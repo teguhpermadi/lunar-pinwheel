@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "primary-dark": "#5e0eb3",
+                        "accent-yellow": "#facc15",
+                        "accent-pink": "#ec4899",
+                        "accent-blue": "#3b82f6",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d1b3e", // Derived from primary hue dark bg
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Sidebar Navigation -->
+<aside class="w-full md:w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-primary/20 hidden md:flex flex-col h-screen sticky top-0 z-20">
+<!-- Logo Area -->
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/20">
+                L
+            </div>
+<span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Lumina<span class="text-primary">LMS</span></span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-4 py-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary dark:text-primary-300 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-primary/5 hover:text-primary dark:hover:text-primary-300 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">library_books</span>
+                My Courses
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-primary/5 hover:text-primary dark:hover:text-primary-300 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">calendar_month</span>
+                Calendar
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-primary/5 hover:text-primary dark:hover:text-primary-300 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">assessment</span>
+                Grades
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-primary/5 hover:text-primary dark:hover:text-primary-300 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">forum</span>
+                Messages
+                <span class="ml-auto bg-accent-pink text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+</a>
+</nav>
+<!-- Bottom Actions -->
+<div class="p-4 border-t border-gray-100 dark:border-primary/20">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-xl font-medium transition-colors" href="#">
+<span class="material-icons-outlined">logout</span>
+                Sign Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header Mobile / Desktop -->
+<header class="bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-primary/20 px-6 py-4 flex items-center justify-between">
+<div class="md:hidden flex items-center gap-3">
+<button class="text-gray-500 dark:text-white">
+<span class="material-icons-outlined">menu</span>
+</button>
+<span class="font-bold text-lg dark:text-white">Lumina</span>
+</div>
+<!-- Search Bar (Desktop) -->
+<div class="hidden md:flex items-center flex-1 max-w-lg relative ml-4">
+<span class="material-icons-outlined absolute left-3 text-gray-400">search</span>
+<input class="w-full bg-gray-50 dark:bg-background-dark/50 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50 dark:text-white placeholder-gray-400" placeholder="Search for courses, assignments..." type="text"/>
+</div>
+<!-- User Profile & Actions -->
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-accent-pink rounded-full border-2 border-white dark:border-surface-dark"></span>
+</button>
+<div class="flex items-center gap-3 border-l border-gray-200 dark:border-primary/20 pl-4">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold text-gray-900 dark:text-white">Alex Morgan</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Computer Science</p>
+</div>
+<img alt="Alex Morgan" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" data-alt="Portrait of student Alex Morgan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5tRQwkZwPvSR4legKv3WMyh7OrW2FgxuWIARNuGrLt6OOgxUNL-RU1zdR1liUjUDKZ_d2eOAHFVp3gvOwcJAgy-Q8mnA0k0kZwUXOv12ESAu1rvAPW4rXrxrqtZqQA5CwehVxpt1vzNuTe4kz5UaOJF-t20LSXnRy1ZxFKwc3om0tY3EMGZkAYd4m4DIsvUhG_RnnhlMStSmPTFiaDyEllhd6mVTz4bJPl_CnkZdOIZqLdEJT_RdKBRUFV9JBWiEx9W9Qbdij2Omq"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+<!-- Welcome Banner -->
+<div class="relative w-full rounded-3xl overflow-hidden mb-8 shadow-xl shadow-primary/10">
+<!-- Abstract Background Gradient -->
+<div class="absolute inset-0 bg-gradient-to-r from-primary via-accent-blue to-primary-dark opacity-90 dark:opacity-80"></div>
+<!-- Pattern Overlay -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="relative z-10 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-white">
+<div>
+<h1 class="text-3xl md:text-4xl font-bold mb-2">Welcome back, Alex! 👋</h1>
+<p class="text-blue-100 text-lg font-light max-w-xl">You've completed <span class="font-semibold text-white">85%</span> of your weekly goals. Keep up the momentum!</p>
+<div class="mt-6 flex gap-3">
+<button class="bg-white text-primary hover:bg-blue-50 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-sm">
+                                Resume Learning
+                            </button>
+<button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-colors">
+                                View Schedule
+                            </button>
+</div>
+</div>
+<!-- Quick Stats in Banner -->
+<div class="flex gap-4">
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl min-w-[120px] text-center">
+<span class="block text-3xl font-bold mb-1">2</span>
+<span class="text-xs text-blue-100 uppercase tracking-wider font-medium">Assignments Due</span>
+</div>
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl min-w-[120px] text-center hidden sm:block">
+<span class="block text-3xl font-bold mb-1">A-</span>
+<span class="text-xs text-blue-100 uppercase tracking-wider font-medium">Current GPA</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column (Subjects) -->
+<div class="lg:col-span-2 space-y-8">
+<!-- Section Header -->
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold text-gray-900 dark:text-white">Enrolled Subjects</h2>
+<a class="text-sm font-medium text-primary hover:text-primary-dark dark:text-primary-300" href="#">View All</a>
+</div>
+<!-- Subjects Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Card 1: Math -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-gray-100 dark:border-primary/10 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary/10 dark:bg-primary/20 p-3 rounded-xl text-primary dark:text-primary-300 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-outlined">calculate</span>
+</div>
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-1 rounded-lg">On Track</span>
+</div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Advanced Calculus II</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Prof. Sarah Jenkins</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400">
+<span>Progress</span>
+<span>75%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-primary to-accent-blue h-2 rounded-full" style="width: 75%"></div>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Student" class="w-7 h-7 rounded-full border-2 border-white dark:border-surface-dark" data-alt="Student avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpBKK7ngUTIiZazcey0sgn55IGAF4L_PiwfMhJZwxtmd_A89Ac_EXi7f5NcyhEBG-gpbbB1NJJTM6JEkRBgQo6BRaaKmVrqBBhTJzE6841gMsySOLripFBfw0-1sQvGAZJmvtRoOjN_TLuK6yaKJVmKPY2xVl3eykD1dqT9MIDnn62U2G_h9rr4CvoRxO-Vy-4MT5Oxg_-uZN3ou8aZC7iDcAr-V_Vm0Q25j63RS1FRbhHjZwnyUlXU3COPNBfJh1RzxVfsxEv2J9W"/>
+<img alt="Student" class="w-7 h-7 rounded-full border-2 border-white dark:border-surface-dark" data-alt="Student avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6V-juXt7iNY4i-GoofOdeaXm-BKJ5yW8yNsYjYqs92PoLbH3sJaNlmBTzZHs6rLV584VybVc4TyM0lEiw8BAQZOQmEADJZCz9mIW19ckrTiUXYDYrdnKYiIdoJoOs3VL8uVisZ24LfWpY_ioGj3rxDMf2XbYOtWQ4maKR8hfO_SEeE1exg5HQ53bS1JtHP5R_zfGPeANVRcr5lFWy0hGfXdBQnSARk9lVCuYq7AHSd-9Z4KgxZZP0SzvUNlNpsrPy0pNH39CRKvCn"/>
+<span class="flex items-center justify-center w-7 h-7 rounded-full border-2 border-white dark:border-surface-dark bg-gray-100 text-[10px] text-gray-500 font-bold">+12</span>
+</div>
+<button class="text-sm font-semibold text-primary hover:text-primary-dark dark:text-primary-300 flex items-center gap-1">
+                                    Resume <span class="material-icons-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Design -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-gray-100 dark:border-primary/10 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-accent-pink/10 dark:bg-accent-pink/20 p-3 rounded-xl text-accent-pink dark:text-accent-pink group-hover:bg-accent-pink group-hover:text-white transition-colors">
+<span class="material-icons-outlined">palette</span>
+</div>
+<span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-bold px-2 py-1 rounded-lg">Due Soon</span>
+</div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">UI/UX Principles</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Prof. David Chen</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400">
+<span>Progress</span>
+<span>40%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-accent-pink to-orange-400 h-2 rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center">
+<div class="text-xs text-gray-500 dark:text-gray-400">
+                                    Next: <span class="font-medium text-gray-800 dark:text-gray-200">Wireframing Task</span>
+</div>
+<button class="text-sm font-semibold text-primary hover:text-primary-dark dark:text-primary-300 flex items-center gap-1">
+                                    Resume <span class="material-icons-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Physics -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-gray-100 dark:border-primary/10 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-accent-blue/10 dark:bg-accent-blue/20 p-3 rounded-xl text-accent-blue dark:text-accent-blue-300 group-hover:bg-accent-blue group-hover:text-white transition-colors">
+<span class="material-icons-outlined">science</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Physics 101</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Dr. Emily Stone</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400">
+<span>Progress</span>
+<span>90%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-accent-blue to-cyan-400 h-2 rounded-full" style="width: 90%"></div>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center">
+<div class="text-xs text-gray-500 dark:text-gray-400">
+<span class="text-green-500 font-bold">Done for week</span>
+</div>
+<button class="text-sm font-semibold text-primary hover:text-primary-dark dark:text-primary-300 flex items-center gap-1">
+                                    Details <span class="material-icons-outlined text-sm">visibility</span>
+</button>
+</div>
+</div>
+<!-- Card 4: History -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-gray-100 dark:border-primary/10 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+<span class="material-icons-outlined">history_edu</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Modern History</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Prof. Alan Turing</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400">
+<span>Progress</span>
+<span>12%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-orange-400 to-yellow-400 h-2 rounded-full" style="width: 12%"></div>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center">
+<div class="text-xs text-gray-500 dark:text-gray-400">
+                                    New Content Added
+                                </div>
+<button class="text-sm font-semibold text-primary hover:text-primary-dark dark:text-primary-300 flex items-center gap-1">
+                                    Start <span class="material-icons-outlined text-sm">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Activity Feed (Optional extra row) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-gray-100 dark:border-primary/10 shadow-sm">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
+<div class="space-y-4">
+<div class="flex items-start gap-4 pb-4 border-b border-gray-50 dark:border-primary/5">
+<div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center shrink-0">
+<span class="material-icons-outlined text-lg">check_circle</span>
+</div>
+<div>
+<p class="text-sm font-medium text-gray-900 dark:text-white">Submitted "Calculus Problem Set 3"</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">2 hours ago</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-icons-outlined text-lg">grade</span>
+</div>
+<div>
+<p class="text-sm font-medium text-gray-900 dark:text-white">Grade posted for "UI/UX Midterm"</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Yesterday</p>
+</div>
+<div class="ml-auto">
+<span class="font-bold text-primary dark:text-primary-300">A</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (Sidebar Widgets) -->
+<div class="space-y-8">
+<!-- Calendar Widget -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-gray-100 dark:border-primary/10 shadow-sm h-auto">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white">Upcoming Exams</h2>
+<button class="text-primary hover:bg-primary/5 p-1 rounded-lg transition-colors">
+<span class="material-icons-outlined text-lg">calendar_today</span>
+</button>
+</div>
+<div class="space-y-4">
+<!-- Event 1 -->
+<div class="flex gap-4 items-center group cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-primary/5 rounded-xl transition-colors">
+<div class="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 text-accent-blue rounded-xl p-2 w-14 shrink-0">
+<span class="text-xs font-bold uppercase">Oct</span>
+<span class="text-xl font-bold">24</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">Mid-term Math</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 truncate">09:00 AM - Room 302</p>
+</div>
+<div class="w-1.5 h-8 rounded-full bg-accent-blue"></div>
+</div>
+<!-- Event 2 -->
+<div class="flex gap-4 items-center group cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-primary/5 rounded-xl transition-colors">
+<div class="flex flex-col items-center bg-purple-50 dark:bg-purple-900/20 text-primary rounded-xl p-2 w-14 shrink-0">
+<span class="text-xs font-bold uppercase">Oct</span>
+<span class="text-xl font-bold">28</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">History Essay</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 truncate">Submission Deadline</p>
+</div>
+<div class="w-1.5 h-8 rounded-full bg-primary"></div>
+</div>
+<!-- Event 3 -->
+<div class="flex gap-4 items-center group cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-primary/5 rounded-xl transition-colors">
+<div class="flex flex-col items-center bg-pink-50 dark:bg-pink-900/20 text-accent-pink rounded-xl p-2 w-14 shrink-0">
+<span class="text-xs font-bold uppercase">Nov</span>
+<span class="text-xl font-bold">02</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">Physics Final</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 truncate">10:30 AM - Main Hall</p>
+</div>
+<div class="w-1.5 h-8 rounded-full bg-accent-pink"></div>
+</div>
+</div>
+<button class="w-full mt-6 py-2.5 text-sm font-semibold text-primary border border-primary/20 hover:bg-primary/5 rounded-xl transition-colors">
+                            View Full Calendar
+                        </button>
+</div>
+<!-- Progress Tracker Widget -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-gray-100 dark:border-primary/10 shadow-sm relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Semester Progress</h2>
+<div class="flex items-center justify-center mb-6">
+<div class="relative w-40 h-40">
+<!-- Background Circle -->
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-100 dark:text-gray-700" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="12"></circle>
+<!-- Progress Circle: 75% -->
+<circle class="text-accent-pink" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="110" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<!-- Center Text -->
+<div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
+<span class="text-3xl font-bold text-gray-900 dark:text-white">75%</span>
+<span class="text-xs text-gray-500 font-medium uppercase tracking-wide">Complete</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 text-center">
+<div class="p-3 bg-gray-50 dark:bg-primary/5 rounded-xl">
+<span class="block text-2xl font-bold text-gray-900 dark:text-white">12</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Courses Done</span>
+</div>
+<div class="p-3 bg-gray-50 dark:bg-primary/5 rounded-xl">
+<span class="block text-2xl font-bold text-gray-900 dark:text-white">4</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Remaining</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Motivational Card (Promo style) -->
+<div class="bg-gradient-to-br from-accent-yellow to-orange-400 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+<div class="relative z-10">
+<div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-4">
+<span class="material-icons-outlined text-white">emoji_events</span>
+</div>
+<h3 class="text-xl font-bold mb-2">Keep it up!</h3>
+<p class="text-white/90 text-sm mb-4">You are in the top 5% of students in Mathematics this week.</p>
+<button class="bg-white text-orange-500 text-xs font-bold px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors">See Leaderboard</button>
+</div>
+<!-- Decorative Circles -->
+<div class="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 rounded-full"></div>
+<div class="absolute -top-10 -left-10 w-24 h-24 bg-white/10 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-12 mb-4 text-center text-xs text-gray-400 dark:text-gray-600">
+                © 2023 Lumina Learning Management System. All rights reserved.
+            </footer>
+</div>
+</main>
+</body></html>
