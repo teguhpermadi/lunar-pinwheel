@@ -12,6 +12,15 @@ export const api = axios.create({
     withCredentials: true,
 });
 
+// User interface
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    role: 'admin' | 'teacher' | 'student'; // Adjust based on actual API response
+    // Add other fields as needed
+}
+
 // Zod schemas for request validation (derived from API docs/logic)
 export const LoginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -41,8 +50,11 @@ export const authApi = {
         const response = await api.post('/register', data);
         return response.data;
     },
-    // Placeholder for logout if needed later
     logout: async () => {
-        // await api.post('/logout');
+        await api.post('/logout');
+    },
+    getUserProfile: async () => {
+        const response = await api.get('/user'); // Adjust endpoint if needed
+        return response.data;
     }
 };

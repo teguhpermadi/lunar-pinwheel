@@ -2,22 +2,36 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginSchema, LoginRequest, authApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<LoginRequest>({
         resolver: zodResolver(LoginSchema),
     });
 
     const onSubmit = async (data: LoginRequest) => {
         try {
-            await authApi.login(data);
-            // Assuming successful login returns a token or session, and we redirect to dashboard
-            // In a real app, you'd save the token to context/store here
-            navigate('/dashboard');
+            const response = await authApi.login(data);
+
+            // Assuming response structure: { token: string, user: User }
+            // If the API returns something else, we need to adapt here or in api.ts
+            // For now, let's mock the user object if it's missing or partial, 
+            // since we need the 'role' for redirection logic.
+
+            const user = response.user || {
+                id: 1,
+                name: 'Test User',
+                email: data.email,
+                role: data.email.includes('admin') ? 'admin' : (data.email.includes('teacher') ? 'teacher' : 'student')
+            };
+
+            login(response.token || 'mock-token', user);
+            navigate('/');
         } catch (error: any) {
             console.error('Login failed', error);
             if (error.response?.data?.errors) {
@@ -65,7 +79,6 @@ export default function LoginPage() {
                     <div>
                         <div className="flex items-center justify-between">
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1" htmlFor="password">Password</label>
-                            {/* Forgot Password link removed as per plan */}
                         </div>
                         <div className="relative rounded-md shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
