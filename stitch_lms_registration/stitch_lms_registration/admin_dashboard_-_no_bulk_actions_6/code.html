@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Profile - LMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 bg-primary dark:bg-background-dark border-r border-primary/10 flex flex-col h-full transition-all duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-primary text-2xl">school</span>
+</div>
+<div>
+<h1 class="text-white text-lg font-bold leading-tight uppercase tracking-wider">LMS Admin</h1>
+<p class="text-primary/30 text-xs font-medium">Core Management</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">class</span>
+<span>Classrooms</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Subjects</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">quiz</span>
+<span>Exams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span>Financials</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-white/5 rounded-2xl p-4 mb-4">
+<p class="text-white/60 text-xs mb-2">Current Storage</p>
+<div class="w-full bg-white/10 rounded-full h-1.5 mb-2">
+<div class="bg-yellow-400 h-1.5 rounded-full w-2/3"></div>
+</div>
+<p class="text-white text-xs font-semibold">82GB / 120GB</p>
+</div>
+<button class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50">
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4 flex-1">
+<label class="relative w-full max-w-md">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 transition-all text-sm" placeholder="Search..." type="text"/>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-slate-900 dark:text-white leading-none">Alex Rivers</p>
+<p class="text-xs text-slate-500 font-medium">Super Admin</p>
+</div>
+<div class="size-10 rounded-full border-2 border-primary/20 p-0.5">
+<img alt="Admin Profile Avatar" class="rounded-full size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-6 max-w-2xl mx-auto">
+<div class="flex flex-col items-center text-center gap-4">
+<div class="relative group">
+<div class="size-32 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+<img alt="User Profile" class="size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+</button>
+</div>
+<div>
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">My Profile</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Manage your personal information and security settings.</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-8 space-y-8">
+<div class="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+<div class="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">person_edit</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Edit Profile Information</h3>
+<p class="text-xs text-slate-500">Keep your account details up to date</p>
+</div>
+</div>
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+<span class="material-symbols-outlined text-xl">person</span>
+</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-800 dark:text-slate-200 font-medium" type="text" value="Alex Rivers"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+<span class="material-symbols-outlined text-xl">mail</span>
+</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-800 dark:text-slate-200 font-medium" type="email" value="alex.rivers@lms-edu.com"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+<span class="material-symbols-outlined text-xl">lock</span>
+</span>
+<input class="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-800 dark:text-slate-200 font-medium" type="password" value="••••••••••••"/>
+<button class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-primary" type="button">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+<span class="material-symbols-outlined text-xl">phone</span>
+</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-800 dark:text-slate-200 font-medium" type="tel" value="+1 (555) 123-4567"/>
+</div>
+</div>
+<div class="flex flex-col gap-4 pt-4">
+<button class="w-full px-8 py-4 bg-primary text-white rounded-2xl text-sm font-bold hover:shadow-lg hover:shadow-primary/40 transition-all" type="submit">
+                                Save Changes
+                            </button>
+<button class="w-full px-6 py-4 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-2xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" type="button">
+                                Discard Changes
+                            </button>
+</div>
+</form>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+<div class="bg-blue-50 dark:bg-blue-900/10 p-5 rounded-3xl border border-blue-100 dark:border-blue-800 flex items-start gap-4">
+<span class="material-symbols-outlined text-blue-500 mt-1">verified_user</span>
+<div>
+<h4 class="font-bold text-blue-900 dark:text-blue-200 text-sm">Account Status</h4>
+<p class="text-blue-700 dark:text-blue-400 text-xs mt-1 leading-relaxed">Your account is verified and secured with two-factor authentication.</p>
+</div>
+</div>
+<div class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-3xl border border-amber-100 dark:border-amber-800 flex items-start gap-4">
+<span class="material-symbols-outlined text-amber-500 mt-1">history</span>
+<div>
+<h4 class="font-bold text-amber-900 dark:text-amber-200 text-sm">Last Login</h4>
+<p class="text-amber-700 dark:text-amber-400 text-xs mt-1 leading-relaxed">October 24, 2023 at 09:42 AM from San Francisco, CA.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

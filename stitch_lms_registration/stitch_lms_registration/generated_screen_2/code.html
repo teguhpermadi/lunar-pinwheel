@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Exam Session Correction - Detailed View</title>
+<!-- Lexend font from Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#7f13ec', // Custom purple from theme
+            secondary: {
+              yellow: '#facc15',
+              blue: '#3b82f6',
+              pink: '#ec4899',
+            },
+          },
+          fontFamily: {
+            lexend: ['Lexend', 'sans-serif'],
+          },
+          borderRadius: {
+            'custom': '8px', // ROUND_EIGHT
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbar">
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #7f13ec44;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7f13ec;
+    }
+  </style>
+<style data-purpose="layout">
+    body {
+      font-family: 'Lexend', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-50">
+<div class="max-w-[1440px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-gray-100 rounded-custom transition-colors" title="Back to Dashboard">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div>
+<h1 class="text-xl font-bold text-gray-900">Ujian Tengah Semester Ganjil</h1>
+<p class="text-sm text-gray-500">Mathematics • Grade 10 • Detailed Correction</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+<span class="text-xs font-semibold text-green-700 tracking-wider">LIVE MONITORING</span>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-custom text-sm font-medium hover:bg-gray-50 transition-colors">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Export
+        </button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="User Profile" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/40x40'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPse__2unPtdJqQkNoc5A8tW1Y6NHSk3qgCLeO_Vpde3d9uY0u-3E_ZvdJtjcHn7FYTbNroXr9wSGLQ_6zJl3BHplO_yRd2ZbV2XJFtA7rrMEOadzhN-BuZZ_dEMDspzWZfF4579qIpoHXgzFRAio3lwivkuG6FiseDUrvay_IhpQWETmCrXU9hpV1W6akM9Tj1BKTvT_t9nqOvAzrKnT5XWWI86fzC3T411SjuGub9nxF-JlkekZsq7-N6i0vl8RCGneCIqEDobnH"/>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow max-w-[1440px] mx-auto w-full p-6">
+<div class="main-grid">
+<!-- BEGIN: QuestionsList -->
+<section class="space-y-4">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-lg font-bold text-gray-800">Student Submission: <span class="text-primary">Felix Alexander</span></h2>
+<div class="text-sm text-gray-500">Showing 1-10 of 25 Questions</div>
+</div>
+<!-- Question Card 1 -->
+<article class="bg-white border border-gray-200 rounded-custom overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="p-4 flex items-center justify-between cursor-pointer" data-purpose="expandable-header">
+<div class="flex items-center gap-4">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">1</span>
+<h3 class="font-medium text-gray-900">Explain the Pythagorean Theorem in real-world applications.</h3>
+</div>
+<div class="flex items-center gap-4">
+<span class="px-3 py-1 bg-secondary-yellow/10 text-secondary-yellow text-xs font-bold rounded-full uppercase">Review Required</span>
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="p-4 pt-0 border-t border-gray-50">
+<div class="mt-4 p-4 bg-gray-50 rounded-custom border border-gray-100">
+<p class="text-xs font-bold text-gray-400 uppercase mb-2">Student's Response</p>
+<p class="text-gray-700 leading-relaxed">
+                The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse is equal to the sum of the squares of the other two sides. In construction, it's used to ensure buildings are square by using the 3-4-5 rule.
+              </p>
+</div>
+<div class="mt-6 flex flex-col md:flex-row gap-6">
+<div class="flex-1">
+<p class="text-xs font-bold text-gray-400 uppercase mb-2">Grade</p>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 bg-green-500 text-white text-sm font-bold rounded-custom hover:bg-green-600 transition-colors flex-1">Correct</button>
+<button class="px-4 py-2 bg-secondary-yellow text-white text-sm font-bold rounded-custom hover:bg-yellow-600 transition-colors flex-1">Partial</button>
+<button class="px-4 py-2 bg-secondary-pink text-white text-sm font-bold rounded-custom hover:bg-pink-600 transition-colors flex-1">Incorrect</button>
+</div>
+</div>
+<div class="flex-[1.5]">
+<p class="text-xs font-bold text-gray-400 uppercase mb-2">Teacher Comments</p>
+<textarea class="w-full text-sm border-gray-200 rounded-custom focus:ring-primary focus:border-primary" placeholder="Type feedback for Felix..." rows="2"></textarea>
+</div>
+</div>
+</div>
+</article>
+<!-- Question Card 2 -->
+<article class="bg-white border border-gray-200 rounded-custom overflow-hidden shadow-sm opacity-90">
+<div class="p-4 flex items-center justify-between cursor-pointer" data-purpose="expandable-header">
+<div class="flex items-center gap-4">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 font-bold text-sm">2</span>
+<h3 class="font-medium text-gray-900">Calculate the value of x: 2x + 5 = 15</h3>
+</div>
+<div class="flex items-center gap-4">
+<span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase">Graded</span>
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</article>
+<!-- Question Card 3 -->
+<article class="bg-white border border-gray-200 rounded-custom overflow-hidden shadow-sm">
+<div class="p-4 flex items-center justify-between cursor-pointer" data-purpose="expandable-header">
+<div class="flex items-center gap-4">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">3</span>
+<h3 class="font-medium text-gray-900">Definition of a prime number and give three examples.</h3>
+</div>
+<div class="flex items-center gap-4">
+<span class="px-3 py-1 bg-secondary-yellow/10 text-secondary-yellow text-xs font-bold rounded-full uppercase">Review Required</span>
+<svg class="h-5 w-5 text-gray-400 rotate-180" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</article>
+</section>
+<!-- END: QuestionsList -->
+<!-- BEGIN: SummarySidebar -->
+<aside class="space-y-6">
+<!-- Student Stats Card -->
+<div class="bg-white p-6 rounded-custom border border-gray-200 shadow-sm">
+<div class="flex items-center gap-4 mb-6">
+<img alt="Felix" class="w-14 h-14 rounded-full border-2 border-primary/20" onerror="this.src='https://placehold.co/600x400'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA78U-e4dLKVbXVzK7_y6sZQHtXc9nehUmp32da5psTKZ166W4q3gUCTgYlkxajgdJrzY1CSoMs6XQdjwe5w2nq5A6l59ev_nthCJbQf__V7njpFoloCFtcKwDIN_KK_m_n5qZA2QstUeW5YHA3-VDfqh4uHxe_0jaJvdX6T-AOZd4dx6bsFOLQ4KdIaFrxL-0S5U4PVKBukughxsTqljakTrWfoWnaOzguVx7D4VAu5CFskGv7D59BhuuR_RE4OVO9pPVJEgcfDHjO"/>
+<div>
+<h4 class="font-bold text-gray-900">Felix Alexander</h4>
+<p class="text-xs text-gray-500">Student ID: #88291</p>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span class="text-gray-500">Current Grade</span>
+<span class="font-bold text-primary">88 / 100</span>
+</div>
+<div class="w-full bg-gray-100 h-2 rounded-full">
+<div class="bg-primary h-2 rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-2">
+<div class="p-3 bg-blue-50 rounded-custom">
+<p class="text-[10px] text-blue-500 font-bold uppercase">Time Spent</p>
+<p class="text-lg font-bold text-blue-700">42:15</p>
+</div>
+<div class="p-3 bg-pink-50 rounded-custom">
+<p class="text-[10px] text-pink-500 font-bold uppercase">Progress</p>
+<p class="text-lg font-bold text-pink-700">85%</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Grade Range / Filters Mockup -->
+<div class="bg-white p-6 rounded-custom border border-gray-200 shadow-sm">
+<div class="flex items-center gap-2 mb-4">
+<svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<h5 class="text-xs font-bold uppercase tracking-widest text-gray-900">Session Filters</h5>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" type="checkbox"/>
+<label class="text-sm font-medium text-gray-700">Corrected</label>
+<span class="ml-auto text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">18</span>
+</div>
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" type="checkbox"/>
+<label class="text-sm font-medium text-gray-700">Pending Review</label>
+<span class="ml-auto text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">7</span>
+</div>
+<div class="pt-4">
+<p class="text-xs font-bold text-gray-400 uppercase mb-3">Target Score Range</p>
+<div class="relative pt-1 px-2">
+<div class="h-1.5 bg-gray-100 rounded-full">
+<div class="absolute h-1.5 bg-primary rounded-full" style="width: 70%; left: 15%"></div>
+</div>
+<div class="absolute top-0 left-[15%] w-4 h-4 bg-white border-2 border-primary rounded-full -mt-1.5 shadow-sm"></div>
+<div class="absolute top-0 left-[85%] w-4 h-4 bg-white border-2 border-primary rounded-full -mt-1.5 shadow-sm"></div>
+</div>
+<div class="flex justify-between text-[10px] text-gray-400 mt-4">
+<span>0</span>
+<span>100</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Alerts -->
+<div class="bg-pink-50 border border-pink-100 p-4 rounded-custom">
+<div class="flex items-center gap-2 mb-3">
+<svg class="h-4 w-4 text-pink-600" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" fill-rule="evenodd"></path>
+</svg>
+<h5 class="text-xs font-bold text-pink-700 uppercase">System Alerts</h5>
+</div>
+<div class="space-y-2 text-xs">
+<div class="flex justify-between">
+<span class="text-pink-600">Review required for Q1, Q3</span>
+<span class="font-bold text-pink-800">Priority</span>
+</div>
+</div>
+</div>
+<button class="w-full py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest rounded-custom transition-all" data-purpose="refresh-action">
+          Refresh Data
+        </button>
+</aside>
+<!-- END: SummarySidebar -->
+</div>
+</main>
+<!-- END: MainContent -->
+</body></html><!-- MISSING_IMAGES:
+- SCREEN_6_AVATAR: Profile avatar for the top right header.
+- SCREEN_6_FELIX: Profile picture of student Felix Alexander.
+-->

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Exam - LMS Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<div class="flex flex-col h-screen">
+<header class="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
+<div class="flex items-center gap-4 flex-1">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex-1 max-w-xl">
+<h1 class="text-xl font-bold text-slate-900 dark:text-white truncate">Ujian Tengah Semester Ganjil</h1>
+<p class="text-xs text-slate-400 font-medium tracking-wide">Mathematics • Grade 10 • Configuration Hub</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">save</span>
+                Save Draft
+            </button>
+<button class="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">rocket_launch</span>
+                Publish Exam
+            </button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="size-10 rounded-full border-2 border-primary/20 p-0.5">
+<img alt="Admin Profile Avatar" class="rounded-full size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/30 relative no-scrollbar">
+<div class="max-w-3xl mx-auto p-8 space-y-8">
+<div class="flex border-b border-slate-200 dark:border-slate-800 space-x-8">
+<button class="pb-4 px-1 border-b-2 border-primary text-primary font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">settings</span>
+                        General Settings
+                    </button>
+<button class="pb-4 px-1 border-b-2 border-transparent text-slate-400 font-bold text-sm hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">psychology</span>
+                        Question Behavior
+                    </button>
+<button class="pb-4 px-1 border-b-2 border-transparent text-slate-400 font-bold text-sm hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">security</span>
+                        Scheduling &amp; Security
+                    </button>
+</div>
+<div class="space-y-6">
+<div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Exam Title</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-primary focus:border-primary" placeholder="Enter title..." type="text" value="Ujian Tengah Semester Ganjil"/>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Type</label>
+<select class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-primary focus:border-primary">
+<option>UTS</option>
+<option>Harian</option>
+<option>UAS</option>
+<option>Kuis</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Passing Score</label>
+<div class="relative">
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-primary focus:border-primary" type="number" value="75"/>
+<span class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">PTS</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Duration</label>
+<div class="relative">
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-primary focus:border-primary" type="number" value="90"/>
+<span class="absolute right-4 top-3.5 text-slate-400 font-bold text-xs">MINS</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Max Attempts</label>
+<select class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-primary focus:border-primary">
+<option>1 Attempt</option>
+<option>2 Attempts</option>
+<option>Unlimited</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Timer Type</label>
+<div class="flex gap-4">
+<label class="flex-1 cursor-pointer group">
+<input checked="" class="hidden peer" name="timer" type="radio"/>
+<div class="p-4 rounded-xl border-2 border-slate-100 dark:border-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all text-center">
+<p class="font-bold text-sm text-slate-600 dark:text-slate-300 peer-checked:text-primary">Strict</p>
+<p class="text-[10px] text-slate-400">Fixed end time</p>
+</div>
+</label>
+<label class="flex-1 cursor-pointer group">
+<input class="hidden peer" name="timer" type="radio"/>
+<div class="p-4 rounded-xl border-2 border-slate-100 dark:border-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all text-center">
+<p class="font-bold text-sm text-slate-600 dark:text-slate-300 peer-checked:text-primary">Flexible</p>
+<p class="text-[10px] text-slate-400">Total duration only</p>
+</div>
+</label>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
+<h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">shuffle</span>
+                            Sequence &amp; Visibility
+                        </h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Randomize Question Order</p>
+<p class="text-[10px] text-slate-400">Shuffle questions for each student</p>
+</div>
+<input checked="" class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Randomize Answer Choices</p>
+<p class="text-[10px] text-slate-400">Shuffle option order within questions</p>
+</div>
+<input checked="" class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Show Results Immediately</p>
+<p class="text-[10px] text-slate-400">Display final score after submission</p>
+</div>
+<input class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Allow Hints Visibility</p>
+<p class="text-[10px] text-slate-400">Show question hints if available</p>
+</div>
+<input class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300" type="checkbox"/>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
+<h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">lock_open</span>
+                            Access Control
+                        </h3>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Start Time</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm" type="datetime-local"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-400 uppercase tracking-widest">End Time</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm" type="datetime-local"/>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div class="flex-1">
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Exam Token</p>
+<div class="flex items-center gap-3 mt-1">
+<code class="px-2 py-1 bg-white dark:bg-slate-700 rounded font-mono text-primary font-bold">MATH-101-X</code>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Visibility</p>
+<input checked="" class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+<div>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">Status</p>
+<p class="text-[10px] text-slate-400">Published or Draft</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold">PUBLISHED</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<aside class="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 no-print overflow-hidden">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800">
+<h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
+<span class="material-symbols-outlined text-primary text-xl">visibility</span>
+                    Overview
+                </h2>
+<p class="text-[10px] text-slate-400 font-bold mt-1">REAL-TIME SETUP SUMMARY</p>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+<div class="space-y-4">
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+<label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Primary Info</label>
+<div class="space-y-2">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">Type</span>
+<span class="font-bold">UTS</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">Duration</span>
+<span class="font-bold">90 Mins</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">Pass Score</span>
+<span class="font-bold">75</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+<label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Behavior</label>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500">Shuffle Questions</span>
+<span class="material-symbols-outlined text-emerald-500 text-base">check_circle</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500">Shuffle Answers</span>
+<span class="material-symbols-outlined text-emerald-500 text-base">check_circle</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500">Show Results</span>
+<span class="material-symbols-outlined text-slate-300 text-base">cancel</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+<label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Schedule</label>
+<div class="space-y-3">
+<div>
+<p class="text-[9px] text-slate-400 font-bold">STARTS</p>
+<p class="text-[11px] font-bold">24 Oct 2023 • 08:00 AM</p>
+</div>
+<div>
+<p class="text-[9px] text-slate-400 font-bold">ENDS</p>
+<p class="text-[11px] font-bold">24 Oct 2023 • 10:00 AM</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-primary/5 rounded-xl border border-primary/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">vpn_key</span>
+<label class="text-[10px] font-bold text-primary uppercase">Security Token</label>
+</div>
+<p class="text-lg font-mono font-black text-primary text-center">MATH-101-X</p>
+<p class="text-[9px] text-slate-400 text-center mt-2">Visiblity: <span class="text-emerald-500 font-bold">ENABLED</span></p>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-bold text-slate-400 uppercase">Publish Status</span>
+<span class="flex items-center gap-1.5 text-[10px] font-black text-emerald-500">
+<span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        LIVE
+                    </span>
+</div>
+<button class="w-full py-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-400 font-bold text-xs uppercase tracking-widest cursor-not-allowed">
+                    Delete Configuration
+                </button>
+</div>
+</aside>
+</div>
+</div>
+
+</body></html>

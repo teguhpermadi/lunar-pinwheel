@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Arabic Essay Input - Modern LMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+Arabic:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                        "status-blue": "#3b82f6",
+                        "status-yellow": "#eab308",
+                        "status-pink": "#ec4899",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "arabic": ["Noto Sans Arabic", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --arabic-minimal-bg: #fdfdfd;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .arabic-input-field:focus-within {
+            border-color: #7f13ec;
+            box-shadow: 0 0 0 4px rgba(127, 19, 236, 0.05);
+        }
+        .keyboard-key {
+            @apply flex items-center justify-center h-12 rounded-xl bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-lg font-arabic hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-primary/30 transition-all active:scale-95 active:bg-primary/5 shadow-sm;
+        }
+        .tab-active {
+            @apply border-b-2 border-primary text-primary bg-primary/5 font-semibold;
+        }
+        .tab-inactive {
+            @apply text-gray-400 dark:text-gray-500 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700;
+        }
+        .arabic-text {
+            direction: rtl;
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-100 h-screen flex flex-col overflow-hidden">
+<div class="h-1 w-full bg-gray-200 dark:bg-gray-700 shrink-0">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" class="h-full bg-primary w-[45%]" role="progressbar"></div>
+</div>
+<header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
+<div class="flex items-center space-x-4">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                AS
+            </div>
+<div>
+<h1 class="text-lg font-semibold leading-tight">Ujian Sastra &amp; Budaya</h1>
+<p class="text-xs text-gray-500 dark:text-gray-400">Bahasa Arab • Sesi Siang</p>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex flex-col items-end">
+<span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Sisa Waktu</span>
+<div class="flex items-center text-status-pink font-bold text-xl font-mono">
+<span class="material-icons text-lg mr-1 animate-pulse">timer</span>
+                    00:45:12
+                </div>
+</div>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-icons">fullscreen</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<section class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col items-center custom-scrollbar">
+<div class="w-full max-w-4xl space-y-6 relative">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                        Pertanyaan 15 dari 50 (Essay)
+                    </span>
+<button class="flex items-center space-x-2 text-gray-400 hover:text-status-yellow transition-colors group">
+<span class="material-icons group-hover:text-status-yellow transition-colors">flag</span>
+<span class="text-sm font-medium">Tandai Pertanyaan</span>
+</button>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 p-8 lg:p-12 overflow-hidden">
+<div class="mb-10 text-center">
+<h2 class="text-2xl lg:text-3xl font-medium leading-[1.8] text-gray-900 dark:text-white arabic-text mb-6">
+                            اكتب مقالاً قصيراً تشرح فيه أهمية اللغة العربية في العصر الحديث، موضحاً دورها كجسر بين الثقافات المختلفة.
+                        </h2>
+<div class="h-px w-24 bg-primary/20 mx-auto mb-6"></div>
+<p class="text-sm text-gray-500 dark:text-gray-400 italic">Silakan tulis jawaban Anda dalam bahasa Arab menggunakan keyboard virtual yang tersedia di bawah.</p>
+</div>
+<div class="space-y-8">
+<div class="arabic-input-field relative min-h-[220px] bg-[var(--arabic-minimal-bg)] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-2xl transition-all p-8">
+<div class="absolute top-4 left-4 flex space-x-2 opacity-30 hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-gray-400 hover:text-primary transition-colors"><span class="material-icons text-lg">undo</span></button>
+<button class="p-1.5 text-gray-400 hover:text-primary transition-colors"><span class="material-icons text-lg">redo</span></button>
+</div>
+<div class="w-full h-full min-h-[160px] text-2xl font-arabic leading-[2] focus:outline-none arabic-text" contenteditable="true" placeholder="ابدأ الكتابة هنا...">
+</div>
+</div>
+<div class="border border-gray-100 dark:border-gray-700 rounded-3xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
+<div class="flex border-b border-gray-100 dark:border-gray-700 overflow-x-auto no-scrollbar">
+<button class="px-8 py-4 text-sm font-medium transition-all tab-active whitespace-nowrap">Harakat &amp; Dasar</button>
+<button class="px-8 py-4 text-sm font-medium transition-all tab-inactive whitespace-nowrap">Abjad (ا-ي)</button>
+<button class="px-8 py-4 text-sm font-medium transition-all tab-inactive whitespace-nowrap">Angka (٠-٩)</button>
+<button class="px-8 py-4 text-sm font-medium transition-all tab-inactive whitespace-nowrap">Tanda Baca</button>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-7 sm:grid-cols-10 lg:grid-cols-12 gap-2 mb-6">
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ً</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ٌ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ٍ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">َ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ُ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ِ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ّ</button>
+<button class="keyboard-key bg-primary/5 border-primary/10 text-primary font-bold">ْ</button>
+<button class="keyboard-key">آ</button>
+<button class="keyboard-key">أ</button>
+<button class="keyboard-key">ؤ</button>
+<button class="keyboard-key">إ</button>
+<button class="keyboard-key">ئ</button>
+<button class="keyboard-key">ا</button>
+<button class="keyboard-key">ب</button>
+<button class="keyboard-key">ت</button>
+<button class="keyboard-key">ث</button>
+<button class="keyboard-key">ج</button>
+<button class="keyboard-key">ح</button>
+<button class="keyboard-key">خ</button>
+<button class="keyboard-key">د</button>
+<button class="keyboard-key">ذ</button>
+<button class="keyboard-key">ر</button>
+<button class="keyboard-key">ز</button>
+<button class="keyboard-key">س</button>
+<button class="keyboard-key">ش</button>
+<button class="keyboard-key">ص</button>
+<button class="keyboard-key">ض</button>
+<button class="keyboard-key">ط</button>
+<button class="keyboard-key">ظ</button>
+<button class="keyboard-key">ع</button>
+<button class="keyboard-key">غ</button>
+<button class="keyboard-key">ف</button>
+<button class="keyboard-key">ق</button>
+<button class="keyboard-key">ك</button>
+<button class="keyboard-key">ل</button>
+<button class="keyboard-key col-span-2 bg-gray-50 dark:bg-gray-700/50"><span class="material-icons text-lg">backspace</span></button>
+</div>
+<div class="flex gap-2">
+<button class="keyboard-key px-8 bg-gray-100 dark:bg-gray-700 flex-1">Space</button>
+<button class="keyboard-key px-10 bg-primary text-white hover:bg-primary/90 border-none"><span class="material-icons">keyboard_return</span></button>
+</div>
+</div>
+<div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+<div class="flex items-center space-x-3">
+<span class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Keyboard Status</span>
+<div class="flex items-center space-x-1.5">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span class="text-xs text-gray-500">Arabic RTL Enabled</span>
+</div>
+</div>
+<button class="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Pengaturan Input</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 pb-12">
+<button class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
+<span class="material-icons text-lg mr-2">arrow_back</span>
+                        Kembali
+                    </button>
+<div class="flex items-center space-x-4">
+<button class="px-6 py-3 rounded-xl border-2 border-status-yellow/20 text-status-yellow font-semibold hover:bg-status-yellow hover:text-white transition-all duration-200 flex items-center group">
+<span class="material-icons text-lg mr-2">help_outline</span>
+                            Ragu-ragu
+                        </button>
+<button class="px-10 py-3 rounded-xl bg-primary text-white font-medium shadow-lg shadow-primary/20 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center transform active:scale-95">
+                            Lanjut
+                            <span class="material-icons text-lg ml-2">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<aside class="w-80 bg-white dark:bg-gray-800 border-l border-gray-100 dark:border-gray-700 flex flex-col shrink-0 z-20 shadow-2xl shadow-gray-200/50">
+<div class="p-6 border-b border-gray-100 dark:border-gray-700">
+<div class="flex items-center justify-between mb-6">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Ukuran Huruf</span>
+<div class="flex items-center space-x-1">
+<button class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary flex items-center justify-center">-</button>
+<button class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary flex items-center justify-center">+</button>
+</div>
+</div>
+<h3 class="font-semibold text-gray-800 dark:text-white mb-4">Navigasi Soal</h3>
+<div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-tight">
+<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-primary mr-2"></span> Aktif</div>
+<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-status-blue mr-2"></span> Terjawab</div>
+<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-status-yellow mr-2"></span> Ragu</div>
+<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full border border-gray-200 mr-2"></span> Kosong</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+<div class="grid grid-cols-5 gap-2.5">
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-medium text-sm">1</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-medium text-sm">...</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-medium text-sm">13</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-medium text-sm">14</button>
+<button class="w-10 h-10 rounded-lg bg-primary text-white shadow-md shadow-primary/30 flex items-center justify-center font-bold text-sm ring-2 ring-offset-2 ring-primary/50">15</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 border border-gray-100 dark:border-gray-600 flex items-center justify-center font-medium text-sm">16</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 border border-gray-100 dark:border-gray-600 flex items-center justify-center font-medium text-sm">17</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 border border-gray-100 dark:border-gray-600 flex items-center justify-center font-medium text-sm">18</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 border border-gray-100 dark:border-gray-600 flex items-center justify-center font-medium text-sm">19</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 border border-gray-100 dark:border-gray-600 flex items-center justify-center font-medium text-sm">20</button>
+</div>
+</div>
+<div class="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
+<button class="w-full py-4 rounded-xl bg-status-pink text-white font-bold shadow-lg shadow-status-pink/20 hover:bg-status-pink/90 transition-all flex items-center justify-center group">
+<span class="mr-2">Selesai Ujian</span>
+<span class="material-icons text-sm opacity-70">send</span>
+</button>
+<p class="text-center text-[10px] font-bold text-gray-400 mt-4 uppercase tracking-wider">
+                    35 Pertanyaan Belum Terjawab
+                </p>
+</div>
+</aside>
+</main>
+
+</body></html>

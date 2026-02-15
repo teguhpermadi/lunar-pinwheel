@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Math Essay Input - Modern LMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                        "status-blue": "#3b82f6",
+                        "status-yellow": "#eab308",
+                        "status-pink": "#ec4899",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "math": ["Cambria Math", "serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .math-input-field:focus-within {
+            border-color: #7f13ec;
+            box-shadow: 0 0 0 4px rgba(127, 19, 236, 0.1);
+        }
+        .keyboard-key {
+            @apply flex items-center justify-center h-12 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-lg font-math hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-primary/50 transition-all active:scale-95 active:bg-primary/10;
+        }
+        .tab-active {
+            @apply border-b-2 border-primary text-primary bg-primary/5 font-semibold;
+        }
+        .tab-inactive {
+            @apply text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-100 h-screen flex flex-col overflow-hidden">
+<div class="h-1 w-full bg-gray-200 dark:bg-gray-700 shrink-0">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="24" class="h-full bg-primary w-[24%]" role="progressbar"></div>
+</div>
+<header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
+<div class="flex items-center space-x-4">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                JS
+            </div>
+<div>
+<h1 class="text-lg font-semibold leading-tight">Advanced Mathematics Exam</h1>
+<p class="text-xs text-gray-500 dark:text-gray-400">Calculus II • Section B</p>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex flex-col items-end">
+<span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
+<div class="flex items-center text-status-pink font-bold text-xl font-mono">
+<span class="material-icons text-lg mr-1 animate-pulse">timer</span>
+                    00:45:12
+                </div>
+</div>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-icons">fullscreen</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<section class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col items-center custom-scrollbar">
+<div class="w-full max-w-4xl space-y-6 relative">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                        Question 15 of 50 (Essay)
+                    </span>
+<button class="flex items-center space-x-2 text-gray-400 hover:text-status-yellow transition-colors group">
+<span class="material-icons group-hover:text-status-yellow transition-colors">flag</span>
+<span class="text-sm font-medium">Flag for review</span>
+</button>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 lg:p-10">
+<div class="mb-8">
+<h2 class="text-xl lg:text-2xl font-semibold leading-relaxed mb-4 text-gray-900 dark:text-white">
+                            Explain the derivation of the Fundamental Theorem of Calculus Part 1 and use it to solve:
+                        </h2>
+<div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-100 dark:border-gray-700 mb-6 flex flex-col items-center">
+<span class="text-2xl font-math italic text-gray-800 dark:text-gray-200">
+                                F(x) = ∫<sub>0</sub><sup>x</sup> sin(t²) dt, find F'(x)
+                            </span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 italic">Provide your step-by-step derivation and final result in the field below. Use the virtual math keyboard for symbols.</p>
+</div>
+<div class="space-y-6">
+<div class="math-input-field relative min-h-[160px] bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all p-4">
+<div class="absolute top-2 right-3 flex space-x-2">
+<button class="p-1 text-gray-400 hover:text-primary transition-colors"><span class="material-icons text-lg">undo</span></button>
+<button class="p-1 text-gray-400 hover:text-primary transition-colors"><span class="material-icons text-lg">redo</span></button>
+</div>
+<div class="w-full h-full min-h-[120px] text-lg font-math focus:outline-none" contenteditable="true" placeholder="Start typing your response here...">
+                                F'(x) = 
+                            </div>
+</div>
+<div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-gray-50/50 dark:bg-gray-800/50">
+<div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+<button class="px-6 py-3 text-sm font-medium transition-all tab-active">Basic Operators</button>
+<button class="px-6 py-3 text-sm font-medium transition-all tab-inactive">Greek Symbols</button>
+<button class="px-6 py-3 text-sm font-medium transition-all tab-inactive">Advanced Calculus</button>
+<button class="px-6 py-3 text-sm font-medium transition-all tab-inactive">Matrix/Roots</button>
+</div>
+<div class="p-4 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+<button class="keyboard-key">+</button>
+<button class="keyboard-key">−</button>
+<button class="keyboard-key">×</button>
+<button class="keyboard-key">÷</button>
+<button class="keyboard-key">=</button>
+<button class="keyboard-key">≠</button>
+<button class="keyboard-key">≈</button>
+<button class="keyboard-key">±</button>
+<button class="keyboard-key">&lt;</button>
+<button class="keyboard-key">&gt;</button>
+<button class="keyboard-key">≤</button>
+<button class="keyboard-key">≥</button>
+<button class="keyboard-key">(</button>
+<button class="keyboard-key">)</button>
+<button class="keyboard-key">[</button>
+<button class="keyboard-key">]</button>
+<button class="keyboard-key">{</button>
+<button class="keyboard-key">}</button>
+<button class="keyboard-key">|</button>
+<button class="keyboard-key">∞</button>
+<button class="keyboard-key">π</button>
+<button class="keyboard-key">e</button>
+<button class="keyboard-key">x²</button>
+<button class="keyboard-key">xⁿ</button>
+<button class="keyboard-key">√</button>
+<button class="keyboard-key">∛</button>
+<button class="keyboard-key">∫</button>
+<button class="keyboard-key">∑</button>
+<button class="keyboard-key">lim</button>
+<button class="keyboard-key">d/dx</button>
+</div>
+<div class="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+<div class="flex items-center space-x-3">
+<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Shift Lock</span>
+<div class="w-8 h-4 bg-gray-300 dark:bg-gray-600 rounded-full relative cursor-pointer">
+<div class="absolute left-1 top-1 w-2 h-2 bg-white rounded-full"></div>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:underline">Show LaTeX Editor</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center w-full py-4 border-y border-gray-100 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/20 rounded-xl">
+<button class="flex items-center space-x-2 px-8 py-2.5 rounded-full bg-status-yellow/10 text-status-yellow border border-status-yellow/30 hover:bg-status-yellow hover:text-white transition-all duration-300 group shadow-sm" title="Hint">
+<span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">lightbulb</span>
+<span class="text-sm font-bold uppercase tracking-widest">Show Hint</span>
+</button>
+</div>
+<div class="flex items-center justify-between pt-2 pb-12">
+<button class="px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
+<span class="material-icons text-lg mr-2">arrow_back</span>
+                        Previous
+                    </button>
+<button class="px-6 py-3 rounded-lg border-2 border-status-yellow text-status-yellow font-semibold hover:bg-status-yellow hover:text-white transition-all duration-200 flex items-center group">
+<span class="material-icons text-lg mr-2">help_outline</span>
+                        Ragu-ragu
+                    </button>
+<button class="px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center transform active:scale-95">
+                        Next Question
+                        <span class="material-icons text-lg ml-2">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<aside class="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col shrink-0 z-20 shadow-lg">
+<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Font Size</span>
+<div class="flex items-center space-x-2">
+<button aria-label="Decrease Font Size" class="p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary hover:text-primary transition-all flex items-center justify-center">
+<span class="text-[10px] font-bold mr-0.5">A</span><span class="text-xs font-bold">-</span>
+</button>
+<button aria-label="Increase Font Size" class="p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary hover:text-primary transition-all flex items-center justify-center">
+<span class="text-sm font-bold mr-0.5">A</span><span class="text-xs font-bold">+</span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
+<h3 class="font-semibold text-gray-800 dark:text-white mb-4">Question Navigator</h3>
+<div class="grid grid-cols-2 gap-y-3 gap-x-2 text-xs text-gray-500 dark:text-gray-400">
+<div class="flex items-center">
+<span class="w-3 h-3 rounded-full bg-primary mr-2"></span> Current
+                    </div>
+<div class="flex items-center">
+<span class="w-3 h-3 rounded-full bg-status-blue mr-2"></span> Answered
+                    </div>
+<div class="flex items-center">
+<span class="w-3 h-3 rounded-full bg-status-yellow mr-2"></span> Flagged
+                    </div>
+<div class="flex items-center">
+<span class="w-3 h-3 rounded-full border border-gray-300 mr-2"></span> Unseen
+                    </div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+<div class="grid grid-cols-5 gap-3">
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 hover:bg-status-blue hover:text-white transition-colors flex items-center justify-center font-medium text-sm">1</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 hover:bg-status-blue hover:text-white transition-colors flex items-center justify-center font-medium text-sm">...</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 hover:bg-status-blue hover:text-white transition-colors flex items-center justify-center font-medium text-sm">13</button>
+<button class="w-10 h-10 rounded-lg bg-status-blue/10 text-status-blue border border-status-blue/20 hover:bg-status-blue hover:text-white transition-colors flex items-center justify-center font-medium text-sm">14</button>
+<button class="w-10 h-10 rounded-lg bg-primary text-white shadow-md shadow-primary/30 flex items-center justify-center font-bold text-sm transform scale-105 ring-2 ring-offset-2 ring-primary/50">15</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-colors flex items-center justify-center font-medium text-sm">16</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-colors flex items-center justify-center font-medium text-sm">17</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-colors flex items-center justify-center font-medium text-sm">18</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-colors flex items-center justify-center font-medium text-sm">19</button>
+<button class="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-colors flex items-center justify-center font-medium text-sm">20</button>
+</div>
+</div>
+<div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
+<button class="w-full py-3.5 rounded-lg bg-status-pink text-white font-semibold shadow-lg shadow-status-pink/20 hover:bg-status-pink/90 transition-all flex items-center justify-center group">
+<span class="mr-2 group-hover:animate-pulse">Submit Exam</span>
+<span class="material-icons text-sm opacity-70">send</span>
+</button>
+<p class="text-center text-xs text-gray-400 mt-3">
+                    You have 35 unanswered questions
+                </p>
+</div>
+</aside>
+</main>
+
+</body></html>

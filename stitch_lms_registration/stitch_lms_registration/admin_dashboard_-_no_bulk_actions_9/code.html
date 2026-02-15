@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Content Creator's Drafts - LMS Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 bg-primary dark:bg-background-dark border-r border-primary/10 flex flex-col h-full transition-all duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-primary text-2xl">school</span>
+</div>
+<div>
+<h1 class="text-white text-lg font-bold leading-tight uppercase tracking-wider">LMS Admin</h1>
+<p class="text-white/40 text-xs font-medium">Core Management</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">class</span>
+<span>Classrooms</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">quiz</span>
+<span>Question Bank</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Exams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span>Financials</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<button class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50">
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4 flex-1">
+<label class="relative w-full max-w-md">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 transition-all text-sm" placeholder="Search questions..." type="text"/>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-slate-900 dark:text-white leading-none">Alex Rivers</p>
+<p class="text-xs text-slate-500 font-medium">Content Creator</p>
+</div>
+<div class="size-10 rounded-full border-2 border-primary/20 p-0.5">
+<img alt="Admin Profile Avatar" class="rounded-full size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnawB2JN8di8ITF6qRh7HKnK8mVycv7KSQ3rSlW147W407xRUHIxyUoekUehMLSiJ5fBfiXtSTGJThcNWrrAOZbwT2KuybpZEZb7yUYa_N-8AYoO0D0ejKAO1289GYcN7E5ME3a2TtCAC_71034c4P8JyX3ojX4PQTZ4EDTdoOmQc_sGBweOCkqFH5h8Lr1NQDgm76DoMoLvKwA-eOpt0_xp8Bttbo3Mq2xmyaJZe2HGvo5Cvw1sws2xhHlfCiOyc8uv6MMMM_UFSc"/>
+</div>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-6 max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Drafts</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Review your draft bank and apply AI-powered improvements.</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
+<div class="flex items-center gap-3">
+<span class="text-sm font-semibold text-slate-600 dark:text-slate-400">Available Questions in Bank</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-slate-50 dark:bg-slate-800/50">
+<tr>
+<th class="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
+<th class="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Question Details</th>
+<th class="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Category</th>
+<th class="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Question Status</th>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">01</td>
+<td class="px-4 py-5 max-w-md">
+<div class="flex items-start gap-3">
+<div class="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">help_center</span>
+</div>
+<div>
+<span class="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">What is the capital city of Indonesia?</span>
+<span class="text-xs text-slate-400 line-clamp-1">Multiple Choice • Created 2 hours ago</span>
+</div>
+</div>
+</td>
+<td class="px-4 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Geography</span>
+</td>
+<td class="px-4 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                            Draft
+                                        </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-3">
+<button class="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2 group/btn" title="Improve/Suggest">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                                                IMPROVE
+                                            </button>
+<button class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-[11px] font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2" title="Review Details">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                REVIEW
+                                            </button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">02</td>
+<td class="px-4 py-5 max-w-md">
+<div class="flex items-start gap-3">
+<div class="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">functions</span>
+</div>
+<div>
+<span class="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">Solve the following quadratic equation: x² + 5x + 6 = 0</span>
+<span class="text-xs text-slate-400 line-clamp-1">Essay • Created 5 hours ago</span>
+</div>
+</div>
+</td>
+<td class="px-4 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Mathematics</span>
+</td>
+<td class="px-4 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                            Pending
+                                        </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-3">
+<button class="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2" title="Improve/Suggest">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                                                IMPROVE
+                                            </button>
+<button class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-[11px] font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2" title="Review Details">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                REVIEW
+                                            </button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">03</td>
+<td class="px-4 py-5 max-w-md">
+<div class="flex items-start gap-3">
+<div class="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div>
+<span class="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">Analyze the character development of Gatsby in Chapter 3.</span>
+<span class="text-xs text-slate-400 line-clamp-1">Long Answer • Published yesterday</span>
+</div>
+</div>
+</td>
+<td class="px-4 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Literature</span>
+</td>
+<td class="px-4 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                            Published
+                                        </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-3">
+<button class="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2" title="Improve/Suggest">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                                                IMPROVE
+                                            </button>
+<button class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-[11px] font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2" title="Review Details">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                REVIEW
+                                            </button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">04</td>
+<td class="px-4 py-5 max-w-md">
+<div class="flex items-start gap-3">
+<div class="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div>
+<span class="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">Explain the process of cellular respiration in plants.</span>
+<span class="text-xs text-slate-400 line-clamp-1">Short Answer • Created today</span>
+</div>
+</div>
+</td>
+<td class="px-4 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">Biology</span>
+</td>
+<td class="px-4 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                            Draft
+                                        </span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-3">
+<button class="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2" title="Improve/Suggest">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                                                IMPROVE
+                                            </button>
+<button class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-[11px] font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2" title="Review Details">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                REVIEW
+                                            </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-8 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/10 flex items-center justify-between">
+<p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Showing 4 of 112 Questions</p>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded-lg bg-primary text-white text-xs font-bold">1</button>
+<button class="px-3 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-xs font-bold text-slate-500">2</button>
+<button class="px-3 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-xs font-bold text-slate-500">3</button>
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

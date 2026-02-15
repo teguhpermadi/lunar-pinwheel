@@ -1,57 +1,37 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import React from 'react';
 
-import { cn } from "@/lib/utils"
-
-const buttonVariants = cva(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
-    {
-        variants: {
-            variant: {
-                default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none mb-1 active:mb-0 active:mt-1",
-                destructive:
-                    "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-[0_4px_0_0_#991b1b] active:translate-y-[2px] active:shadow-none mb-1",
-                outline:
-                    "border-2 border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-[0_4px_0_0_var(--border)] active:translate-y-[2px] active:shadow-none mb-1",
-                secondary:
-                    "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-[0_4px_0_0_#94a3b8] active:translate-y-[2px] active:shadow-none mb-1",
-                ghost: "hover:bg-accent hover:text-accent-foreground",
-                link: "text-primary underline-offset-4 hover:underline",
-                game: "bg-green-500 text-white hover:bg-green-600 shadow-[0_4px_0_0_#15803d] active:translate-y-[2px] active:shadow-none mb-1 active:mb-0 active:mt-1 border-b-4 border-green-700",
-            },
-            size: {
-                default: "h-11 px-6 py-2",
-                sm: "h-9 rounded-xl px-4",
-                lg: "h-14 rounded-3xl px-10 text-lg",
-                icon: "h-11 w-11",
-            },
-        },
-        defaultVariants: {
-            variant: "default",
-            size: "default",
-        },
-    }
-)
-
-export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-    asChild?: boolean
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    children: React.ReactNode;
+    variant?: 'primary' | 'outline' | 'ghost';
+    fullWidth?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, asChild = false, ...props }, ref) => {
-        const Comp = asChild ? Slot : "button"
-        return (
-            <Comp
-                className={cn(buttonVariants({ variant, size, className }))}
-                ref={ref}
-                {...props}
-            />
-        )
-    }
-)
-Button.displayName = "Button"
+export const Button: React.FC<ButtonProps> = ({
+    children,
+    variant = 'primary',
+    fullWidth = false,
+    className = '',
+    ...props
+}) => {
+    const baseStyles = "flex justify-center items-center py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-export { Button, buttonVariants }
+    const variants = {
+        primary: "border border-transparent shadow-sm text-white bg-primary hover:bg-primary-dark hover:shadow-lg focus:ring-primary",
+        outline: "border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700",
+        ghost: "text-primary hover:text-primary-dark bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800"
+    };
+
+    const widthClass = fullWidth ? 'w-full' : '';
+
+    return (
+        <button
+            className={`${baseStyles} ${variants[variant]} ${widthClass} ${className} group relative overflow-hidden`}
+            {...props}
+        >
+            {variant === 'primary' && (
+                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+            )}
+            {children}
+        </button>
+    );
+};

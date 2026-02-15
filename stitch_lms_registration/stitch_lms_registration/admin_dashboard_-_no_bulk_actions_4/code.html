@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Live Score - LMS Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .action-dropdown {
+            display: none;
+        }
+        .action-container:focus-within .action-dropdown {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<div class="flex flex-col h-screen">
+<header class="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
+<div class="flex items-center gap-4 flex-1">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex-1 max-w-xl">
+<h1 class="text-xl font-bold text-slate-900 dark:text-white truncate">Ujian Tengah Semester Ganjil</h1>
+<p class="text-xs text-slate-400 font-medium tracking-wide">Mathematics • Grade 10 • Live Dashboard</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold animate-pulse">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                LIVE MONITORING
+            </div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="flex items-center gap-2">
+<button class="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">fact_check</span>
+                    Correction Exam
+                </button>
+<button class="px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">download</span>
+                    Export
+                </button>
+</div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="size-10 rounded-full border-2 border-primary/20 p-0.5">
+<img alt="Admin Profile Avatar" class="rounded-full size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<main class="flex-1 overflow-hidden bg-slate-50 dark:bg-background-dark/30 flex flex-col">
+<div class="p-6 flex items-center justify-between bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search students..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-slate-400 uppercase">Sort By:</span>
+<select class="bg-transparent border-none text-sm font-bold text-slate-600 dark:text-slate-300 focus:ring-0 cursor-pointer">
+<option>Highest Score</option>
+<option>Time Remaining</option>
+<option>Name (A-Z)</option>
+<option>Status</option>
+</select>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Average Score</p>
+<p class="text-xl font-bold text-primary">82.4</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Participants</p>
+<p class="text-xl font-bold text-slate-900 dark:text-white">32/35</p>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-auto p-6 no-scrollbar">
+<div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Extra Time</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Score</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-16">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKyviFy5oYzjFZIIekId451Xw21WzL4SAdRlPUlBAoJQ7H0ueObZlIBhoXJZqAICit1WglxhDPnDCF182ezGwBJdFV4O7_nhHba6FdPo-BPp_5efGuDKpm6Hpb8TaA4GybIxN9BZ_xhNxXoP93ubEx5trdhTN8oOGtKYHgbo6sOueBscg-FkPIx8Wr8e3zN5ccCvYhLZiCo2rpyaWM0mDMfjDSV0gPI06Rq-kQtTkDceAPGZS9Wmy2uRtKAPIWENxcTCn8FTGCfOfH"/>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Felix Alexander</p>
+<p class="text-[10px] text-slate-400">felix.alex@school.edu</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">In Progress</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-xs font-medium text-slate-600 dark:text-slate-400">08:00 AM</p>
+</td>
+<td class="px-6 py-4 text-center">
+<p class="text-sm font-black text-slate-900 dark:text-white tabular-nums">42:15</p>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="text-[10px] font-bold text-primary hover:underline">+ Add Time</button>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-lg font-black text-primary tabular-nums">88</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="relative action-container inline-block">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<div class="action-dropdown absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden">
+<div class="py-1">
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                View Exam Result
+                                            </button>
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                                                Correction Answer
+                                            </button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJbjR9Jz0S_qM40uAfbXLuCbhpVA470weLImS44a5K1FrbZcLFQLON33u8lEWw5Gtrk1Zi79uYUQBMMzOj4kXz-kVz8u4ENlBpFqJ_T8dsUy9IsYbufcW9sMqxY2ZB16SI6SC_0HXq8z4lB0LcL1-DjoLON1TddHRLezeGZJ5Y_nmwGxxBCmHxYnLwhJ7RNHyHFgCdnueawBePTCIAPgjIlfu37Iu7ufNVOvNsTAl9SfM45841R_mWJNuc5YUEKictzQ14BntKop4r"/>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Sarah Jenkins</p>
+<p class="text-[10px] text-slate-400">s.jenkins@school.edu</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">Idle</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-xs font-medium text-slate-600 dark:text-slate-400">08:05 AM</p>
+</td>
+<td class="px-6 py-4 text-center">
+<p class="text-sm font-black text-rose-500 tabular-nums">05:22</p>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-[10px] font-bold text-slate-400">+5m applied</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-lg font-black text-primary tabular-nums">64</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="relative action-container inline-block">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<div class="action-dropdown absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden">
+<div class="py-1">
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                View Exam Result
+                                            </button>
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                                                Correction Answer
+                                            </button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8UJtIQATuPPF5C2MU1SR2I-sMU4Z7H2rovbDlDEGGO9OTB1pqaHwVuV30nOZI7eZHVcIKSuqrg728NHnsFyY7RHZ-yA0ji6XqQ4IPP7KSzqVpCQsO_cvpHFa88Spb6fQVatyv_LRaNDyAJMN9DkhY-VXRTytlHXJ9H5PDdIBbN-ycyVJ_w9Svsm-Eebi8hHLt8Pboq0QWQihyZV_heww7wIBhtBbCPzKQeKkPqbkOzJmw_zBZE7Nlzwp2Q-DBfRpkxMzYEQvs6ZwG"/>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Marcus Thorne</p>
+<p class="text-[10px] text-slate-400">m.thorne@school.edu</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-[10px] font-bold uppercase">Finished</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-xs font-medium text-slate-600 dark:text-slate-400">08:02 AM</p>
+</td>
+<td class="px-6 py-4 text-center">
+<p class="text-sm font-black text-slate-300 dark:text-slate-700 tabular-nums">00:00</p>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-[10px] font-bold text-slate-300">-</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-lg font-black text-primary tabular-nums">92</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="relative action-container inline-block">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<div class="action-dropdown absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden">
+<div class="py-1">
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                View Exam Result
+                                            </button>
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                                                Correction Answer
+                                            </button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdaaGi_s_S9889DiHqPqlkOCAS_Hfp0Z34KSpd0cBWe-2ryN58IaLu6MyApw3lo8IeokYKPnROvvyhXBrLaVHlGiyNHHvo2K-368vRHA3TAy6HxpCmt32bKWh_UcClrYWjJp7c-DVj9KPasAoB_dYUtlIuxTLVJAkcjaa0kbp0r9J_aRVym-Jw11WeRSoqL6OM9Ukh9WZqf2AbBbfE23c5BhhtViBvjaAcbbWuuui9KLN2bbItyjPbnJB1aiuhSW7U42EBWZC33q7E"/>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Emily Zhang</p>
+<p class="text-[10px] text-slate-400">ezhang@school.edu</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">In Progress</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-xs font-medium text-slate-600 dark:text-slate-400">08:12 AM</p>
+</td>
+<td class="px-6 py-4 text-center">
+<p class="text-sm font-black text-slate-900 dark:text-white tabular-nums">55:40</p>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="text-[10px] font-bold text-primary hover:underline">+ Add Time</button>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-lg font-black text-primary tabular-nums">75</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="relative action-container inline-block">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<div class="action-dropdown absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-30 overflow-hidden">
+<div class="py-1">
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                                View Exam Result
+                                            </button>
+<button class="flex items-center gap-3 w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                                                Correction Answer
+                                            </button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<aside class="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 no-print overflow-hidden">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800">
+<h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
+<span class="material-symbols-outlined text-primary text-xl">filter_list</span>
+                    Live Filters
+                </h2>
+<p class="text-[10px] text-slate-400 font-bold mt-1">NARROW DOWN RESULTS</p>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+<div class="space-y-4">
+<div class="space-y-3">
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Show Status</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
+<input checked="" class="rounded text-primary focus:ring-primary h-4 w-4 border-slate-300" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300">In Progress</span>
+<span class="ml-auto text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">24</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
+<input checked="" class="rounded text-primary focus:ring-primary h-4 w-4 border-slate-300" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300">Idle / Away</span>
+<span class="ml-auto text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">3</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
+<input class="rounded text-primary focus:ring-primary h-4 w-4 border-slate-300" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300">Finished</span>
+<span class="ml-auto text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">8</span>
+</label>
+</div>
+</div>
+<div class="h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="space-y-3">
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Score Range</label>
+<div class="px-2">
+<input class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] font-bold text-slate-400">0</span>
+<span class="text-[10px] font-bold text-slate-400">100</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-primary/5 rounded-xl border border-primary/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">notifications_active</span>
+<label class="text-[10px] font-bold text-primary uppercase">Critical Alerts</label>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-slate-600 dark:text-slate-400">Low Time (&lt; 5m)</span>
+<span class="text-[10px] font-black text-rose-500">2 Students</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-slate-600 dark:text-slate-400">Score Below Pass</span>
+<span class="text-[10px] font-black text-amber-500">5 Students</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<button class="w-full py-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-400 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    Refresh Data
+                </button>
+</div>
+</aside>
+</div>
+</div>
+
+</body></html>

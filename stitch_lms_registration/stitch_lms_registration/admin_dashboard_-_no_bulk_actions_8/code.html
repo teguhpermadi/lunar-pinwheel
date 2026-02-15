@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Sequence Question - LMS Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        #hint-toggle:checked ~ #hint-sidebar {
+            transform: translateX(0);
+        }
+        .drop-zone-highlight {
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #7f13ec, transparent);
+            margin: 0.5rem 0;
+            border-radius: 2px;
+            opacity: 0.3;
+        }
+        .step-number-ring {
+            box-shadow: 0 0 0 4px rgba(127, 19, 236, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<div class="flex flex-col h-screen relative">
+<header class="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between z-30 shrink-0">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400 flex items-center">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="relative">
+<select class="appearance-none bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm font-bold pr-10 pl-4 py-2.5 focus:ring-2 focus:ring-primary cursor-pointer text-slate-700 dark:text-slate-200">
+<option>Sequence</option>
+<option>Matching</option>
+<option>True/False</option>
+<option>Multiple Choice</option>
+<option>Short Answer</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0">
+<button class="px-3 py-1.5 text-[10px] font-bold rounded-lg text-slate-500 hover:bg-white/50 dark:hover:bg-slate-700/50">Easy</button>
+<button class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-primary">Medium</button>
+<button class="px-3 py-1.5 text-[10px] font-bold rounded-lg text-slate-500 hover:bg-white/50 dark:hover:bg-slate-700/50">Hard</button>
+</div>
+<div class="flex items-center gap-3 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shrink-0">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight leading-none">Time</span>
+<div class="flex items-center gap-0.5">
+<input class="w-6 p-0 bg-transparent border-none text-[11px] font-bold focus:ring-0 text-slate-700 dark:text-slate-200 text-right" type="number" value="90"/>
+<span class="text-[10px] text-slate-400 font-bold">s</span>
+</div>
+</div>
+<div class="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight leading-none">Score</span>
+<input class="w-6 p-0 bg-transparent border-none text-[11px] font-bold focus:ring-0 text-slate-700 dark:text-slate-200 text-right" type="number" value="30"/>
+</div>
+</div>
+<button class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">save</span>
+                Simpan
+            </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/30 relative">
+<div class="absolute top-6 right-6 z-20">
+<input class="hidden peer" id="hint-toggle" type="checkbox"/>
+<label class="size-10 bg-white dark:bg-slate-800 shadow-md rounded-full flex items-center justify-center text-primary cursor-pointer hover:scale-110 transition-transform border border-slate-100 dark:border-slate-700" for="hint-toggle">
+<span class="material-symbols-outlined">lightbulb</span>
+</label>
+<aside class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 z-50 translate-x-full transition-transform duration-300 ease-in-out p-6" id="hint-sidebar">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-slate-100">
+<span class="material-symbols-outlined text-yellow-500">lightbulb</span>
+                        Sequence Hint
+                    </h2>
+<label class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer" for="hint-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="space-y-4">
+<p class="text-sm text-slate-500 leading-relaxed italic">Provide clues about the correct order for the students.</p>
+<textarea class="w-full h-40 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary transition-all resize-none" placeholder="e.g., The first step begins with 'S' and involves starting the engine..."></textarea>
+</div>
+</aside>
+</div>
+<main class="max-w-4xl mx-auto p-8 space-y-10">
+<section class="space-y-4">
+<label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Question Instruction</label>
+<div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-1 overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<textarea class="w-full bg-transparent border-none text-lg leading-relaxed focus:ring-0 p-6 text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700 resize-none h-24" placeholder="Enter instructions for sequencing... (e.g., Arrange the steps of cellular respiration in order)">Arrange the following historical events in chronological order, from earliest to latest.</textarea>
+</div>
+</section>
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Linear Sequence Builder</label>
+<button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-primary text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add_circle</span> Add New Step
+                    </button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="group relative flex items-center gap-6 p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:border-primary/30">
+<div class="flex flex-col items-center gap-2">
+<div class="size-10 bg-primary/10 text-primary font-bold rounded-full flex items-center justify-center step-number-ring">1</div>
+<div class="cursor-grab active:cursor-grabbing text-slate-300 hover:text-primary transition-colors py-2">
+<span class="material-symbols-outlined text-2xl">drag_indicator</span>
+</div>
+</div>
+<div class="flex-1">
+<input class="w-full bg-transparent border-none text-slate-800 dark:text-slate-100 font-medium focus:ring-0 p-0 text-lg" type="text" value="The signing of the Declaration of Independence"/>
+<div class="mt-2 flex items-center gap-4">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Content Step</span>
+<div class="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<div class="relative h-12 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-full max-w-md h-px bg-primary/20 border-t border-dashed border-primary"></div>
+</div>
+<div class="z-10 bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/20">Drop here to reorder</div>
+</div>
+<div class="group relative flex items-center gap-6 p-4 bg-primary/5 dark:bg-primary/20 rounded-2xl border-2 border-primary shadow-lg ring-4 ring-primary/5 transition-all">
+<div class="flex flex-col items-center gap-2">
+<div class="size-10 bg-primary text-white font-bold rounded-full flex items-center justify-center">2</div>
+<div class="cursor-grabbing text-primary py-2">
+<span class="material-symbols-outlined text-2xl">drag_indicator</span>
+</div>
+</div>
+<div class="flex-1">
+<input class="w-full bg-transparent border-none text-slate-800 dark:text-slate-100 font-bold focus:ring-0 p-0 text-lg" type="text" value="The Start of the Civil War"/>
+<div class="mt-2 flex items-center gap-4">
+<span class="text-[10px] font-bold text-primary uppercase tracking-wider">Moving...</span>
+<div class="h-px flex-1 bg-primary/20"></div>
+<button class="text-primary/40">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<div class="relative h-12 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-full max-w-md h-px bg-primary/20 border-t border-dashed border-primary"></div>
+</div>
+<div class="z-10 bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/20">Drop here to reorder</div>
+</div>
+<div class="group relative flex items-center gap-6 p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:border-primary/30">
+<div class="flex flex-col items-center gap-2">
+<div class="size-10 bg-primary/10 text-primary font-bold rounded-full flex items-center justify-center step-number-ring">3</div>
+<div class="cursor-grab active:cursor-grabbing text-slate-300 hover:text-primary transition-colors py-2">
+<span class="material-symbols-outlined text-2xl">drag_indicator</span>
+</div>
+</div>
+<div class="flex-1">
+<input class="w-full bg-transparent border-none text-slate-800 dark:text-slate-100 font-medium focus:ring-0 p-0 text-lg" type="text" value="The End of World War II"/>
+<div class="mt-2 flex items-center gap-4">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Content Step</span>
+<div class="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative flex items-center gap-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
+<div class="flex flex-col items-center gap-2">
+<div class="size-10 bg-slate-200 dark:bg-slate-700 text-slate-400 font-bold rounded-full flex items-center justify-center">4</div>
+<div class="text-slate-300 py-2">
+<span class="material-symbols-outlined text-2xl">drag_indicator</span>
+</div>
+</div>
+<div class="flex-1">
+<input class="w-full bg-transparent border-none text-slate-500 dark:text-slate-400 font-medium focus:ring-0 p-0 text-lg italic" placeholder="Add next event in sequence..." type="text"/>
+<div class="mt-2 flex items-center gap-4">
+<span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Empty Slot</span>
+<div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm mt-8">
+<div class="flex flex-col gap-4">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Question Tags</label>
+<div class="flex flex-wrap gap-2 items-center min-h-[40px]">
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 dark:bg-primary/20 rounded-full text-xs font-semibold text-primary border border-primary/20">
+                            History
+                            <button class="hover:text-red-500 flex items-center"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 dark:bg-primary/20 rounded-full text-xs font-semibold text-primary border border-primary/20">
+                            Timeline
+                            <button class="hover:text-red-500 flex items-center"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex-1 min-w-[120px]">
+<input class="w-full bg-transparent border-none text-xs p-0 focus:ring-0 placeholder:text-slate-400" placeholder="Type and enter to add tag..." type="text"/>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+
+</body></html>

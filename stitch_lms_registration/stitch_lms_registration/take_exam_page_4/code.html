@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ujian Sastra Jawa - Aksara Hanacaraka</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+Javanese:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5e34", // Earthy brown for calligraphy feel
+                        "accent": "#d4a373",
+                        "background-light": "#fdfaf6",
+                        "background-dark": "#1a1612",
+                        "parchment": "#fcf5e5",
+                        "status-blue": "#3b82f6",
+                        "status-yellow": "#eab308",
+                        "status-pink": "#be185d",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "javanese": ["Noto Sans Javanese", "serif"],
+                        "serif-calligraphy": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --javanese-bg: #fcf8f0;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        .javanese-input-field:focus-within {
+            border-color: #8b5e34;
+            box-shadow: 0 0 0 4px rgba(139, 94, 52, 0.1);
+        }
+        .keyboard-key {
+            @apply flex flex-col items-center justify-center min-h-[56px] rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xl font-javanese hover:bg-stone-50 dark:hover:bg-stone-700 hover:border-primary/40 transition-all active:scale-95 shadow-sm relative overflow-hidden;
+            border-bottom-width: 3px;
+        }
+        .key-label {
+            @apply text-[10px] font-display font-medium text-stone-400 uppercase mt-1;
+        }
+        .tab-active {
+            @apply border-b-2 border-primary text-primary bg-primary/5 font-semibold;
+        }
+        .tab-inactive {
+            @apply text-stone-400 dark:text-stone-500 hover:text-primary hover:bg-stone-50 dark:hover:bg-stone-800;
+        }
+        .javanese-text {
+            font-family: 'Noto Sans Javanese', serif;
+            line-height: 1.8;
+        }
+        .manuscript-card {
+            background-image: radial-gradient(#e5e7eb 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-stone-800 dark:text-stone-100 h-screen flex flex-col overflow-hidden">
+<div class="h-1 w-full bg-stone-200 dark:bg-stone-700 shrink-0">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" class="h-full bg-primary w-[45%]" role="progressbar"></div>
+</div>
+<header class="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 h-16 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
+<div class="flex items-center space-x-4">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            AS
+        </div>
+<div>
+<h1 class="text-lg font-semibold leading-tight">Ujian Sastra &amp; Budaya Jawa</h1>
+<p class="text-xs text-stone-500 dark:text-stone-400">Aksara Hanacaraka • Sesi Siang</p>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex flex-col items-end">
+<span class="text-xs font-medium text-stone-400 uppercase tracking-wider">Sisa Waktu</span>
+<div class="flex items-center text-status-pink font-bold text-xl font-mono">
+<span class="material-icons text-lg mr-1 animate-pulse">timer</span>
+                00:45:12
+            </div>
+</div>
+<button class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors">
+<span class="material-icons">fullscreen</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<section class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col items-center custom-scrollbar">
+<div class="w-full max-w-4xl space-y-6 relative">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full border border-primary/20">
+                    Pitakonan 15 saking 50 (Esei)
+                </span>
+<button class="flex items-center space-x-2 text-stone-400 hover:text-status-yellow transition-colors group">
+<span class="material-icons group-hover:text-status-yellow transition-colors text-xl">bookmark_border</span>
+<span class="text-sm font-medium">Tandai Pertanyaan</span>
+</button>
+</div>
+<div class="bg-parchment dark:bg-stone-900/50 rounded-[2.5rem] shadow-[0_10px_40px_-10px_rgba(139,94,52,0.15)] border border-stone-200 dark:border-stone-800 p-8 lg:p-14 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none">
+<span class="javanese-text text-9xl">ꦧꦸꦢꦪ</span>
+</div>
+<div class="mb-12 text-center relative z-10">
+<h2 class="text-4xl lg:text-5xl font-medium leading-relaxed text-stone-900 dark:text-stone-100 javanese-text mb-8">
+                        ꦱꦼꦫꦠ꧀ꦤꦧꦧꦒꦤ꧀ꦮꦶꦒꦠꦶꦤꦶꦥꦸꦤ꧀ꦔꦿꦺꦏ꧀ꦱꦧꦸꦢꦪꦗꦮꦶꦮꦺꦴꦤ꧀ꦠꦼꦤ꧀ꦆꦁꦗꦩꦤ꧀ꦩꦺꦴꦢꦺꦫꦼꦤ꧀꧈
+                    </h2>
+<div class="flex items-center justify-center space-x-4 mb-6">
+<div class="h-px w-12 bg-primary/30"></div>
+<span class="material-icons text-primary/40">auto_stories</span>
+<div class="h-px w-12 bg-primary/30"></div>
+</div>
+<p class="text-sm text-stone-600 dark:text-stone-400 italic font-display">
+                        "Seratna babagan wigatinipun ngreksa budaya Jawi wonten ing jaman modern."<br/>
+                        (Tuliskan esai mengenai pentingnya melestarikan budaya Jawa di era modern.)
+                    </p>
+</div>
+<div class="space-y-8">
+<div class="javanese-input-field relative min-h-[250px] bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-3xl transition-all p-10 shadow-inner">
+<div class="absolute top-4 left-4 flex space-x-2 opacity-40 hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-stone-400 hover:text-primary transition-colors"><span class="material-icons text-lg">undo</span></button>
+<button class="p-1.5 text-stone-400 hover:text-primary transition-colors"><span class="material-icons text-lg">redo</span></button>
+</div>
+<div class="w-full h-full min-h-[180px] text-3xl javanese-text leading-loose focus:outline-none" contenteditable="true" placeholder="Wangsulan panjenengan...">
+</div>
+</div>
+<div class="border border-stone-200 dark:border-stone-700 rounded-[2rem] overflow-hidden bg-stone-50 dark:bg-stone-900 shadow-xl">
+<div class="flex border-b border-stone-200 dark:border-stone-800 overflow-x-auto no-scrollbar bg-white dark:bg-stone-800">
+<button class="px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all tab-active whitespace-nowrap">Aksara Utama (ꦲ-ꦔ)</button>
+<button class="px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all tab-inactive whitespace-nowrap">Pasangan (꧀ꦲ-꧀ꦔ)</button>
+<button class="px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all tab-inactive whitespace-nowrap">Sandhangan</button>
+<button class="px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all tab-inactive whitespace-nowrap">Angka &amp; Tanda Baca</button>
+</div>
+<div class="p-8">
+<div class="grid grid-cols-5 sm:grid-cols-10 gap-3 mb-6">
+<button class="keyboard-key">ꦲ<span class="key-label">ha</span></button>
+<button class="keyboard-key">ꦯ<span class="key-label">na</span></button>
+<button class="keyboard-key">ꦕ<span class="key-label">ca</span></button>
+<button class="keyboard-key">ꦱ<span class="key-label">ra</span></button>
+<button class="keyboard-key">ꦏ<span class="key-label">ka</span></button>
+<button class="keyboard-key">ꦢ<span class="key-label">da</span></button>
+<button class="keyboard-key">ꦠ<span class="key-label">ta</span></button>
+<button class="keyboard-key">ꦱ<span class="key-label">sa</span></button>
+<button class="keyboard-key">ꦮ<span class="key-label">wa</span></button>
+<button class="keyboard-key">ꦭ<span class="key-label">la</span></button>
+<button class="keyboard-key">ꦥ<span class="key-label">pa</span></button>
+<button class="keyboard-key">ꦝ<span class="key-label">dha</span></button>
+<button class="keyboard-key">ꦗ<span class="key-label">ja</span></button>
+<button class="keyboard-key">ꦪ<span class="key-label">ya</span></button>
+<button class="keyboard-key">ꦜ<span class="key-label">nya</span></button>
+<button class="keyboard-key">ꦩ<span class="key-label">ma</span></button>
+<button class="keyboard-key">ꦒ<span class="key-label">ga</span></button>
+<button class="keyboard-key">ꦧ<span class="key-label">ba</span></button>
+<button class="keyboard-key">ꦛ<span class="key-label">tha</span></button>
+<button class="keyboard-key">ꦔ<span class="key-label">nga</span></button>
+</div>
+<div class="flex flex-wrap gap-3 items-center">
+<div class="flex gap-2 bg-stone-100 dark:bg-stone-800 p-2 rounded-2xl border border-stone-200 dark:border-stone-700">
+<button class="keyboard-key px-4 h-14 bg-white hover:bg-stone-50 !text-sm font-bold border-stone-300">꧀ <span class="key-label">Pangkon</span></button>
+<button class="keyboard-key px-4 h-14 bg-white hover:bg-stone-50 !text-sm font-bold border-stone-300">ꦶ <span class="key-label">Wulu</span></button>
+<button class="keyboard-key px-4 h-14 bg-white hover:bg-stone-50 !text-sm font-bold border-stone-300">ꦸ <span class="key-label">Suku</span></button>
+<button class="keyboard-key px-4 h-14 bg-white hover:bg-stone-50 !text-sm font-bold border-stone-300">ꦺ <span class="key-label">Taling</span></button>
+</div>
+<div class="flex-1 flex gap-3">
+<button class="keyboard-key flex-1 h-14 bg-stone-200 dark:bg-stone-700 !border-stone-300 dark:!border-stone-600 font-display text-xs font-bold uppercase tracking-widest">Spasi</button>
+<button class="keyboard-key w-16 h-14 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 border-stone-300"><span class="material-icons">backspace</span></button>
+<button class="keyboard-key w-20 h-14 bg-primary text-white border-primary/50 hover:bg-primary/90"><span class="material-icons">keyboard_return</span></button>
+</div>
+</div>
+</div>
+<div class="px-8 py-4 bg-stone-100/50 dark:bg-stone-900/50 border-t border-stone-200 dark:border-stone-800 flex justify-between items-center">
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Keyboard Active</span>
+</div>
+<div class="h-4 w-px bg-stone-300 dark:bg-stone-700"></div>
+<span class="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Aksara Nglegena Mode</span>
+</div>
+<button class="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline">Setelan Papan Ketik</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 pb-12">
+<button class="px-8 py-3.5 rounded-2xl border border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium hover:bg-white dark:hover:bg-stone-800 transition-all flex items-center shadow-sm">
+<span class="material-icons text-lg mr-2">west</span>
+                    Saderengipun
+                </button>
+<div class="flex items-center space-x-4">
+<button class="px-8 py-3.5 rounded-2xl border-2 border-status-yellow/30 text-status-yellow font-bold hover:bg-status-yellow hover:text-white transition-all duration-300 flex items-center group">
+<span class="material-icons text-lg mr-2 group-hover:rotate-12 transition-transform">help_outline</span>
+                        Ragu-ragu
+                    </button>
+<button class="px-12 py-3.5 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all flex items-center transform active:scale-95">
+                        Lajengipun
+                        <span class="material-icons text-lg ml-2">east</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<aside class="w-80 bg-white dark:bg-stone-900 border-l border-stone-200 dark:border-stone-800 flex flex-col shrink-0 z-20 shadow-2xl">
+<div class="p-8 border-b border-stone-100 dark:border-stone-800">
+<div class="flex items-center justify-between mb-8">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">Ukuran Aksara</span>
+<div class="flex items-center space-x-2">
+<button class="w-9 h-9 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-primary flex items-center justify-center transition-colors">-</button>
+<button class="w-9 h-9 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-primary flex items-center justify-center transition-colors">+</button>
+</div>
+</div>
+<h3 class="font-bold text-stone-800 dark:text-white mb-5 flex items-center">
+<span class="material-icons text-primary mr-2 text-xl">grid_view</span>
+                Navigasi Soal
+            </h3>
+<div class="grid grid-cols-2 gap-y-3 gap-x-4 text-[10px] text-stone-500 dark:text-stone-400 uppercase font-bold tracking-widest">
+<div class="flex items-center"><span class="w-2 h-2 rounded-full bg-primary mr-2"></span> Aktif</div>
+<div class="flex items-center"><span class="w-2 h-2 rounded-full bg-status-blue mr-2"></span> Rampung</div>
+<div class="flex items-center"><span class="w-2 h-2 rounded-full bg-status-yellow mr-2"></span> Ragu</div>
+<div class="flex items-center"><span class="w-2 h-2 rounded-full border border-stone-300 mr-2"></span> Kosong</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="grid grid-cols-5 gap-3">
+<button class="w-10 h-10 rounded-xl bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-bold text-xs">1</button>
+<button class="w-10 h-10 rounded-xl bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-bold text-xs">...</button>
+<button class="w-10 h-10 rounded-xl bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-bold text-xs">13</button>
+<button class="w-10 h-10 rounded-xl bg-status-blue/10 text-status-blue border border-status-blue/20 flex items-center justify-center font-bold text-xs">14</button>
+<button class="w-10 h-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center font-black text-xs ring-4 ring-primary/10">15</button>
+<button class="w-10 h-10 rounded-xl bg-stone-50 dark:bg-stone-800 text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center font-bold text-xs">16</button>
+<button class="w-10 h-10 rounded-xl bg-stone-50 dark:bg-stone-800 text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center font-bold text-xs">17</button>
+<button class="w-10 h-10 rounded-xl bg-stone-50 dark:bg-stone-800 text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center font-bold text-xs">18</button>
+<button class="w-10 h-10 rounded-xl bg-stone-50 dark:bg-stone-800 text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center font-bold text-xs">19</button>
+<button class="w-10 h-10 rounded-xl bg-stone-50 dark:bg-stone-800 text-stone-400 border border-stone-200 dark:border-stone-700 flex items-center justify-center font-bold text-xs">20</button>
+</div>
+</div>
+<div class="p-8 border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 shrink-0">
+<button class="w-full py-4 rounded-2xl bg-status-pink text-white font-bold shadow-xl shadow-status-pink/20 hover:bg-status-pink/90 transition-all flex items-center justify-center group uppercase tracking-widest text-xs">
+<span>Rampung Ujian</span>
+<span class="material-symbols-outlined ml-2 text-sm">done_all</span>
+</button>
+<div class="mt-5 flex flex-col items-center">
+<p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                    35 Pitakonan dèrèng rampung
+                </p>
+<div class="w-full h-1 bg-stone-200 dark:bg-stone-700 rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-status-blue w-[30%]"></div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+
+</body></html>

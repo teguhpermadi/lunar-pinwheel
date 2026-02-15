@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Dashboard - LMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 bg-primary dark:bg-background-dark border-r border-primary/10 flex flex-col h-full transition-all duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-primary text-2xl">school</span>
+</div>
+<div>
+<h1 class="text-white text-lg font-bold leading-tight uppercase tracking-wider">LMS Student</h1>
+<p class="text-primary/30 text-xs font-medium">Learning Hub</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>My Courses</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">quiz</span>
+<span>Exams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span>Leaderboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">military_tech</span>
+<span>Achievements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Profile</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-white/5 rounded-2xl p-4 mb-4">
+<p class="text-white/60 text-xs mb-2">Semester Progress</p>
+<div class="w-full bg-white/10 rounded-full h-1.5 mb-2">
+<div class="bg-yellow-400 h-1.5 rounded-full w-3/4"></div>
+</div>
+<p class="text-white text-xs font-semibold">Level 14 • 12,450 XP</p>
+</div>
+<button class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50">
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4 flex-1">
+<label class="relative w-full max-w-md">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 transition-all text-sm" placeholder="Search courses, lessons, or exams..." type="text"/>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">workspace_premium</span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-slate-900 dark:text-white leading-none">Alex Rivers</p>
+<p class="text-xs text-slate-500 font-medium">B.Sc Computer Science</p>
+</div>
+<div class="size-10 rounded-full border-2 border-primary/20 p-0.5">
+<img alt="Student Profile Avatar" class="rounded-full size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8 max-w-7xl mx-auto">
+<section class="bg-primary rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-primary/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 translate-x-1/2"></div>
+<div class="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
+<div class="space-y-4 max-w-xl text-center md:text-left">
+<span class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold uppercase tracking-widest">Active Streak: 12 Days 🔥</span>
+<h2 class="text-4xl md:text-5xl font-black tracking-tight">Welcome back, Alex!</h2>
+<p class="text-primary-100 text-lg opacity-80">You're just 450 XP away from reaching Level 15. Keep up the great work on your UI Design course!</p>
+<div class="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
+<div class="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+<div class="size-10 bg-amber-400 rounded-xl flex items-center justify-center text-slate-900">
+<span class="material-symbols-outlined">stars</span>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase opacity-60">Latest Badge</p>
+<p class="text-sm font-bold">Fast Learner</p>
+</div>
+</div>
+<div class="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+<div class="size-10 bg-blue-400 rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase opacity-60">Achievement</p>
+<p class="text-sm font-bold">7 Day Streak</p>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full md:w-72 bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20">
+<div class="flex justify-between items-end mb-4">
+<h4 class="font-bold">Next Rank</h4>
+<span class="text-xs font-medium opacity-60">Master</span>
+</div>
+<div class="space-y-4">
+<div class="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+<div class="bg-yellow-400 h-full rounded-full w-2/3 shadow-[0_0_15px_rgba(250,204,21,0.5)]"></div>
+</div>
+<div class="flex justify-between text-xs font-bold">
+<span>12,450 XP</span>
+<span class="text-yellow-400">15,000 XP</span>
+</div>
+<button class="w-full py-3 bg-white text-primary rounded-xl font-bold text-sm hover:bg-yellow-400 hover:text-slate-900 transition-all">Claim Daily Reward</button>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-8">
+<div class="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white">Course Progress Overview</h4>
+<p class="text-sm text-slate-500 font-medium">Ongoing academic performance</p>
+</div>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-lg text-blue-600">brush</span>
+</div>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-200">Graphic Design Masterclass</span>
+</div>
+<span class="text-xs font-black text-slate-400">85% Complete</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+<div class="bg-blue-500 h-full rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-amber-100 dark:bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined text-lg text-amber-600">code</span>
+</div>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-200">Fullstack React 2024</span>
+</div>
+<span class="text-xs font-black text-slate-400">42% Complete</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+<div class="bg-amber-400 h-full rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-rose-100 dark:bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-600">
+<span class="material-symbols-outlined text-lg text-rose-600">functions</span>
+</div>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-200">Advanced Calculus II</span>
+</div>
+<span class="text-xs font-black text-slate-400">12% Complete</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+<div class="bg-rose-500 h-full rounded-full" style="width: 12%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white px-2">Suggested Next Steps</h4>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<button class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+<div class="size-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">play_circle</span>
+</div>
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">Resume Lesson</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+<div class="size-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">quiz</span>
+</div>
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">Take Quiz</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+<div class="size-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">upload_file</span>
+</div>
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">Submit Task</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+<div class="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">explore</span>
+</div>
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">Explore</span>
+</button>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1">
+<div class="bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-sm border border-slate-200 dark:border-slate-800 h-full flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white">Upcoming Exams</h4>
+<button class="text-primary text-xs font-bold hover:underline">Full Schedule</button>
+</div>
+<div class="space-y-6 relative flex-1">
+<div class="absolute left-4 top-0 bottom-0 w-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="relative flex gap-4">
+<div class="z-10 size-8 rounded-full bg-rose-500 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 text-white shadow-lg shadow-rose-500/30">
+<span class="material-symbols-outlined text-sm">alarm</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-black text-rose-600 uppercase tracking-widest mb-1">In 2 Hours</p>
+<p class="text-sm font-bold text-slate-900 dark:text-white">UI/UX Mid-Term Exam</p>
+<p class="text-xs text-slate-500">Starts at 2:00 PM • Duration: 90m</p>
+<div class="mt-2">
+<button class="px-4 py-1.5 bg-rose-500 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest">Join Waiting Room</button>
+</div>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="z-10 size-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 text-blue-600">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Tomorrow</p>
+<p class="text-sm font-bold text-slate-900 dark:text-white">React Fundamentals Final</p>
+<p class="text-xs text-slate-500">10:00 AM • Main Hall / Online</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="z-10 size-8 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 text-amber-600">
+<span class="material-symbols-outlined text-sm">schedule</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Friday</p>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Mathematics Quiz III</p>
+<p class="text-xs text-slate-500">09:00 AM • 15 Questions</p>
+</div>
+</div>
+<div class="mt-auto pt-8 flex flex-col items-center opacity-20 grayscale select-none">
+<span class="material-symbols-outlined text-6xl mb-2">event_available</span>
+<p class="text-xs font-bold text-center uppercase tracking-widest">Study hard, score big</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-amber-400 rounded-xl flex items-center justify-center text-slate-900 shadow-lg shadow-amber-400/20">
+<span class="material-symbols-outlined">emoji_events</span>
+</div>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white">Global Leaderboard</h4>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-widest">All Time</button>
+<button class="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded-full uppercase tracking-widest">This Month</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50">
+<tr>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Rank</th>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Student</th>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Achievements</th>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Points</th>
+<th class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Performance</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-8 py-5">
+<div class="size-8 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center font-black text-sm">1</div>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 overflow-hidden">
+<img alt="User profile" class="size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+<div>
+<p class="font-bold text-slate-800 dark:text-slate-200 leading-tight">Sarah Jenkins</p>
+<p class="text-[10px] font-bold text-primary uppercase">Pro Member</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-amber-400 text-lg">military_tech</span>
+<span class="material-symbols-outlined text-blue-400 text-lg">verified</span>
+<span class="material-symbols-outlined text-rose-400 text-lg">local_fire_department</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-sm font-black text-slate-900 dark:text-white">18,240 XP</span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-2 text-emerald-500">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-xs font-bold">+12%</span>
+</div>
+</td>
+</tr>
+<tr class="group bg-primary/5 hover:bg-primary/10 transition-colors">
+<td class="px-8 py-5">
+<div class="size-8 bg-slate-200 text-slate-700 rounded-full flex items-center justify-center font-black text-sm">42</div>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full border-2 border-primary/50 overflow-hidden">
+<img alt="Your profile" class="size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"/>
+</div>
+<div>
+<p class="font-bold text-primary leading-tight">Alex Rivers (You)</p>
+<p class="text-[10px] font-bold text-slate-500 uppercase">Master Tier</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-amber-400 text-lg">military_tech</span>
+<span class="material-symbols-outlined text-slate-300 text-lg opacity-30">verified</span>
+<span class="material-symbols-outlined text-rose-400 text-lg">local_fire_department</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-sm font-black text-slate-900 dark:text-white">12,450 XP</span>
+</td>
+<td class="px-8 py-5 text-right">
+<div class="flex items-center justify-end gap-2 text-emerald-500">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-xs font-bold">+5%</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

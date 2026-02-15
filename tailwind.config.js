@@ -24,8 +24,10 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#7f13ec", // Updated to match design
           foreground: "hsl(var(--primary-foreground))",
+          dark: "#6a0bc1",
+          light: "#9a45f2",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -42,7 +44,13 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          yellow: "#facc15",
+          pink: "#ec4899",
+          blue: "#3b82f6",
         },
+        "background-light": "#f7f6f8",
+        "background-dark": "#191022",
+        "surface-dark": "#2a1e36",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -51,6 +59,9 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      fontFamily: {
+        "display": ["Lexend", "sans-serif"]
       },
       borderRadius: {
         lg: "var(--radius)",
