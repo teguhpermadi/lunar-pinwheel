@@ -1,13 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StudentSidebarProps {
     isCollapsed: boolean;
-    toggleSidebar: () => void;
 }
 
 export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
     const location = useLocation();
+    const { logout } = useAuth();
 
     const navItems = [
         { icon: 'dashboard', label: 'Dashboard', path: '/' },
@@ -80,10 +81,12 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
                     </div>
                     <p className="text-white text-xs font-semibold">Level 14 • 12,450 XP</p>
                 </div>
-                <button className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full",
-                    isCollapsed ? "justify-center px-0" : ""
-                )}>
+                <button
+                    onClick={logout}
+                    className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full",
+                        isCollapsed ? "justify-center px-0" : ""
+                    )}>
                     <span className="material-symbols-outlined shrink-0">logout</span>
                     <span className={cn(
                         "nav-label overflow-hidden whitespace-nowrap transition-all duration-300",
@@ -96,3 +99,4 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
         </aside>
     );
 }
+

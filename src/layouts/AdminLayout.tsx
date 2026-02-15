@@ -11,7 +11,7 @@ export default function AdminLayout() {
 
     return (
         <div className="flex h-screen overflow-hidden relative bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
-            <AdminSidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+            <AdminSidebar isCollapsed={isSidebarCollapsed} />
 
             <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50 transition-all duration-300">
                 <header className="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center justify-between">
