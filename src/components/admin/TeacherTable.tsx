@@ -1,0 +1,310 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Teacher } from '@/lib/api';
+
+interface TeacherTableProps {
+    teachers: Teacher[];
+    isLoading: boolean;
+    onEdit: (teacher: Teacher) => void;
+    onDelete: (id: string) => void;
+    pagination?: {
+        currentPage: number;
+        lastPage: number;
+        total: number;
+        from: number;
+        to: number;
+    };
+    onPageChange: (page: number) => void;
+    onBulkDelete?: (ids: string[]) => void;
+}
+
+export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete }: TeacherTableProps) {
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelectedIds(teachers.map(t => t.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectOne = (id: string) => {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    // Determine if all are selected
+    const isAllSelected = teachers.length > 0 && selectedIds.length === teachers.length;
+    const isIndeterminate = selectedIds.length > 0 && selectedIds.length < teachers.length; // Optional UI refinement
+
+    // ... (animations remain same)
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const item = {
+        hidden: { y: 20, opacity: 0 },
+        show: { y: 0, opacity: 1 }
+    };
+
+    if (isLoading) {
+        // ... (skeleton remains same)
+        return (
+            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
+                    <Skeleton className="h-8 w-32" />
+                    <div className="flex gap-2">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 dark:bg-slate-800/50">
+                            <tr>
+                                <th className="pl-8 pr-4 py-4 w-12"><Skeleton className="h-4 w-4" /></th>
+                                <th className="px-4 py-4"><Skeleton className="h-4 w-24" /></th>
+                                <th className="px-4 py-4"><Skeleton className="h-4 w-32" /></th>
+                                <th className="px-4 py-4"><Skeleton className="h-4 w-20" /></th>
+                                <th className="px-8 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {Array(5).fill(0).map((_, i) => (
+                                <tr key={i}>
+                                    <td className="pl-8 pr-4 py-5"><Skeleton className="h-4 w-4" /></td>
+                                    <td className="px-4 py-5">
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="size-10 rounded-xl" />
+                                            <div className="space-y-2">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-20" />
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>
+                                    <td className="px-4 py-5"><Skeleton className="h-4 w-16" /></td>
+                                    <td className="px-8 py-5 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Skeleton className="size-8 rounded-lg" />
+                                            <Skeleton className="size-8 rounded-lg" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden"
+        >
+            <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
+                <div className="flex items-center gap-3">
+                    {selectedIds.length > 0 && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={() => {
+                                if (onBulkDelete) {
+                                    onBulkDelete(selectedIds);
+                                    setSelectedIds([]); // Clear selection after action trigger (optimistic)
+                                }
+                            }}
+                            className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-lg">delete</span>
+                            Delete ({selectedIds.length})
+                        </motion.button>
+                    )}
+                </div>
+                {/* <div className="flex items-center gap-2">
+                    <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400" title="Filter">
+                        <span className="material-symbols-outlined">filter_list</span>
+                    </button>
+                    <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400" title="Export">
+                        <span className="material-symbols-outlined">download</span>
+                    </button>
+                </div> */}
+            </div>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50">
+                        <tr>
+                            <th className="pl-8 pr-4 py-4 w-12">
+                                <input
+                                    className="rounded border-slate-300 text-primary focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700"
+                                    type="checkbox"
+                                    checked={isAllSelected}
+                                    onChange={handleSelectAll}
+                                />
+                            </th>
+                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>
+                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Email/Contact</th>
+                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subjects</th>
+                            <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {teachers.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                    No teachers found.
+                                </td>
+                            </tr>
+                        ) : (
+                            teachers.map((teacher) => (
+                                <motion.tr
+                                    key={teacher.id}
+                                    variants={item}
+                                    className={`group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors ${selectedIds.includes(teacher.id) ? 'bg-slate-50 dark:bg-slate-800/30' : ''}`}
+                                >
+                                    <td className="pl-8 pr-4 py-5">
+                                        <input
+                                            className="rounded border-slate-300 text-primary focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700"
+                                            type="checkbox"
+                                            checked={selectedIds.includes(teacher.id)}
+                                            onChange={() => handleSelectOne(teacher.id)}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary overflow-hidden">
+                                                {teacher.avatar ? (
+                                                    <img src={teacher.avatar} alt={teacher.name} className="size-full object-cover" />
+                                                ) : (
+                                                    <span className="material-symbols-outlined">person</span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <span className="block font-bold text-slate-800 dark:text-slate-200">{teacher.name}</span>
+                                                <span className="text-xs text-slate-400">@{teacher.username || teacher.name.toLowerCase().replace(/\s+/g, '')}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <span className="text-sm text-slate-600 dark:text-slate-400">{teacher.email}</span>
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <div className="flex flex-wrap gap-1">
+                                            {teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.map((sub: any, idx) => (
+                                                <span key={idx} className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                                    {sub.name || sub}
+                                                </span>
+                                            )) : (
+                                                <span className="text-xs text-slate-400 italic">No subjects</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-5 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => onEdit(teacher)}
+                                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                                                title="Edit"
+                                            >
+                                                <span className="material-symbols-outlined text-xl">edit</span>
+                                            </button>
+                                            <button
+                                                onClick={() => onDelete(teacher.id)}
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                title="Delete"
+                                            >
+                                                <span className="material-symbols-outlined text-xl">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </motion.tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {pagination && (
+                <div className="px-8 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/10 flex items-center justify-between">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        Showing {pagination.from}-{pagination.to} of {pagination.total} Results
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onPageChange(pagination.currentPage - 1)}
+                            disabled={pagination.currentPage <= 1}
+                            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span className="material-symbols-outlined text-lg">chevron_left</span>
+                        </button>
+
+                        {(() => {
+                            const range = [];
+                            const delta = 1;
+                            const left = pagination.currentPage - delta;
+                            const right = pagination.currentPage + delta + 1;
+                            const rangeWithDots = [];
+                            let l;
+
+                            for (let i = 1; i <= pagination.lastPage; i++) {
+                                if (i === 1 || i === pagination.lastPage || (i >= left && i < right)) {
+                                    range.push(i);
+                                }
+                            }
+
+                            for (let i of range) {
+                                if (l) {
+                                    if (i - l === 2) {
+                                        rangeWithDots.push(l + 1);
+                                    } else if (i - l !== 1) {
+                                        rangeWithDots.push('...');
+                                    }
+                                }
+                                rangeWithDots.push(i);
+                                l = i;
+                            }
+
+                            return rangeWithDots.map((page, index) => (
+                                page === '...' ? (
+                                    <span key={`dots-${index}`} className="px-2 py-1 flex items-center text-slate-400">...</span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        onClick={() => onPageChange(page as number)}
+                                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${pagination.currentPage === page
+                                            ? 'bg-primary text-white'
+                                            : 'border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            ));
+                        })()}
+
+                        <button
+                            onClick={() => onPageChange(pagination.currentPage + 1)}
+                            disabled={pagination.currentPage >= pagination.lastPage}
+                            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span className="material-symbols-outlined text-lg">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+        </motion.div>
+    );
+}

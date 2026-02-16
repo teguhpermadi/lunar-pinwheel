@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext"
 import AdminLayout from "@/layouts/AdminLayout"
 import StudentLayout from "@/layouts/StudentLayout"
 import AdminDashboard from "@/pages/admin/AdminDashboard"
+import TeacherManagement from "@/pages/admin/TeacherManagement"
 import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
@@ -61,6 +62,7 @@ function App() {
             {/* Common sub-routes (can be conditionally rendered or protected inside components) */}
             <Route path="courses" element={<div>Courses Page</div>} />
             <Route path="users" element={<div>Users Page</div>} />
+            <Route path="admin/teachers" element={<TeacherManagement />} />
             <Route path="exams" element={<div>Exams Page</div>} />
           </Route>
         </Route>

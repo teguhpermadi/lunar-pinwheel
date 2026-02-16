@@ -18,20 +18,34 @@ export default function LoginPage() {
         try {
             const response = await authApi.login(data);
 
-            // Assuming response structure: { token: string, user: User }
-            // If the API returns something else, we need to adapt here or in api.ts
-            // For now, let's mock the user object if it's missing or partial, 
-            // since we need the 'role' for redirection logic.
+            // Response structure is { success: true, message: "...", data: { user: ..., token: ... } }
+            // Note: API returns 'user_type', frontend uses 'role'.
+            const { token, user: apiUserData } = response.data || {};
 
-            const user = response.user || {
-                id: 1,
-                name: 'Test User',
-                email: data.email,
-                role: data.email.includes('admin') ? 'admin' : (data.email.includes('teacher') ? 'teacher' : 'student')
-            };
+            let user = apiUserData;
 
-            login(response.token || 'mock-token', user);
-            navigate('/');
+            // Map user_type to role if needed
+            if (user && user.user_type && !user.role) {
+                user = { ...user, role: user.user_type };
+            }
+
+            if (!user) {
+                user = {
+                    id: 1,
+                    name: 'Test User',
+                    email: data.email,
+                    role: data.email.includes('admin') ? 'admin' : (data.email.includes('teacher') ? 'teacher' : 'student')
+                };
+            }
+
+            login(token, user);
+
+            if (token) {
+                login(token, user);
+                navigate('/');
+            } else {
+                throw new Error("Token not found in response");
+            }
         } catch (error: any) {
             console.error('Login failed', error);
             if (error.response?.data?.errors) {

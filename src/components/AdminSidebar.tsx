@@ -14,6 +14,7 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
         { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
         { icon: 'menu_book', label: 'Courses', path: '/admin/courses' },
         { icon: 'group', label: 'Users', path: '/admin/users' },
+        { icon: 'school', label: 'Teachers', path: '/admin/teachers' },
         { icon: 'quiz', label: 'Exams', path: '/admin/exams' },
         { icon: 'account_balance_wallet', label: 'Financials', path: '/admin/financials' },
         { icon: 'settings', label: 'Settings', path: '/admin/settings' },

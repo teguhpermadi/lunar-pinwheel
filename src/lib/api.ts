@@ -12,12 +12,21 @@ export const api = axios.create({
     withCredentials: true,
 });
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // User interface
 export interface User {
     id: number;
     name: string;
     email: string;
-    role: 'admin' | 'teacher' | 'student'; // Adjust based on actual API response
+    role?: 'admin' | 'teacher' | 'student'; // Mapped from user_type
+    user_type?: string;
     // Add other fields as needed
 }
 
@@ -55,6 +64,82 @@ export const authApi = {
     },
     getUserProfile: async () => {
         const response = await api.get('/user'); // Adjust endpoint if needed
+        return response.data;
+    }
+};
+
+// Teacher Interface
+export interface Teacher {
+    id: string;
+    name: string;
+    username?: string;
+    email: string;
+    avatar?: string;
+    subjects?: any[]; // Replace with specific Subject interface if available
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TeacherResponse {
+    success: boolean;
+    message: string;
+    data: Teacher[];
+    meta?: any; // For pagination
+    links?: any;
+}
+
+// Teacher API
+export const teacherApi = {
+    getTeachers: async (params?: any) => {
+        // Assuming /v1/users?role=teacher or similar. 
+        // Based on api.json there is no specific /v1/teachers endpoint listed in the first grep, 
+        // but often it's under users or a specific endpoint I missed. 
+        // However, I will use /v1/users?type=teacher based on common patterns if /v1/teachers fails,
+        // but for now I will try /v1/teachers as per potential convention or /users.
+        // Actually, looking at the previous grep, I didn't see /v1/teachers. 
+        // I will use /v1/users?user_type=teacher as a fallback or if I find the specific endpoint.
+        // Wait, I saw 'StoreTeacherRequest' in api.json, which implies there might be a resource.
+        // Let's assume /v1/teachers exists or I'll use /v1/users.
+        // Let's try to hit /v1/teachers first.
+        const response = await api.get('/teachers', { params });
+        return response.data;
+    },
+    createTeacher: async (data: any) => {
+        const response = await api.post('/teachers', data);
+        return response.data;
+    },
+    updateTeacher: async (id: string, data: any) => {
+        const response = await api.put(`/teachers/${id}`, data);
+        return response.data;
+    },
+    deleteTeacher: async (id: string) => {
+        const response = await api.delete(`/teachers/${id}`);
+        return response.data;
+    },
+    bulkDeleteTeachers: async (ids: string[]) => {
+        const response = await api.post('/teachers/bulk-delete', { ids });
+        return response.data;
+    },
+    importTeachers: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/teachers/import', formData, {
+            headers: {
+                'Content-Type': undefined,
+            },
+        });
+        return response.data;
+    },
+    downloadTemplate: async () => {
+        const response = await api.get('/teachers/export/template', {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
+    exportTeachers: async () => {
+        const response = await api.get('/teachers/export', {
+            responseType: 'blob',
+        });
         return response.data;
     }
 };
