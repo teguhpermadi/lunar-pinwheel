@@ -5,6 +5,7 @@ import StudentLayout from "@/layouts/StudentLayout"
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import TeacherManagement from "@/pages/admin/TeacherManagement"
 import StudentManagement from "@/pages/admin/StudentManagement"
+import SubjectManagement from "@/pages/admin/SubjectManagement"
 import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
@@ -65,6 +66,7 @@ function App() {
             <Route path="users" element={<div>Users Page</div>} />
             <Route path="admin/teachers" element={<TeacherManagement />} />
             <Route path="admin/students" element={<StudentManagement />} />
+            <Route path="admin/subjects" element={<SubjectManagement />} />
             <Route path="exams" element={<div>Exams Page</div>} />
           </Route>
         </Route>

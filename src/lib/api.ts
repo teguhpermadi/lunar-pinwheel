@@ -221,3 +221,110 @@ export const studentApi = {
     }
 };
 
+// Subject Interface
+export interface Subject {
+    id: string;
+    name: string;
+    code: string;
+    description?: string;
+    image_url?: string;
+    logo_url?: string;
+    user_id: number;
+    color?: string;
+    class_name?: string;
+    academic_year_id: number;
+    classroom_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface SubjectResponse {
+    success: boolean;
+    message: string;
+    data: Subject[];
+    meta?: any; // For pagination
+    links?: any;
+}
+
+// Subject API
+export const subjectApi = {
+    getSubjects: async (params?: any) => {
+        const response = await api.get('/subjects', { params });
+        return response.data;
+    },
+    createSubject: async (data: any) => {
+        const response = await api.post('/subjects', data);
+        return response.data;
+    },
+    updateSubject: async (id: string, data: any) => {
+        const response = await api.put(`/subjects/${id}`, data);
+        return response.data;
+    },
+    deleteSubject: async (id: string) => {
+        const response = await api.delete(`/subjects/${id}`);
+        return response.data;
+    },
+    bulkDeleteSubjects: async (ids: string[]) => {
+        const response = await api.post('/subjects/bulk-delete', { ids });
+        return response.data;
+    },
+    searchSubjects: async (query: string, params?: any) => {
+        const response = await api.get('/subjects/search', {
+            params: { query, ...params }
+        });
+        return response.data;
+    }
+};
+
+// Academic Year Interface
+export interface AcademicYear {
+    id: number;
+    year: string;          // e.g., "2023/2024"
+    semester: string;      // e.g., "1", "2", or "Ganjil/Genap"
+    user_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AcademicYearResponse {
+    success: boolean;
+    message: string;
+    data: AcademicYear[];
+    meta?: any;
+    links?: any;
+}
+
+// Academic Year API
+export const academicYearApi = {
+    getAcademicYears: async (params?: any) => {
+        const response = await api.get('/academic-years', { params });
+        return response.data;
+    }
+};
+
+// Classroom Interface
+export interface Classroom {
+    id: number;
+    name: string;
+    description?: string;
+    capacity?: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ClassroomResponse {
+    success: boolean;
+    message: string;
+    data: Classroom[];
+    meta?: any;
+    links?: any;
+}
+
+// Classroom API
+export const classroomApi = {
+    getClassrooms: async (params?: any) => {
+        const response = await api.get('/classrooms', { params });
+        return response.data;
+    }
+};
+
