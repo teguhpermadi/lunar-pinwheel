@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import TeacherTable from '@/components/admin/teacher/TeacherTable';
-import TeacherModal from '@/components/admin/teacher/TeacherModal';
-import { teacherApi, Teacher } from '@/lib/api';
+import StudentTable from '@/components/admin/student/StudentTable';
+import StudentModal from '@/components/admin/student/StudentModal';
+import { studentApi, Student } from '@/lib/api';
 
 const MySwal = withReactContent(Swal);
 
@@ -20,8 +20,8 @@ const Toast = MySwal.mixin({
     }
 });
 
-export default function TeacherManagement() {
-    const [teachers, setTeachers] = useState<Teacher[]>([]);
+export default function StudentManagement() {
+    const [students, setStudents] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const [pagination, setPagination] = useState({
@@ -33,22 +33,15 @@ export default function TeacherManagement() {
     });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+    const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-    const fetchTeachers = async (page = 1) => {
+    const fetchStudents = async (page = 1) => {
         setIsLoading(true);
         try {
-            const response = await teacherApi.getTeachers({ page: page });
-            // Standard Laravel API Resource Response:
-            // { data: [...], meta: { current_page, last_page, total, from, to, ... }, links: ... }
-            if (response.success && response.data) { // Assuming response.data is the actual payload wrapper if using ApiResponse trait
-                // Adjusting based on inspection: ApiResponse trait returns { success: true, message: "", data: { ...pagination_result } }
-                // The pagination result itself has `data`, `meta` (or inline pagination fields if using Standard Resources).
-                // Let's assume the controller returns `TeacherResource::collection($teachers)->response()->getData(true)`.
-                // This usually results in { data: [...], meta: { ... }, links: { ... } } directly inside the main `data` field of ApiResponse
-
+            const response = await studentApi.getStudents({ page: page });
+            if (response.success && response.data) {
                 const result = response.data;
-                setTeachers(result.data || []);
+                setStudents(result.data || []);
                 setPagination({
                     currentPage: result.meta?.current_page || result.current_page || 1,
                     lastPage: result.meta?.last_page || result.last_page || 1,
@@ -57,59 +50,58 @@ export default function TeacherManagement() {
                     to: result.meta?.to || result.to || 0
                 });
             } else {
-                setTeachers([]);
+                setStudents([]);
             }
         } catch (error) {
-            console.error("Failed to fetch teachers:", error);
+            console.error("Failed to fetch students:", error);
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchTeachers();
+        fetchStudents();
     }, []);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.lastPage) {
-            fetchTeachers(newPage);
+            fetchStudents(newPage);
         }
     };
 
     const handleCreate = () => {
-        setSelectedTeacher(null);
+        setSelectedStudent(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (teacher: Teacher) => {
-        setSelectedTeacher(teacher);
+    const handleEdit = (student: Student) => {
+        setSelectedStudent(student);
         setIsModalOpen(true);
     };
 
     const handleSave = async (data: any) => {
         try {
-            if (selectedTeacher) {
-                await teacherApi.updateTeacher(selectedTeacher.id, data);
+            if (selectedStudent) {
+                await studentApi.updateStudent(selectedStudent.id, data);
                 Toast.fire({
                     icon: 'success',
-                    title: 'Teacher updated successfully'
+                    title: 'Student updated successfully'
                 });
             } else {
-                await teacherApi.createTeacher(data);
+                await studentApi.createStudent(data);
                 Toast.fire({
                     icon: 'success',
-                    title: 'Teacher created successfully'
+                    title: 'Student created successfully'
                 });
             }
-            fetchTeachers(pagination.currentPage);
-            // setIsModalOpen(false); // Handled by Modal on success
+            fetchStudents(pagination.currentPage);
         } catch (error) {
-            console.error("Failed to save teacher:", error);
+            console.error("Failed to save student:", error);
             Toast.fire({
                 icon: 'error',
-                title: 'Failed to save teacher'
+                title: 'Failed to save student'
             });
-            throw error; // Re-throw for modal to handle
+            throw error;
         }
     };
 
@@ -126,18 +118,18 @@ export default function TeacherManagement() {
 
         if (result.isConfirmed) {
             try {
-                await teacherApi.deleteTeacher(id);
+                await studentApi.deleteStudent(id);
                 MySwal.fire(
                     'Deleted!',
-                    'Teacher has been deleted.',
+                    'Student has been deleted.',
                     'success'
                 );
-                fetchTeachers(pagination.currentPage); // Refresh list
+                fetchStudents(pagination.currentPage);
             } catch (error) {
-                console.error("Failed to delete teacher:", error);
+                console.error("Failed to delete student:", error);
                 MySwal.fire(
                     'Error!',
-                    'Failed to delete teacher.',
+                    'Failed to delete student.',
                     'error'
                 );
             }
@@ -147,7 +139,7 @@ export default function TeacherManagement() {
     const handleBulkDelete = async (ids: string[]) => {
         const result = await MySwal.fire({
             title: 'Are you sure?',
-            text: `You are about to delete ${ids.length} teachers. This action cannot be undone!`,
+            text: `You are about to delete ${ids.length} students. This action cannot be undone!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -157,18 +149,18 @@ export default function TeacherManagement() {
 
         if (result.isConfirmed) {
             try {
-                await teacherApi.bulkDeleteTeachers(ids);
+                await studentApi.bulkDeleteStudents(ids);
                 MySwal.fire(
                     'Deleted!',
-                    `${ids.length} teachers have been deleted.`,
+                    `${ids.length} students have been deleted.`,
                     'success'
                 );
-                fetchTeachers(pagination.currentPage);
+                fetchStudents(pagination.currentPage);
             } catch (error) {
-                console.error("Failed to delete teachers:", error);
+                console.error("Failed to delete students:", error);
                 MySwal.fire(
                     'Error!',
-                    'Failed to delete teachers.',
+                    'Failed to delete students.',
                     'error'
                 );
             }
@@ -177,22 +169,22 @@ export default function TeacherManagement() {
 
     const handleImport = async () => {
         const { value: file } = await MySwal.fire({
-            title: 'Import Teachers',
+            title: 'Import Students',
             html: (
                 <div className="flex flex-col gap-4 text-left">
                     <p className="text-sm text-gray-500">
-                        Upload an Excel file to import teachers.
+                        Upload an Excel file to import students.
                         Please use the template to ensure correct format.
                     </p>
                     <button
                         onClick={async (e) => {
                             e.preventDefault();
                             try {
-                                const blob = await teacherApi.downloadTemplate();
+                                const blob = await studentApi.downloadTemplate();
                                 const url = window.URL.createObjectURL(new Blob([blob]));
                                 const link = document.createElement('a');
                                 link.href = url;
-                                link.setAttribute('download', 'teachers_template.xlsx');
+                                link.setAttribute('download', 'students_template.xlsx');
                                 document.body.appendChild(link);
                                 link.click();
                                 link.parentNode?.removeChild(link);
@@ -239,18 +231,18 @@ export default function TeacherManagement() {
 
         if (file) {
             try {
-                await teacherApi.importTeachers(file);
+                await studentApi.importStudents(file);
                 MySwal.fire({
                     icon: 'success',
                     title: 'Import Successful',
-                    text: 'Teachers have been imported successfully.'
+                    text: 'Students have been imported successfully.'
                 });
-                fetchTeachers(pagination.currentPage);
+                fetchStudents(pagination.currentPage);
             } catch (error: any) {
                 console.error("Import failed:", error);
 
                 const responseData = error.response?.data;
-                let errorMessage = responseData?.message || 'Failed to import teachers.';
+                let errorMessage = responseData?.message || 'Failed to import students.';
 
                 if (responseData?.errors) {
                     const validationErrors = responseData.errors;
@@ -268,7 +260,7 @@ export default function TeacherManagement() {
                     title: 'Import Failed',
                     text: errorMessage,
                     customClass: {
-                        popup: 'swal2-wide' // Ensure you have this class or just leave it
+                        popup: 'swal2-wide'
                     }
                 });
             }
@@ -277,11 +269,11 @@ export default function TeacherManagement() {
 
     const handleDownload = async () => {
         try {
-            const blob = await teacherApi.exportTeachers();
+            const blob = await studentApi.exportStudents();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'teachers.xlsx';
+            a.download = 'students.xlsx';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -299,8 +291,8 @@ export default function TeacherManagement() {
         >
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Teacher Management</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Manage api/teacher access, subjects, and schedules.</p>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Student Management</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">Manage student accounts, enrollments, and progress.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <button
@@ -315,7 +307,7 @@ export default function TeacherManagement() {
                         className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                     >
                         <span className="material-symbols-outlined text-lg">add</span>
-                        New Teacher
+                        New Student
                     </button>
                     <button
                         onClick={handleDownload}
@@ -327,8 +319,8 @@ export default function TeacherManagement() {
                 </div>
             </div>
 
-            <TeacherTable
-                teachers={teachers}
+            <StudentTable
+                students={students}
                 isLoading={isLoading}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -337,10 +329,10 @@ export default function TeacherManagement() {
                 onBulkDelete={handleBulkDelete}
             />
 
-            <TeacherModal
+            <StudentModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                teacher={selectedTeacher}
+                student={selectedStudent}
                 onSave={handleSave}
             />
         </motion.div>

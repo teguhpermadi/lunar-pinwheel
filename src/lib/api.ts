@@ -143,3 +143,69 @@ export const teacherApi = {
         return response.data;
     }
 };
+
+// Student Interface
+export interface Student {
+    id: string;
+    name: string;
+    username?: string;
+    email: string;
+    avatar?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface StudentResponse {
+    success: boolean;
+    message: string;
+    data: Student[];
+    meta?: any; // For pagination
+    links?: any;
+}
+
+// Student API
+export const studentApi = {
+    getStudents: async (params?: any) => {
+        const response = await api.get('/students', { params });
+        return response.data;
+    },
+    createStudent: async (data: any) => {
+        const response = await api.post('/students', data);
+        return response.data;
+    },
+    updateStudent: async (id: string, data: any) => {
+        const response = await api.put(`/students/${id}`, data);
+        return response.data;
+    },
+    deleteStudent: async (id: string) => {
+        const response = await api.delete(`/students/${id}`);
+        return response.data;
+    },
+    bulkDeleteStudents: async (ids: string[]) => {
+        const response = await api.post('/students/bulk-delete', { ids });
+        return response.data;
+    },
+    importStudents: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/students/import', formData, {
+            headers: {
+                'Content-Type': undefined,
+            },
+        });
+        return response.data;
+    },
+    downloadTemplate: async () => {
+        const response = await api.get('/students/export/template', {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
+    exportStudents: async () => {
+        const response = await api.get('/students/export', {
+            responseType: 'blob',
+        });
+        return response.data;
+    }
+};
+
