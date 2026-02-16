@@ -141,6 +141,12 @@ export const teacherApi = {
             responseType: 'blob',
         });
         return response.data;
+    },
+    searchTeachers: async (query: string, params?: any) => {
+        const response = await api.get('/teachers/search', {
+            params: { query, ...params }
+        });
+        return response.data;
     }
 };
 
@@ -204,6 +210,12 @@ export const studentApi = {
     exportStudents: async () => {
         const response = await api.get('/students/export', {
             responseType: 'blob',
+        });
+        return response.data;
+    },
+    searchStudents: async (query: string, params?: any) => {
+        const response = await api.get('/students/search', {
+            params: { query, ...params }
         });
         return response.data;
     }

@@ -23,6 +23,7 @@ const Toast = MySwal.mixin({
 export default function StudentManagement() {
     const [students, setStudents] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -35,10 +36,13 @@ export default function StudentManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-    const fetchStudents = async (page = 1) => {
+    const fetchStudents = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const response = await studentApi.getStudents({ page: page });
+            const response = search
+                ? await studentApi.searchStudents(search, { page })
+                : await studentApi.getStudents({ page: page });
+
             if (response.success && response.data) {
                 const result = response.data;
                 setStudents(result.data || []);
@@ -63,10 +67,25 @@ export default function StudentManagement() {
         fetchStudents();
     }, []);
 
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (searchQuery !== undefined) {
+                fetchStudents(1, searchQuery);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery]);
+
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.lastPage) {
-            fetchStudents(newPage);
+            fetchStudents(newPage, searchQuery);
         }
+    };
+
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
     };
 
     const handleCreate = () => {
@@ -94,7 +113,7 @@ export default function StudentManagement() {
                     title: 'Student created successfully'
                 });
             }
-            fetchStudents(pagination.currentPage);
+            fetchStudents(pagination.currentPage, searchQuery);
         } catch (error) {
             console.error("Failed to save student:", error);
             Toast.fire({
@@ -124,7 +143,7 @@ export default function StudentManagement() {
                     'Student has been deleted.',
                     'success'
                 );
-                fetchStudents(pagination.currentPage);
+                fetchStudents(pagination.currentPage, searchQuery);
             } catch (error) {
                 console.error("Failed to delete student:", error);
                 MySwal.fire(
@@ -155,7 +174,7 @@ export default function StudentManagement() {
                     `${ids.length} students have been deleted.`,
                     'success'
                 );
-                fetchStudents(pagination.currentPage);
+                fetchStudents(pagination.currentPage, searchQuery);
             } catch (error) {
                 console.error("Failed to delete students:", error);
                 MySwal.fire(
@@ -237,7 +256,7 @@ export default function StudentManagement() {
                     title: 'Import Successful',
                     text: 'Students have been imported successfully.'
                 });
-                fetchStudents(pagination.currentPage);
+                fetchStudents(pagination.currentPage, searchQuery);
             } catch (error: any) {
                 console.error("Import failed:", error);
 
@@ -327,6 +346,7 @@ export default function StudentManagement() {
                 pagination={pagination}
                 onPageChange={handlePageChange}
                 onBulkDelete={handleBulkDelete}
+                onSearch={handleSearch}
             />
 
             <StudentModal

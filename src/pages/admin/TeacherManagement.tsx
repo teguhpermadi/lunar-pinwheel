@@ -23,6 +23,7 @@ const Toast = MySwal.mixin({
 export default function TeacherManagement() {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -35,18 +36,14 @@ export default function TeacherManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
-    const fetchTeachers = async (page = 1) => {
+    const fetchTeachers = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const response = await teacherApi.getTeachers({ page: page });
-            // Standard Laravel API Resource Response:
-            // { data: [...], meta: { current_page, last_page, total, from, to, ... }, links: ... }
-            if (response.success && response.data) { // Assuming response.data is the actual payload wrapper if using ApiResponse trait
-                // Adjusting based on inspection: ApiResponse trait returns { success: true, message: "", data: { ...pagination_result } }
-                // The pagination result itself has `data`, `meta` (or inline pagination fields if using Standard Resources).
-                // Let's assume the controller returns `TeacherResource::collection($teachers)->response()->getData(true)`.
-                // This usually results in { data: [...], meta: { ... }, links: { ... } } directly inside the main `data` field of ApiResponse
+            const response = search
+                ? await teacherApi.searchTeachers(search, { page })
+                : await teacherApi.getTeachers({ page: page });
 
+            if (response.success && response.data) {
                 const result = response.data;
                 setTeachers(result.data || []);
                 setPagination({
@@ -70,10 +67,25 @@ export default function TeacherManagement() {
         fetchTeachers();
     }, []);
 
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (searchQuery !== undefined) {
+                fetchTeachers(1, searchQuery);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery]);
+
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.lastPage) {
-            fetchTeachers(newPage);
+            fetchTeachers(newPage, searchQuery);
         }
+    };
+
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
     };
 
     const handleCreate = () => {
@@ -101,7 +113,7 @@ export default function TeacherManagement() {
                     title: 'Teacher created successfully'
                 });
             }
-            fetchTeachers(pagination.currentPage);
+            fetchTeachers(pagination.currentPage, searchQuery);
             // setIsModalOpen(false); // Handled by Modal on success
         } catch (error) {
             console.error("Failed to save teacher:", error);
@@ -132,7 +144,7 @@ export default function TeacherManagement() {
                     'Teacher has been deleted.',
                     'success'
                 );
-                fetchTeachers(pagination.currentPage); // Refresh list
+                fetchTeachers(pagination.currentPage, searchQuery); // Refresh list
             } catch (error) {
                 console.error("Failed to delete teacher:", error);
                 MySwal.fire(
@@ -163,7 +175,7 @@ export default function TeacherManagement() {
                     `${ids.length} teachers have been deleted.`,
                     'success'
                 );
-                fetchTeachers(pagination.currentPage);
+                fetchTeachers(pagination.currentPage, searchQuery);
             } catch (error) {
                 console.error("Failed to delete teachers:", error);
                 MySwal.fire(
@@ -245,7 +257,7 @@ export default function TeacherManagement() {
                     title: 'Import Successful',
                     text: 'Teachers have been imported successfully.'
                 });
-                fetchTeachers(pagination.currentPage);
+                fetchTeachers(pagination.currentPage, searchQuery);
             } catch (error: any) {
                 console.error("Import failed:", error);
 
@@ -335,6 +347,7 @@ export default function TeacherManagement() {
                 pagination={pagination}
                 onPageChange={handlePageChange}
                 onBulkDelete={handleBulkDelete}
+                onSearch={handleSearch}
             />
 
             <TeacherModal

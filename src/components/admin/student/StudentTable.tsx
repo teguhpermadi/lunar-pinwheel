@@ -17,10 +17,12 @@ interface StudentTableProps {
     };
     onPageChange: (page: number) => void;
     onBulkDelete?: (ids: string[]) => void;
+    onSearch: (query: string) => void;
 }
 
-export default function StudentTable({ students, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete }: StudentTableProps) {
+export default function StudentTable({ students, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete, onSearch }: StudentTableProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -129,6 +131,22 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                             Delete ({selectedIds.length})
                         </motion.button>
                     )}
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search students..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setSearchQuery(value);
+                                onSearch(value);
+                            }}
+                            className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64"
+                        />
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    </div>
                 </div>
             </div>
             <div className="overflow-x-auto">

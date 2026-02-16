@@ -17,10 +17,12 @@ interface TeacherTableProps {
     };
     onPageChange: (page: number) => void;
     onBulkDelete?: (ids: string[]) => void;
+    onSearch: (query: string) => void;
 }
 
-export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete }: TeacherTableProps) {
+export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete, onSearch }: TeacherTableProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -134,14 +136,22 @@ export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pa
                         </motion.button>
                     )}
                 </div>
-                {/* <div className="flex items-center gap-2">
-                    <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400" title="Filter">
-                        <span className="material-symbols-outlined">filter_list</span>
-                    </button>
-                    <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400" title="Export">
-                        <span className="material-symbols-outlined">download</span>
-                    </button>
-                </div> */}
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search teachers..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setSearchQuery(value);
+                                onSearch(value);
+                            }}
+                            className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64"
+                        />
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    </div>
+                </div>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
