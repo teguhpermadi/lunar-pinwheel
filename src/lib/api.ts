@@ -27,6 +27,7 @@ export interface User {
     email: string;
     role?: 'admin' | 'teacher' | 'student'; // Mapped from user_type
     user_type?: string;
+    avatar?: string;
     // Add other fields as needed
 }
 
@@ -312,8 +313,12 @@ export interface Classroom {
     name: string;
     description?: string;
     capacity?: number;
+    level?: string; // e.g. Beginner, Intermediate, Advanced
+    students_count?: number;
+    academic_year_id?: string;
     created_at: string;
     updated_at: string;
+    students?: Student[];
 }
 
 export interface ClassroomResponse {
@@ -328,6 +333,45 @@ export interface ClassroomResponse {
 export const classroomApi = {
     getClassrooms: async (params?: any) => {
         const response = await api.get('/classrooms', { params });
+        return response.data;
+    },
+    getClassroom: async (id: string) => {
+        const response = await api.get(`/classrooms/${id}`);
+        return response.data;
+    },
+    createClassroom: async (data: any) => {
+        const response = await api.post('/classrooms', data);
+        return response.data;
+    },
+    updateClassroom: async (id: string, data: any) => {
+        const response = await api.put(`/classrooms/${id}`, data);
+        return response.data;
+    },
+    deleteClassroom: async (id: string) => {
+        const response = await api.delete(`/classrooms/${id}`);
+        return response.data;
+    },
+    bulkDeleteClassrooms: async (ids: string[]) => {
+        const response = await api.post('/classrooms/bulk-delete', { ids });
+        return response.data;
+    },
+    assignStudents: async (classroomId: string, studentIds: string[]) => {
+        const response = await api.post(`/classrooms/${classroomId}/students`, { student_ids: studentIds });
+        return response.data;
+    },
+    removeStudents: async (classroomId: string, studentIds: string[]) => {
+        // Assuming there's an endpoint to remove specific students or sync
+        // Using a similar pattern to assign, but potentially DELETE or specific endpoint
+        // If not standard, might need to use sync or separate delete calls.
+        // For now, assuming a 'detach' or 'remove' endpoint logic, or simply using a sync endpoint if available?
+        // Let's assume a strictly RESTful sub-resource delete for bulk might not exist, 
+        // so maybe a POST to remove-students
+        const response = await api.post(`/classrooms/${classroomId}/students/remove`, { student_ids: studentIds });
+        return response.data;
+    },
+    getAvailableStudents: async (params?: any) => {
+        // Students not assigned to any classroom, or specific logic
+        const response = await api.get('/students/available', { params });
         return response.data;
     }
 };

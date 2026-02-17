@@ -1,11 +1,14 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
+import { AcademicYearProvider } from "@/contexts/AcademicYearContext"
 import AdminLayout from "@/layouts/AdminLayout"
 import StudentLayout from "@/layouts/StudentLayout"
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import TeacherManagement from "@/pages/admin/TeacherManagement"
 import StudentManagement from "@/pages/admin/StudentManagement"
 import SubjectManagement from "@/pages/admin/SubjectManagement"
+import ClassroomManagement from "@/pages/admin/ClassroomManagement"
+import ClassroomForm from "@/pages/admin/ClassroomForm"
 import AcademicYearManagement from "@/pages/admin/AcademicYearManagement"
 import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
@@ -51,31 +54,36 @@ function DashboardPage() {
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+      <AcademicYearProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* Protected Routes */}
-        <Route element={<RequireAuth />}>
-          {/* Root Path - Automatically renders correct layout & dashboard based on role */}
-          <Route path="/" element={<RoleBasedDashboard />}>
-            <Route index element={<DashboardPage />} />
+          {/* Protected Routes */}
+          <Route element={<RequireAuth />}>
+            {/* Root Path - Automatically renders correct layout & dashboard based on role */}
+            <Route path="/" element={<RoleBasedDashboard />}>
+              <Route index element={<DashboardPage />} />
 
-            {/* Common sub-routes (can be conditionally rendered or protected inside components) */}
-            <Route path="courses" element={<div>Courses Page</div>} />
-            <Route path="users" element={<div>Users Page</div>} />
-            <Route path="admin/teachers" element={<TeacherManagement />} />
-            <Route path="admin/students" element={<StudentManagement />} />
-            <Route path="admin/subjects" element={<SubjectManagement />} />
-            <Route path="admin/academic-years" element={<AcademicYearManagement />} />
-            <Route path="exams" element={<div>Exams Page</div>} />
+              {/* Common sub-routes (can be conditionally rendered or protected inside components) */}
+              <Route path="courses" element={<div>Courses Page</div>} />
+              <Route path="users" element={<div>Users Page</div>} />
+              <Route path="admin/teachers" element={<TeacherManagement />} />
+              <Route path="admin/students" element={<StudentManagement />} />
+              <Route path="admin/subjects" element={<SubjectManagement />} />
+              <Route path="admin/academic-years" element={<AcademicYearManagement />} />
+              <Route path="admin/classrooms" element={<ClassroomManagement />} />
+              <Route path="admin/classrooms/create" element={<ClassroomForm />} />
+              <Route path="admin/classrooms/:id" element={<ClassroomForm />} />
+              <Route path="exams" element={<div>Exams Page</div>} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AcademicYearProvider>
     </AuthProvider>
   )
 }
