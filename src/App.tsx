@@ -6,6 +6,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard"
 import TeacherManagement from "@/pages/admin/TeacherManagement"
 import StudentManagement from "@/pages/admin/StudentManagement"
 import SubjectManagement from "@/pages/admin/SubjectManagement"
+import AcademicYearManagement from "@/pages/admin/AcademicYearManagement"
 import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
@@ -67,6 +68,7 @@ function App() {
             <Route path="admin/teachers" element={<TeacherManagement />} />
             <Route path="admin/students" element={<StudentManagement />} />
             <Route path="admin/subjects" element={<SubjectManagement />} />
+            <Route path="admin/academic-years" element={<AcademicYearManagement />} />
             <Route path="exams" element={<div>Exams Page</div>} />
           </Route>
         </Route>

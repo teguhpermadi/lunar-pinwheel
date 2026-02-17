@@ -263,10 +263,11 @@ export const subjectApi = {
 
 // Academic Year Interface
 export interface AcademicYear {
-    id: number;
+    id: string; // ULID
     year: string;          // e.g., "2023/2024"
     semester: string;      // e.g., "1", "2", or "Ganjil/Genap"
-    user_id: number;
+    user_id?: string;
+    user?: User; // Headmaster
     created_at: string;
     updated_at: string;
 }
@@ -283,6 +284,22 @@ export interface AcademicYearResponse {
 export const academicYearApi = {
     getAcademicYears: async (params?: any) => {
         const response = await api.get('/academic-years', { params });
+        return response.data;
+    },
+    createAcademicYear: async (data: any) => {
+        const response = await api.post('/academic-years', data);
+        return response.data;
+    },
+    updateAcademicYear: async (id: string, data: any) => {
+        const response = await api.put(`/academic-years/${id}`, data);
+        return response.data;
+    },
+    deleteAcademicYear: async (id: string) => {
+        const response = await api.delete(`/academic-years/${id}`);
+        return response.data;
+    },
+    bulkDeleteAcademicYears: async (ids: string[]) => {
+        const response = await api.post('/academic-years/bulk-delete', { ids });
         return response.data;
     }
 };
