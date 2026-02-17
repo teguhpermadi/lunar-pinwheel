@@ -355,18 +355,11 @@ export const classroomApi = {
         const response = await api.post('/classrooms/bulk-delete', { ids });
         return response.data;
     },
-    assignStudents: async (classroomId: string, studentIds: string[]) => {
-        const response = await api.post(`/classrooms/${classroomId}/students`, { student_ids: studentIds });
-        return response.data;
-    },
-    removeStudents: async (classroomId: string, studentIds: string[]) => {
-        // Assuming there's an endpoint to remove specific students or sync
-        // Using a similar pattern to assign, but potentially DELETE or specific endpoint
-        // If not standard, might need to use sync or separate delete calls.
-        // For now, assuming a 'detach' or 'remove' endpoint logic, or simply using a sync endpoint if available?
-        // Let's assume a strictly RESTful sub-resource delete for bulk might not exist, 
-        // so maybe a POST to remove-students
-        const response = await api.post(`/classrooms/${classroomId}/students/remove`, { student_ids: studentIds });
+    syncStudents: async (classroomId: string, studentIds: string[], academicYearId: string) => {
+        const response = await api.post(`/classrooms/${classroomId}/sync`, {
+            student_ids: studentIds,
+            academic_year_id: academicYearId
+        });
         return response.data;
     },
     getAvailableStudents: async (params?: any) => {
