@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 
 export default function AcademicYearSelector() {
-    const { academicYears, selectedYearId, setSelectedYearId, isLoading } = useAcademicYear();
+    const { academicYears, selectedYearId, setSelectedYearId, isLoading: isContextLoading, loadMore, hasMore } = useAcademicYear();
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const selectedYear = academicYears.find(y => y.id === selectedYearId);
 
@@ -22,7 +24,16 @@ export default function AcademicYearSelector() {
         };
     }, [containerRef]);
 
-    if (isLoading) {
+    const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 20 && hasMore && !isLoadingMore) {
+            setIsLoadingMore(true);
+            await loadMore();
+            setIsLoadingMore(false);
+        }
+    };
+
+    if (isContextLoading && academicYears.length === 0) {
         return (
             <div className="w-48 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse"></div>
         );
@@ -57,29 +68,40 @@ export default function AcademicYearSelector() {
                         transition={{ duration: 0.15 }}
                         className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 shadow-xl rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50 py-1"
                     >
-                        <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                        <div
+                            ref={listRef}
+                            onScroll={handleScroll}
+                            className="max-h-64 overflow-y-auto custom-scrollbar"
+                        >
                             {academicYears.length > 0 ? (
-                                academicYears.map((year) => (
-                                    <button
-                                        key={year.id}
-                                        onClick={() => {
-                                            setSelectedYearId(year.id);
-                                            setIsOpen(false);
-                                        }}
-                                        className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${selectedYearId === year.id
+                                <>
+                                    {academicYears.map((year) => (
+                                        <button
+                                            key={year.id}
+                                            onClick={() => {
+                                                setSelectedYearId(year.id);
+                                                setIsOpen(false);
+                                            }}
+                                            className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${selectedYearId === year.id
                                                 ? 'bg-primary/5 text-primary'
                                                 : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
-                                            }`}
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold text-sm">{year.year}</span>
-                                            <span className="text-xs opacity-70">Semester {year.semester}</span>
+                                                }`}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm">{year.year}</span>
+                                                <span className="text-xs opacity-70">Semester {year.semester}</span>
+                                            </div>
+                                            {selectedYearId === year.id && (
+                                                <span className="material-symbols-outlined text-lg">check</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    {hasMore && (
+                                        <div className="py-2 text-center text-xs text-slate-400">
+                                            {isLoadingMore ? 'Loading more...' : 'Scroll for more'}
                                         </div>
-                                        {selectedYearId === year.id && (
-                                            <span className="material-symbols-outlined text-lg">check</span>
-                                        )}
-                                    </button>
-                                ))
+                                    )}
+                                </>
                             ) : (
                                 <div className="px-4 py-3 text-sm text-slate-500 text-center">
                                     No academic years found

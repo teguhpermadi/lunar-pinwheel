@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { academicYearApi, AcademicYear } from '@/lib/api';
 
 interface AcademicYearContextType {
@@ -8,6 +8,8 @@ interface AcademicYearContextType {
     setSelectedYearId: (id: string) => Promise<void>;
     isLoading: boolean;
     refreshAcademicYears: () => Promise<void>;
+    loadMore: () => Promise<void>;
+    hasMore: boolean;
 }
 
 const AcademicYearContext = createContext<AcademicYearContextType | undefined>(undefined);
@@ -16,51 +18,85 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
     const [selectedYearId, setSelectedYearIdState] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const fetchAcademicYears = async () => {
-        setIsLoading(true);
+    const fetchAcademicYears = useCallback(async (pageNum: number, isRefresh = false) => {
+        if (isRefresh) {
+            setIsLoading(true);
+        } else {
+            setIsLoadingMore(true);
+        }
+
         try {
-            // Fetch all academic years - assuming pagination might be an issue if there are many,
-            // but for a selector we typically want all active ones or a reasonable list.
-            // Use a large per_page if pagination is enforced by default.
-            const response = await academicYearApi.getAcademicYears({ per_page: 100 });
+            const response = await academicYearApi.getAcademicYears({
+                page: pageNum,
+                per_page: 10, // Adjust batch size as needed
+                sort_by: 'created_at',
+                order: 'desc'
+            });
+
             if (response.success && response.data) {
-                // Handle potentially paginated response structure similar to AcademicYearManagement
                 const result = response.data as any;
-                const years: AcademicYear[] = Array.isArray(result) ? result : (result.data || []);
+                // Handle both paginated and non-paginated structures safely
+                const newYears: AcademicYear[] = Array.isArray(result) ? result : (result.data || []);
+                const meta = result.meta || {};
 
-                setAcademicYears(years);
+                setAcademicYears(prev => {
+                    if (isRefresh) return newYears;
+                    // Filter duplicates
+                    const existingIds = new Set(prev.map(y => y.id));
+                    const uniqueNewYears = newYears.filter(y => !existingIds.has(y.id));
+                    return [...prev, ...uniqueNewYears];
+                });
 
-                // Initialize selection
-                const storedYearId = localStorage.getItem('selectedAcademicYearId');
+                // Update pagination state
+                const lastPage = meta.last_page || 1;
+                setHasMore(pageNum < lastPage);
+                setPage(pageNum);
 
-                if (storedYearId && years.find(y => y.id === storedYearId)) {
-                    setSelectedYearIdState(storedYearId);
-                } else if (years.length > 0) {
-                    // Default to the most recent one or active one if available
-                    // For now, let's default to the first one in the list (usually latest if sorted by created_at desc)
-                    const defaultYear = years[0];
-                    setSelectedYearIdState(defaultYear.id);
-                    localStorage.setItem('selectedAcademicYearId', defaultYear.id);
+                // Initial Selection Logic (Only runs on first load/refresh)
+                if (isRefresh) {
+                    const storedYearId = localStorage.getItem('selectedAcademicYearId');
+                    if (storedYearId && newYears.find(y => y.id === storedYearId)) {
+                        setSelectedYearIdState(storedYearId);
+                    } else if (newYears.length > 0 && !selectedYearId) {
+                        const defaultYear = newYears[0];
+                        setSelectedYearIdState(defaultYear.id);
+                        localStorage.setItem('selectedAcademicYearId', defaultYear.id);
+                    }
                 }
             }
         } catch (error) {
             console.error("Failed to fetch academic years for context:", error);
         } finally {
             setIsLoading(false);
+            setIsLoadingMore(false);
+        }
+    }, [selectedYearId]);
+
+    useEffect(() => {
+        fetchAcademicYears(1, true);
+    }, [fetchAcademicYears]);
+
+    const loadMore = async () => {
+        if (!isLoadingMore && hasMore) {
+            await fetchAcademicYears(page + 1, false);
         }
     };
 
-    useEffect(() => {
-        fetchAcademicYears();
-    }, []);
+    const refreshAcademicYears = async () => {
+        setPage(1);
+        setHasMore(true);
+        await fetchAcademicYears(1, true);
+    };
 
     const setSelectedYearId = async (id: string) => {
         // Just client side update
         setIsLoading(true);
 
-        // Simulate a brief delay to show transition if needed, 
-        // or just to allow UI to catch up before alert
+        // Simulate a brief delay to show transition if needed
         await new Promise(resolve => setTimeout(resolve, 300));
 
         setSelectedYearIdState(id);
@@ -81,6 +117,10 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
     };
 
+    // Ensure selected year is available even if not in current page (optional: fetch specific if missing)
+    // For now, we rely on the list. If the user has a selected ID that isn't loaded, 
+    // it effectively acts as "Select Year" until they find it or we load it. 
+    // Ideally we'd fetch the specific selected year if missing, but let's keep it simple for now.
     const selectedYear = academicYears.find(y => y.id === selectedYearId) || null;
 
     return (
@@ -90,7 +130,9 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
             selectedYear,
             setSelectedYearId,
             isLoading,
-            refreshAcademicYears: fetchAcademicYears
+            refreshAcademicYears,
+            loadMore,
+            hasMore
         }}>
             {children}
         </AcademicYearContext.Provider>
