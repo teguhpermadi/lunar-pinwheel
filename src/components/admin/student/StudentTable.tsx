@@ -55,56 +55,43 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
         show: { y: 0, opacity: 1 }
     };
 
-    if (isLoading) {
-        return (
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
-                    <Skeleton className="h-8 w-32" />
-                    <div className="flex gap-2">
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                    </div>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 dark:bg-slate-800/50">
-                            <tr>
-                                <th className="pl-8 pr-4 py-4 w-12"><Skeleton className="h-4 w-4" /></th>
-                                <th className="px-4 py-4"><Skeleton className="h-4 w-24" /></th>
-                                <th className="px-4 py-4"><Skeleton className="h-4 w-32" /></th>
-                                <th className="px-4 py-4"><Skeleton className="h-4 w-20" /></th>
-                                <th className="px-8 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {Array(5).fill(0).map((_, i) => (
-                                <tr key={i}>
-                                    <td className="pl-8 pr-4 py-5"><Skeleton className="h-4 w-4" /></td>
-                                    <td className="px-4 py-5">
-                                        <div className="flex items-center gap-3">
-                                            <Skeleton className="size-10 rounded-xl" />
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-32" />
-                                                <Skeleton className="h-3 w-20" />
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5"><Skeleton className="h-4 w-32" /></td>
-                                    <td className="px-4 py-5"><Skeleton className="h-4 w-16" /></td>
-                                    <td className="px-8 py-5 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Skeleton className="size-8 rounded-lg" />
-                                            <Skeleton className="size-8 rounded-lg" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    }
+    const TableSkeleton = () => (
+        <>
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+                <tr>
+                    <th className="pl-8 pr-4 py-4 w-12"><Skeleton className="h-4 w-4" /></th>
+                    <th className="px-4 py-4"><Skeleton className="h-4 w-24" /></th>
+                    <th className="px-4 py-4"><Skeleton className="h-4 w-32" /></th>
+                    <th className="px-4 py-4"><Skeleton className="h-4 w-20" /></th>
+                    <th className="px-8 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {Array(5).fill(0).map((_, i) => (
+                    <tr key={i}>
+                        <td className="pl-8 pr-4 py-5"><Skeleton className="h-4 w-4" /></td>
+                        <td className="px-4 py-5">
+                            <div className="flex items-center gap-3">
+                                <Skeleton className="size-10 rounded-xl" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-3 w-20" />
+                                </div>
+                            </div>
+                        </td>
+                        <td className="px-4 py-5"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-4 py-5"><Skeleton className="h-4 w-16" /></td>
+                        <td className="px-8 py-5 text-right">
+                            <div className="flex justify-end gap-2">
+                                <Skeleton className="size-8 rounded-lg" />
+                                <Skeleton className="size-8 rounded-lg" />
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </>
+    );
 
     return (
         <motion.div
@@ -151,89 +138,95 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50 dark:bg-slate-800/50">
-                        <tr>
-                            <th className="pl-8 pr-4 py-4 w-12">
-                                <input
-                                    className="rounded border-slate-300 text-primary focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700"
-                                    type="checkbox"
-                                    checked={isAllSelected}
-                                    onChange={handleSelectAll}
-                                />
-                            </th>
-                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Student</th>
-                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Email</th>
-                            <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Created</th>
-                            <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {students.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
-                                    No students found.
-                                </td>
-                            </tr>
-                        ) : (
-                            students.map((student) => (
-                                <motion.tr
-                                    key={student.id}
-                                    variants={item}
-                                    className={`group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors ${selectedIds.includes(student.id) ? 'bg-slate-50 dark:bg-slate-800/30' : ''}`}
-                                >
-                                    <td className="pl-8 pr-4 py-5">
+                    {isLoading ? (
+                        <TableSkeleton />
+                    ) : (
+                        <>
+                            <thead className="bg-slate-50 dark:bg-slate-800/50">
+                                <tr>
+                                    <th className="pl-8 pr-4 py-4 w-12">
                                         <input
                                             className="rounded border-slate-300 text-primary focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700"
                                             type="checkbox"
-                                            checked={selectedIds.includes(student.id)}
-                                            onChange={() => handleSelectOne(student.id)}
+                                            checked={isAllSelected}
+                                            onChange={handleSelectAll}
                                         />
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary overflow-hidden">
-                                                {student.avatar ? (
-                                                    <img src={student.avatar} alt={student.name} className="size-full object-cover" />
-                                                ) : (
-                                                    <span className="material-symbols-outlined">person</span>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <span className="block font-bold text-slate-800 dark:text-slate-200">{student.name}</span>
-                                                <span className="text-xs text-slate-400">@{student.username || student.name.toLowerCase().replace(/\s+/g, '')}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <span className="text-sm text-slate-600 dark:text-slate-400">{student.email}</span>
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <span className="text-xs text-slate-400">
-                                            {new Date(student.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => onEdit(student)}
-                                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
-                                                title="Edit"
-                                            >
-                                                <span className="material-symbols-outlined text-xl">edit</span>
-                                            </button>
-                                            <button
-                                                onClick={() => onDelete(student.id)}
-                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                title="Delete"
-                                            >
-                                                <span className="material-symbols-outlined text-xl">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
-                            ))
-                        )}
-                    </tbody>
+                                    </th>
+                                    <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Student</th>
+                                    <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Email</th>
+                                    <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Created</th>
+                                    <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {students.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                            No students found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    students.map((student) => (
+                                        <motion.tr
+                                            key={student.id}
+                                            variants={item}
+                                            className={`group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors ${selectedIds.includes(student.id) ? 'bg-slate-50 dark:bg-slate-800/30' : ''}`}
+                                        >
+                                            <td className="pl-8 pr-4 py-5">
+                                                <input
+                                                    className="rounded border-slate-300 text-primary focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700"
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(student.id)}
+                                                    onChange={() => handleSelectOne(student.id)}
+                                                />
+                                            </td>
+                                            <td className="px-4 py-5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary overflow-hidden">
+                                                        {student.avatar ? (
+                                                            <img src={student.avatar} alt={student.name} className="size-full object-cover" />
+                                                        ) : (
+                                                            <span className="material-symbols-outlined">person</span>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <span className="block font-bold text-slate-800 dark:text-slate-200">{student.name}</span>
+                                                        <span className="text-xs text-slate-400">@{student.username || student.name.toLowerCase().replace(/\s+/g, '')}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-5">
+                                                <span className="text-sm text-slate-600 dark:text-slate-400">{student.email}</span>
+                                            </td>
+                                            <td className="px-4 py-5">
+                                                <span className="text-xs text-slate-400">
+                                                    {new Date(student.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => onEdit(student)}
+                                                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                                                        title="Edit"
+                                                    >
+                                                        <span className="material-symbols-outlined text-xl">edit</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => onDelete(student.id)}
+                                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete"
+                                                    >
+                                                        <span className="material-symbols-outlined text-xl">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </>
+                    )}
                 </table>
             </div>
 

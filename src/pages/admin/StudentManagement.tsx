@@ -39,9 +39,12 @@ export default function StudentManagement() {
     const fetchStudents = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const response = search
-                ? await studentApi.searchStudents(search, { page })
-                : await studentApi.getStudents({ page: page });
+            const params: any = { page };
+            if (search) {
+                params.search = search;
+            }
+
+            const response = await studentApi.getStudents(params);
 
             if (response.success && response.data) {
                 const result = response.data;

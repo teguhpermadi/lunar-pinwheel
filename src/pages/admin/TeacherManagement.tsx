@@ -39,9 +39,12 @@ export default function TeacherManagement() {
     const fetchTeachers = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const response = search
-                ? await teacherApi.searchTeachers(search, { page })
-                : await teacherApi.getTeachers({ page: page });
+            const params: any = { page };
+            if (search) {
+                params.search = search;
+            }
+
+            const response = await teacherApi.getTeachers(params);
 
             if (response.success && response.data) {
                 const result = response.data;

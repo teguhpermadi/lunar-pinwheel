@@ -142,12 +142,7 @@ export const teacherApi = {
         });
         return response.data;
     },
-    searchTeachers: async (query: string, params?: any) => {
-        const response = await api.get('/teachers/search', {
-            params: { query, ...params }
-        });
-        return response.data;
-    }
+
 };
 
 // Student Interface
@@ -213,12 +208,7 @@ export const studentApi = {
         });
         return response.data;
     },
-    searchStudents: async (query: string, params?: any) => {
-        const response = await api.get('/students/search', {
-            params: { query, ...params }
-        });
-        return response.data;
-    }
+
 };
 
 // Subject Interface
@@ -268,12 +258,7 @@ export const subjectApi = {
         const response = await api.post('/subjects/bulk-delete', { ids });
         return response.data;
     },
-    searchSubjects: async (query: string, params?: any) => {
-        const response = await api.get('/subjects/search', {
-            params: { query, ...params }
-        });
-        return response.data;
-    }
+
 };
 
 // Academic Year Interface

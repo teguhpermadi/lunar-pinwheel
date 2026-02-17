@@ -41,9 +41,11 @@ export default function SubjectManagement() {
         try {
             const params: any = { page };
 
-            const response = search
-                ? await subjectApi.searchSubjects(search, params)
-                : await subjectApi.getSubjects(params);
+            if (search) {
+                params.search = search;
+            }
+
+            const response = await subjectApi.getSubjects(params);
 
             if (response.success && response.data) {
                 const result = response.data;
