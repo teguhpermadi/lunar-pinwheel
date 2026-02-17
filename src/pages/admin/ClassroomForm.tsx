@@ -62,13 +62,16 @@ export default function ClassroomForm() {
     const [availableSearch, setAvailableSearch] = useState('');
     const [assignedSearch, setAssignedSearch] = useState('');
 
+    // Pagination State
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     useEffect(() => {
         if (isEditing && id) {
             fetchClassroomData(id);
         }
-        if (selectedYearId) {
-            fetchAvailableStudents();
-        }
+        // fetchAvailableStudents is now triggered by availableSearch effect
     }, [id, isEditing, selectedYearId]);
 
     const fetchClassroomData = async (classroomId: string) => {
@@ -97,32 +100,55 @@ export default function ClassroomForm() {
         }
     };
 
-    const fetchAvailableStudents = async () => {
-        // Use the classroom's year if editing, otherwise the global selected year
+    const fetchAvailableStudents = async (reset = false) => {
         const targetYearId = isEditing ? formData.academic_year_id : selectedYearId;
-
-        if (!targetYearId && !selectedYearId) return; // Need at least one
+        if (!targetYearId && !selectedYearId) return;
 
         try {
-            const response = await classroomApi.getAvailableStudents({ academic_year_id: targetYearId || selectedYearId });
+            const currentPage = reset ? 1 : page;
+            if (!reset) setIsLoadingMore(true);
+
+            const response = await classroomApi.getAvailableStudents({
+                academic_year_id: targetYearId || selectedYearId,
+                search: availableSearch,
+                page: currentPage,
+                per_page: 15 // Adjust batch size as needed
+            });
+
             if (response.success && response.data) {
                 const responseData = response.data;
-                const studentsData = Array.isArray(responseData) ? responseData : (responseData.data || []);
-                setAvailableStudents(Array.isArray(studentsData) ? studentsData : []);
+                const newStudents = Array.isArray(responseData) ? responseData : (responseData.data || []);
+                const meta = responseData.meta || {};
+
+                setAvailableStudents(prev => {
+                    const combined = reset ? newStudents : [...prev, ...newStudents];
+                    // Remove duplicates just in case
+                    return Array.from(new Map(combined.map(s => [s.id, s])).values());
+                });
+
+                setHasMore(newStudents.length > 0 && currentPage < (meta.last_page || 999));
+                setPage(currentPage + 1);
             }
         } catch (error) {
             console.error("Failed to load available students:", error);
-            // Fallback: fetch all students and filter client side if API doesn't exist yet/fails
-            try {
-                const all = await studentApi.getStudents({ per_page: 1000 }); // Get many
-                if (all.success && all.data) {
-                    const allData = all.data;
-                    const studentsData = Array.isArray(allData) ? allData : (allData.data || []);
-                    setAvailableStudents(Array.isArray(studentsData) ? studentsData : []);
-                }
-            } catch (e) {
-                setAvailableStudents([]);
-            }
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (selectedYearId) fetchAvailableStudents(true);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [availableSearch]);
+
+    // Handle Infinite Scroll
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 50 && hasMore && !isLoadingMore && !loading) {
+            fetchAvailableStudents();
         }
     };
 
@@ -238,12 +264,9 @@ export default function ClassroomForm() {
     };
 
     // Filtered lists
-    const filteredAvailable = availableStudents
-        .filter(s => !assignedStudents.some(assigned => assigned.id === s.id))
-        .filter(s =>
-            s.name.toLowerCase().includes(availableSearch.toLowerCase()) ||
-            s.email.toLowerCase().includes(availableSearch.toLowerCase())
-        );
+    // We only filter out assigned students from the server results to be safe, 
+    // but the server search handles the text search now.
+    const filteredAvailable = availableStudents.filter(s => !assignedStudents.some(assigned => assigned.id === s.id));
 
     const filteredAssigned = assignedStudents.filter(s =>
         s.name.toLowerCase().includes(assignedSearch.toLowerCase()) ||
@@ -257,6 +280,7 @@ export default function ClassroomForm() {
             animate="show"
             className="p-8 space-y-8 max-w-7xl mx-auto"
         >
+            {/* Headers and Details Section (unchanged) */}
             <motion.div variants={itemVariants} className="flex items-center justify-between gap-6">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -281,7 +305,6 @@ export default function ClassroomForm() {
                 </div>
             </motion.div>
 
-            {/* Details Section */}
             <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
@@ -335,9 +358,9 @@ export default function ClassroomForm() {
                 </div>
             </motion.div>
 
-            {/* Student Assignment Section - Only visible if editing (created) */}
             {isEditing && (
                 <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+                    {/* Header for assignment */}
                     <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                         <div className="flex items-center gap-3">
                             <div className="size-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
@@ -353,7 +376,10 @@ export default function ClassroomForm() {
                             <div className="p-6 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Available Students</h4>
-                                    <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-500 text-[10px] font-bold">{loading ? <Skeleton className="h-4 w-10 inline-block" /> : `${filteredAvailable.length} Total`}</span>
+                                    <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-500 text-[10px] font-bold">
+                                        {/* Total count might not be accurate if paginated, maybe show loaded count? or nothing */}
+                                        {loading ? <Skeleton className="h-4 w-10 inline-block" /> : 'Select to Add'}
+                                    </span>
                                 </div>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -376,7 +402,11 @@ export default function ClassroomForm() {
                                     Add Selected Students ({selectedAvailable.length})
                                 </button>
                             </div>
-                            <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-2 student-list max-h-[500px]">
+
+                            <div
+                                className="flex-1 overflow-y-auto p-6 pt-0 space-y-2 student-list max-h-[500px]"
+                                onScroll={handleScroll}
+                            >
                                 {loading && availableStudents.length === 0 ? (
                                     <div className="space-y-3">
                                         {[1, 2, 3, 4, 5].map(i => (
@@ -390,37 +420,49 @@ export default function ClassroomForm() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <AnimatePresence mode='popLayout'>
-                                        {filteredAvailable.map(student => (
-                                            <motion.div
-                                                layout
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, scale: 0.9 }}
-                                                key={student.id}
-                                                onClick={() => toggleAvailableSort(student.id)}
-                                                className={`group flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedAvailable.includes(student.id) ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedAvailable.includes(student.id)}
-                                                        readOnly
-                                                        className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary dark:bg-slate-700 pointer-events-none"
-                                                    />
-                                                    <div className="size-9 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                        <div className="size-full flex items-center justify-center text-slate-400 bg-slate-200 dark:bg-slate-700">
-                                                            <span className="material-symbols-outlined text-lg">person</span>
+                                    <>
+                                        <AnimatePresence mode='popLayout'>
+                                            {filteredAvailable.map(student => (
+                                                <motion.div
+                                                    layout
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.9 }}
+                                                    key={student.id}
+                                                    onClick={() => toggleAvailableSort(student.id)}
+                                                    className={`group flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedAvailable.includes(student.id) ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedAvailable.includes(student.id)}
+                                                            readOnly
+                                                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary dark:bg-slate-700 pointer-events-none"
+                                                        />
+                                                        <div className="size-9 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                            <div className="size-full flex items-center justify-center text-slate-400 bg-slate-200 dark:bg-slate-700">
+                                                                <span className="material-symbols-outlined text-lg">person</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{student.name}</span>
+                                                            <span className="text-xs text-slate-400">{student.username || student.email}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{student.name}</span>
-                                                        <span className="text-xs text-slate-400">{student.username || student.email}</span>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </AnimatePresence>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                        {isLoadingMore && (
+                                            <div className="py-4 text-center">
+                                                <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                                            </div>
+                                        )}
+                                        {!hasMore && filteredAvailable.length > 0 && (
+                                            <div className="py-4 text-center text-xs text-slate-400">
+                                                No more students
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
