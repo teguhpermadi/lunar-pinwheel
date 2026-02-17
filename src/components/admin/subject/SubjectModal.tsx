@@ -11,9 +11,9 @@ const subjectSchema = z.object({
     description: z.string().optional(),
     color: z.string().optional(),
     class_name: z.string().optional(),
-    user_id: z.number().min(1, "Teacher is required"),
-    academic_year_id: z.number().min(1, "Academic year is required"),
-    classroom_id: z.number().min(1, "Classroom is required"),
+    user_id: z.string().min(1, "Teacher is required"),
+    academic_year_id: z.string().min(1, "Academic year is required"),
+    classroom_id: z.string().min(1, "Classroom is required"),
     image_url: z.string().url("Must be a valid URL").optional().or(z.literal('')),
     logo_url: z.string().url("Must be a valid URL").optional().or(z.literal('')),
 });
@@ -47,9 +47,9 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
             description: '',
             color: '#6366f1',
             class_name: '',
-            user_id: 0,
-            academic_year_id: 0,
-            classroom_id: 0,
+            user_id: '',
+            academic_year_id: '',
+            classroom_id: '',
             image_url: '',
             logo_url: '',
         },
@@ -72,13 +72,17 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
             ]);
 
             if (teachersRes.success && teachersRes.data) {
-                setTeachers(teachersRes.data.data || teachersRes.data);
+                // Handle pagination structure: response.data.data is the array
+                const teacherData = teachersRes.data.data || teachersRes.data;
+                setTeachers(Array.isArray(teacherData) ? teacherData : []);
             }
             if (academicYearsRes.success && academicYearsRes.data) {
-                setAcademicYears(academicYearsRes.data.data || academicYearsRes.data);
+                const yearData = academicYearsRes.data.data || academicYearsRes.data;
+                setAcademicYears(Array.isArray(yearData) ? yearData : []);
             }
             if (classroomsRes.success && classroomsRes.data) {
-                setClassrooms(classroomsRes.data.data || classroomsRes.data);
+                const classroomData = classroomsRes.data.data || classroomsRes.data;
+                setClassrooms(Array.isArray(classroomData) ? classroomData : []);
             }
         } catch (error) {
             console.error("Failed to fetch dropdown data:", error);
@@ -108,9 +112,9 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
                 description: '',
                 color: '#6366f1',
                 class_name: '',
-                user_id: 0,
-                academic_year_id: 0,
-                classroom_id: 0,
+                user_id: '',
+                academic_year_id: '',
+                classroom_id: '',
                 image_url: '',
                 logo_url: '',
             });
@@ -220,13 +224,13 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teacher *</label>
                         <select
-                            {...register('user_id', { valueAsNumber: true })}
+                            {...register('user_id')}
                             disabled={isLoadingData}
                             className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50"
                         >
-                            <option value={0}>Select Teacher</option>
+                            <option value="">Select Teacher</option>
                             {teachers.map((teacher) => (
-                                <option key={teacher.id} value={parseInt(teacher.id)}>
+                                <option key={teacher.id} value={teacher.id}>
                                     {teacher.name}
                                 </option>
                             ))}
@@ -237,11 +241,11 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Academic Year *</label>
                         <select
-                            {...register('academic_year_id', { valueAsNumber: true })}
+                            {...register('academic_year_id')}
                             disabled={isLoadingData}
                             className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50"
                         >
-                            <option value={0}>Select Year</option>
+                            <option value="">Select Year</option>
                             {academicYears.map((year) => (
                                 <option key={year.id} value={year.id}>
                                     {year.year} - Semester {year.semester}
@@ -254,11 +258,11 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Classroom *</label>
                         <select
-                            {...register('classroom_id', { valueAsNumber: true })}
+                            {...register('classroom_id')}
                             disabled={isLoadingData}
                             className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50"
                         >
-                            <option value={0}>Select Classroom</option>
+                            <option value="">Select Classroom</option>
                             {classrooms.map((classroom) => (
                                 <option key={classroom.id} value={classroom.id}>
                                     {classroom.name}

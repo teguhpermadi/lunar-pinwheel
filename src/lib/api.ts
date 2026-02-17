@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
 
 // User interface
 export interface User {
-    id: number;
+    id: string; // ULID
     name: string;
     email: string;
     role?: 'admin' | 'teacher' | 'student'; // Mapped from user_type
@@ -219,13 +219,15 @@ export interface Subject {
     description?: string;
     image_url?: string;
     logo_url?: string;
-    user_id: number;
+    user_id: string;
     color?: string;
     class_name?: string;
-    academic_year_id: number;
-    classroom_id: number;
+    academic_year_id: string;
+    classroom_id: string;
     created_at: string;
     updated_at: string;
+    user: User;
+    academic_year: AcademicYear;
 }
 
 export interface SubjectResponse {
@@ -306,7 +308,7 @@ export const academicYearApi = {
 
 // Classroom Interface
 export interface Classroom {
-    id: number;
+    id: string;
     name: string;
     description?: string;
     capacity?: number;
