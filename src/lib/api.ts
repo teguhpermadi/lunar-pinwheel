@@ -32,7 +32,7 @@ export interface User {
 
 // Zod schemas for request validation (derived from API docs/logic)
 export const LoginSchema = z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().min(1, 'Email or Username is required'),
     password: z.string().min(1, 'Password is required'),
     remember: z.boolean().optional(),
 });

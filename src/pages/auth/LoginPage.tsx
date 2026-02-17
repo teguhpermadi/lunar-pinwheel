@@ -82,12 +82,12 @@ export default function LoginPage() {
 
                     <Input
                         id="email"
-                        type="email"
-                        label="Email Address"
-                        placeholder="name@school.edu"
+                        type="text"
+                        label="Email or Username"
+                        placeholder="Enter your email or username"
                         register={register('email')}
                         error={errors.email}
-                        icon={<span className="material-icons text-slate-400 text-lg">mail</span>}
+                        icon={<span className="material-icons text-slate-400 text-lg">person</span>}
                     />
 
                     <div>
