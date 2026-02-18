@@ -181,13 +181,29 @@ export interface Classroom {
     code: string;
     level: string;
     user_id?: string;
-    academic_year_id: string; // or integer? Resource says AcademicYearResource is linked.
+    academic_year_id: string;
     user?: User;
     academic_year?: AcademicYear;
     students_count?: number;
-    students?: User[]; // or StudentResource?
+    students?: User[];
     created_at: string;
     updated_at: string;
+}
+
+export interface StoreClassroomRequest {
+    name: string;
+    code?: string | null;
+    level: string;
+    user_id?: number | null;
+    academic_year_id: number;
+}
+
+export interface UpdateClassroomRequest {
+    name?: string;
+    code?: string;
+    level?: string;
+    user_id?: number | null;
+    academic_year_id?: number;
 }
 
 // Re-using User for Teacher/Student if they share structure, or defining specific if they differ
@@ -251,11 +267,11 @@ export const classroomApi = {
         const response = await api.get(`/classrooms/${id}`);
         return response.data;
     },
-    createClassroom: async (data: any) => {
+    createClassroom: async (data: StoreClassroomRequest) => {
         const response = await api.post('/classrooms', data);
         return response.data;
     },
-    updateClassroom: async (id: string, data: any) => {
+    updateClassroom: async (id: string, data: UpdateClassroomRequest) => {
         const response = await api.put(`/classrooms/${id}`, data);
         return response.data;
     },
