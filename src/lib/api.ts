@@ -245,6 +245,10 @@ export const subjectApi = {
         const response = await api.get('/subjects', { params });
         return response.data;
     },
+    getSubject: async (id: string) => {
+        const response = await api.get(`/subjects/${id}`);
+        return response.data;
+    },
     createSubject: async (data: any) => {
         const response = await api.post('/subjects', data);
         return response.data;

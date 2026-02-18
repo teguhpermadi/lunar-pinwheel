@@ -2,28 +2,20 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { useNavigate } from 'react-router-dom';
 import SubjectTable from '@/components/admin/subject/SubjectTable';
-import SubjectModal from '@/components/admin/subject/SubjectModal';
+import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { subjectApi, Subject } from '@/lib/api';
 
 const MySwal = withReactContent(Swal);
 
-const Toast = MySwal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-        toast.onmouseenter = Swal.stopTimer;
-        toast.onmouseleave = Swal.resumeTimer;
-    }
-});
 
 export default function SubjectManagement() {
+    const navigate = useNavigate();
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const { selectedYearId } = useAcademicYear();
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -33,9 +25,6 @@ export default function SubjectManagement() {
         to: 0
     });
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-
     const fetchSubjects = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
@@ -43,6 +32,10 @@ export default function SubjectManagement() {
 
             if (search) {
                 params.search = search;
+            }
+
+            if (selectedYearId) {
+                params.academic_year_id = selectedYearId;
             }
 
             const response = await subjectApi.getSubjects(params);
@@ -68,8 +61,8 @@ export default function SubjectManagement() {
     };
 
     useEffect(() => {
-        fetchSubjects();
-    }, []);
+        fetchSubjects(1, searchQuery);
+    }, [selectedYearId]);
 
     // Debounced search effect
     useEffect(() => {
@@ -93,39 +86,11 @@ export default function SubjectManagement() {
     };
 
     const handleCreate = () => {
-        setSelectedSubject(null);
-        setIsModalOpen(true);
+        navigate('/admin/subjects/create');
     };
 
     const handleEdit = (subject: Subject) => {
-        setSelectedSubject(subject);
-        setIsModalOpen(true);
-    };
-
-    const handleSave = async (data: any) => {
-        try {
-            if (selectedSubject) {
-                await subjectApi.updateSubject(selectedSubject.id, data);
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Subject updated successfully'
-                });
-            } else {
-                await subjectApi.createSubject(data);
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Subject created successfully'
-                });
-            }
-            fetchSubjects(pagination.currentPage, searchQuery);
-        } catch (error) {
-            console.error("Failed to save subject:", error);
-            Toast.fire({
-                icon: 'error',
-                title: 'Failed to save subject'
-            });
-            throw error;
-        }
+        navigate(`/admin/subjects/${subject.id}`);
     };
 
     const handleDelete = async (id: string) => {
@@ -223,12 +188,6 @@ export default function SubjectManagement() {
                 onSearch={handleSearch}
             />
 
-            <SubjectModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                subject={selectedSubject}
-                onSave={handleSave}
-            />
         </motion.div>
     );
 }
