@@ -48,8 +48,7 @@ export default function ClassroomForm() {
     // Classroom Form Data
     const [formData, setFormData] = useState<Partial<Classroom>>({
         name: '',
-        level: 'Intermediate', // Default from HTML
-        capacity: 32 // Default or from API
+        level: '1', // Default to '1'
     });
 
     // Student Assignment State
@@ -70,8 +69,10 @@ export default function ClassroomForm() {
     useEffect(() => {
         if (isEditing && id) {
             fetchClassroomData(id);
+            if (selectedYearId) {
+                fetchAvailableStudents(true);
+            }
         }
-        // fetchAvailableStudents is now triggered by availableSearch effect
     }, [id, isEditing, selectedYearId]);
 
     const fetchClassroomData = async (classroomId: string) => {
@@ -84,7 +85,6 @@ export default function ClassroomForm() {
                 setFormData({
                     name: data.name,
                     level: data.level,
-                    capacity: data.capacity,
                     academic_year_id: data.academic_year?.id // Capture the classroom's academic year
                 });
 
@@ -108,7 +108,7 @@ export default function ClassroomForm() {
             const currentPage = reset ? 1 : page;
             if (!reset) setIsLoadingMore(true);
 
-            const response = await classroomApi.getAvailableStudents({
+            const response = await studentApi.getAvailable({
                 academic_year_id: targetYearId || selectedYearId,
                 search: availableSearch,
                 page: currentPage,
@@ -117,13 +117,13 @@ export default function ClassroomForm() {
 
             if (response.success && response.data) {
                 const responseData = response.data;
-                const newStudents = Array.isArray(responseData) ? responseData : (responseData.data || []);
+                const newStudents: Student[] = Array.isArray(responseData) ? responseData : (responseData.data || []);
                 const meta = responseData.meta || {};
 
                 setAvailableStudents(prev => {
                     const combined = reset ? newStudents : [...prev, ...newStudents];
                     // Remove duplicates just in case
-                    return Array.from(new Map(combined.map(s => [s.id, s])).values());
+                    return Array.from(new Map(combined.map((s: Student) => [s.id, s])).values());
                 });
 
                 setHasMore(newStudents.length > 0 && currentPage < (meta.last_page || 999));
@@ -229,7 +229,13 @@ export default function ClassroomForm() {
                     Toast.fire({ icon: 'error', title: 'Please select an Academic Year first' });
                     return;
                 }
-                const payload = { ...formData, academic_year_id: selectedYearId };
+                // Ensure required fields are present and valid
+                const payload = {
+                    ...formData,
+                    name: formData.name || '', // Ensure name is not undefined
+                    level: formData.level || '1',
+                    academic_year_id: selectedYearId
+                };
                 const res = await classroomApi.createClassroom(payload);
                 if (res.success && res.data) {
                     Toast.fire({ icon: 'success', title: 'Classroom created' });
@@ -332,13 +338,16 @@ export default function ClassroomForm() {
                             <Skeleton className="h-12 w-full rounded-xl" />
                         ) : (
                             <select
-                                value={formData.level || 'Intermediate'}
+                                value={formData.level || '1'}
                                 onChange={e => setFormData({ ...formData, level: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-primary focus:border-primary text-slate-800 dark:text-slate-200 font-medium"
                             >
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
+                                <option value="1">Kelas 1</option>
+                                <option value="2">Kelas 2</option>
+                                <option value="3">Kelas 3</option>
+                                <option value="4">Kelas 4</option>
+                                <option value="5">Kelas 5</option>
+                                <option value="6">Kelas 6</option>
                             </select>
                         )}
                     </div>

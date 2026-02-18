@@ -194,16 +194,16 @@ export interface StoreClassroomRequest {
     name: string;
     code?: string | null;
     level: string;
-    user_id?: number | null;
-    academic_year_id: number;
+    user_id?: string | null;
+    academic_year_id: string;
 }
 
 export interface UpdateClassroomRequest {
     name?: string;
     code?: string;
     level?: string;
-    user_id?: number | null;
-    academic_year_id?: number;
+    user_id?: string | null;
+    academic_year_id?: string;
 }
 
 // Re-using User for Teacher/Student if they share structure, or defining specific if they differ
