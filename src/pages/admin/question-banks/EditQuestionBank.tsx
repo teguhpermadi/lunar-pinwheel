@@ -132,16 +132,40 @@ export default function EditQuestionBank() {
                             <Skeleton className="h-3 w-32" />
                         </div>
                     </div>
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-28 rounded-xl" />
+                        <Skeleton className="h-10 w-24 rounded-xl" />
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+                        <Skeleton className="size-10 rounded-full" />
+                    </div>
                 </header>
                 <div className="flex flex-1 overflow-hidden">
-                    <main className="flex-1 p-8">
-                        <Skeleton className="h-32 w-full rounded-2xl mb-6" />
-                        <div className="space-y-6">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <Skeleton key={i} className="h-48 w-full rounded-2xl" />
-                            ))}
+                    <main className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-background-dark/30">
+                        <div className="max-w-4xl mx-auto space-y-6">
+                            <Skeleton className="h-32 w-full rounded-2xl" />
+                            <div className="space-y-6">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+                                ))}
+                            </div>
                         </div>
                     </main>
+                    <aside className="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex-col h-full shrink-0 hidden lg:flex">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                            <Skeleton className="h-4 w-40 mb-4" />
+                            <div className="flex items-center justify-between">
+                                <Skeleton className="h-3 w-28" />
+                                <Skeleton className="h-5 w-16 rounded-full" />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <div className="grid grid-cols-4 gap-3">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <Skeleton key={i} className="size-12 rounded-xl" />
+                                ))}
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </div>
         );
@@ -358,19 +382,6 @@ export default function EditQuestionBank() {
                             >
                                 <span className="material-symbols-outlined">add</span>
                             </button>
-                        </div>
-                    </div>
-                    <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
-                        <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
-                            <p className="text-[10px] font-black uppercase text-primary tracking-widest mb-2">Editor Statistics</p>
-                            <div className="flex justify-between text-xs mb-1">
-                                <span className="text-slate-500">Auto-save:</span>
-                                <span className="text-emerald-500 font-bold">Enabled</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                                <span className="text-slate-500">Last edited:</span>
-                                <span className="text-slate-700 dark:text-slate-300">Just now</span>
-                            </div>
                         </div>
                     </div>
                 </aside>
