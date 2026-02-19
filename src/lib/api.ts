@@ -578,6 +578,12 @@ export interface QuestionOption {
     content: string;
     order: number;
     is_correct: boolean;
+    metadata?: {
+        side?: 'left' | 'right';
+        pair_id?: string | number;
+        match_with?: string;
+        [key: string]: any;
+    };
     media?: { option_media?: string };
 }
 

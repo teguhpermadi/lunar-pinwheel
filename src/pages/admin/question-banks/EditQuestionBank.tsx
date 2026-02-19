@@ -8,6 +8,7 @@ import QuestionDifficultySelector from '@/components/questions/QuestionDifficult
 import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector';
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
+import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -286,19 +287,9 @@ export default function EditQuestionBank() {
                                                 dangerouslySetInnerHTML={{ __html: question.content }}
                                             />
                                             {/* Options */}
-                                            {question.type === 'multiple_choice' && question.options && (
-                                                <div className="space-y-3">
-                                                    {question.options.map((opt) => (
-                                                        <div key={opt.id} className={`flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border ${opt.is_correct ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700'}`}>
-                                                            <span className={`size-6 rounded-full border-2 ${opt.is_correct ? 'border-emerald-500 text-emerald-500' : 'border-slate-300'} flex items-center justify-center text-[10px] font-bold`}>
-                                                                {opt.option_key}
-                                                            </span>
-                                                            <div className="text-sm" dangerouslySetInnerHTML={{ __html: opt.content }} />
-                                                            {opt.is_correct && <span className="ml-auto material-symbols-outlined text-emerald-500 text-lg">check_circle</span>}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            <div className="mt-6">
+                                                <QuestionOptionDisplay question={question} />
+                                            </div>
                                         </div>
                                     </div>
                                 );
