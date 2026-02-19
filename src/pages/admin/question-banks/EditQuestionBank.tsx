@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { questionBankApi, questionApi, QuestionBank, Question } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import QuestionDifficultySelector from '@/components/questions/QuestionDifficultySelector';
+import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector';
+import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
+import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -230,16 +234,18 @@ export default function EditQuestionBank() {
                                             questionRefs.current[question.id] = el;
                                             if (isLast) lastQuestionElementRef(el);
                                         }}
-                                        className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden group"
+                                        className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 group"
                                     >
-                                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start">
+                                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start rounded-t-2xl">
                                             <div className="flex gap-4 items-center">
                                                 <span className="size-8 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">
                                                     {index + 1}
                                                 </span>
-                                                <span className="px-2 py-1 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-bold uppercase tracking-wider">
-                                                    {question.type}
-                                                </span>
+                                                <QuestionTypeSelector
+                                                    questionId={question.id}
+                                                    initialType={question.type}
+                                                    disabled={true}
+                                                />
                                             </div>
                                             <div className="flex gap-2">
                                                 <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Question">
@@ -259,21 +265,35 @@ export default function EditQuestionBank() {
                                             {/* Badge Stats */}
                                             <div className="flex items-center gap-2">
                                                 <span className="material-symbols-outlined text-slate-400 text-sm">bar_chart</span>
-                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.difficulty}</span>
+                                                <QuestionDifficultySelector
+                                                    questionId={question.id}
+                                                    initialDifficulty={question.difficulty}
+                                                    onDifficultyChange={(newDifficulty) => {
+                                                        // Optimistically update the list locally to reflect changes if needed elsewhere, 
+                                                        // though the selector manages its own state for the dropdown itself.
+                                                        setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, difficulty: newDifficulty } : q));
+                                                    }}
+                                                />
                                             </div>
                                             <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-slate-400 text-sm">schedule</span>
-                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.timer}s</span>
-                                            </div>
+                                            <QuestionTimerSelector
+                                                questionId={question.id}
+                                                initialTimer={question.timer}
+                                                onTimerChange={(newTimer) => {
+                                                    setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, timer: newTimer } : q));
+                                                }}
+                                            />
                                             <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-slate-400 text-sm">grade</span>
-                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.score} pts</span>
-                                            </div>
+                                            <QuestionScoreSelector
+                                                questionId={question.id}
+                                                initialScore={question.score}
+                                                onScoreChange={(newScore) => {
+                                                    setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, score: newScore } : q));
+                                                }}
+                                            />
                                         </div>
 
-                                        <div className="p-6">
+                                        <div className="p-6 rounded-b-2xl">
                                             <div
                                                 className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
                                                 dangerouslySetInnerHTML={{ __html: question.content }}
@@ -347,8 +367,8 @@ export default function EditQuestionBank() {
                                         key={i}
                                         onClick={() => scrollToQuestion(i)}
                                         className={`size-12 rounded-xl font-bold text-sm border border-transparent transition-all ${isLoaded
-                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary'
-                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 cursor-not-allowed' // Visual cue
+                                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary'
+                                            : 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 cursor-not-allowed' // Visual cue
                                             }`}
                                     >
                                         {i + 1}
