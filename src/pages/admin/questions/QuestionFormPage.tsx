@@ -61,6 +61,10 @@ export default function QuestionFormPage() {
                 { key: 'C', content: '', is_correct: false, uuid: crypto.randomUUID() },
                 { key: 'D', content: '', is_correct: false, uuid: crypto.randomUUID() },
             ]);
+        } else if (newType === 'short_answer') {
+            setOptions([
+                { key: 'SA1', content: '', is_correct: true, uuid: crypto.randomUUID() }
+            ]);
         }
     };
 
@@ -85,7 +89,7 @@ export default function QuestionFormPage() {
                 if (q.question_bank_id) setCurrentBankId(q.question_bank_id);
 
                 // Map options
-                if (['multiple_choice', 'multiple_selection', 'true_false'].includes(q.type)) {
+                if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(q.type)) {
                     setOptions(q.options.map((o: any) => ({
                         ...o,
                         key: o.option_key,
@@ -210,6 +214,18 @@ export default function QuestionFormPage() {
                             order: idx + 1
                         }))
                     };
+                    break;
+                case 'short_answer':
+                    finalOptions = options.map((opt, idx) => ({
+                        id: opt.id,
+                        option_key: opt.key || `SA${idx + 1}`,
+                        content: opt.content,
+                        is_correct: 1
+                    }));
+
+                    if (!finalOptions.some(o => o.content.trim())) {
+                        throw new Error('Please provide at least one accepted answer');
+                    }
                     break;
                 case 'essay':
                     extendedData = { keywords: essayKeywords };

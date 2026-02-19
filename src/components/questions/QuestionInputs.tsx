@@ -1,6 +1,7 @@
 import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
 import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
 import TrueFalseInput from '@/components/questions/inputs/TrueFalseInput';
+import ShortAnswerInput from '@/components/questions/inputs/ShortAnswerInput';
 import MatchingInput from '@/components/questions/inputs/MatchingInput';
 import SequenceInput from '@/components/questions/inputs/SequenceInput';
 import EssayInput from '@/components/questions/inputs/EssayInput';
@@ -37,6 +38,8 @@ export default function QuestionInputs({
             return <MultipleSelectionInput options={options} onChange={setOptions} />;
         case 'true_false':
             return <TrueFalseInput options={options} onChange={setOptions} />;
+        case 'short_answer':
+            return <ShortAnswerInput options={options} onChange={setOptions} />;
         case 'matching':
             return <MatchingInput pairs={matchingPairs} onChange={setMatchingPairs} />;
         case 'sequence':
