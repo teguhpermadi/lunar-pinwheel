@@ -32,8 +32,8 @@ export default function QuestionFormPage() {
         { key: 'D', content: '', is_correct: false, uuid: crypto.randomUUID() },
     ]);
     const [matchingPairs, setMatchingPairs] = useState<any[]>([
-        { uuid: crypto.randomUUID(), left: '', right: '' },
-        { uuid: crypto.randomUUID(), left: '', right: '' },
+        { uuid: crypto.randomUUID(), rightUuid: crypto.randomUUID(), left: '', right: '' },
+        { uuid: crypto.randomUUID(), rightUuid: crypto.randomUUID(), left: '', right: '' },
     ]);
     const [sequenceItems, setSequenceItems] = useState<any[]>([
         { uuid: crypto.randomUUID(), content: '', order: 1 },
@@ -91,6 +91,37 @@ export default function QuestionFormPage() {
                         key: o.option_key,
                         uuid: o.id || crypto.randomUUID()
                     })));
+                } else if (q.type === 'matching') {
+                    const pairsMap = new Map();
+
+                    // Group by pair_id from metadata
+                    q.options.forEach((o: any) => {
+                        const pairId = o.metadata?.pair_id;
+                        if (!pairId) return;
+
+                        if (!pairsMap.has(pairId)) {
+                            pairsMap.set(pairId, {
+                                uuid: crypto.randomUUID(),
+                                rightUuid: crypto.randomUUID(),
+                                pair_id: pairId,
+                                left: '',
+                                right: '',
+                                leftOptionId: null,
+                                rightOptionId: null
+                            });
+                        }
+
+                        const pair = pairsMap.get(pairId);
+                        if (o.metadata?.side === 'left') {
+                            pair.left = o.content;
+                            pair.leftOptionId = o.id;
+                        } else if (o.metadata?.side === 'right') {
+                            pair.right = o.content;
+                            pair.rightOptionId = o.id;
+                        }
+                    });
+
+                    setMatchingPairs(Array.from(pairsMap.values()));
                 }
             } else {
                 throw new Error(response.message || 'Failed to load question');
@@ -163,9 +194,11 @@ export default function QuestionFormPage() {
                 case 'matching':
                     extendedData = {
                         matching_pairs: matchingPairs.map(p => ({
-                            id: p.id,
+                            id: p.id, // Keep for backward compat if it was used
                             left: p.left,
-                            right: p.right
+                            right: p.right,
+                            left_option_id: p.leftOptionId,
+                            right_option_id: p.rightOptionId
                         }))
                     };
                     break;
