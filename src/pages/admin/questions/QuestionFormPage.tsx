@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { questionApi, optionsApi } from '@/lib/api';
 import QuestionFormLayout from '@/components/questions/QuestionFormLayout';
-import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
-import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
-import TrueFalseInput from '@/components/questions/inputs/TrueFalseInput';
-import MatchingInput from '@/components/questions/inputs/MatchingInput';
-import SequenceInput from '@/components/questions/inputs/SequenceInput';
-import EssayInput from '@/components/questions/inputs/EssayInput';
+import QuestionInputs from '@/components/questions/QuestionInputs';
 
-export default function CreateQuestionPage() {
-    const { bankId } = useParams<{ bankId: string }>();
+export default function QuestionFormPage() {
+    const { bankId, questionId } = useParams();
     const navigate = useNavigate();
+    const isEditing = !!questionId;
+
+    const [isLoading, setIsLoading] = useState(isEditing);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Core Question State
     const [type, setType] = useState('multiple_choice');
@@ -21,6 +20,9 @@ export default function CreateQuestionPage() {
     const [score, setScore] = useState(5);
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
+
+    // Internal bankId state
+    const [currentBankId, setCurrentBankId] = useState<string | undefined>(bankId);
 
     // Specific Input States
     const [options, setOptions] = useState<any[]>([
@@ -39,25 +41,74 @@ export default function CreateQuestionPage() {
     ]);
     const [essayKeywords, setEssayKeywords] = useState('');
 
-    const [isSaving, setIsSaving] = useState(false);
-
-    // Reset specific states when type changes
+    // Load question data if editing
     useEffect(() => {
-        if (type === 'true_false') {
+        if (isEditing && questionId) {
+            fetchQuestion();
+        }
+    }, [questionId, isEditing]);
+
+    const initializeOptionsForType = (newType: string) => {
+        if (newType === 'true_false') {
             setOptions([
                 { key: 'A', content: 'True', is_correct: true, uuid: crypto.randomUUID() },
                 { key: 'B', content: 'False', is_correct: false, uuid: crypto.randomUUID() }
             ]);
+        } else if (['multiple_choice', 'multiple_selection'].includes(newType)) {
+            setOptions([
+                { key: 'A', content: '', is_correct: false, uuid: crypto.randomUUID() },
+                { key: 'B', content: '', is_correct: false, uuid: crypto.randomUUID() },
+                { key: 'C', content: '', is_correct: false, uuid: crypto.randomUUID() },
+                { key: 'D', content: '', is_correct: false, uuid: crypto.randomUUID() },
+            ]);
         }
-    }, [type]);
+    };
+
+    const handleTypeChange = (newType: string) => {
+        setType(newType);
+        initializeOptionsForType(newType);
+    };
+
+    const fetchQuestion = async () => {
+        if (!questionId) return;
+        setIsLoading(true);
+        try {
+            const response = await questionApi.getQuestion(questionId);
+            if (response.success) {
+                const q = response.data;
+                setType(q.type);
+                setDifficulty(q.difficulty);
+                setTimer(q.timer);
+                setScore(q.score);
+                setContent(q.content);
+                setHint(q.hint || '');
+                if (q.question_bank_id) setCurrentBankId(q.question_bank_id);
+
+                // Map options
+                if (['multiple_choice', 'multiple_selection', 'true_false'].includes(q.type)) {
+                    setOptions(q.options.map((o: any) => ({
+                        ...o,
+                        key: o.option_key,
+                        uuid: o.id || crypto.randomUUID()
+                    })));
+                }
+            } else {
+                throw new Error(response.message || 'Failed to load question');
+            }
+        } catch (error) {
+            console.error("Failed to load question", error);
+            Swal.fire('Error', 'Failed to load question', 'error');
+            navigate(-1);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleDeleteOptionMedia = async (optionUuid: string, mediaId?: string) => {
         const option = options.find(o => o.uuid === optionUuid);
         if (!option) return;
 
         try {
-            // If option has a real ID (saved in DB) and mediaId exists, call API
-            // In Create page, typically options don't have IDs yet, but logic is here for consistency/scalability
             if (option.id && mediaId) {
                 await optionsApi.deleteMedia(option.id, mediaId);
                 Swal.fire({
@@ -70,7 +121,6 @@ export default function CreateQuestionPage() {
                 });
             }
 
-            // Always update local state
             setOptions(prev => prev.map(o =>
                 o.uuid === optionUuid ? { ...o, media: null } : o
             ));
@@ -89,9 +139,7 @@ export default function CreateQuestionPage() {
         setIsSaving(true);
 
         try {
-            // Transform data based on type
             let finalOptions: any[] = [];
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             let extendedData = {};
 
             switch (type) {
@@ -99,6 +147,7 @@ export default function CreateQuestionPage() {
                 case 'multiple_selection':
                 case 'true_false':
                     finalOptions = options.map((opt, idx) => ({
+                        id: opt.id,
                         option_key: opt.key || String.fromCharCode(65 + idx),
                         content: opt.content,
                         is_correct: opt.is_correct ? 1 : 0
@@ -114,6 +163,7 @@ export default function CreateQuestionPage() {
                 case 'matching':
                     extendedData = {
                         matching_pairs: matchingPairs.map(p => ({
+                            id: p.id,
                             left: p.left,
                             right: p.right
                         }))
@@ -122,6 +172,7 @@ export default function CreateQuestionPage() {
                 case 'sequence':
                     extendedData = {
                         sequence_items: sequenceItems.map((item, idx) => ({
+                            id: item.id,
                             content: item.content,
                             order: idx + 1
                         }))
@@ -133,42 +184,40 @@ export default function CreateQuestionPage() {
             }
 
             const payload: any = {
-                question_bank_id: bankId,
+                question_bank_id: currentBankId,
                 type,
                 difficulty,
                 timer,
                 score,
                 content,
+                hint,
                 options: finalOptions
             };
-
-            // Add extended data if API supports it, or stringify into content/options
-            // For now, let's assume standard options structure is used where possible
-            // or we might need to adjust based on backend requirement.
 
             if (Object.keys(extendedData).length > 0) {
                 Object.assign(payload, extendedData);
             }
 
-            const response = await questionApi.createQuestion(payload);
+            let response;
+            if (isEditing && questionId) {
+                response = await questionApi.updateQuestion(questionId, payload);
+            } else {
+                response = await questionApi.createQuestion(payload);
+            }
 
             if (response.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Question Created',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    position: 'top-end'
-                });
-                // Navigate back to the specific bank with the new question ID to highlight
-                navigate(`/admin/question-banks/${bankId}`, {
-                    state: {
-                        highlightQuestionId: response.data.id,
-                        action: 'created'
-                    }
-                });
+                if (currentBankId) {
+                    navigate(`/admin/question-banks/${currentBankId}`, {
+                        state: {
+                            highlightQuestionId: response.data.id || questionId,
+                            action: isEditing ? 'updated' : 'created'
+                        }
+                    });
+                } else {
+                    navigate(-1);
+                }
             } else {
-                throw new Error(response.message || 'Failed to create question');
+                throw new Error(response.message || 'Failed to save question');
             }
 
         } catch (error: any) {
@@ -179,11 +228,26 @@ export default function CreateQuestionPage() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex flex-col">
+                <div className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center gap-4 shrink-0">
+                    <div className="size-10 bg-slate-100 dark:bg-slate-800 rounded-full animate-pulse"></div>
+                    <div className="h-4 w-32 bg-slate-100 dark:bg-slate-800 rounded animate-pulse"></div>
+                </div>
+                <div className="flex-1 p-8 space-y-6">
+                    <div className="h-48 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+                    <div className="h-64 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <QuestionFormLayout
-            title="Create New Question"
+            title={isEditing ? "Edit Question" : "Create New Question"}
             type={type}
-            setType={setType}
+            setType={handleTypeChange}
             difficulty={difficulty}
             setDifficulty={setDifficulty}
             timer={timer}
@@ -194,6 +258,7 @@ export default function CreateQuestionPage() {
             setHint={setHint}
             onSave={handleSave}
             isSaving={isSaving}
+            isEditing={isEditing}
         >
             <section className="flex-1 space-y-4 w-full">
                 <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest">Question Text</label>
@@ -207,24 +272,18 @@ export default function CreateQuestionPage() {
                 </div>
             </section>
 
-            {type === 'multiple_choice' && (
-                <MultipleChoiceInput options={options} onChange={setOptions} onDeleteMedia={handleDeleteOptionMedia} />
-            )}
-            {type === 'multiple_selection' && (
-                <MultipleSelectionInput options={options} onChange={setOptions} />
-            )}
-            {type === 'true_false' && (
-                <TrueFalseInput options={options} onChange={setOptions} />
-            )}
-            {type === 'matching' && (
-                <MatchingInput pairs={matchingPairs} onChange={setMatchingPairs} />
-            )}
-            {type === 'sequence' && (
-                <SequenceInput items={sequenceItems} onChange={setSequenceItems} />
-            )}
-            {type === 'essay' && (
-                <EssayInput keywords={essayKeywords} onKeywordsChange={setEssayKeywords} />
-            )}
+            <QuestionInputs
+                type={type}
+                options={options}
+                setOptions={setOptions}
+                handleDeleteOptionMedia={handleDeleteOptionMedia}
+                matchingPairs={matchingPairs}
+                setMatchingPairs={setMatchingPairs}
+                sequenceItems={sequenceItems}
+                setSequenceItems={setSequenceItems}
+                essayKeywords={essayKeywords}
+                setEssayKeywords={setEssayKeywords}
+            />
 
         </QuestionFormLayout>
     );
