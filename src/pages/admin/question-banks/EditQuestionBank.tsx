@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { questionBankApi, questionApi, QuestionBank, Question } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,26 +12,13 @@ import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const [bank, setBank] = useState<QuestionBank | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoadingBank, setIsLoadingBank] = useState(true);
     const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
     const [totalQuestions, setTotalQuestions] = useState(0);
-
-    const observer = useRef<IntersectionObserver | null>(null);
-    const lastQuestionElementRef = useCallback((node: HTMLDivElement | null) => {
-        if (isLoadingQuestions) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [isLoadingQuestions, hasMore]);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -39,45 +26,23 @@ export default function EditQuestionBank() {
         if (!id) return;
         setIsLoadingBank(true);
         try {
-            const bankRes = await questionBankApi.getQuestionBank(id);
-            if (bankRes.success) {
-                setBank(bankRes.data);
+            const response = await questionBankApi.getQuestionBank(id);
+            if (response.success) {
+                setBank(response.data);
+                // Use questions from the bank response
+                if (response.data.questions) {
+                    setQuestions(response.data.questions);
+                    setTotalQuestions(response.data.questions.length);
+                }
             } else {
-                Swal.fire('Error', 'Failed to load Question Bank', 'error');
+                Swal.fire('Error', response.message, 'error');
                 navigate('/admin/question-banks');
             }
         } catch (error) {
-            console.error("Failed to fetch bank", error);
-            Swal.fire('Error', 'Failed to load Question Bank', 'error');
+            Swal.fire('Error', 'Failed to load question bank', 'error');
             navigate('/admin/question-banks');
         } finally {
             setIsLoadingBank(false);
-        }
-    };
-
-    const fetchQuestions = async (pageNum: number) => {
-        if (!id) return;
-        setIsLoadingQuestions(true);
-        try {
-            const questionsRes = await questionApi.getQuestions({
-                question_bank_id: id,
-                page: pageNum,
-                per_page: 10 // Adjust as needed
-            });
-
-            if (questionsRes.success) {
-                const result = questionsRes.data as any;
-                const newQuestions = Array.isArray(result) ? result : (result.data || []);
-                const meta = result.meta || (questionsRes as any).meta;
-
-                setQuestions(prev => pageNum === 1 ? newQuestions : [...prev, ...newQuestions]);
-                setTotalQuestions(meta ? meta.total : newQuestions.length); // Fallback
-                setHasMore(meta ? meta.current_page < meta.last_page : false);
-            }
-        } catch (error) {
-            console.error("Failed to fetch questions", error);
-        } finally {
-            setIsLoadingQuestions(false);
         }
     };
 
@@ -85,11 +50,32 @@ export default function EditQuestionBank() {
         fetchBank();
     }, [id]);
 
+    // Scroll to highlighted question if passed in state
     useEffect(() => {
-        if (id) {
-            fetchQuestions(page);
+        if (location.state?.highlightQuestionId && questions.length > 0) {
+            const highlightId = location.state.highlightQuestionId as string;
+            // Check if question is in current list
+            const questionIndex = questions.findIndex(q => q.id === highlightId);
+
+            if (questionIndex !== -1) {
+                // Determine if we need to wait for render (useRef callback) or if ref is ready
+                // Since this runs on questions change, refs might be updated in next tick
+                setTimeout(() => {
+                    const element = questionRefs.current[highlightId];
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                        setTimeout(() => element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
+
+                        // Clear state to prevent re-scroll? 
+                        // Actually React Router history state persists. We should probably clear it.
+                        // useNavigate(currentPath, { replace: true, state: {} })
+                        navigate(location.pathname, { replace: true, state: {} });
+                    }
+                }, 100);
+            }
         }
-    }, [id, page]);
+    }, [questions, location.state, navigate, location.pathname]);
 
     const scrollToQuestion = async (index: number) => {
         const targetQuestion = questions[index];
@@ -99,7 +85,6 @@ export default function EditQuestionBank() {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         } else {
-            // Logic to fetch until we reach the index (simplified: just alert for now or implement "load until")
             // Real implementation would be complex: verify total, calc page, fetch pages seq.
             Swal.fire({
                 toast: true,
@@ -226,13 +211,11 @@ export default function EditQuestionBank() {
                         {/* Question List */}
                         <div className="space-y-6">
                             {questions.map((question, index) => {
-                                const isLast = index === questions.length - 1;
                                 return (
                                     <div
                                         key={question.id}
                                         ref={(el) => {
                                             questionRefs.current[question.id] = el;
-                                            if (isLast) lastQuestionElementRef(el);
                                         }}
                                         className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 group"
                                     >
@@ -248,7 +231,11 @@ export default function EditQuestionBank() {
                                                 />
                                             </div>
                                             <div className="flex gap-2">
-                                                <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Question">
+                                                <button
+                                                    onClick={() => navigate(`/admin/questions/${question.id}/edit`)}
+                                                    className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                                                    title="Edit Question"
+                                                >
                                                     <span className="material-symbols-outlined text-xl">edit</span>
                                                 </button>
                                                 <button
@@ -324,11 +311,7 @@ export default function EditQuestionBank() {
                                 </div>
                             )}
 
-                            {!hasMore && questions.length > 0 && (
-                                <div className="text-center py-8 text-slate-500 text-sm">
-                                    You have reached the end of the list.
-                                </div>
-                            )}
+
 
                             {questions.length === 0 && !isLoadingQuestions && (
                                 <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
@@ -342,7 +325,10 @@ export default function EditQuestionBank() {
                         </div>
 
                         {/* Add New Button */}
-                        <button className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12">
+                        <button
+                            onClick={() => navigate(`/admin/question-banks/${id}/questions/create`)}
+                            className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12"
+                        >
                             <span className="material-symbols-outlined">add_circle</span>
                             Add New Question
                         </button>
@@ -375,7 +361,10 @@ export default function EditQuestionBank() {
                                     </button>
                                 );
                             })}
-                            <button className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all">
+                            <button
+                                onClick={() => navigate(`/admin/question-banks/${id}/questions/create`)}
+                                className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all"
+                            >
                                 <span className="material-symbols-outlined">add</span>
                             </button>
                         </div>

@@ -4,9 +4,10 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuestionScoreSelectorProps {
-    questionId: string;
+    questionId?: string;
     initialScore: number;
     onScoreChange?: (newScore: number) => void;
+    manual?: boolean;
 }
 
 // Mapped from App\Enums\QuestionScoreEnum
@@ -19,7 +20,7 @@ const scoreOptions = [
     { value: 5, label: '5 Poin' },
 ];
 
-export default function QuestionScoreSelector({ questionId, initialScore, onScoreChange }: QuestionScoreSelectorProps) {
+export default function QuestionScoreSelector({ questionId, initialScore, onScoreChange, manual = false }: QuestionScoreSelectorProps) {
     const [score, setScore] = useState<number>(initialScore);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +51,18 @@ export default function QuestionScoreSelector({ questionId, initialScore, onScor
         const oldScore = score;
         setScore(newScore);
         setIsOpen(false);
+        if (manual) {
+            if (onScoreChange) {
+                onScoreChange(newScore);
+            }
+            setIsOpen(false);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            if (!questionId) throw new Error("Question ID is required for automatic updates");
             const response = await questionApi.updateQuestion(questionId, { score: newScore });
 
             if (response.success) {

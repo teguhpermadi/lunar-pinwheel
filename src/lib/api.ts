@@ -596,6 +596,22 @@ export interface Question {
     updated_at: string;
 }
 
+export interface StoreQuestionRequest {
+    question_bank_id?: string;
+    reading_material_id?: string;
+    type: string;
+    difficulty: string;
+    timer: number;
+    score: number;
+    content: string;
+    hint?: string;
+    order?: number;
+    is_approved?: boolean;
+    tags?: string[];
+    // For update too maybe? Or make separate UpdateQuestionRequest?
+    // Let's stick to Store for createQuestion
+}
+
 export const questionApi = {
     getQuestions: async (params?: any) => {
         const response = await api.get('/questions', { params });
@@ -605,7 +621,7 @@ export const questionApi = {
         const response = await api.get(`/questions/${id}`);
         return response.data;
     },
-    createQuestion: async (data: any) => {
+    createQuestion: async (data: StoreQuestionRequest | any) => {
         const response = await api.post('/questions', data);
         return response.data;
     },

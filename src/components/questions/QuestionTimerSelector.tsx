@@ -4,9 +4,10 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuestionTimerSelectorProps {
-    questionId: string;
+    questionId?: string;
     initialTimer: number;
     onTimerChange?: (newTimer: number) => void;
+    manual?: boolean;
 }
 
 // Mapped from App\Enums\QuestionTimeEnum
@@ -24,7 +25,7 @@ const timerOptions = [
     { value: 900000, label: '15 Menit' },
 ];
 
-export default function QuestionTimerSelector({ questionId, initialTimer, onTimerChange }: QuestionTimerSelectorProps) {
+export default function QuestionTimerSelector({ questionId, initialTimer, onTimerChange, manual = false }: QuestionTimerSelectorProps) {
     const [timer, setTimer] = useState<number>(initialTimer);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -55,9 +56,18 @@ export default function QuestionTimerSelector({ questionId, initialTimer, onTime
         const oldTimer = timer;
         setTimer(newTimer);
         setIsOpen(false);
+        if (manual) {
+            if (onTimerChange) {
+                onTimerChange(newTimer);
+            }
+            setIsOpen(false);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            if (!questionId) throw new Error("Question ID is required for automatic updates");
             const response = await questionApi.updateQuestion(questionId, { timer: newTimer });
 
             if (response.success) {

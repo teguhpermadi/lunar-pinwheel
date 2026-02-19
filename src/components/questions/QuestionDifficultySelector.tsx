@@ -4,9 +4,10 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuestionDifficultySelectorProps {
-    questionId: string;
+    questionId?: string;
     initialDifficulty: string;
     onDifficultyChange?: (newDifficulty: string) => void;
+    manual?: boolean;
 }
 
 const difficultyConfig = {
@@ -32,7 +33,7 @@ const difficultyConfig = {
 
 type DifficultyKey = keyof typeof difficultyConfig;
 
-export default function QuestionDifficultySelector({ questionId, initialDifficulty, onDifficultyChange }: QuestionDifficultySelectorProps) {
+export default function QuestionDifficultySelector({ questionId, initialDifficulty, onDifficultyChange, manual = false }: QuestionDifficultySelectorProps) {
     const [difficulty, setDifficulty] = useState<DifficultyKey>(initialDifficulty as DifficultyKey || 'mudah');
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -65,9 +66,18 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
         const oldDifficulty = difficulty;
         setDifficulty(newDifficulty);
         setIsOpen(false);
+        if (manual) {
+            if (onDifficultyChange) {
+                onDifficultyChange(newDifficulty);
+            }
+            setIsOpen(false);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            if (!questionId) throw new Error("Question ID is required for automatic updates");
             const response = await questionApi.updateQuestion(questionId, { difficulty: newDifficulty });
 
             if (response.success) {
@@ -167,7 +177,7 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
                                     >
                                         <div className="flex items-center gap-2">
                                             <span className={`w-1.5 h-1.5 rounded-full ${key === 'mudah' ? 'bg-emerald-500' :
-                                                    key === 'sedang' ? 'bg-amber-500' : 'bg-rose-500'
+                                                key === 'sedang' ? 'bg-amber-500' : 'bg-rose-500'
                                                 }`}></span>
                                             {config.label}
                                         </div>

@@ -18,6 +18,8 @@ import QuestionBankList from "@/pages/admin/question-banks/QuestionBankList"
 import CreateQuestionBank from "@/pages/admin/question-banks/CreateQuestionBank"
 import EditQuestionBank from "@/pages/admin/question-banks/EditQuestionBank"
 import ShowQuestionBank from "@/pages/admin/question-banks/ShowQuestionBank"
+import CreateQuestionPage from "@/pages/admin/questions/CreateQuestionPage"
+import EditQuestionPage from "@/pages/admin/questions/EditQuestionPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -95,6 +97,8 @@ function App() {
             {/* Standalone Routes (No Sidebar) */}
             <Route path="admin/question-banks/:id" element={<EditQuestionBank />} />
             <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />
+            <Route path="admin/question-banks/:bankId/questions/create" element={<CreateQuestionPage />} />
+            <Route path="admin/questions/:questionId/edit" element={<EditQuestionPage />} />
           </Route>
 
           {/* Fallback */}

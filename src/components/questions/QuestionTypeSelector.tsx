@@ -4,10 +4,11 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuestionTypeSelectorProps {
-    questionId: string;
+    questionId?: string;
     initialType: string;
     onTypeChange?: (newType: string) => void;
     disabled?: boolean;
+    manual?: boolean;
 }
 
 // Mapped from App\Enums\QuestionTypeEnum
@@ -23,7 +24,7 @@ const typeOptions = [
     { value: 'arrange_words', label: 'Arrange Words' },
 ];
 
-export default function QuestionTypeSelector({ questionId, initialType, onTypeChange, disabled = false }: QuestionTypeSelectorProps) {
+export default function QuestionTypeSelector({ questionId, initialType, onTypeChange, disabled = false, manual = false }: QuestionTypeSelectorProps) {
     const [type, setType] = useState<string>(initialType);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -54,9 +55,18 @@ export default function QuestionTypeSelector({ questionId, initialType, onTypeCh
         const oldType = type;
         setType(newType);
         setIsOpen(false);
+        if (manual) {
+            if (onTypeChange) {
+                onTypeChange(newType);
+            }
+            setIsOpen(false);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            if (!questionId) throw new Error("Question ID is required for automatic updates");
             const response = await questionApi.updateQuestion(questionId, { type: newType });
 
             if (response.success) {
