@@ -14,6 +14,10 @@ import AcademicYearManagement from "@/pages/admin/AcademicYearManagement"
 import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
+import QuestionBankList from "@/pages/admin/question-banks/QuestionBankList"
+import CreateQuestionBank from "@/pages/admin/question-banks/CreateQuestionBank"
+import EditQuestionBank from "@/pages/admin/question-banks/EditQuestionBank"
+import ShowQuestionBank from "@/pages/admin/question-banks/ShowQuestionBank"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -80,8 +84,17 @@ function App() {
               <Route path="admin/classrooms" element={<ClassroomManagement />} />
               <Route path="admin/classrooms/create" element={<ClassroomForm />} />
               <Route path="admin/classrooms/:id" element={<ClassroomForm />} />
+
+              {/* Question Bank Routes */}
+              <Route path="admin/question-banks" element={<QuestionBankList />} />
+              <Route path="admin/question-banks/create" element={<CreateQuestionBank />} />
+
               <Route path="exams" element={<div>Exams Page</div>} />
             </Route>
+
+            {/* Standalone Routes (No Sidebar) */}
+            <Route path="admin/question-banks/:id" element={<EditQuestionBank />} />
+            <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />
           </Route>
 
           {/* Fallback */}

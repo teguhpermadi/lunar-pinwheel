@@ -1,0 +1,380 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { questionBankApi, questionApi, QuestionBank, Question } from '@/lib/api';
+import Swal from 'sweetalert2';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function EditQuestionBank() {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [bank, setBank] = useState<QuestionBank | null>(null);
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [isLoadingBank, setIsLoadingBank] = useState(true);
+    const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [totalQuestions, setTotalQuestions] = useState(0);
+
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastQuestionElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (isLoadingQuestions) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [isLoadingQuestions, hasMore]);
+
+    const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+    const fetchBank = async () => {
+        if (!id) return;
+        setIsLoadingBank(true);
+        try {
+            const bankRes = await questionBankApi.getQuestionBank(id);
+            if (bankRes.success) {
+                setBank(bankRes.data);
+            } else {
+                Swal.fire('Error', 'Failed to load Question Bank', 'error');
+                navigate('/admin/question-banks');
+            }
+        } catch (error) {
+            console.error("Failed to fetch bank", error);
+            Swal.fire('Error', 'Failed to load Question Bank', 'error');
+            navigate('/admin/question-banks');
+        } finally {
+            setIsLoadingBank(false);
+        }
+    };
+
+    const fetchQuestions = async (pageNum: number) => {
+        if (!id) return;
+        setIsLoadingQuestions(true);
+        try {
+            const questionsRes = await questionApi.getQuestions({
+                question_bank_id: id,
+                page: pageNum,
+                per_page: 10 // Adjust as needed
+            });
+
+            if (questionsRes.success) {
+                const result = questionsRes.data as any;
+                const newQuestions = Array.isArray(result) ? result : (result.data || []);
+                const meta = result.meta || (questionsRes as any).meta;
+
+                setQuestions(prev => pageNum === 1 ? newQuestions : [...prev, ...newQuestions]);
+                setTotalQuestions(meta ? meta.total : newQuestions.length); // Fallback
+                setHasMore(meta ? meta.current_page < meta.last_page : false);
+            }
+        } catch (error) {
+            console.error("Failed to fetch questions", error);
+        } finally {
+            setIsLoadingQuestions(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBank();
+    }, [id]);
+
+    useEffect(() => {
+        if (id) {
+            fetchQuestions(page);
+        }
+    }, [id, page]);
+
+    const scrollToQuestion = async (index: number) => {
+        const targetQuestion = questions[index];
+        if (targetQuestion) {
+            const element = questionRefs.current[targetQuestion.id];
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } else {
+            // Logic to fetch until we reach the index (simplified: just alert for now or implement "load until")
+            // Real implementation would be complex: verify total, calc page, fetch pages seq.
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'info',
+                title: 'Question not loaded yet. Scroll down to load more.',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    };
+
+    const handleDeleteQuestion = async (questionId: string) => {
+        const result = await Swal.fire({
+            title: 'Delete Question?',
+            text: "This cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await questionApi.deleteQuestion(questionId);
+                setQuestions(prev => prev.filter(q => q.id !== questionId));
+                setTotalQuestions(prev => prev - 1);
+                Swal.fire('Deleted!', 'Question has been deleted.', 'success');
+            } catch (error) {
+                console.error("Failed to delete question", error);
+                Swal.fire('Error', 'Failed to delete question', 'error');
+            }
+        }
+    };
+
+    if (isLoadingBank && !bank) {
+        return (
+            <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex flex-col">
+                <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
+                    <div className="flex items-center gap-4 flex-1">
+                        <Skeleton className="size-10 rounded-full" />
+                        <div className="flex-1 max-w-xl space-y-2">
+                            <Skeleton className="h-6 w-48" />
+                            <Skeleton className="h-3 w-32" />
+                        </div>
+                    </div>
+                </header>
+                <div className="flex flex-1 overflow-hidden">
+                    <main className="flex-1 p-8">
+                        <Skeleton className="h-32 w-full rounded-2xl mb-6" />
+                        <div className="space-y-6">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+                            ))}
+                        </div>
+                    </main>
+                </div>
+            </div>
+        );
+    }
+
+    if (!bank) return null;
+
+    return (
+        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex flex-col font-display">
+            {/* Header */}
+            <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
+                <div className="flex items-center gap-4 flex-1">
+                    <button onClick={() => navigate('/admin/question-banks')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
+                        <span className="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div className="flex-1 max-w-xl">
+                        {/* Editable Title Implementation could go here */}
+                        <div className="text-xl font-bold text-slate-900 dark:text-white truncate">{bank.name}</div>
+                        <p className="text-xs text-slate-400 font-medium">
+                            {(bank as any).subject?.name} • {(bank as any).subject?.code}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg">settings</span>
+                        Settings
+                    </button>
+                    <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg">save</span>
+                        Save
+                    </button>
+                    <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+                    <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
+                        <img
+                            alt="Profile"
+                            className="rounded-full size-full object-cover"
+                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                        />
+                    </div>
+                </div>
+            </header>
+
+            <div className="flex flex-1 overflow-hidden">
+                <main className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-background-dark/30 scroll-smooth">
+                    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+                        {/* AI Generator Mock */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-primary/20 p-6 flex items-center gap-4">
+                            <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+                                <span className="material-symbols-outlined text-2xl">auto_awesome</span>
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-1">Generate Question by AI</label>
+                                <div className="relative">
+                                    <input
+                                        className="w-full pl-4 pr-32 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-primary focus:border-primary transition-all outline-none"
+                                        placeholder="Describe the topic or paste text to generate questions... (Coming Soon)"
+                                        type="text"
+                                        disabled
+                                    />
+                                    <button disabled className="absolute right-2 top-1.5 px-4 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                                        Generate
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Question List */}
+                        <div className="space-y-6">
+                            {questions.map((question, index) => {
+                                const isLast = index === questions.length - 1;
+                                return (
+                                    <div
+                                        key={question.id}
+                                        ref={(el) => {
+                                            questionRefs.current[question.id] = el;
+                                            if (isLast) lastQuestionElementRef(el);
+                                        }}
+                                        className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden group"
+                                    >
+                                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start">
+                                            <div className="flex gap-4 items-center">
+                                                <span className="size-8 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="px-2 py-1 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-bold uppercase tracking-wider">
+                                                    {question.type}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Edit Question">
+                                                    <span className="material-symbols-outlined text-xl">edit</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteQuestion(question.id)}
+                                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                    title="Delete Question"
+                                                >
+                                                    <span className="material-symbols-outlined text-xl">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center">
+                                            {/* Badge Stats */}
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-slate-400 text-sm">bar_chart</span>
+                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.difficulty}</span>
+                                            </div>
+                                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-slate-400 text-sm">schedule</span>
+                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.timer}s</span>
+                                            </div>
+                                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-slate-400 text-sm">grade</span>
+                                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.score} pts</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6">
+                                            <div
+                                                className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
+                                                dangerouslySetInnerHTML={{ __html: question.content }}
+                                            />
+                                            {/* Options */}
+                                            {question.type === 'multiple_choice' && question.options && (
+                                                <div className="space-y-3">
+                                                    {question.options.map((opt) => (
+                                                        <div key={opt.id} className={`flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border ${opt.is_correct ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700'}`}>
+                                                            <span className={`size-6 rounded-full border-2 ${opt.is_correct ? 'border-emerald-500 text-emerald-500' : 'border-slate-300'} flex items-center justify-center text-[10px] font-bold`}>
+                                                                {opt.option_key}
+                                                            </span>
+                                                            <div className="text-sm" dangerouslySetInnerHTML={{ __html: opt.content }} />
+                                                            {opt.is_correct && <span className="ml-auto material-symbols-outlined text-emerald-500 text-lg">check_circle</span>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {isLoadingQuestions && (
+                                <div className="space-y-6">
+                                    <Skeleton className="h-48 w-full rounded-2xl" />
+                                    <Skeleton className="h-48 w-full rounded-2xl" />
+                                </div>
+                            )}
+
+                            {!hasMore && questions.length > 0 && (
+                                <div className="text-center py-8 text-slate-500 text-sm">
+                                    You have reached the end of the list.
+                                </div>
+                            )}
+
+                            {questions.length === 0 && !isLoadingQuestions && (
+                                <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                                    <div className="size-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                                        <span className="material-symbols-outlined text-3xl">library_add</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No Questions Yet</h3>
+                                    <p className="text-slate-500 text-sm mb-6">Start adding questions to this bank.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Add New Button */}
+                        <button className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12">
+                            <span className="material-symbols-outlined">add_circle</span>
+                            Add New Question
+                        </button>
+                    </div>
+                </main>
+
+                {/* Right Sidebar - Question Navigator */}
+                <aside className="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col h-full z-10 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] shrink-0 hidden lg:flex">
+                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Question Navigator</h4>
+                        <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+                            <span>Total: {totalQuestions} Questions</span>
+                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full font-bold">{questions.length} Loaded</span>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+                        <div className="grid grid-cols-4 gap-3">
+                            {Array.from({ length: totalQuestions }).map((_, i) => {
+                                const isLoaded = i < questions.length;
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => scrollToQuestion(i)}
+                                        className={`size-12 rounded-xl font-bold text-sm border border-transparent transition-all ${isLoaded
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 cursor-not-allowed' // Visual cue
+                                            }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                );
+                            })}
+                            <button className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all">
+                                <span className="material-symbols-outlined">add</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                        <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+                            <p className="text-[10px] font-black uppercase text-primary tracking-widest mb-2">Editor Statistics</p>
+                            <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-500">Auto-save:</span>
+                                <span className="text-emerald-500 font-bold">Enabled</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Last edited:</span>
+                                <span className="text-slate-700 dark:text-slate-300">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    );
+}

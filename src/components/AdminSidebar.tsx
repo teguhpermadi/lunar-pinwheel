@@ -13,6 +13,7 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
     const navItems = [
         { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
         { icon: 'class', label: 'Classrooms', path: '/admin/classrooms' },
+        { icon: 'library_books', label: 'Question Bank', path: '/admin/question-banks' },
         { icon: 'menu_book', label: 'Courses', path: '/admin/courses' },
         { icon: 'group', label: 'Users', path: '/admin/users' },
         { icon: 'school', label: 'Teachers', path: '/admin/teachers' },
