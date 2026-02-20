@@ -65,6 +65,11 @@ export default function QuestionFormPage() {
             setOptions([
                 { key: 'SA1', content: '', is_correct: true, uuid: crypto.randomUUID() }
             ]);
+        } else if (newType === 'sequence') {
+            setSequenceItems([
+                { uuid: crypto.randomUUID(), content: '', order: 1 },
+                { uuid: crypto.randomUUID(), content: '', order: 2 },
+            ]);
         } else if (newType === 'essay') {
             setOptions([]);
             setEssayKeywords('');
@@ -128,6 +133,15 @@ export default function QuestionFormPage() {
                     });
 
                     setMatchingPairs(Array.from(pairsMap.values()));
+                } else if (q.type === 'sequence') {
+                    setSequenceItems(q.options
+                        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                        .map((o: any) => ({
+                            id: o.id,
+                            uuid: o.id || crypto.randomUUID(),
+                            content: o.content,
+                            order: o.order
+                        })));
                 } else if (q.type === 'essay') {
                     const essayOption = q.options.find((o: any) => o.option_key === 'ESSAY');
                     if (essayOption) {
