@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface MultipleChoiceDisplayProps {
     options?: QuestionOption[];
@@ -37,7 +38,10 @@ export default function MultipleChoiceDisplay({ options = [], onMediaClick }: Mu
                         </div>
                     )}
 
-                    <div className="text-sm text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: opt.content }} />
+                    <MathRenderer
+                        className="text-sm text-slate-700 dark:text-slate-300"
+                        content={opt.content}
+                    />
                     {opt.is_correct && <span className="ml-auto material-symbols-outlined text-emerald-500 text-lg">check_circle</span>}
                 </div>
             ))}

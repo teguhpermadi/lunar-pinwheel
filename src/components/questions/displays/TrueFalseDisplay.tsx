@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface TrueFalseDisplayProps {
     options?: QuestionOption[];
@@ -22,7 +23,7 @@ export default function TrueFalseDisplay({ options = [] }: TrueFalseDisplayProps
                     `}
                 >
                     <span className="material-symbols-outlined">{icons[index] ?? icons[0]}</span>
-                    {opt.content}
+                    <MathRenderer content={opt.content} />
                 </div>
             ))}
         </div>

@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface SequenceDisplayProps {
     options?: QuestionOption[];
@@ -26,9 +27,7 @@ export default function SequenceDisplay({ options = [], sequenceItems }: Sequenc
                         <span className="text-lg font-black text-slate-700 dark:text-slate-300">{idx + 1}</span>
                     </div>
 
-                    <div className="flex-1 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 shadow-sm">
-                        {item.content}
-                    </div>
+                    <MathRenderer content={item.content} />
                 </div>
             ))}
         </div>

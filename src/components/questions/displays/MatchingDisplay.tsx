@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface MatchingDisplayProps {
     options?: QuestionOption[];
@@ -69,7 +70,7 @@ export default function MatchingDisplay({ options = [], matchingPairs }: Matchin
             {pairs.map((pair, idx) => (
                 <div key={pair.id || idx} className="grid grid-cols-[1fr,40px,1fr] gap-4 items-center">
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300">
-                        <div dangerouslySetInnerHTML={{ __html: pair.left || '<span class="text-slate-300 italic">Empty</span>' }} />
+                        <MathRenderer content={pair.left || '<span class="text-slate-300 italic">Empty</span>'} />
                     </div>
 
                     <div className="flex items-center justify-center">
@@ -77,7 +78,7 @@ export default function MatchingDisplay({ options = [], matchingPairs }: Matchin
                     </div>
 
                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-300 font-medium">
-                        <div dangerouslySetInnerHTML={{ __html: pair.right || '<span class="text-slate-300 italic">Empty</span>' }} />
+                        <MathRenderer content={pair.right || '<span class="text-slate-300 italic">Empty</span>'} />
                     </div>
                 </div>
             ))}

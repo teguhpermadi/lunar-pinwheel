@@ -9,6 +9,7 @@ import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector'
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 export default function ShowQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -154,9 +155,9 @@ export default function ShowQuestionBank() {
                                 </div>
 
                                 <div className="p-6 rounded-b-2xl">
-                                    <div
+                                    <MathRenderer
                                         className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
-                                        dangerouslySetInnerHTML={{ __html: question.content }}
+                                        content={question.content}
                                     />
                                     <div className="mt-6">
                                         <QuestionOptionDisplay question={question} />

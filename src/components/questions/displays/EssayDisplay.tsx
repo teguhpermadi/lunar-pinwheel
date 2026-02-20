@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface EssayDisplayProps {
     options?: QuestionOption[];
@@ -26,9 +27,10 @@ export default function EssayDisplay({ options = [], keywords }: EssayDisplayPro
                         <span className="material-symbols-outlined text-sm">auto_awesome</span>
                         Grading Keywords / Rubric
                     </h5>
-                    <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/10 dark:border-primary/20 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {rubric}
-                    </div>
+                    <MathRenderer
+                        className="p-4 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/10 dark:border-primary/20 text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
+                        content={rubric}
+                    />
                 </div>
             ) : (
                 <div className="text-sm italic text-slate-400">No grading keywords or rubric set.</div>

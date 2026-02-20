@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface ShortAnswerDisplayProps {
     options?: QuestionOption[];
@@ -18,7 +19,7 @@ export default function ShortAnswerDisplay({ options = [] }: ShortAnswerDisplayP
             <div className="flex flex-wrap gap-2">
                 {options.map((opt, idx) => (
                     <div key={opt.id || idx} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm font-medium rounded-lg border border-emerald-200 dark:border-emerald-800">
-                        {opt.content}
+                        <MathRenderer content={opt.content} />
                     </div>
                 ))}
             </div>

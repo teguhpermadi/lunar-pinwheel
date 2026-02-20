@@ -1,4 +1,7 @@
-import { Routes, Route, Navigate, Outlet } from "react-router-dom"
+import { Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom"
+import { useEffect } from "react"
+import renderMathInElement from 'katex/dist/contrib/auto-render'
+import 'katex/dist/katex.min.css'
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
 import { AcademicYearProvider } from "@/contexts/AcademicYearContext"
 import AdminLayout from "@/layouts/AdminLayout"
@@ -58,6 +61,20 @@ function DashboardPage() {
 }
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\(', right: '\\)', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+      throwOnError: false,
+    });
+  }, [location]);
+
   return (
     <AuthProvider>
       <AcademicYearProvider>

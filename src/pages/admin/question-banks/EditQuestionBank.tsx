@@ -9,6 +9,7 @@ import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector'
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
+import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 import MediaModal from '@/components/questions/MediaModal';
 
@@ -311,9 +312,9 @@ export default function EditQuestionBank() {
 
                                         <div className="p-6 rounded-b-2xl">
                                             <div className="flex gap-6 mb-6">
-                                                <div
+                                                <MathRenderer
                                                     className="flex-1 font-semibold text-slate-800 dark:text-slate-100 leading-relaxed"
-                                                    dangerouslySetInnerHTML={{ __html: question.content }}
+                                                    content={question.content}
                                                 />
                                                 {question.media?.content?.[0] && (
                                                     <div
