@@ -9,6 +9,7 @@ import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector'
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
+import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ export default function EditQuestionBank() {
     const [isLoadingBank, setIsLoadingBank] = useState(true);
     const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
     const [totalQuestions, setTotalQuestions] = useState(0);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -190,7 +192,10 @@ export default function EditQuestionBank() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
+                    <button
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+                    >
                         <span className="material-symbols-outlined text-lg">settings</span>
                         Settings
                     </button>
@@ -386,6 +391,15 @@ export default function EditQuestionBank() {
                     </div>
                 </aside>
             </div>
+
+            <QuestionBankSettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                bank={bank}
+                onSaved={(updatedBank) => {
+                    setBank(updatedBank);
+                }}
+            />
         </div>
     );
 }

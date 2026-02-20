@@ -523,7 +523,9 @@ export interface QuestionBank {
     name: string;
     subject_id: string;
     user_id: string;
+    subject?: Subject;
     questions_count?: number;
+    questions?: Question[];
     created_at: string;
     updated_at: string;
 }
