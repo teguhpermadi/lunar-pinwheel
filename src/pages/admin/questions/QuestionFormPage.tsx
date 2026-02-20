@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { questionApi, optionsApi } from '@/lib/api';
 import QuestionFormLayout from '@/components/questions/QuestionFormLayout';
 import QuestionInputs from '@/components/questions/QuestionInputs';
+import MediaModal from '@/components/questions/MediaModal';
 
 export default function QuestionFormPage() {
     const { bankId, questionId } = useParams();
@@ -20,6 +21,10 @@ export default function QuestionFormPage() {
     const [score, setScore] = useState(1);
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
+    const [questionMedia, setQuestionMedia] = useState<any>(null);
+    const [pendingQuestionImage, setPendingQuestionImage] = useState<File | null>(null);
+    const [questionPreviewUrl, setQuestionPreviewUrl] = useState<string | null>(null);
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
     // Internal bankId state
     const [currentBankId, setCurrentBankId] = useState<string | undefined>(bankId);
@@ -93,6 +98,7 @@ export default function QuestionFormPage() {
                 setScore(q.score);
                 setContent(q.content);
                 setHint(q.hint || '');
+                setQuestionMedia(q.media?.content?.[0] || null);
                 if (q.question_bank_id) setCurrentBankId(q.question_bank_id);
 
                 // Map options
@@ -161,7 +167,7 @@ export default function QuestionFormPage() {
     };
 
     const handleDeleteOptionMedia = async (optionUuid: string, mediaId?: string) => {
-        const option = options.find(o => o.uuid === optionUuid);
+        const option = options.find((o: any) => o.uuid === optionUuid);
         if (!option) return;
 
         try {
@@ -177,12 +183,58 @@ export default function QuestionFormPage() {
                 });
             }
 
-            setOptions(prev => prev.map(o =>
+            setOptions((prev: any) => prev.map((o: any) =>
                 o.uuid === optionUuid ? { ...o, media: null } : o
             ));
         } catch (error) {
             console.error("Failed to delete media", error);
             Swal.fire('Error', 'Failed to delete media', 'error');
+        }
+    };
+
+    const handleQuestionMediaUpload = (file: File) => {
+        setPendingQuestionImage(file);
+        setQuestionPreviewUrl(URL.createObjectURL(file));
+        setIsMediaModalOpen(false);
+    };
+
+    const handleQuestionMediaDelete = async () => {
+        setIsMediaModalOpen(false);
+        if (pendingQuestionImage) {
+            if (questionPreviewUrl) URL.revokeObjectURL(questionPreviewUrl);
+            setPendingQuestionImage(null);
+            setQuestionPreviewUrl(null);
+            return;
+        }
+
+        if (!questionId || !questionMedia) return;
+
+        const result = await Swal.fire({
+            title: 'Delete existing image?',
+            text: "This action will delete the image from the server immediately.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await questionApi.deleteMedia(questionId, questionMedia.id);
+                setQuestionMedia(null);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Image deleted',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } catch (error) {
+                console.error("Delete failed", error);
+                Swal.fire('Error', 'Failed to delete image', 'error');
+            }
         }
     };
 
@@ -195,84 +247,69 @@ export default function QuestionFormPage() {
         setIsSaving(true);
 
         try {
-            let finalOptions: any[] = [];
-            let extendedData = {};
+            const formData = new FormData();
+            formData.append('question_bank_id', currentBankId || '');
+            formData.append('type', type);
+            formData.append('difficulty', difficulty);
+            formData.append('timer', timer.toString());
+            formData.append('score', score.toString());
+            formData.append('content', content);
+            formData.append('hint', hint);
 
+            if (pendingQuestionImage) {
+                formData.append('question_image', pendingQuestionImage);
+            }
+
+            // Append Options / Extended Data
             switch (type) {
                 case 'multiple_choice':
                 case 'multiple_selection':
                 case 'true_false':
-                    finalOptions = options.map((opt, idx) => ({
-                        id: opt.id,
-                        option_key: opt.key || String.fromCharCode(65 + idx),
-                        content: opt.content,
-                        is_correct: opt.is_correct ? 1 : 0
-                    }));
+                case 'short_answer':
+                    options.forEach((opt: any, idx: number) => {
+                        if (opt.id) {
+                            formData.append(`options[${idx}][id]`, opt.id);
+                        }
+                        formData.append(`options[${idx}][option_key]`, opt.key || (type === 'short_answer' ? `SA${idx + 1}` : String.fromCharCode(65 + idx)));
+                        formData.append(`options[${idx}][content]`, opt.content);
+                        formData.append(`options[${idx}][is_correct]`, opt.is_correct ? '1' : '0');
+                        if (opt.pendingImage) {
+                            formData.append(`options[${idx}][image]`, opt.pendingImage);
+                        }
+                    });
 
-                    if (type === 'multiple_choice' && !finalOptions.some(o => o.is_correct)) {
+                    if (type === 'multiple_choice' && !options.some((o: any) => o.is_correct)) {
                         throw new Error('Please select a correct answer');
                     }
-                    if (type === 'multiple_selection' && !finalOptions.some(o => o.is_correct)) {
+                    if (type === 'multiple_selection' && !options.some((o: any) => o.is_correct)) {
                         throw new Error('Please select at least one correct answer');
                     }
-                    break;
-                case 'matching':
-                    extendedData = {
-                        matching_pairs: matchingPairs.map(p => ({
-                            id: p.id, // Keep for backward compat if it was used
-                            left: p.left,
-                            right: p.right,
-                            left_option_id: p.leftOptionId,
-                            right_option_id: p.rightOptionId
-                        }))
-                    };
-                    break;
-                case 'sequence':
-                    extendedData = {
-                        sequence_items: sequenceItems.map((item, idx) => ({
-                            id: item.id,
-                            content: item.content,
-                            order: idx + 1
-                        }))
-                    };
-                    break;
-                case 'short_answer':
-                    finalOptions = options.map((opt, idx) => ({
-                        id: opt.id,
-                        option_key: opt.key || `SA${idx + 1}`,
-                        content: opt.content,
-                        is_correct: 1
-                    }));
-
-                    if (!finalOptions.some(o => o.content.trim())) {
+                    if (type === 'short_answer' && !options.some((o: any) => o.content.trim())) {
                         throw new Error('Please provide at least one accepted answer');
                     }
                     break;
-                case 'essay':
-                    extendedData = { keywords: essayKeywords };
+                case 'matching':
+                    matchingPairs.forEach((p: any, idx: number) => {
+                        formData.append(`matching_pairs[${idx}][left]`, p.left);
+                        formData.append(`matching_pairs[${idx}][right]`, p.right);
+                    });
                     break;
-            }
-
-            const payload: any = {
-                question_bank_id: currentBankId,
-                type,
-                difficulty,
-                timer,
-                score,
-                content,
-                hint,
-                options: finalOptions
-            };
-
-            if (Object.keys(extendedData).length > 0) {
-                Object.assign(payload, extendedData);
+                case 'sequence':
+                    sequenceItems.forEach((item: any, idx: number) => {
+                        formData.append(`sequence_items[${idx}][content]`, item.content);
+                        formData.append(`sequence_items[${idx}][order]`, (idx + 1).toString());
+                    });
+                    break;
+                case 'essay':
+                    formData.append('keywords', essayKeywords);
+                    break;
             }
 
             let response;
             if (isEditing && questionId) {
-                response = await questionApi.updateQuestion(questionId, payload);
+                response = await questionApi.updateQuestion(questionId, formData);
             } else {
-                response = await questionApi.createQuestion(payload);
+                response = await questionApi.createQuestion(formData);
             }
 
             if (response.success) {
@@ -332,13 +369,47 @@ export default function QuestionFormPage() {
         >
             <section className="flex-1 space-y-4 w-full">
                 <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest">Question Text</label>
-                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-1 overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all h-[180px]">
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-full bg-transparent border-none text-lg leading-relaxed focus:ring-0 p-6 text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700 resize-none"
-                        placeholder="Enter your question here..."
-                    />
+
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+                    <div className="flex flex-col md:flex-row min-h-[220px]">
+                        <textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="flex-1 bg-transparent border-none text-xl leading-relaxed focus:ring-0 p-8 text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700 resize-none min-h-[200px]"
+                            placeholder="Tuliskan pertanyaan Anda di sini..."
+                        />
+
+                        <div className="md:w-72 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 p-6 bg-slate-50/50 dark:bg-slate-800/30 shrink-0 flex flex-col items-center justify-center">
+                            <div
+                                onClick={() => setIsMediaModalOpen(true)}
+                                className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-primary hover:bg-white dark:hover:bg-slate-800 transition-all overflow-hidden relative"
+                            >
+                                {questionPreviewUrl || questionMedia?.url ? (
+                                    <>
+                                        <img
+                                            src={questionPreviewUrl || questionMedia?.url}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <span className="text-white text-xs font-bold uppercase tracking-wider">Change Image</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="size-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                                            <span className="material-symbols-outlined text-3xl">image</span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">Add Question Image</span>
+                                    </>
+                                )}
+                            </div>
+
+                            <p className="mt-4 text-[10px] text-slate-400 text-center uppercase tracking-tighter">
+                                Image will appear next to the question
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -353,8 +424,17 @@ export default function QuestionFormPage() {
                 setSequenceItems={setSequenceItems}
                 essayKeywords={essayKeywords}
                 setEssayKeywords={setEssayKeywords}
+                isEditing={isEditing}
             />
 
+            <MediaModal
+                isOpen={isMediaModalOpen}
+                onClose={() => setIsMediaModalOpen(false)}
+                title="Question Image"
+                imageUrl={questionPreviewUrl || questionMedia?.url}
+                onUpload={handleQuestionMediaUpload}
+                onDelete={handleQuestionMediaDelete}
+            />
         </QuestionFormLayout>
     );
 }

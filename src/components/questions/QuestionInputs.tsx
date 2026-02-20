@@ -17,6 +17,7 @@ interface QuestionInputsProps {
     setSequenceItems: (items: any[]) => void;
     essayKeywords: string;
     setEssayKeywords: (keywords: string) => void;
+    isEditing?: boolean;
 }
 
 export default function QuestionInputs({
@@ -29,13 +30,14 @@ export default function QuestionInputs({
     sequenceItems,
     setSequenceItems,
     essayKeywords,
-    setEssayKeywords
+    setEssayKeywords,
+    isEditing
 }: QuestionInputsProps) {
     switch (type) {
         case 'multiple_choice':
-            return <MultipleChoiceInput options={options} onChange={setOptions} onDeleteMedia={handleDeleteOptionMedia} />;
+            return <MultipleChoiceInput options={options} onChange={setOptions} onDeleteMedia={handleDeleteOptionMedia} isEditing={isEditing} />;
         case 'multiple_selection':
-            return <MultipleSelectionInput options={options} onChange={setOptions} />;
+            return <MultipleSelectionInput options={options} onChange={setOptions} onDeleteMedia={handleDeleteOptionMedia} isEditing={isEditing} />;
         case 'true_false':
             return <TrueFalseInput options={options} onChange={setOptions} />;
         case 'short_answer':

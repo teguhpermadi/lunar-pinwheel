@@ -629,11 +629,22 @@ export const questionApi = {
         const response = await api.get(`/questions/${id}`);
         return response.data;
     },
-    createQuestion: async (data: StoreQuestionRequest | any) => {
-        const response = await api.post('/questions', data);
+    createQuestion: async (data: StoreQuestionRequest | FormData | any) => {
+        const isFormData = data instanceof FormData;
+        const response = await api.post('/questions', data, {
+            headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+        });
         return response.data;
     },
-    updateQuestion: async (id: string, data: any) => {
+    updateQuestion: async (id: string, data: any | FormData) => {
+        if (data instanceof FormData) {
+            // Laravel works best with POST + _method=PUT for multipart updates
+            data.append('_method', 'PUT');
+            const response = await api.post(`/questions/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return response.data;
+        }
         const response = await api.put(`/questions/${id}`, data);
         return response.data;
     },
@@ -663,6 +674,24 @@ export const questionApi = {
     },
     deleteMedia: async (id: string, mediaId: string) => {
         const response = await api.delete(`/questions/${id}/media/${mediaId}`);
+        return response.data;
+    },
+    uploadMedia: async (id: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/questions/${id}/media`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
+        return response.data;
+    },
+    replaceMedia: async (id: string, mediaId: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/questions/${id}/media/${mediaId}`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
         return response.data;
     }
 };
@@ -849,6 +878,24 @@ export const optionsApi = {
     },
     deleteMedia: async (id: string, mediaId: string) => {
         const response = await api.delete(`/options/${id}/media/${mediaId}`);
+        return response.data;
+    },
+    uploadMedia: async (id: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/options/${id}/media`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
+        return response.data;
+    },
+    replaceMedia: async (id: string, mediaId: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/options/${id}/media/${mediaId}`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
         return response.data;
     }
 };
