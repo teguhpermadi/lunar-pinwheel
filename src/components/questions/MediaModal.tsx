@@ -25,7 +25,7 @@ export default function MediaModal({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            onUpload(file);
+            onUpload?.(file);
         }
         e.target.value = '';
     };
