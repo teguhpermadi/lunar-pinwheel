@@ -198,6 +198,23 @@ export default function QuestionFormPage() {
         setIsMediaModalOpen(false);
     };
 
+    const handlePaste = (e: React.ClipboardEvent) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    handleQuestionMediaUpload(file);
+                    // Prevent pasting the image as text if supported by browser/target
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
+    };
+
     const handleQuestionMediaDelete = async () => {
         setIsMediaModalOpen(false);
         if (pendingQuestionImage) {
@@ -375,6 +392,7 @@ export default function QuestionFormPage() {
                         <textarea
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
+                            onPaste={handlePaste}
                             className="flex-1 bg-transparent border-none text-xl leading-relaxed focus:ring-0 p-8 text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700 resize-none min-h-[200px]"
                             placeholder="Tuliskan pertanyaan Anda di sini..."
                         />

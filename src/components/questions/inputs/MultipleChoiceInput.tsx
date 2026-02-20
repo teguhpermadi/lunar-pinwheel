@@ -82,6 +82,22 @@ export default function MultipleChoiceInput({ options, onChange, onDeleteMedia }
         setSelectedOptionUuid(null);
     };
 
+    const handlePaste = (uuid: string, e: React.ClipboardEvent) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    handleFileChange(uuid, file);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
+    };
+
     const handleRemoveMedia = (uuid: string) => {
         const option = options.find((o: Option) => o.uuid === uuid);
         if (!option) return;
@@ -138,6 +154,7 @@ export default function MultipleChoiceInput({ options, onChange, onDeleteMedia }
                                         type="text"
                                         value={option.content}
                                         onChange={(e) => handleContentChange(option.uuid, e.target.value)}
+                                        onPaste={(e) => handlePaste(option.uuid, e)}
                                         placeholder="Option text..."
                                         className="flex-1 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary transition-all"
                                     />
