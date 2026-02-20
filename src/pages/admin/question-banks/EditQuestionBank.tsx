@@ -19,7 +19,6 @@ export default function EditQuestionBank() {
     const [bank, setBank] = useState<QuestionBank | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoadingBank, setIsLoadingBank] = useState(true);
-    const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -55,7 +54,7 @@ export default function EditQuestionBank() {
 
     // Scroll to highlighted question if passed in state
     useEffect(() => {
-        if (location.state?.highlightQuestionId && questions.length > 0) {
+        if (!isLoadingBank && location.state?.highlightQuestionId && questions.length > 0) {
             const highlightId = location.state.highlightQuestionId as string;
             // Check if question is in current list
             const questionIndex = questions.findIndex(q => q.id === highlightId);
@@ -70,15 +69,13 @@ export default function EditQuestionBank() {
                         element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
                         setTimeout(() => element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
 
-                        // Clear state to prevent re-scroll? 
-                        // Actually React Router history state persists. We should probably clear it.
-                        // useNavigate(currentPath, { replace: true, state: {} })
+                        // Clear state to prevent re-scroll
                         navigate(location.pathname, { replace: true, state: {} });
                     }
                 }, 100);
             }
         }
-    }, [questions, location.state, navigate, location.pathname]);
+    }, [questions, location.state, navigate, location.pathname, isLoadingBank]);
 
     const scrollToQuestion = async (index: number) => {
         const targetQuestion = questions[index];
@@ -324,16 +321,10 @@ export default function EditQuestionBank() {
                                 );
                             })}
 
-                            {isLoadingQuestions && (
-                                <div className="space-y-6">
-                                    <Skeleton className="h-48 w-full rounded-2xl" />
-                                    <Skeleton className="h-48 w-full rounded-2xl" />
-                                </div>
-                            )}
 
 
 
-                            {questions.length === 0 && !isLoadingQuestions && (
+                            {questions.length === 0 && (
                                 <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
                                     <div className="size-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
                                         <span className="material-symbols-outlined text-3xl">library_add</span>
