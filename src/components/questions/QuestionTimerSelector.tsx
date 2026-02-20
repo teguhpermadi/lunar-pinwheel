@@ -7,6 +7,7 @@ interface QuestionTimerSelectorProps {
     questionId?: string;
     initialTimer: number;
     onTimerChange?: (newTimer: number) => void;
+    disabled?: boolean;
     manual?: boolean;
 }
 
@@ -25,7 +26,7 @@ const timerOptions = [
     { value: 900000, label: '15 Menit' },
 ];
 
-export default function QuestionTimerSelector({ questionId, initialTimer, onTimerChange, manual = false }: QuestionTimerSelectorProps) {
+export default function QuestionTimerSelector({ questionId, initialTimer, onTimerChange, disabled = false, manual = false }: QuestionTimerSelectorProps) {
     const [timer, setTimer] = useState<number>(initialTimer);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -124,15 +125,15 @@ export default function QuestionTimerSelector({ questionId, initialTimer, onTime
         <div className="relative inline-block" ref={containerRef}>
             <button
                 type="button"
-                onClick={() => !isLoading && setIsOpen(!isOpen)}
+                onClick={() => !isLoading && !disabled && setIsOpen(!isOpen)}
                 className={`
                     group relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all duration-200 outline-none
                     bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800
-                    hover:bg-blue-100 dark:hover:bg-blue-900/40
-                    ${isLoading ? 'opacity-70 cursor-wait' : 'cursor-pointer'}
+                    ${disabled ? 'opacity-80 cursor-default' : 'hover:bg-blue-100 dark:hover:bg-blue-900/40 cursor-pointer'}
+                    ${isLoading ? 'opacity-70 cursor-wait' : ''}
                     ${isOpen ? 'ring-2 ring-offset-1 ring-primary/20 dark:ring-offset-slate-900' : ''}
                 `}
-                disabled={isLoading}
+                disabled={isLoading || disabled}
             >
                 {isLoading ? (
                     <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
@@ -140,13 +141,15 @@ export default function QuestionTimerSelector({ questionId, initialTimer, onTime
                     <span className="material-symbols-outlined text-[14px]">schedule</span>
                 )}
                 <span>{formatLabel(timer)}</span>
-                <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                    expand_more
-                </span>
+                {!disabled && (
+                    <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                        expand_more
+                    </span>
+                )}
             </button>
 
             <AnimatePresence>
-                {isOpen && (
+                {isOpen && !disabled && (
                     <motion.div
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}

@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { questionBankApi, questionApi, QuestionBank, Question } from '@/lib/api';
+import { questionBankApi, QuestionBank, Question } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import QuestionDifficultySelector from '@/components/questions/QuestionDifficultySelector';
+import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector';
+import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
+import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
+import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 
 export default function ShowQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -18,21 +23,16 @@ export default function ShowQuestionBank() {
             if (!id) return;
             setIsLoading(true);
             try {
-                const [bankRes, questionsRes] = await Promise.all([
-                    questionBankApi.getQuestionBank(id),
-                    questionApi.getQuestions({ question_bank_id: id, per_page: 100 }) // Fetch all for review/print
-                ]);
-
-                if (bankRes.success) {
-                    setBank(bankRes.data);
+                const response = await questionBankApi.getQuestionBank(id);
+                if (response.success) {
+                    setBank(response.data);
+                    // Use questions from the bank response (includes options relation)
+                    if (response.data.questions) {
+                        setQuestions(response.data.questions);
+                    }
                 } else {
                     Swal.fire('Error', 'Failed to load Question Bank', 'error');
                     navigate('/admin/question-banks');
-                }
-
-                if (questionsRes.success) {
-                    const result = questionsRes.data as any;
-                    setQuestions(Array.isArray(result) ? result : (result.data || []));
                 }
             } catch (error) {
                 console.error("Failed to fetch data", error);
@@ -90,10 +90,13 @@ export default function ShowQuestionBank() {
                         <span className="material-symbols-outlined text-lg">print</span>
                         Print Questions
                     </button>
-                    {/* <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">save</span>
-                        Save Exam Config
-                    </button> */}
+                    <button
+                        onClick={() => navigate(`/admin/question-banks/${id}`)}
+                        className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-lg">edit</span>
+                        Edit Question Bank
+                    </button>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
                     <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
                         <img
@@ -110,54 +113,54 @@ export default function ShowQuestionBank() {
                 <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/30 scroll-smooth relative print-full-width no-scrollbar">
                     <div className="max-w-4xl mx-auto p-8 space-y-8 pb-10 print-full-width">
                         {questions.map((question, index) => (
-                            <div key={question.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden break-inside-avoid">
-                                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div
+                                key={question.id}
+                                className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 break-inside-avoid"
+                            >
+                                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start rounded-t-2xl">
                                     <div className="flex gap-4 items-center">
                                         <span className="size-8 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">
                                             {index + 1}
                                         </span>
-                                        <span className="px-2 py-1 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-bold uppercase tracking-wider">
-                                            {question.type}
-                                        </span>
+                                        <QuestionTypeSelector
+                                            questionId={question.id}
+                                            initialType={question.type}
+                                            disabled={true}
+                                        />
                                     </div>
                                 </div>
-                                <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-6 items-center">
-                                    <div className="flex items-center gap-2 opacity-75">
+
+                                <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center">
+                                    <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined text-slate-400 text-sm">bar_chart</span>
-                                        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-tight mr-1">Difficulty:</label>
-                                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.difficulty}</span>
+                                        <QuestionDifficultySelector
+                                            questionId={question.id}
+                                            initialDifficulty={question.difficulty}
+                                            disabled={true}
+                                        />
                                     </div>
                                     <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                                    <div className="flex items-center gap-2 opacity-75">
-                                        <span className="material-symbols-outlined text-slate-400 text-sm">schedule</span>
-                                        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-tight mr-1">Time:</label>
-                                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.timer}s</span>
-                                    </div>
+                                    <QuestionTimerSelector
+                                        questionId={question.id}
+                                        initialTimer={question.timer}
+                                        disabled={true}
+                                    />
                                     <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-                                    <div className="flex items-center gap-2 opacity-75">
-                                        <span className="material-symbols-outlined text-slate-400 text-sm">grade</span>
-                                        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-tight mr-1">Score:</label>
-                                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{question.score} pts</span>
-                                    </div>
+                                    <QuestionScoreSelector
+                                        questionId={question.id}
+                                        initialScore={question.score}
+                                        disabled={true}
+                                    />
                                 </div>
-                                <div className="p-6">
-                                    <h3
+
+                                <div className="p-6 rounded-b-2xl">
+                                    <div
                                         className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
                                         dangerouslySetInnerHTML={{ __html: question.content }}
                                     />
-                                    {question.type === 'multiple_choice' && question.options && (
-                                        <div className="space-y-3">
-                                            {question.options.map((opt) => (
-                                                <div key={opt.id} className={`flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border ${opt.is_correct ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700'}`}>
-                                                    <span className={`size-6 rounded-full border-2 ${opt.is_correct ? 'border-emerald-500 text-emerald-500' : 'border-slate-300'} flex items-center justify-center text-[10px] font-bold`}>
-                                                        {opt.option_key}
-                                                    </span>
-                                                    <div className="text-sm" dangerouslySetInnerHTML={{ __html: opt.content }} />
-                                                    {opt.is_correct && <span className="ml-auto material-symbols-outlined text-emerald-500 text-lg">check_circle</span>}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    <div className="mt-6">
+                                        <QuestionOptionDisplay question={question} />
+                                    </div>
                                 </div>
                             </div>
                         ))}

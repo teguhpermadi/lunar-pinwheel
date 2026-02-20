@@ -7,6 +7,7 @@ interface QuestionDifficultySelectorProps {
     questionId?: string;
     initialDifficulty: string;
     onDifficultyChange?: (newDifficulty: string) => void;
+    disabled?: boolean;
     manual?: boolean;
 }
 
@@ -33,7 +34,7 @@ const difficultyConfig = {
 
 type DifficultyKey = keyof typeof difficultyConfig;
 
-export default function QuestionDifficultySelector({ questionId, initialDifficulty, onDifficultyChange, manual = false }: QuestionDifficultySelectorProps) {
+export default function QuestionDifficultySelector({ questionId, initialDifficulty, onDifficultyChange, disabled = false, manual = false }: QuestionDifficultySelectorProps) {
     const [difficulty, setDifficulty] = useState<DifficultyKey>(initialDifficulty as DifficultyKey || 'mudah');
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -128,15 +129,15 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
         <div className="relative inline-block" ref={containerRef}>
             <button
                 type="button"
-                onClick={() => !isLoading && setIsOpen(!isOpen)}
+                onClick={() => !isLoading && !disabled && setIsOpen(!isOpen)}
                 className={`
                     group relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all duration-200 outline-none
                     ${currentConfig.color}
-                    ${currentConfig.hover}
-                    ${isLoading ? 'opacity-70 cursor-wait' : 'cursor-pointer'}
+                    ${disabled ? 'opacity-80 cursor-default' : currentConfig.hover + ' cursor-pointer'}
+                    ${isLoading ? 'opacity-70 cursor-wait' : ''}
                     ${isOpen ? 'ring-2 ring-offset-1 ring-primary/20 dark:ring-offset-slate-900' : ''}
                 `}
-                disabled={isLoading}
+                disabled={isLoading || disabled}
             >
                 {isLoading ? (
                     <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
@@ -144,13 +145,15 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
                     <span className="material-symbols-outlined text-[14px]">{currentConfig.icon}</span>
                 )}
                 <span>{currentConfig.label}</span>
-                <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                    expand_more
-                </span>
+                {!disabled && (
+                    <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                        expand_more
+                    </span>
+                )}
             </button>
 
             <AnimatePresence>
-                {isOpen && (
+                {isOpen && !disabled && (
                     <motion.div
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
