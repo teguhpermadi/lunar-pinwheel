@@ -8,13 +8,14 @@ import EssayDisplay from './EssayDisplay';
 
 interface QuestionOptionDisplayProps {
     question: Question;
+    onMediaClick?: (url: string) => void;
 }
 
-export default function QuestionOptionDisplay({ question }: QuestionOptionDisplayProps) {
+export default function QuestionOptionDisplay({ question, onMediaClick }: QuestionOptionDisplayProps) {
     switch (question.type) {
         case 'multiple_choice':
         case 'multiple_selection':
-            return <MultipleChoiceDisplay options={question.options} type={question.type} />;
+            return <MultipleChoiceDisplay options={question.options} type={question.type} onMediaClick={onMediaClick} />;
 
         case 'true_false':
             return <TrueFalseDisplay options={question.options} />;

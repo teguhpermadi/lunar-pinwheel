@@ -10,6 +10,7 @@ import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector'
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
+import MediaModal from '@/components/questions/MediaModal';
 
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ export default function EditQuestionBank() {
     const [isLoadingBank, setIsLoadingBank] = useState(true);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -308,13 +310,30 @@ export default function EditQuestionBank() {
                                         </div>
 
                                         <div className="p-6 rounded-b-2xl">
-                                            <div
-                                                className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
-                                                dangerouslySetInnerHTML={{ __html: question.content }}
-                                            />
+                                            <div className="flex gap-6 mb-6">
+                                                <div
+                                                    className="flex-1 font-semibold text-slate-800 dark:text-slate-100 leading-relaxed"
+                                                    dangerouslySetInnerHTML={{ __html: question.content }}
+                                                />
+                                                {question.media?.content?.[0] && (
+                                                    <div
+                                                        onClick={() => setPreviewImageUrl(question.media?.content?.[0].url || null)}
+                                                        className="size-24 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 cursor-zoom-in hover:border-primary/50 transition-all shadow-sm"
+                                                    >
+                                                        <img
+                                                            src={question.media.content[0].url}
+                                                            alt="Question"
+                                                            className="size-full object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
                                             {/* Options */}
                                             <div className="mt-6">
-                                                <QuestionOptionDisplay question={question} />
+                                                <QuestionOptionDisplay
+                                                    question={question}
+                                                    onMediaClick={(url) => setPreviewImageUrl(url)}
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -390,6 +409,12 @@ export default function EditQuestionBank() {
                 onSaved={(updatedBank) => {
                     setBank(updatedBank);
                 }}
+            />
+            <MediaModal
+                isOpen={!!previewImageUrl}
+                onClose={() => setPreviewImageUrl(null)}
+                imageUrl={previewImageUrl}
+                readOnly={true}
             />
         </div>
     );

@@ -22,6 +22,15 @@ api.interceptors.request.use((config) => {
 
 // --- Common Interfaces ---
 
+export interface MediaItem {
+    id: string;
+    name: string;
+    file_name: string;
+    url: string;
+    mime_type: string;
+    size: number;
+}
+
 export interface PaginationMeta {
     current_page: number;
     from: number | null;
@@ -586,7 +595,9 @@ export interface QuestionOption {
         match_with?: string;
         [key: string]: any;
     };
-    media?: { option_media?: string };
+    media?: {
+        option_media?: MediaItem[];
+    };
 }
 
 export interface Question {
@@ -598,7 +609,9 @@ export interface Question {
     score: number;
     hint?: string;
     tags?: string; // or array? Schema says string for QuestionResource, array in StoreRequest? Resource: tags: string.
-    media?: { content?: string };
+    media?: {
+        content?: MediaItem[];
+    };
     options?: QuestionOption[];
     created_at: string;
     updated_at: string;
