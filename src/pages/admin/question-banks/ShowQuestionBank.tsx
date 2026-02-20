@@ -90,10 +90,10 @@ export default function ShowQuestionBank() {
                         <span className="material-symbols-outlined text-lg">print</span>
                         Print Questions
                     </button>
-                    <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+                    {/* <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-lg">save</span>
                         Save Exam Config
-                    </button>
+                    </button> */}
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
                     <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
                         <img
