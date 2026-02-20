@@ -30,7 +30,12 @@ export default function QuestionOptionDisplay({ question }: QuestionOptionDispla
             return <ShortAnswerDisplay options={question.options} />;
 
         case 'essay':
-            return <EssayDisplay keywords={(question as any).keywords} />;
+            return (
+                <EssayDisplay
+                    options={question.options}
+                    keywords={(question as any).keywords}
+                />
+            );
 
         case 'arrange_words':
             return <div className="text-sm italic text-slate-400">Arrange words display coming soon.</div>;

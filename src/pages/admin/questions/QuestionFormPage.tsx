@@ -16,8 +16,8 @@ export default function QuestionFormPage() {
     // Core Question State
     const [type, setType] = useState('multiple_choice');
     const [difficulty, setDifficulty] = useState('mudah');
-    const [timer, setTimer] = useState(60000);
-    const [score, setScore] = useState(5);
+    const [timer, setTimer] = useState(30000);
+    const [score, setScore] = useState(1);
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
 
@@ -65,9 +65,11 @@ export default function QuestionFormPage() {
             setOptions([
                 { key: 'SA1', content: '', is_correct: true, uuid: crypto.randomUUID() }
             ]);
+        } else if (newType === 'essay') {
+            setOptions([]);
+            setEssayKeywords('');
         }
     };
-
     const handleTypeChange = (newType: string) => {
         setType(newType);
         initializeOptionsForType(newType);
@@ -126,6 +128,11 @@ export default function QuestionFormPage() {
                     });
 
                     setMatchingPairs(Array.from(pairsMap.values()));
+                } else if (q.type === 'essay') {
+                    const essayOption = q.options.find((o: any) => o.option_key === 'ESSAY');
+                    if (essayOption) {
+                        setEssayKeywords(essayOption.content);
+                    }
                 }
             } else {
                 throw new Error(response.message || 'Failed to load question');
