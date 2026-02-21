@@ -45,6 +45,7 @@ export default function QuestionFormPage() {
         { uuid: crypto.randomUUID(), content: '', order: 2 },
     ]);
     const [essayKeywords, setEssayKeywords] = useState('');
+    const [mathContent, setMathContent] = useState('');
 
     // Load question data if editing
     useEffect(() => {
@@ -78,6 +79,9 @@ export default function QuestionFormPage() {
         } else if (newType === 'essay') {
             setOptions([]);
             setEssayKeywords('');
+        } else if (newType === 'math_input') {
+            setOptions([]);
+            setMathContent('');
         }
     };
     const handleTypeChange = (newType: string) => {
@@ -152,6 +156,11 @@ export default function QuestionFormPage() {
                     const essayOption = q.options.find((o: any) => o.option_key === 'ESSAY');
                     if (essayOption) {
                         setEssayKeywords(essayOption.content);
+                    }
+                } else if (q.type === 'math_input') {
+                    const mathOption = q.options.find((o: any) => o.option_key === 'MATH');
+                    if (mathOption) {
+                        setMathContent(mathOption.content);
                     }
                 }
             } else {
@@ -320,6 +329,9 @@ export default function QuestionFormPage() {
                 case 'essay':
                     formData.append('keywords', essayKeywords);
                     break;
+                case 'math_input':
+                    formData.append('math_content', mathContent);
+                    break;
             }
 
             let response;
@@ -442,6 +454,8 @@ export default function QuestionFormPage() {
                 setSequenceItems={setSequenceItems}
                 essayKeywords={essayKeywords}
                 setEssayKeywords={setEssayKeywords}
+                mathContent={mathContent}
+                setMathContent={setMathContent}
                 isEditing={isEditing}
             />
 

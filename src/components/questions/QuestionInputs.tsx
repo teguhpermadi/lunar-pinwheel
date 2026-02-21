@@ -5,6 +5,7 @@ import ShortAnswerInput from '@/components/questions/inputs/ShortAnswerInput';
 import MatchingInput from '@/components/questions/inputs/MatchingInput';
 import SequenceInput from '@/components/questions/inputs/SequenceInput';
 import EssayInput from '@/components/questions/inputs/EssayInput';
+import MathInput from '@/components/questions/inputs/MathInput';
 
 interface QuestionInputsProps {
     type: string;
@@ -17,6 +18,8 @@ interface QuestionInputsProps {
     setSequenceItems: (items: any[]) => void;
     essayKeywords: string;
     setEssayKeywords: (keywords: string) => void;
+    mathContent: string;
+    setMathContent: (content: string) => void;
     isEditing?: boolean;
 }
 
@@ -31,6 +34,8 @@ export default function QuestionInputs({
     setSequenceItems,
     essayKeywords,
     setEssayKeywords,
+    mathContent,
+    setMathContent,
     isEditing
 }: QuestionInputsProps) {
     switch (type) {
@@ -48,6 +53,8 @@ export default function QuestionInputs({
             return <SequenceInput items={sequenceItems} onChange={setSequenceItems} />;
         case 'essay':
             return <EssayInput keywords={essayKeywords} onKeywordsChange={setEssayKeywords} />;
+        case 'math_input':
+            return <MathInput value={mathContent} onChange={setMathContent} />;
         default:
             return null;
     }

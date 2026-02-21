@@ -1,11 +1,11 @@
 import { Question } from '@/lib/api';
-import MathRenderer from '@/components/ui/MathRenderer';
 import MultipleChoiceDisplay from './MultipleChoiceDisplay';
 import TrueFalseDisplay from './TrueFalseDisplay';
 import MatchingDisplay from './MatchingDisplay';
 import SequenceDisplay from './SequenceDisplay';
 import ShortAnswerDisplay from './ShortAnswerDisplay';
 import EssayDisplay from './EssayDisplay';
+import MathInputDisplay from './MathInputDisplay';
 
 interface QuestionOptionDisplayProps {
     question: Question;
@@ -43,7 +43,7 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
             return <div className="text-sm italic text-slate-400">Arrange words display coming soon.</div>;
 
         case 'math_input':
-            return <MathRenderer content={question.content} />;
+            return <MathInputDisplay options={question.options} />;
 
         default:
             return <div className="text-sm italic text-slate-400">Preview not available for this question type.</div>;
