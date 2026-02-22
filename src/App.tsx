@@ -25,6 +25,7 @@ import QuestionFormPage from "@/pages/admin/questions/QuestionFormPage"
 import ExamManagementPage from "@/pages/admin/exams/ExamManagementPage"
 import ExamLiveScorePage from "@/pages/admin/exams/ExamLiveScorePage"
 import EditExamPage from "@/pages/admin/exams/EditExamPage"
+import StudentExamsPage from "@/pages/student/StudentExamsPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -50,6 +51,17 @@ function RoleBasedDashboard() {
   }
 
   return <StudentLayout />;
+}
+
+// Role guard for specific routes
+function RequireRole({ role }: { role: 'admin' | 'teacher' | 'student' }) {
+  const { user } = useAuth();
+
+  if (user?.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 }
 
 // Component to decide which dashboard page to show inside the layout
@@ -114,7 +126,10 @@ function App() {
               <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
               <Route path="admin/exams/:id/edit" element={<EditExamPage />} />
 
-              <Route path="exams" element={<div>Exams Page</div>} />
+              {/* Student Only Routes */}
+              <Route element={<RequireRole role="student" />}>
+                <Route path="exams" element={<StudentExamsPage />} />
+              </Route>
             </Route>
 
             {/* Standalone Routes (No Sidebar) */}
