@@ -153,7 +153,7 @@ export default function ExamManagementPage() {
                                 <th className="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Exam Title</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject Name</th>
-                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Grade / Year</th>
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Target Classrooms</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Exam Status</th>
                                 <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                             </tr>
@@ -201,9 +201,27 @@ export default function ExamManagementPage() {
                                             </span>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                                                {exam.academic_year?.year || 'N/A'}
-                                            </span>
+                                            <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+                                                {exam.classrooms && exam.classrooms.length > 0 ? (
+                                                    <>
+                                                        {exam.classrooms.slice(0, 2).map(cls => (
+                                                            <span key={cls.id} className="px-2.5 py-1 rounded-lg text-[9px] font-black bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 uppercase border border-indigo-100 dark:border-indigo-500/20">
+                                                                {cls.name}
+                                                            </span>
+                                                        ))}
+                                                        {exam.classrooms.length > 2 && (
+                                                            <span className="px-2 py-1 rounded-lg text-[9px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase border border-slate-200 dark:border-slate-700">
+                                                                +{exam.classrooms.length - 2} More
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic font-medium">No Classrooms</span>
+                                                )}
+                                            </div>
+                                            <div className="mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                {exam.academic_year?.year || 'Unknown Year'}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-5 text-center">
                                             {getStatusBadge(exam)}

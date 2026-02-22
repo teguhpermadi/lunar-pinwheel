@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { questionBankApi, examApi, QuestionBank, Question } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { questionBankApi, examApi, classroomApi, QuestionBank, Question, Classroom } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,7 +59,8 @@ export default function ShowQuestionBank() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [availableClassrooms, setAvailableClassrooms] = useState<Classroom[]>([]);
+    const [selectedClassroomIds, setSelectedClassroomIds] = useState<string[]>([]);
     // Form State
     const [formData, setFormData] = useState({
         title: '',
@@ -91,6 +93,32 @@ export default function ShowQuestionBank() {
             return;
         }
 
+        // Validation Rules
+        if (!formData.title.trim()) {
+            Swal.fire('Error', 'Exam title is required', 'error');
+            return;
+        }
+
+        if (formData.duration <= 0) {
+            Swal.fire('Error', 'Duration must be greater than 0 minutes', 'error');
+            return;
+        }
+
+        if (formData.passing_score < 0 || formData.passing_score > 100) {
+            Swal.fire('Error', 'Passing score must be between 0 and 100', 'error');
+            return;
+        }
+
+        if (formData.max_attempts !== null && formData.max_attempts < 0) {
+            Swal.fire('Error', 'Max attempts cannot be negative', 'error');
+            return;
+        }
+
+        if (selectedClassroomIds.length === 0) {
+            Swal.fire('Error', 'Please select at least one target classroom', 'error');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const payload = {
@@ -113,6 +141,7 @@ export default function ShowQuestionBank() {
                 is_visible_hint: formData.is_visible_hint,
                 start_time: formData.start_time || null,
                 end_time: formData.end_time || null,
+                classroom_ids: selectedClassroomIds,
             };
 
             const response = await examApi.createExam(payload);
@@ -164,6 +193,28 @@ export default function ShowQuestionBank() {
 
         fetchData();
     }, [id, navigate]);
+
+    useEffect(() => {
+        const fetchClassrooms = async () => {
+            if (!selectedYearId) return;
+            try {
+                const response = await classroomApi.getClassrooms({ academic_year_id: selectedYearId });
+                if (response.success) {
+                    setAvailableClassrooms(response.data.data || []);
+                    // Auto-select the classroom belonging to the subject if exists
+                    if (bank?.subject?.classroom_id) {
+                        setSelectedClassroomIds([bank.subject.classroom_id]);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch classrooms", error);
+            }
+        };
+
+        if (bank) {
+            fetchClassrooms();
+        }
+    }, [selectedYearId, bank]);
 
     if (isLoading) {
         return (
@@ -303,7 +354,7 @@ export default function ShowQuestionBank() {
                                     <span className="material-symbols-outlined text-slate-400 text-lg">info</span>
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Basic Information</h3>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Exam Title</label>
                                         <input
@@ -314,6 +365,35 @@ export default function ShowQuestionBank() {
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         />
                                     </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Target Classrooms</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableClassrooms.map(classroom => (
+                                                <button
+                                                    key={classroom.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (selectedClassroomIds.includes(classroom.id)) {
+                                                            setSelectedClassroomIds(selectedClassroomIds.filter(id => id !== classroom.id));
+                                                        } else {
+                                                            setSelectedClassroomIds([...selectedClassroomIds, classroom.id]);
+                                                        }
+                                                    }}
+                                                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all ${selectedClassroomIds.includes(classroom.id)
+                                                        ? 'bg-primary border-primary text-white shadow-md shadow-primary/20'
+                                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-primary/40'
+                                                        }`}
+                                                >
+                                                    {classroom.name}
+                                                </button>
+                                            ))}
+                                            {availableClassrooms.length === 0 && (
+                                                <p className="text-[10px] text-slate-400 italic">No classrooms available for this academic year</p>
+                                            )}
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-3">
                                         <div>
                                             <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Type</label>
@@ -520,11 +600,14 @@ export default function ShowQuestionBank() {
                     <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                         <div className="flex items-center gap-3">
                             <button
+                                disabled={isSubmitting || availableClassrooms.length === 0}
                                 onClick={handleFinalizeExam}
-                                disabled={isSubmitting}
-                                className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-bold hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed group"
                             >
-                                {isSubmitting ? 'Processing...' : 'Finalize Exam'}
+                                <span className={cn("material-symbols-outlined", isSubmitting && "animate-spin")}>
+                                    {isSubmitting ? 'sync' : 'rocket_launch'}
+                                </span>
+                                {isSubmitting ? 'Processing...' : availableClassrooms.length === 0 ? 'No Classrooms Available' : 'Finalize & Create Exam'}
                             </button>
                         </div>
                     </div>

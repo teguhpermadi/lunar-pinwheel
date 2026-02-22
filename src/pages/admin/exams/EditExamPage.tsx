@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { examApi, Exam } from '@/lib/api';
+import { examApi, Exam, Classroom, classroomApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
+// import { useAuth } from '@/contexts/AuthContext';
 
 type Tab = 'general' | 'behavior' | 'scheduling';
 
@@ -51,6 +52,7 @@ export default function EditExamPage() {
     const [exam, setExam] = useState<Exam | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [availableClassrooms, setAvailableClassrooms] = useState<Classroom[]>([]);
 
     useEffect(() => {
         const fetchExam = async () => {
@@ -58,7 +60,11 @@ export default function EditExamPage() {
             try {
                 const response = await examApi.getExam(id);
                 if (response.success) {
-                    setExam(response.data);
+                    const data = response.data;
+                    if (data.classrooms && !data.classroom_ids) {
+                        data.classroom_ids = data.classrooms.map((c: any) => c.id);
+                    }
+                    setExam(data);
                 }
             } catch (error) {
                 console.error('Error fetching exam:', error);
@@ -70,8 +76,57 @@ export default function EditExamPage() {
         fetchExam();
     }, [id]);
 
+    useEffect(() => {
+        const fetchAvailableClassrooms = async () => {
+            if (!exam?.academic_year?.id) return;
+            try {
+                const response = await classroomApi.getClassrooms({
+                    academic_year_id: exam.academic_year.id,
+                    per_page: 100
+                });
+                if (response.success) {
+                    const data = response.data;
+                    setAvailableClassrooms(Array.isArray(data) ? data : (data.data || []));
+                }
+            } catch (error) {
+                console.error('Error fetching classrooms:', error);
+            }
+        };
+
+        if (exam) {
+            fetchAvailableClassrooms();
+        }
+    }, [exam?.academic_year?.id]);
+
     const handleSave = async () => {
         if (!id || !exam) return;
+
+        // Validation Rules
+        if (!exam.title.trim()) {
+            Swal.fire('Error', 'Exam title is required', 'error');
+            return;
+        }
+
+        if (exam.duration <= 0) {
+            Swal.fire('Error', 'Duration must be greater than 0 minutes', 'error');
+            return;
+        }
+
+        if (exam.passing_score < 0 || exam.passing_score > 100) {
+            Swal.fire('Error', 'Passing score must be between 0 and 100', 'error');
+            return;
+        }
+
+        if (exam.max_attempts !== null && exam.max_attempts < 0) {
+            Swal.fire('Error', 'Max attempts cannot be negative', 'error');
+            return;
+        }
+
+        if (!exam.classroom_ids || exam.classroom_ids.length === 0) {
+            Swal.fire('Error', 'Please select at least one target classroom', 'error');
+            return;
+        }
+
         setIsSaving(true);
         try {
             const response = await examApi.updateExam(id, exam);
@@ -155,13 +210,13 @@ export default function EditExamPage() {
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={isSaving}
+                        disabled={isSaving || !exam.classroom_ids || exam.classroom_ids.length === 0}
                         className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span className="material-symbols-outlined text-lg">
                             {isSaving ? 'sync' : 'save'}
                         </span>
-                        {isSaving ? 'Saving...' : 'Save Configuration'}
+                        {isSaving ? 'Saving...' : (!exam.classroom_ids || exam.classroom_ids.length === 0) ? 'Select a Classroom' : 'Save Configuration'}
                     </button>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
                     <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
@@ -241,6 +296,57 @@ export default function EditExamPage() {
                                                 </div>
                                             </div>
                                         </div>
+                                    </section>
+
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                            <span className="material-symbols-outlined text-slate-400 text-lg">groups</span>
+                                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Classrooms</h3>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {availableClassrooms.map(classroom => {
+                                                const isSelected = exam.classroom_ids?.includes(classroom.id);
+                                                return (
+                                                    <button
+                                                        key={classroom.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const currentIds = exam.classroom_ids || [];
+                                                            const newIds = isSelected
+                                                                ? currentIds.filter(id => id !== classroom.id)
+                                                                : [...currentIds, classroom.id];
+                                                            setExam(prev => prev ? { ...prev, classroom_ids: newIds } : null);
+                                                        }}
+                                                        className={cn(
+                                                            "flex flex-col p-3 rounded-2xl border transition-all text-left group",
+                                                            isSelected
+                                                                ? "bg-primary/5 border-primary shadow-sm shadow-primary/10"
+                                                                : "bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-primary/20"
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className={cn(
+                                                                "text-[10px] font-bold uppercase tracking-tight",
+                                                                isSelected ? "text-primary" : "text-slate-700 dark:text-slate-200"
+                                                            )}>
+                                                                {classroom.name}
+                                                            </span>
+                                                            {isSelected && (
+                                                                <span className="material-symbols-outlined text-primary text-sm animate-in zoom-in duration-200">check_circle</span>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[9px] text-slate-400 font-medium">Level {classroom.level}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        {!availableClassrooms.length && (
+                                            <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                <span className="material-symbols-outlined text-slate-300 text-3xl mb-2">group_off</span>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">No classrooms found</p>
+                                                <p className="text-[9px] text-slate-400 mt-1">Check academic year settings</p>
+                                            </div>
+                                        )}
                                     </section>
                                 </div>
                             )}
@@ -464,20 +570,20 @@ export default function EditExamPage() {
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
                         <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="material-symbols-outlined text-primary text-sm">vpn_key</span>
-                                    <label className="text-[10px] font-bold text-primary uppercase">Security Token</label>
-                                </div>
-                                <p className="text-3xl font-mono font-black text-primary text-center">
-                                    {exam.token || 'AUTOGEN'}
-                                </p>
-                                {exam.is_published && (
-                                    <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
-                                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        Live & Published
-                                    </div>
-                                )}
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="material-symbols-outlined text-primary text-sm">vpn_key</span>
+                                <label className="text-[10px] font-bold text-primary uppercase">Security Token</label>
                             </div>
+                            <p className="text-3xl font-mono font-black text-primary text-center">
+                                {exam.token || 'AUTOGEN'}
+                            </p>
+                            {exam.is_published && (
+                                <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
+                                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Live & Published
+                                </div>
+                            )}
+                        </div>
                         <div className="space-y-4">
                             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Primary Info</label>
@@ -517,7 +623,7 @@ export default function EditExamPage() {
                                     ))}
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </aside>

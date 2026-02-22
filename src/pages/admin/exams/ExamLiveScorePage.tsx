@@ -15,6 +15,7 @@ interface LiveScoreData {
             name: string;
             email: string;
             avatar?: string;
+            classroom?: string;
         };
         status: 'in_progress' | 'idle' | 'finished';
         start_time: string;
@@ -31,6 +32,7 @@ export default function ExamLiveScorePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [showTokenModal, setShowTokenModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('All');
 
     const fetchLiveScore = async () => {
         if (!id) return;
@@ -52,10 +54,14 @@ export default function ExamLiveScorePage() {
         return () => clearInterval(interval);
     }, [id]);
 
-    const filteredSessions = (data?.sessions || []).filter(session =>
-        session.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        session.student.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredSessions = (data?.sessions || []).filter(session => {
+        const matchesSearch = session.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            session.student.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTab = activeTab === 'All' || session.student.classroom === activeTab;
+        return matchesSearch && matchesTab;
+    });
+
+    const classroomList = data?.exam.classrooms ? data.exam.classrooms.map(c => c.name) : [];
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -150,18 +156,48 @@ export default function ExamLiveScorePage() {
                             <div className="text-right">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">Participants</p>
                                 <p className="text-xl font-bold text-slate-900 dark:text-white">
-                                    {(data?.sessions || []).length}/{(data?.sessions || []).length}
+                                    {filteredSessions.length}/{(data?.sessions || []).length}
                                 </p>
                             </div>
                         </div>
                     </div>
 
+                    {classroomList.length > 1 && (
+                        <div className="px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                            <button
+                                onClick={() => setActiveTab('All')}
+                                className={cn(
+                                    "px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
+                                    activeTab === 'All'
+                                        ? "bg-primary text-white shadow-lg shadow-primary/25"
+                                        : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                )}
+                            >
+                                All Classrooms
+                            </button>
+                            {classroomList.map((classroom: string) => (
+                                <button
+                                    key={classroom}
+                                    onClick={() => setActiveTab(classroom)}
+                                    className={cn(
+                                        "px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
+                                        activeTab === classroom
+                                            ? "bg-primary text-white shadow-lg shadow-primary/25"
+                                            : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    )}
+                                >
+                                    {classroom}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <div className="flex-1 overflow-auto p-6 scrollbar-hide">
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                                     <tr>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
+                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classroom</th>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
@@ -186,6 +222,11 @@ export default function ExamLiveScorePage() {
                                                         <p className="text-[10px] text-slate-400">{session.student.email}</p>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase border border-indigo-100 dark:border-indigo-500/20">
+                                                    {session.student.classroom || 'N/A'}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 {session.status === 'in_progress' ? (

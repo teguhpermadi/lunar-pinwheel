@@ -729,6 +729,8 @@ export interface Exam {
     passing_score: number;
     subject?: Subject;
     academic_year?: AcademicYear;
+    classrooms?: Classroom[];
+    classroom_ids?: string[];
     user?: User;
     created_at: string;
     updated_at: string;
