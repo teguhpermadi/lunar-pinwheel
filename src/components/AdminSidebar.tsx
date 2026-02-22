@@ -12,17 +12,13 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
 
     const navItems = [
         { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
-        { icon: 'class', label: 'Classrooms', path: '/admin/classrooms' },
-        { icon: 'library_books', label: 'Question Bank', path: '/admin/question-banks' },
-        { icon: 'menu_book', label: 'Courses', path: '/admin/courses' },
-        { icon: 'group', label: 'Users', path: '/admin/users' },
         { icon: 'school', label: 'Teachers', path: '/admin/teachers' },
         { icon: 'groups', label: 'Students', path: '/admin/students' },
-        { icon: 'book', label: 'Subjects', path: '/admin/subjects' },
         { icon: 'calendar_month', label: 'Academic Years', path: '/admin/academic-years' },
+        { icon: 'book', label: 'Subjects', path: '/admin/subjects' },
+        { icon: 'class', label: 'Classrooms', path: '/admin/classrooms' },
+        { icon: 'library_books', label: 'Question Bank', path: '/admin/question-banks' },
         { icon: 'description', label: 'Exams', path: '/admin/exams' },
-        { icon: 'account_balance_wallet', label: 'Financials', path: '/admin/financials' },
-        { icon: 'settings', label: 'Settings', path: '/admin/settings' },
     ];
 
     return (
@@ -77,16 +73,6 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
             </nav>
 
             <div className={cn("p-4 mt-auto", isCollapsed ? "px-3" : "")}>
-                <div className={cn(
-                    "sidebar-footer-content bg-white/5 rounded-2xl p-4 mb-4 overflow-hidden transition-all",
-                    isCollapsed ? "hidden" : "block"
-                )}>
-                    <p className="text-white/60 text-xs mb-2">Current Storage</p>
-                    <div className="w-full bg-white/10 rounded-full h-1.5 mb-2">
-                        <div className="bg-yellow-400 h-1.5 rounded-full w-2/3"></div>
-                    </div>
-                    <p className="text-white text-xs font-semibold">82GB / 120GB</p>
-                </div>
                 <button
                     onClick={logout}
                     className={cn(
