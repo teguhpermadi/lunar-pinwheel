@@ -6,6 +6,8 @@ import MatchingInput from '@/components/questions/inputs/MatchingInput';
 import SequenceInput from '@/components/questions/inputs/SequenceInput';
 import EssayInput from '@/components/questions/inputs/EssayInput';
 import MathInput from '@/components/questions/inputs/MathInput';
+import ArabicInput from '@/components/questions/inputs/ArabicInput';
+
 
 interface QuestionInputsProps {
     type: string;
@@ -20,7 +22,10 @@ interface QuestionInputsProps {
     setEssayKeywords: (keywords: string) => void;
     mathContent: string;
     setMathContent: (content: string) => void;
+    arabicContent: string;
+    setArabicContent: (content: string) => void;
     isEditing?: boolean;
+
 }
 
 export default function QuestionInputs({
@@ -36,8 +41,11 @@ export default function QuestionInputs({
     setEssayKeywords,
     mathContent,
     setMathContent,
+    arabicContent,
+    setArabicContent,
     isEditing
 }: QuestionInputsProps) {
+
     switch (type) {
         case 'multiple_choice':
             return <MultipleChoiceInput options={options} onChange={setOptions} onDeleteMedia={handleDeleteOptionMedia} isEditing={isEditing} />;
@@ -55,7 +63,10 @@ export default function QuestionInputs({
             return <EssayInput keywords={essayKeywords} onKeywordsChange={setEssayKeywords} />;
         case 'math_input':
             return <MathInput value={mathContent} onChange={setMathContent} />;
+        case 'arabic_response':
+            return <ArabicInput value={arabicContent} onChange={setArabicContent} />;
         default:
+
             return null;
     }
 }

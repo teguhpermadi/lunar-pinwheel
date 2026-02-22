@@ -46,6 +46,8 @@ export default function QuestionFormPage() {
     ]);
     const [essayKeywords, setEssayKeywords] = useState('');
     const [mathContent, setMathContent] = useState('');
+    const [arabicContent, setArabicContent] = useState('');
+
 
     // Load question data if editing
     useEffect(() => {
@@ -82,8 +84,12 @@ export default function QuestionFormPage() {
         } else if (newType === 'math_input') {
             setOptions([]);
             setMathContent('');
+        } else if (newType === 'arabic_response') {
+            setOptions([]);
+            setArabicContent('');
         }
     };
+
     const handleTypeChange = (newType: string) => {
         setType(newType);
         initializeOptionsForType(newType);
@@ -162,8 +168,14 @@ export default function QuestionFormPage() {
                     if (mathOption) {
                         setMathContent(mathOption.content);
                     }
+                } else if (q.type === 'arabic_response') {
+                    const arabicOption = q.options.find((o: any) => o.option_key === 'ARABIC');
+                    if (arabicOption) {
+                        setArabicContent(arabicOption.content);
+                    }
                 }
             } else {
+
                 throw new Error(response.message || 'Failed to load question');
             }
         } catch (error) {
@@ -332,7 +344,11 @@ export default function QuestionFormPage() {
                 case 'math_input':
                     formData.append('math_content', mathContent);
                     break;
+                case 'arabic_response':
+                    formData.append('arabic_content', arabicContent);
+                    break;
             }
+
 
             let response;
             if (isEditing && questionId) {
@@ -456,8 +472,11 @@ export default function QuestionFormPage() {
                 setEssayKeywords={setEssayKeywords}
                 mathContent={mathContent}
                 setMathContent={setMathContent}
+                arabicContent={arabicContent}
+                setArabicContent={setArabicContent}
                 isEditing={isEditing}
             />
+
 
             <MediaModal
                 isOpen={isMediaModalOpen}

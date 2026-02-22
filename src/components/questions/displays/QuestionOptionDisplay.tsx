@@ -6,6 +6,8 @@ import SequenceDisplay from './SequenceDisplay';
 import ShortAnswerDisplay from './ShortAnswerDisplay';
 import EssayDisplay from './EssayDisplay';
 import MathInputDisplay from './MathInputDisplay';
+import ArabicInputDisplay from './ArabicInputDisplay';
+
 
 interface QuestionOptionDisplayProps {
     question: Question;
@@ -45,7 +47,11 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
         case 'math_input':
             return <MathInputDisplay options={question.options} />;
 
+        case 'arabic_response':
+            return <ArabicInputDisplay options={question.options} />;
+
         default:
+
             return <div className="text-sm italic text-slate-400">Preview not available for this question type.</div>;
     }
 }

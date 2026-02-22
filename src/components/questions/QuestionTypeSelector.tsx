@@ -22,7 +22,9 @@ const typeOptions = [
     { value: 'matching', label: 'Matching' },
     { value: 'sequence', label: 'Sequence' },
     { value: 'arrange_words', label: 'Arrange Words' },
+    { value: 'arabic_response', label: 'Arabic Response' },
 ];
+
 
 export default function QuestionTypeSelector({ questionId, initialType, onTypeChange, disabled = false, manual = false }: QuestionTypeSelectorProps) {
     const [type, setType] = useState<string>(initialType);
