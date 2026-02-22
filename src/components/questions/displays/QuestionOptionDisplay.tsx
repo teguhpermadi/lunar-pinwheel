@@ -6,7 +6,8 @@ import SequenceDisplay from './SequenceDisplay';
 import ShortAnswerDisplay from './ShortAnswerDisplay';
 import EssayDisplay from './EssayDisplay';
 import MathInputDisplay from './MathInputDisplay';
-import ArabicInputDisplay from './ArabicInputDisplay';
+import ArabicInputDisplay from '@/components/questions/displays/ArabicInputDisplay';
+import JavaneseInputDisplay from '@/components/questions/displays/JavaneseInputDisplay';
 
 
 interface QuestionOptionDisplayProps {
@@ -49,6 +50,8 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
 
         case 'arabic_response':
             return <ArabicInputDisplay options={question.options} />;
+        case 'javanese_response':
+            return <JavaneseInputDisplay options={question.options} />;
 
         default:
 

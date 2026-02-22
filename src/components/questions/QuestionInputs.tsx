@@ -7,6 +7,7 @@ import SequenceInput from '@/components/questions/inputs/SequenceInput';
 import EssayInput from '@/components/questions/inputs/EssayInput';
 import MathInput from '@/components/questions/inputs/MathInput';
 import ArabicInput from '@/components/questions/inputs/ArabicInput';
+import JavaneseInput from '@/components/questions/inputs/JavaneseInput';
 
 
 interface QuestionInputsProps {
@@ -24,6 +25,8 @@ interface QuestionInputsProps {
     setMathContent: (content: string) => void;
     arabicContent: string;
     setArabicContent: (content: string) => void;
+    javaneseContent: string;
+    setJavaneseContent: (content: string) => void;
     isEditing?: boolean;
 
 }
@@ -43,6 +46,8 @@ export default function QuestionInputs({
     setMathContent,
     arabicContent,
     setArabicContent,
+    javaneseContent,
+    setJavaneseContent,
     isEditing
 }: QuestionInputsProps) {
 
@@ -65,6 +70,8 @@ export default function QuestionInputs({
             return <MathInput value={mathContent} onChange={setMathContent} />;
         case 'arabic_response':
             return <ArabicInput value={arabicContent} onChange={setArabicContent} />;
+        case 'javanese_response':
+            return <JavaneseInput value={javaneseContent} onChange={setJavaneseContent} />;
         default:
 
             return null;

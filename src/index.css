@@ -121,4 +121,8 @@
   .font-arabic {
     font-family: 'LPMQ IsepMisbah', serif;
   }
+
+  .font-javanese {
+    font-family: 'Noto Sans Javanese', sans-serif;
+  }
 }

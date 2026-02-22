@@ -47,6 +47,7 @@ export default function QuestionFormPage() {
     const [essayKeywords, setEssayKeywords] = useState('');
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
+    const [javaneseContent, setJavaneseContent] = useState('');
 
 
     // Load question data if editing
@@ -87,6 +88,9 @@ export default function QuestionFormPage() {
         } else if (newType === 'arabic_response') {
             setOptions([]);
             setArabicContent('');
+        } else if (newType === 'javanese_response') {
+            setOptions([]);
+            setJavaneseContent('');
         }
     };
 
@@ -172,6 +176,11 @@ export default function QuestionFormPage() {
                     const arabicOption = q.options.find((o: any) => o.option_key === 'ARABIC');
                     if (arabicOption) {
                         setArabicContent(arabicOption.content);
+                    }
+                } else if (q.type === 'javanese_response') {
+                    const javaneseOption = q.options.find((o: any) => o.option_key === 'JAVANESE');
+                    if (javaneseOption) {
+                        setJavaneseContent(javaneseOption.content);
                     }
                 }
             } else {
@@ -347,6 +356,9 @@ export default function QuestionFormPage() {
                 case 'arabic_response':
                     formData.append('arabic_content', arabicContent);
                     break;
+                case 'javanese_response':
+                    formData.append('javanese_content', javaneseContent);
+                    break;
             }
 
 
@@ -474,6 +486,8 @@ export default function QuestionFormPage() {
                 setMathContent={setMathContent}
                 arabicContent={arabicContent}
                 setArabicContent={setArabicContent}
+                javaneseContent={javaneseContent}
+                setJavaneseContent={setJavaneseContent}
                 isEditing={isEditing}
             />
 

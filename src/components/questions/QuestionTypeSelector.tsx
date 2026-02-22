@@ -23,6 +23,7 @@ const typeOptions = [
     { value: 'sequence', label: 'Sequence' },
     { value: 'arrange_words', label: 'Arrange Words' },
     { value: 'arabic_response', label: 'Arabic Response' },
+    { value: 'javanese_response', label: 'Javanese Response' },
 ];
 
 
