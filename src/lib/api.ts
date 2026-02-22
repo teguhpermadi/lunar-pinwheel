@@ -719,12 +719,19 @@ export interface Exam {
     end_time?: string;
     is_published: boolean;
     token?: string;
+    is_token_visible: boolean;
+    is_randomized_question: boolean;
+    is_randomized_answer: boolean;
+    is_show_result: boolean;
+    is_visible_hint: boolean;
+    max_attempts: number | null;
+    timer_type: 'strict' | 'flexible';
+    passing_score: number;
     subject?: Subject;
     academic_year?: AcademicYear;
     user?: User;
     created_at: string;
     updated_at: string;
-    // Add other fields from ExamResource
 }
 
 export const examApi = {

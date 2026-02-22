@@ -22,6 +22,9 @@ import CreateQuestionBank from "@/pages/admin/question-banks/CreateQuestionBank"
 import EditQuestionBank from "@/pages/admin/question-banks/EditQuestionBank"
 import ShowQuestionBank from "@/pages/admin/question-banks/ShowQuestionBank"
 import QuestionFormPage from "@/pages/admin/questions/QuestionFormPage"
+import ExamManagementPage from "@/pages/admin/exams/ExamManagementPage"
+import ExamLiveScorePage from "@/pages/admin/exams/ExamLiveScorePage"
+import EditExamPage from "@/pages/admin/exams/EditExamPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -106,6 +109,10 @@ function App() {
               {/* Question Bank Routes */}
               <Route path="admin/question-banks" element={<QuestionBankList />} />
               <Route path="admin/question-banks/create" element={<CreateQuestionBank />} />
+
+              <Route path="admin/exams" element={<ExamManagementPage />} />
+              <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
+              <Route path="admin/exams/:id/edit" element={<EditExamPage />} />
 
               <Route path="exams" element={<div>Exams Page</div>} />
             </Route>

@@ -12,7 +12,6 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        console.log("MathRenderer: Rendering content", { content, isHtml });
         if (containerRef.current) {
             try {
                 // @ts-ignore
@@ -37,9 +36,8 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
                         output: 'html',
                     });
                 }
-                console.log("MathRenderer: KaTeX auto-render called successfully");
             } catch (err) {
-                console.error("MathRenderer: KaTeX auto-render failed:", err);
+                // Silently fail if KaTeX fails to render
             }
         }
     }, [content]);

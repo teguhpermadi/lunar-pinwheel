@@ -20,7 +20,7 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
         { icon: 'groups', label: 'Students', path: '/admin/students' },
         { icon: 'book', label: 'Subjects', path: '/admin/subjects' },
         { icon: 'calendar_month', label: 'Academic Years', path: '/admin/academic-years' },
-        { icon: 'quiz', label: 'Exams', path: '/admin/exams' },
+        { icon: 'description', label: 'Exams', path: '/admin/exams' },
         { icon: 'account_balance_wallet', label: 'Financials', path: '/admin/financials' },
         { icon: 'settings', label: 'Settings', path: '/admin/settings' },
     ];

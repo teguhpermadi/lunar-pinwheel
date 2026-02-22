@@ -124,7 +124,8 @@ export default function ShowQuestionBank() {
                     timer: 2000,
                     showConfirmButton: false
                 });
-                navigate('/admin/question-banks');
+                // navigate to exam live score
+                navigate(`/admin/exams/${response.data.id}/live`);
             } else {
                 Swal.fire('Error', response.message || 'Failed to create exam', 'error');
             }

@@ -27,9 +27,7 @@ const Toast = MySwal.mixin({
 
 const subjectSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters").max(255, "Name must be less than 255 characters"),
-    name: z.string().min(2, "Name must be at least 2 characters").max(255, "Name must be less than 255 characters"),
     code: z.string().optional(),
-    description: z.string().optional(),
     description: z.string().optional(),
     color: z.string().max(20, "Color code too long").optional(),
     class_name: z.string().max(100, "Class name too long").optional(),
