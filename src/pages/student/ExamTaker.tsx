@@ -16,6 +16,7 @@ import StudentMatchingInput from '@/components/questions/student-inputs/StudentM
 import StudentSequenceInput from '@/components/questions/student-inputs/StudentSequenceInput';
 import StudentLanguageResponseInput from '@/components/questions/student-inputs/StudentLanguageResponseInput';
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
+import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 
 const MySwal = withReactContent(Swal);
 
@@ -94,7 +95,7 @@ export default function ExamTaker() {
                     return {
                         ...q,
                         student_answer: q.student_answer || (qt === 'multiple_selection' || qt === 'sequence' ? [] :
-                            (qt === 'matching' ? {} : null))
+                            (qt === 'matching' || qt === 'categorization' ? {} : null))
                     };
                 });
 
@@ -220,7 +221,13 @@ export default function ExamTaker() {
         if (questions.length === 0) return false;
         return questions.every(q => {
             if (Array.isArray(q.student_answer)) return q.student_answer.length > 0;
-            if (typeof q.student_answer === 'object' && q.student_answer !== null) return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: any) => o.metadata?.side === 'left').length;
+            if (typeof q.student_answer === 'object' && q.student_answer !== null) {
+                if (q.exam_question?.question_type === 'categorization') {
+                    // All options must be assigned to some category
+                    return Object.keys(q.student_answer).length === q.exam_question?.options?.length;
+                }
+                return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: any) => o.metadata?.side === 'left').length;
+            }
             return q.student_answer !== null && q.student_answer !== undefined && q.student_answer !== '';
         });
     };
@@ -287,6 +294,12 @@ export default function ExamTaker() {
                 />;
             case 'math_input':
                 return <StudentMathInput
+                    selectedAnswer={q.student_answer}
+                    onChange={handleAnswerChange}
+                />;
+            case 'categorization':
+                return <StudentCategorizationInput
+                    options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                 />;

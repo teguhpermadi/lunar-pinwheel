@@ -8,6 +8,7 @@ import EssayInput from '@/components/questions/inputs/EssayInput';
 import MathInput from '@/components/questions/inputs/MathInput';
 import ArabicInput from '@/components/questions/inputs/ArabicInput';
 import JavaneseInput from '@/components/questions/inputs/JavaneseInput';
+import CategorizationInput from '@/components/questions/inputs/CategorizationInput';
 
 
 interface QuestionInputsProps {
@@ -27,6 +28,8 @@ interface QuestionInputsProps {
     setArabicContent: (content: string) => void;
     javaneseContent: string;
     setJavaneseContent: (content: string) => void;
+    categorizationGroups: any[];
+    setCategorizationGroups: (groups: any[]) => void;
     isEditing?: boolean;
 
 }
@@ -48,6 +51,8 @@ export default function QuestionInputs({
     setArabicContent,
     javaneseContent,
     setJavaneseContent,
+    categorizationGroups,
+    setCategorizationGroups,
     isEditing
 }: QuestionInputsProps) {
 
@@ -72,6 +77,8 @@ export default function QuestionInputs({
             return <ArabicInput value={arabicContent} onChange={setArabicContent} />;
         case 'javanese_response':
             return <JavaneseInput value={javaneseContent} onChange={setJavaneseContent} />;
+        case 'categorization':
+            return <CategorizationInput groups={categorizationGroups} onChange={setCategorizationGroups} onDeleteMedia={handleDeleteOptionMedia} />;
         default:
 
             return null;

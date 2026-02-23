@@ -48,6 +48,10 @@ export default function QuestionFormPage() {
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
     const [javaneseContent, setJavaneseContent] = useState('');
+    const [categorizationGroups, setCategorizationGroups] = useState<any[]>([
+        { uuid: crypto.randomUUID(), title: 'Category 1', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+        { uuid: crypto.randomUUID(), title: 'Category 2', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+    ]);
 
 
     // Load question data if editing
@@ -91,6 +95,11 @@ export default function QuestionFormPage() {
         } else if (newType === 'javanese_response') {
             setOptions([]);
             setJavaneseContent('');
+        } else if (newType === 'categorization') {
+            setCategorizationGroups([
+                { uuid: crypto.randomUUID(), title: 'Category 1', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+                { uuid: crypto.randomUUID(), title: 'Category 2', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+            ]);
         }
     };
 
@@ -182,6 +191,25 @@ export default function QuestionFormPage() {
                     if (javaneseOption) {
                         setJavaneseContent(javaneseOption.content);
                     }
+                } else if (q.type === 'categorization') {
+                    const groupsMap = new Map();
+                    q.options.forEach((o: any) => {
+                        const title = o.metadata?.category_title || 'Uncategorized';
+                        if (!groupsMap.has(title)) {
+                            groupsMap.set(title, {
+                                uuid: crypto.randomUUID(),
+                                title: title,
+                                items: []
+                            });
+                        }
+                        groupsMap.get(title).items.push({
+                            id: o.id,
+                            uuid: o.id || crypto.randomUUID(),
+                            content: o.content,
+                            media: o.media?.option_media?.[0] || null
+                        });
+                    });
+                    setCategorizationGroups(Array.from(groupsMap.values()));
                 }
             } else {
 
@@ -216,6 +244,13 @@ export default function QuestionFormPage() {
             setOptions((prev: any) => prev.map((o: any) =>
                 o.uuid === optionUuid ? { ...o, media: null } : o
             ));
+
+            setCategorizationGroups((prev: any) => prev.map((g: any) => ({
+                ...g,
+                items: g.items.map((i: any) =>
+                    i.uuid === optionUuid ? { ...i, media: null, previewUrl: null, pendingImage: null } : i
+                )
+            })));
         } catch (error) {
             console.error("Failed to delete media", error);
             Swal.fire('Error', 'Failed to delete media', 'error');
@@ -359,6 +394,17 @@ export default function QuestionFormPage() {
                 case 'javanese_response':
                     formData.append('javanese_content', javaneseContent);
                     break;
+                case 'categorization':
+                    categorizationGroups.forEach((group: any, gIdx: number) => {
+                        formData.append(`categorization_groups[${gIdx}][title]`, group.title);
+                        group.items.forEach((item: any, iIdx: number) => {
+                            formData.append(`categorization_groups[${gIdx}][items][${iIdx}][content]`, item.content);
+                            if (item.pendingImage) {
+                                formData.append(`categorization_groups[${gIdx}][items][${iIdx}][image]`, item.pendingImage);
+                            }
+                        });
+                    });
+                    break;
             }
 
 
@@ -488,6 +534,8 @@ export default function QuestionFormPage() {
                 setArabicContent={setArabicContent}
                 javaneseContent={javaneseContent}
                 setJavaneseContent={setJavaneseContent}
+                categorizationGroups={categorizationGroups}
+                setCategorizationGroups={setCategorizationGroups}
                 isEditing={isEditing}
             />
 

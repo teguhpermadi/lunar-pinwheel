@@ -8,6 +8,7 @@ import EssayDisplay from './EssayDisplay';
 import MathInputDisplay from './MathInputDisplay';
 import ArabicInputDisplay from '@/components/questions/displays/ArabicInputDisplay';
 import JavaneseInputDisplay from '@/components/questions/displays/JavaneseInputDisplay';
+import CategorizationDisplay from './CategorizationDisplay';
 
 
 interface QuestionOptionDisplayProps {
@@ -52,6 +53,8 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
             return <ArabicInputDisplay options={question.options} />;
         case 'javanese_response':
             return <JavaneseInputDisplay options={question.options} />;
+        case 'categorization':
+            return <CategorizationDisplay options={question.options} onMediaClick={onMediaClick} />;
 
         default:
 

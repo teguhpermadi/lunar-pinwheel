@@ -24,6 +24,7 @@ const typeOptions = [
     { value: 'arrange_words', label: 'Arrange Words' },
     { value: 'arabic_response', label: 'Arabic Response' },
     { value: 'javanese_response', label: 'Javanese Response' },
+    { value: 'categorization', label: 'Categorization' },
 ];
 
 
