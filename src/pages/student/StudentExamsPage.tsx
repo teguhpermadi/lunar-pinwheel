@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { studentApi, Exam } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
 export default function StudentExamsPage() {
+    const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -64,15 +66,9 @@ export default function StudentExamsPage() {
         }
 
         try {
-            const response = await studentApi.startExam(selectedExam.id);
+            const response = await studentApi.startExam(selectedExam.id, token);
             if (response.success) {
-                // Navigate to exam page (yet to be implemented or route needs to be known)
-                // For now, let's just show success
-                MySwal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Exam started successfully!',
-                });
+                navigate(`/exams/${selectedExam.id}/take`);
             } else {
                 MySwal.fire({
                     icon: 'error',

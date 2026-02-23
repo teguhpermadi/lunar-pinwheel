@@ -441,8 +441,8 @@ export const studentApi = {
         const response = await api.get('/students/exams', { params });
         return response.data;
     },
-    startExam: async (id: string) => {
-        const response = await api.post(`/students/exams/${id}/start`);
+    startExam: async (id: string, token?: string) => {
+        const response = await api.post(`/students/exams/${id}/start`, { token });
         return response.data;
     },
     takeExam: async (id: string) => {
@@ -785,12 +785,20 @@ export const examApi = {
         const response = await api.post(`/exams/${id}/regenerate-token`);
         return response.data;
     },
-    resetExam: async (id: string) => {
-        const response = await api.post(`/exams/${id}/reset`);
+    resetExam: async (id: string, userId: string) => {
+        const response = await api.post(`/exams/${id}/reset`, { user_id: userId });
         return response.data;
     },
-    forceFinish: async (id: string) => {
-        const response = await api.post(`/exams/${id}/force-finish`);
+    forceFinish: async (id: string, userId: string) => {
+        const response = await api.post(`/exams/${id}/force-finish`, { user_id: userId });
+        return response.data;
+    },
+    addTime: async (id: string, userId: string, minutes: number) => {
+        const response = await api.post(`/exams/${id}/add-time`, { user_id: userId, minutes });
+        return response.data;
+    },
+    reopenExam: async (id: string, userId: string, minutes?: number) => {
+        const response = await api.post(`/exams/${id}/reopen`, { user_id: userId, minutes });
         return response.data;
     },
     liveScore: async (id: string) => {

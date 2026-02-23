@@ -17,11 +17,15 @@ interface LiveScoreData {
             avatar?: string;
             classroom?: string;
         };
-        status: 'in_progress' | 'idle' | 'finished';
+        status: 'in_progress' | 'idle' | 'finished' | 'completed' | 'timed_out';
         start_time: string;
         remaining_time: number;
         extra_time: number;
         score: number;
+        progress: {
+            answered: number;
+            total: number;
+        };
     }[];
 }
 
@@ -54,12 +58,24 @@ export default function ExamLiveScorePage() {
         return () => clearInterval(interval);
     }, [id]);
 
-    const filteredSessions = (data?.sessions || []).filter(session => {
-        const matchesSearch = session.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            session.student.email.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesTab = activeTab === 'All' || session.student.classroom === activeTab;
-        return matchesSearch && matchesTab;
-    });
+    const sortedSessions = [...(data?.sessions || [])]
+        .filter(session => {
+            const matchesSearch = session.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                session.student.email.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesTab = activeTab === 'All' || session.student.classroom === activeTab;
+            return matchesSearch && matchesTab;
+        })
+        .sort((a, b) => {
+            // Priority 1: Status (Finished first? or In Progress first? Usually high score first)
+            // Priority 2: Score (Descending)
+            if (b.score !== a.score) return b.score - a.score;
+            // Priority 3: Progress percentage
+            const aProgress = a.progress.total > 0 ? a.progress.answered / a.progress.total : 0;
+            const bProgress = b.progress.total > 0 ? b.progress.answered / b.progress.total : 0;
+            if (bProgress !== aProgress) return bProgress - aProgress;
+            // Priority 4: Name
+            return a.student.name.localeCompare(b.student.name);
+        });
 
     const classroomList = data?.exam.classrooms ? data.exam.classrooms.map(c => c.name) : [];
 
@@ -67,6 +83,130 @@ export default function ExamLiveScorePage() {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const handleForceFinish = async (user_id: string, name: string) => {
+        if (!id) return;
+        const result = await Swal.fire({
+            title: 'Force Finish?',
+            text: `Are you sure you want to force finish ${name}'s exam? This will close their session and calculate their final score immediately.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Yes, Finish it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await examApi.forceFinish(id, user_id);
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Finished!',
+                        text: 'Exam has been forced to finish.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                    fetchLiveScore();
+                }
+            } catch (error: any) {
+                Swal.fire('Error', error.response?.data?.message || 'Failed to force finish exam', 'error');
+            }
+        }
+    };
+
+    const handleAddTime = async (user_id: string, name: string) => {
+        if (!id) return;
+        const { value: minutes } = await Swal.fire({
+            title: `Add Extra Time`,
+            text: `How many minutes would you like to add for ${name}?`,
+            input: 'number',
+            inputPlaceholder: 'Minutes (e.g. 10)',
+            inputValue: 10,
+            showCancelButton: true,
+            confirmButtonText: 'Add Time',
+            inputValidator: (value) => {
+                if (!value || isNaN(Number(value)) || Number(value) < 1) {
+                    return 'Please enter a valid number of minutes';
+                }
+                return null;
+            }
+        });
+
+        if (minutes) {
+            try {
+                const response = await examApi.addTime(id, user_id, parseInt(minutes));
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: `Added ${minutes} minutes to ${name}'s exam.`,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                    fetchLiveScore();
+                }
+            } catch (error: any) {
+                Swal.fire('Error', error.response?.data?.message || 'Failed to add extra time', 'error');
+            }
+        }
+    };
+
+    const handleReopenExam = async (user_id: string, name: string) => {
+        if (!id) return;
+
+        const { value: minutes } = await Swal.fire({
+            title: 'Reopen Exam?',
+            html: `
+                <div class="text-left space-y-3 overflow-x-hidden">
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        Are you sure you want to reopen <b>${name}</b>'s exam? This will allow them to continue answering questions.
+                    </p>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500">ADD EXTRA TIME (MINUTES - OPTIONAL)</label>
+                        <input id="swal-input-minutes" type="number" 
+                            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+                            placeholder="0" min="0">
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            confirmButtonText: 'Yes, Reopen!',
+            cancelButtonText: 'Cancel',
+            preConfirm: () => {
+                const input = document.getElementById('swal-input-minutes') as HTMLInputElement;
+                return input.value ? parseInt(input.value) : 0;
+            }
+        });
+
+        if (minutes !== undefined) {
+            try {
+                const response = await examApi.reopenExam(id, user_id, minutes);
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Reopened!',
+                        text: minutes > 0
+                            ? `Exam reopened with ${minutes} extra minutes.`
+                            : 'Exam session has been reopened.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                    fetchLiveScore();
+                }
+            } catch (error: any) {
+                Swal.fire('Error', error.response?.data?.message || 'Failed to reopen exam', 'error');
+            }
+        }
     };
 
     if (isLoading && !data) {
@@ -156,7 +296,7 @@ export default function ExamLiveScorePage() {
                             <div className="text-right">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">Participants</p>
                                 <p className="text-xl font-bold text-slate-900 dark:text-white">
-                                    {filteredSessions.length}/{(data?.sessions || []).length}
+                                    {sortedSessions.length}/{(data?.sessions || []).length}
                                 </p>
                             </div>
                         </div>
@@ -193,73 +333,156 @@ export default function ExamLiveScorePage() {
                     )}
                     <div className="flex-1 overflow-auto p-6 scrollbar-hide">
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                    <tr>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classroom</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Extra Time</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {filteredSessions.map((session) => (
-                                        <tr key={session.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                                                        {session.student.avatar ? (
-                                                            <img alt="avatar" className="w-full h-full object-cover" src={session.student.avatar} />
-                                                        ) : (
-                                                            <span className="material-symbols-outlined text-slate-400">person</span>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-slate-900 dark:text-white">{session.student.name}</p>
-                                                        <p className="text-[10px] text-slate-400">{session.student.email}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase border border-indigo-100 dark:border-indigo-500/20">
-                                                    {session.student.classroom || 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {session.status === 'in_progress' ? (
-                                                    <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">In Progress</span>
-                                                ) : session.status === 'idle' ? (
-                                                    <span className="px-2.5 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">Idle</span>
-                                                ) : (
-                                                    <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-[10px] font-bold uppercase">Finished</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                                    {new Date(session.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <p className={cn(
-                                                    "text-sm font-black tabular-nums",
-                                                    session.remaining_time < 300 ? "text-rose-500" : "text-slate-900 dark:text-white"
-                                                )}>
-                                                    {formatTime(session.remaining_time)}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <button className="text-[10px] font-bold text-primary hover:underline">+ Add Time</button>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <span className="text-lg font-black text-primary tabular-nums">{session.score}</span>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse min-w-[1000px]">
+                                    <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                        <tr>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classroom</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Progress</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Actions</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Score</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 relative">
+                                        <AnimatePresence mode="popLayout" initial={false}>
+                                            {sortedSessions.map((session, index) => {
+                                                const progressPercent = session.progress.total > 0
+                                                    ? (session.progress.answered / session.progress.total) * 100
+                                                    : 0;
+
+                                                return (
+                                                    <motion.tr
+                                                        key={session.id}
+                                                        layout
+                                                        initial={{ opacity: 0, scale: 0.98 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        exit={{ opacity: 0, scale: 0.98 }}
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 300,
+                                                            damping: 30,
+                                                            opacity: { duration: 0.2 }
+                                                        }}
+                                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group bg-white dark:bg-slate-900"
+                                                    >
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="relative">
+                                                                    <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                                                                        {session.student.avatar ? (
+                                                                            <img alt="avatar" className="w-full h-full object-cover" src={session.student.avatar} />
+                                                                        ) : (
+                                                                            <span className="material-symbols-outlined text-slate-400">person</span>
+                                                                        )}
+                                                                    </div>
+                                                                    {index < 3 && (
+                                                                        <div className={cn(
+                                                                            "absolute -top-1 -right-1 size-5 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white dark:border-slate-900 shadow-sm",
+                                                                            index === 0 ? "bg-yellow-400 text-yellow-900" :
+                                                                                index === 1 ? "bg-slate-300 text-slate-700" :
+                                                                                    "bg-amber-600 text-amber-50"
+                                                                        )}>
+                                                                            {index + 1}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{session.student.name}</p>
+                                                                    <p className="text-[10px] text-slate-400">{session.student.email}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase border border-indigo-100 dark:border-indigo-500/20">
+                                                                {session.student.classroom || 'N/A'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                                <div className="flex items-center justify-between text-[10px] font-bold">
+                                                                    <span className="text-slate-400">{session.progress.answered}/{session.progress.total}</span>
+                                                                    <span className="text-primary">{Math.round(progressPercent)}%</span>
+                                                                </div>
+                                                                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${progressPercent}%` }}
+                                                                        className={cn(
+                                                                            "h-full rounded-full transition-all duration-500",
+                                                                            progressPercent === 100 ? "bg-emerald-500" : "bg-primary"
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {session.status === 'in_progress' ? (
+                                                                <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase">In Progress</span>
+                                                            ) : session.status === 'idle' ? (
+                                                                <span className="px-2.5 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-[10px] font-bold uppercase">Idle</span>
+                                                            ) : session.status === 'completed' ? (
+                                                                <span className="px-2.5 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-bold uppercase">Completed (Waiting)</span>
+                                                            ) : session.status === 'timed_out' ? (
+                                                                <span className="px-2.5 py-1 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg text-[10px] font-bold uppercase animate-pulse">Time Out</span>
+                                                            ) : (
+                                                                <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-[10px] font-bold uppercase">Finished</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                                                {session.start_time ? new Date(session.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
+                                                            </p>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <p className={cn(
+                                                                "text-sm font-black tabular-nums",
+                                                                session.remaining_time < 300 && session.remaining_time > 0 ? "text-rose-500 animate-pulse" : "text-slate-900 dark:text-white"
+                                                            )}>
+                                                                {formatTime(session.remaining_time)}
+                                                            </p>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                {(session.status === 'in_progress' || session.status === 'completed' || session.status === 'timed_out') && (
+                                                                    <button
+                                                                        onClick={() => handleForceFinish(session.student.id, session.student.name)}
+                                                                        className="p-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
+                                                                        title="Force Finish"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-lg">stop_circle</span>
+                                                                    </button>
+                                                                )}
+                                                                {session.status === 'finished' && (
+                                                                    <button
+                                                                        onClick={() => handleReopenExam(session.student.id, session.student.name)}
+                                                                        className="p-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
+                                                                        title="Reopen Exam"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-lg">play_circle</span>
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleAddTime(session.student.id, session.student.name)}
+                                                                    className="text-[10px] font-bold text-primary hover:underline transition-all active:scale-90 shrink-0"
+                                                                >
+                                                                    + Add Time
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <span className="text-lg font-black text-primary tabular-nums">{session.score}</span>
+                                                        </td>
+                                                    </motion.tr>
+                                                );
+                                            })}
+                                        </AnimatePresence>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </main>

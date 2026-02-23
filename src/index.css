@@ -125,4 +125,12 @@
   .font-javanese {
     font-family: 'Noto Sans Javanese', sans-serif;
   }
+
+  .question-content img,
+  .mt-8 img {
+    @apply cursor-zoom-in transition-transform hover:scale-[1.02] active:scale-95;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
 }

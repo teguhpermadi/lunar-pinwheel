@@ -26,6 +26,7 @@ import ExamManagementPage from "@/pages/admin/exams/ExamManagementPage"
 import ExamLiveScorePage from "@/pages/admin/exams/ExamLiveScorePage"
 import EditExamPage from "@/pages/admin/exams/EditExamPage"
 import StudentExamsPage from "@/pages/student/StudentExamsPage"
+import ExamTaker from "@/pages/student/ExamTaker"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -137,6 +138,8 @@ function App() {
             <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />
             <Route path="admin/question-banks/:bankId/questions/create" element={<QuestionFormPage />} />
             <Route path="admin/questions/:questionId/edit" element={<QuestionFormPage />} />
+
+            <Route path="exams/:id/take" element={<ExamTaker />} />
           </Route>
 
           {/* Fallback */}
