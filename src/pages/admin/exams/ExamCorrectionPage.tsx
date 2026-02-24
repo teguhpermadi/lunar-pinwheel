@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import Swal from 'sweetalert2';
-import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
+import CorrectionByStudent from './correction/CorrectionByStudent';
+import CorrectionByQuestion from './correction/CorrectionByQuestion';
 
-const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
+export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
 
-interface StudentSession {
+export interface StudentSession {
     id: string;
     student: {
         id: string;
@@ -25,7 +26,7 @@ interface StudentSession {
     progress_percent?: number;
 }
 
-interface QuestionDetail {
+export interface QuestionDetail {
     id: string; // Detail ID
     question_type: string;
     question_content: string;
@@ -582,306 +583,34 @@ export default function ExamCorrectionPage() {
                     <div className="max-w-4xl mx-auto w-full space-y-6">
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
-                                <motion.div
-                                    key={`${selectedSessionId}-${selectedQuestionIndex}`}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="space-y-6"
-                                >
-                                    {isDetailLoading || !currentQuestion ? (
-                                        <div className="space-y-6 animate-pulse">
-                                            <Skeleton className="h-[200px] w-full rounded-2xl" />
-                                            <Skeleton className="h-[300px] w-full rounded-2xl" />
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                                                <div className="flex items-center gap-4 mb-6">
-                                                    <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
-                                                        Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
-                                                    </span>
-                                                    <div
-                                                        className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed flex-1"
-                                                        dangerouslySetInnerHTML={{ __html: currentQuestion.question_content }}
-                                                    />
-                                                </div>
-
-                                                <CorrectionDisplay
-                                                    type={currentQuestion.question_type}
-                                                    studentAnswer={currentQuestion.student_answer}
-                                                    options={currentQuestion.options || []}
-                                                    keyAnswer={currentQuestion.key_answer}
-                                                    maxScore={currentQuestion.max_score}
-                                                    scoreEarned={currentQuestion.score_earned}
-                                                />
-                                            </div>
-
-                                            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluate Response</h4>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Max Score:</span>
-                                                        <span className="text-sm font-black text-primary tabular-nums">{currentQuestion.max_score}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-3 gap-4 mb-6">
-                                                    <button
-                                                        onClick={() => handleUpdateCorrection(currentQuestion.max_score, true)}
-                                                        className={cn(
-                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                            currentQuestion.is_correct === true && currentQuestion.score_earned === currentQuestion.max_score
-                                                                ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50/50"
-                                                        )}
-                                                    >
-                                                        <span className="material-symbols-outlined text-2xl">check_circle</span>
-                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
-                                                    </button>
-                                                    {!EXCLUDED_PARTIAL_TYPES.includes(currentQuestion.question_type) && (
-                                                        <button
-                                                            onClick={() => {
-                                                                setPartialScoreData({
-                                                                    maxScore: currentQuestion.max_score,
-                                                                    currentScore: currentQuestion.score_earned || 0,
-                                                                    studentName: sessions.find(s => s.id === selectedSessionId)?.student.name
-                                                                });
-                                                                setIsPartialModalOpen(true);
-                                                            }}
-                                                            className={cn(
-                                                                "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                                (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
-                                                                    ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                                                                    : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
-                                                            )}
-                                                        >
-                                                            <span className="material-symbols-outlined text-2xl">adjust</span>
-                                                            <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleUpdateCorrection(0, false)}
-                                                        className={cn(
-                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                            currentQuestion.is_correct === false
-                                                                ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
-                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200 hover:bg-rose-50/50"
-                                                        )}
-                                                    >
-                                                        <span className="material-symbols-outlined text-2xl">cancel</span>
-                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Incorrect</span>
-                                                    </button>
-                                                </div>
-
-                                                <div className="space-y-4">
-                                                    <div className="relative">
-                                                        <textarea
-                                                            className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl focus:ring-primary focus:border-primary placeholder-slate-300 min-h-[100px] p-4 pt-8"
-                                                            placeholder="Type feedback or evaluation notes..."
-                                                            value={currentQuestion.correction_notes || ''}
-                                                            onChange={(e) => {
-                                                                const newQuestions = [...questions];
-                                                                newQuestions[selectedQuestionIndex].correction_notes = e.target.value;
-                                                                setQuestions(newQuestions);
-                                                            }}
-                                                        ></textarea>
-                                                        <label className="absolute top-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Teacher's Comment</label>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                                            Evaluation is autosaved on button click
-                                                        </p>
-                                                        <div className="flex gap-3">
-                                                            <button
-                                                                onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
-                                                                disabled={selectedQuestionIndex === 0}
-                                                                className="px-6 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 disabled:opacity-30"
-                                                            >
-                                                                <span className="material-symbols-outlined text-sm">keyboard_arrow_left</span>
-                                                                Previous
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setSelectedQuestionIndex(Math.min(questions.length - 1, selectedQuestionIndex + 1))}
-                                                                disabled={selectedQuestionIndex === questions.length - 1}
-                                                                className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 disabled:opacity-30"
-                                                            >
-                                                                Next
-                                                                <span className="material-symbols-outlined text-sm">keyboard_arrow_right</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </motion.div>
+                                <CorrectionByStudent
+                                    currentQuestion={currentQuestion}
+                                    isDetailLoading={isDetailLoading}
+                                    selectedQuestionIndex={selectedQuestionIndex}
+                                    setSelectedQuestionIndex={setSelectedQuestionIndex}
+                                    handleUpdateCorrection={handleUpdateCorrection}
+                                    setPartialScoreData={setPartialScoreData}
+                                    setIsPartialModalOpen={setIsPartialModalOpen}
+                                    questions={questions}
+                                    sessions={sessions}
+                                    selectedSessionId={selectedSessionId}
+                                    setQuestions={setQuestions}
+                                />
                             ) : (
-                                <motion.div
-                                    key={`bulk-${selectedQuestionIndex}`}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="space-y-8"
-                                >
-                                    <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
-                                        <div className="flex items-center justify-between gap-4">
-                                            <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                                                <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20 shrink-0">
-                                                    Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
-                                                </span>
-                                                <div
-                                                    className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate"
-                                                    dangerouslySetInnerHTML={{ __html: currentQuestionContent }}
-                                                />
-                                            </div>
-                                            <div className="flex gap-2 items-center">
-                                                <button
-                                                    onClick={handleToggleSelectAll}
-                                                    className={cn(
-                                                        "flex items-center gap-2 px-3 py-2 border rounded-xl transition-all text-[10px] font-black uppercase",
-                                                        selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0
-                                                            ? "bg-primary text-white border-primary"
-                                                            : "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-primary/50"
-                                                    )}
-                                                >
-                                                    <span className="material-symbols-outlined text-sm">
-                                                        {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'deselect' : 'select_all'}
-                                                    </span>
-                                                    {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'Deselect All' : 'Select All'}
-                                                </button>
-                                                <div className="h-6 w-px bg-slate-100 dark:bg-slate-800 mx-1" />
-                                                <button
-                                                    onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
-                                                    disabled={selectedQuestionIndex === 0}
-                                                    className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
-                                                >
-                                                    <span className="material-symbols-outlined">chevron_left</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => setSelectedQuestionIndex(Math.min(masterQuestions.length - 1, selectedQuestionIndex + 1))}
-                                                    disabled={selectedQuestionIndex === masterQuestions.length - 1}
-                                                    className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
-                                                >
-                                                    <span className="material-symbols-outlined">chevron_right</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {isBulkLoading ? (
-                                        Array.from({ length: 3 }).map((_, i) => (
-                                            <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse space-y-4">
-                                                <Skeleton className="h-8 w-40 rounded-lg" />
-                                                <Skeleton className="h-[150px] w-full rounded-xl" />
-                                            </div>
-                                        ))
-                                    ) : bulkAnswers.length > 0 ? (
-                                        <div className="space-y-6 pb-20">
-                                            {bulkAnswers.map((answer) => (
-                                                <div
-                                                    key={answer.id}
-                                                    id={`session-${answer.exam_session_id}`}
-                                                    className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md scroll-mt-24"
-                                                >
-                                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-50 dark:border-slate-800/50">
-                                                        <div className="flex items-center gap-3">
-                                                            <div
-                                                                onClick={() => toggleAnswerSelection(answer.id)}
-                                                                className={cn(
-                                                                    "size-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all shrink-0",
-                                                                    selectedAnswerIds.includes(answer.id)
-                                                                        ? "bg-primary border-primary text-white"
-                                                                        : "border-slate-200 dark:border-slate-800 hover:border-primary/50"
-                                                                )}
-                                                            >
-                                                                {selectedAnswerIds.includes(answer.id) && <span className="material-symbols-outlined text-[14px]">check</span>}
-                                                            </div>
-                                                            <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
-                                                                {answer.session?.user?.name?.charAt(0) || '?'}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                                                                    {answer.session?.user?.name}
-                                                                </h4>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => handleUpdateCorrection(answer.max_score, true, answer.id, answer.session.id)}
-                                                                className={cn(
-                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
-                                                                    answer.is_correct === true && answer.score_earned === answer.max_score
-                                                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200"
-                                                                )}
-                                                            >
-                                                                <span className="material-symbols-outlined text-sm">check_circle</span>
-                                                                <span className="text-[9px] font-black uppercase">Full</span>
-                                                            </button>
-                                                            {!EXCLUDED_PARTIAL_TYPES.includes(answer.exam_question?.question_type || answer.question_type) && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setPartialScoreData({
-                                                                            detailId: answer.id,
-                                                                            sessionId: answer.session.id,
-                                                                            maxScore: answer.max_score,
-                                                                            currentScore: answer.score_earned || 0,
-                                                                            studentName: answer.session?.user?.name
-                                                                        });
-                                                                        setIsPartialModalOpen(true);
-                                                                    }}
-                                                                    className={cn(
-                                                                        "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
-                                                                        (answer.is_correct === true && answer.score_earned < answer.max_score && answer.score_earned > 0)
-                                                                            ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                                                                            : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200"
-                                                                    )}
-                                                                >
-                                                                    <span className="material-symbols-outlined text-sm">adjust</span>
-                                                                    <span className="text-[9px] font-black uppercase">Partial</span>
-                                                                </button>
-                                                            )}
-                                                            <button
-                                                                onClick={() => handleUpdateCorrection(0, false, answer.id, answer.session.id)}
-                                                                className={cn(
-                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
-                                                                    answer.is_correct === false
-                                                                        ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
-                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200"
-                                                                )}
-                                                            >
-                                                                <span className="material-symbols-outlined text-sm">cancel</span>
-                                                                <span className="text-[9px] font-black uppercase">No</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    <CorrectionDisplay
-                                                        type={answer.exam_question?.question_type || answer.question_type}
-                                                        studentAnswer={answer.student_answer}
-                                                        options={answer.exam_question?.options || answer.options || []}
-                                                        keyAnswer={answer.exam_question?.key_answer || answer.key_answer}
-                                                        maxScore={answer.max_score}
-                                                        scoreEarned={answer.score_earned}
-                                                    />
-
-                                                    <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
-                                                        <div className="text-[10px] font-bold text-slate-400 uppercase">
-                                                            Score: <span className="text-primary tabular-nums">{answer.score_earned}</span>/{answer.max_score}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="py-10 text-center bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                            <span className="material-symbols-outlined text-5xl text-slate-200 mb-4 block">person_off</span>
-                                            <p className="text-slate-400 font-medium">No student responses found for this question.</p>
-                                        </div>
-                                    )}
-                                </motion.div>
+                                <CorrectionByQuestion
+                                    selectedQuestionIndex={selectedQuestionIndex}
+                                    masterQuestions={masterQuestions}
+                                    currentQuestionContent={currentQuestionContent}
+                                    handleToggleSelectAll={handleToggleSelectAll}
+                                    selectedAnswerIds={selectedAnswerIds}
+                                    bulkAnswers={bulkAnswers}
+                                    setSelectedQuestionIndex={setSelectedQuestionIndex}
+                                    isBulkLoading={isBulkLoading}
+                                    toggleAnswerSelection={toggleAnswerSelection}
+                                    handleUpdateCorrection={handleUpdateCorrection}
+                                    setPartialScoreData={setPartialScoreData}
+                                    setIsPartialModalOpen={setIsPartialModalOpen}
+                                />
                             )}
                         </AnimatePresence>
                     </div>
