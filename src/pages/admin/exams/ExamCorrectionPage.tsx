@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 
-const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'multiple_selection', 'true_false'];
+const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
 
 interface StudentSession {
     id: string;
