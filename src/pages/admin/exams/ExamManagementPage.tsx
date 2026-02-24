@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ExamManagementPage() {
     const { selectedYearId } = useAcademicYear();
+    const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -180,7 +181,11 @@ export default function ExamManagementPage() {
                                 ))
                             ) : exams.length > 0 ? (
                                 exams.map((exam, index) => (
-                                    <tr key={exam.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                    <tr
+                                        key={exam.id}
+                                        className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors cursor-pointer"
+                                        onClick={() => navigate(`/admin/exams/${exam.id}/correction`)}
+                                    >
                                         <td className="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">
                                             {(pagination.from + index).toString().padStart(2, '0')}
                                         </td>
@@ -227,7 +232,15 @@ export default function ExamManagementPage() {
                                             {getStatusBadge(exam)}
                                         </td>
                                         <td className="px-8 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                <Link
+                                                    to={`/admin/exams/${exam.id}/correction`}
+                                                    className="px-4 py-2 bg-indigo-500 text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center gap-2"
+                                                    title="Correction"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">fact_check</span>
+                                                    CORRECTION
+                                                </Link>
                                                 <Link
                                                     to={`/admin/exams/${exam.id}/live`}
                                                     className="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"

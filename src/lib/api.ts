@@ -804,7 +804,24 @@ export const examApi = {
     liveScore: async (id: string) => {
         const response = await api.get(`/exams/${id}/live-score`);
         return response.data;
-    }
+    },
+    // Correction endpoints
+    getCorrectionSessions: async (id: string, params?: any) => {
+        const response = await api.get(`/exams/${id}/sessions`, { params });
+        return response.data;
+    },
+    async getCorrectionDetail(examId: string, sessionId: string) {
+        const response = await api.get(`/exams/${examId}/sessions/${sessionId}/correction`);
+        return response.data;
+    },
+    async updateCorrection(sessionId: string, detailId: string, data: { score_earned: number; correction_notes?: string; is_correct: boolean }) {
+        const response = await api.put(`/sessions/${sessionId}/details/${detailId}`, data);
+        return response.data;
+    },
+    finishCorrection: async (sessionId: string) => {
+        const response = await api.post(`/sessions/${sessionId}/finish-correction`);
+        return response.data;
+    },
 };
 
 export const questionSuggestionApi = {
