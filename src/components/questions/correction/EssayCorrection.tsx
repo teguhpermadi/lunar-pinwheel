@@ -4,10 +4,29 @@ import { QuestionOption } from '@/lib/api';
 interface EssayCorrectionProps {
     studentAnswer: string;
     options?: QuestionOption[]; // Often used to store key/rubric
+    keyAnswer?: any;
 }
 
-export default function EssayCorrection({ studentAnswer, options = [] }: EssayCorrectionProps) {
-    const referenceAnswer = options.find(o => o.is_correct)?.content || options[0]?.content;
+export default function EssayCorrection({ studentAnswer, options = [], keyAnswer }: EssayCorrectionProps) {
+    // 1. Try keyAnswer first
+    const extractValue = (val: any): string => {
+        if (typeof val === 'object' && val !== null) {
+            // Check for common answer fields
+            const inner = val.answers || val.answer || val.rubric || val.id || val.option_id || val.option_key || val;
+
+            if (Array.isArray(inner)) return inner.join(', ');
+            if (typeof inner === 'object' && inner !== null) return JSON.stringify(inner);
+            return String(inner);
+        }
+        return Array.isArray(val) ? val.join(', ') : String(val);
+    };
+
+    let referenceAnswer = keyAnswer ? extractValue(keyAnswer) : null;
+
+    // 2. Fallback to options array if keyAnswer is missing or extracted value is invalid
+    if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined') {
+        referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer)?.content || options[0]?.content;
+    }
 
     return (
         <div className="space-y-6">

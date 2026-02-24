@@ -9,32 +9,33 @@ interface CorrectionDisplayProps {
     type: string;
     studentAnswer: any;
     options: QuestionOption[];
+    keyAnswer?: any;
     maxScore: number;
     scoreEarned: number;
 }
 
-export default function CorrectionDisplay({ type, studentAnswer, options, maxScore, scoreEarned }: CorrectionDisplayProps) {
+export default function CorrectionDisplay({ type, studentAnswer, options, keyAnswer, maxScore, scoreEarned }: CorrectionDisplayProps) {
     const renderComponent = () => {
         switch (type) {
             case 'multiple_choice':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} isMultiple={false} />;
+                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={false} />;
             case 'multiple_selection':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} isMultiple={true} />;
+                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={true} />;
             case 'true_false':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} isMultiple={false} />;
+                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={false} />;
             case 'essay':
             case 'short_answer':
-                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} />;
+                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'arabic_response':
             case 'javanese_response':
             case 'math_input':
-                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} />;
+                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'matching':
-                return <MatchingCorrection options={options} studentAnswer={studentAnswer} />;
+                return <MatchingCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             case 'sequence':
-                return <SequenceCorrection options={options} studentAnswer={studentAnswer as string[]} />;
+                return <SequenceCorrection options={options} studentAnswer={studentAnswer as string[]} keyAnswer={keyAnswer} />;
             case 'categorization':
-                return <CategorizationCorrection options={options} studentAnswer={studentAnswer} />;
+                return <CategorizationCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             default:
                 return (
                     <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400">

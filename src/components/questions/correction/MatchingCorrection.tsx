@@ -5,16 +5,26 @@ import { cn } from '@/lib/utils';
 interface MatchingCorrectionProps {
     options: QuestionOption[];
     studentAnswer: any; // Record<string, string> (leftId -> rightId)
+    keyAnswer?: any;
 }
 
-export default function MatchingCorrection({ options, studentAnswer = {} }: MatchingCorrectionProps) {
+export default function MatchingCorrection({ options, studentAnswer = {}, keyAnswer }: MatchingCorrectionProps) {
     const leftOptions = options.filter(o => o.metadata?.side === 'left');
     const rightOptions = options.filter(o => o.metadata?.side === 'right');
 
-    const getCorrectRightId = (leftId: string) => {
-        const leftOpt = options.find(o => o.id === leftId);
-        const pairId = leftOpt?.metadata?.pair_id;
-        return options.find(o => o.metadata?.side === 'right' && o.metadata?.pair_id === pairId)?.id;
+    const getCorrectRightId = (left: QuestionOption) => {
+        // 1. Try keyAnswer.pairs if available
+        if (keyAnswer && keyAnswer.pairs) {
+            const correctRightKey = keyAnswer.pairs[left.option_key];
+            if (correctRightKey) {
+                const found = rightOptions.find(o => o.option_key === correctRightKey);
+                if (found) return found.id;
+            }
+        }
+
+        // 2. Fallback to pair_id in metadata
+        const pairId = left.metadata?.pair_id;
+        return rightOptions.find(o => o.metadata?.pair_id === pairId)?.id;
     };
 
     return (
@@ -23,7 +33,7 @@ export default function MatchingCorrection({ options, studentAnswer = {} }: Matc
             <div className="grid gap-3">
                 {leftOptions.map((left) => {
                     const studentRightId = studentAnswer[left.id];
-                    const correctRightId = getCorrectRightId(left.id);
+                    const correctRightId = getCorrectRightId(left);
 
                     const studentRight = rightOptions.find(o => o.id === studentRightId);
                     const correctRight = rightOptions.find(o => o.id === correctRightId);
@@ -54,18 +64,24 @@ export default function MatchingCorrection({ options, studentAnswer = {} }: Matc
                             <div className={cn(
                                 "p-3 rounded-xl border-2 shadow-sm flex items-center gap-2",
                                 isCorrect
-                                    ? "border-emerald-500/50 bg-emerald-50/20 dark:bg-emerald-500/5"
-                                    : "border-rose-500/50 bg-rose-50/20 dark:bg-rose-500/5"
+                                    ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10"
+                                    : "border-rose-500 bg-rose-50/50 dark:bg-rose-500/10"
                             )}>
                                 {studentRight ? (
                                     <>
                                         <span className={cn(
-                                            "size-6 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0",
+                                            "size-6 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 shadow-sm",
                                             isCorrect ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
                                         )}>
                                             {studentRight.option_key}
                                         </span>
-                                        <MathRenderer className="text-sm font-medium" content={studentRight.content} />
+                                        <MathRenderer
+                                            className={cn(
+                                                "text-sm font-medium",
+                                                isCorrect ? "text-emerald-900 dark:text-emerald-300" : "text-rose-900 dark:text-rose-300"
+                                            )}
+                                            content={studentRight.content}
+                                        />
                                     </>
                                 ) : (
                                     <span className="text-xs italic text-slate-400 p-1">No selection</span>

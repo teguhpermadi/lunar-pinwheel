@@ -5,11 +5,20 @@ import { cn } from '@/lib/utils';
 interface SequenceCorrectionProps {
     options: QuestionOption[];
     studentAnswer: string[]; // Array of option IDs in student's chosen order
+    keyAnswer?: any;
 }
 
-export default function SequenceCorrection({ options, studentAnswer = [] }: SequenceCorrectionProps) {
-    // Sort options by original order to get the correct sequence
-    const correctSequence = [...options].sort((a, b) => (a.order || 0) - (b.order || 0));
+export default function SequenceCorrection({ options, studentAnswer = [], keyAnswer }: SequenceCorrectionProps) {
+    // 1. Try to get correct sequence from keyAnswer.order
+    let correctSequence: QuestionOption[] = [];
+    if (keyAnswer && Array.isArray(keyAnswer.order)) {
+        correctSequence = keyAnswer.order.map((key: any) => options.find(o => o.option_key === String(key))).filter(Boolean) as QuestionOption[];
+    }
+
+    // 2. Fallback to sorting by order property if keyAnswer is missing or incomplete
+    if (correctSequence.length === 0) {
+        correctSequence = [...options].sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
 
     return (
         <div className="space-y-6">
@@ -32,19 +41,28 @@ export default function SequenceCorrection({ options, studentAnswer = [] }: Sequ
                                     <div key={id || index} className={cn(
                                         "flex items-center gap-3 p-3 rounded-xl border-2 transition-all",
                                         isCorrectPos
-                                            ? "border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-500/5"
-                                            : "border-rose-500/30 bg-rose-50/20 dark:bg-rose-500/5"
+                                            ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10"
+                                            : "border-rose-500 bg-rose-50/50 dark:bg-rose-500/10"
                                     )}>
                                         <div className={cn(
                                             "size-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0",
-                                            isCorrectPos ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                                            isCorrectPos ? "bg-emerald-500 text-white shadow-sm" : "bg-rose-500 text-white shadow-sm"
                                         )}>
                                             {index + 1}
                                         </div>
                                         <div className="flex-1">
-                                            <MathRenderer className="text-sm font-bold" content={option?.content || 'Unknown Item'} />
+                                            <MathRenderer
+                                                className={cn(
+                                                    "text-sm font-bold",
+                                                    isCorrectPos ? "text-emerald-900 dark:text-emerald-300" : "text-rose-900 dark:text-rose-300"
+                                                )}
+                                                content={option?.content || 'Unknown Item'}
+                                            />
                                         </div>
-                                        <span className="material-symbols-outlined text-lg">
+                                        <span className={cn(
+                                            "material-symbols-outlined text-lg",
+                                            isCorrectPos ? "text-emerald-500" : "text-rose-500"
+                                        )}>
                                             {isCorrectPos ? 'check_circle' : 'cancel'}
                                         </span>
                                     </div>

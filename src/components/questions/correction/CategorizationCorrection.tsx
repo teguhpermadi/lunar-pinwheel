@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 interface CategorizationCorrectionProps {
     options: QuestionOption[];
     studentAnswer: any; // Record<string, string> (itemId -> categoryId)
+    keyAnswer?: any;
 }
 
-export default function CategorizationCorrection({ options, studentAnswer = {} }: CategorizationCorrectionProps) {
+export default function CategorizationCorrection({ options, studentAnswer = {}, keyAnswer }: CategorizationCorrectionProps) {
     // Categories are typically options with metadata group_title
     const groupsMap = new Map<string, QuestionOption[]>();
     options.forEach(opt => {

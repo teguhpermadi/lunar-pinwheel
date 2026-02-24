@@ -34,6 +34,7 @@ interface QuestionDetail {
     correction_notes: string | null;
     question_number: number;
     options?: any[];
+    key_answer?: any;
 }
 
 export default function ExamCorrectionPage() {
@@ -591,6 +592,7 @@ export default function ExamCorrectionPage() {
                                                     type={currentQuestion.question_type}
                                                     studentAnswer={currentQuestion.student_answer}
                                                     options={currentQuestion.options || []}
+                                                    keyAnswer={currentQuestion.key_answer}
                                                     maxScore={currentQuestion.max_score}
                                                     scoreEarned={currentQuestion.score_earned}
                                                 />
@@ -821,6 +823,7 @@ export default function ExamCorrectionPage() {
                                                         type={answer.exam_question?.question_type || answer.question_type}
                                                         studentAnswer={answer.student_answer}
                                                         options={answer.exam_question?.options || answer.options || []}
+                                                        keyAnswer={answer.exam_question?.key_answer || answer.key_answer}
                                                         maxScore={answer.max_score}
                                                         scoreEarned={answer.score_earned}
                                                     />
