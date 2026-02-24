@@ -32,6 +32,8 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     selectedSessionId,
     setQuestions
 }) => {
+    const currentSession = sessions.find(s => s.id === selectedSessionId);
+
     return (
         <motion.div
             key={`${selectedSessionId}-${selectedQuestionIndex}`}
@@ -96,7 +98,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         setPartialScoreData({
                                             maxScore: currentQuestion.max_score,
                                             currentScore: currentQuestion.score_earned || 0,
-                                            studentName: sessions.find(s => s.id === selectedSessionId)?.student.name
+                                            studentName: currentSession?.student.name
                                         });
                                         setIsPartialModalOpen(true);
                                     }}

@@ -118,10 +118,13 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                     <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
                                         {answer.session?.user?.name?.charAt(0) || '?'}
                                     </div>
-                                    <div>
+                                    <div className="flex flex-col">
                                         <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                                             {answer.session?.user?.name}
                                         </h4>
+                                        {answer.session?.is_corrected && (
+                                            <span className="text-[9px] font-black uppercase text-emerald-500 tracking-wider">Corrected</span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -173,6 +176,12 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                         <span className="material-symbols-outlined text-sm">cancel</span>
                                         <span className="text-[9px] font-black uppercase">No</span>
                                     </button>
+                                    {answer.session?.is_corrected && (
+                                        <>
+                                            <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1" />
+                                            <span className="material-symbols-outlined text-emerald-500" title="Corrected">verified</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 

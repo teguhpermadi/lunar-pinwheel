@@ -287,12 +287,16 @@ export default function ExamCorrectionPage() {
         }
     };
 
-    const handleFinishCorrection = async () => {
-        if (!selectedSessionId) return;
+    const handleFinishCorrection = async (sessionId?: string | string[]) => {
+        const targetSessionIds = sessionId ? (Array.isArray(sessionId) ? sessionId : [sessionId]) : (selectedSessionId ? [selectedSessionId] : []);
+
+        if (targetSessionIds.length === 0) return;
 
         const result = await Swal.fire({
-            title: 'Finalize Correction?',
-            text: 'This will mark the session as corrected and notify the student.',
+            title: targetSessionIds.length > 1 ? 'Finalize Multiple Corrections?' : 'Finalize Correction?',
+            text: targetSessionIds.length > 1
+                ? `This will mark ${targetSessionIds.length} sessions as corrected and notify the students.`
+                : 'This will mark the session as corrected and notify the student.',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Yes, Finalize',
@@ -301,11 +305,14 @@ export default function ExamCorrectionPage() {
 
         if (result.isConfirmed) {
             try {
-                const response = await examApi.finishCorrection(selectedSessionId);
-                if (response.success) {
-                    Swal.fire('Success', 'Correction finalized successfully!', 'success');
-                    fetchSessions();
+                // Bulk finalize sessions sequentially or via parallel (sequentially is safer if API is single-id)
+                // Actually examApi.finishCorrection only takes one ID.
+                for (const id of targetSessionIds) {
+                    await examApi.finishCorrection(id);
                 }
+
+                Swal.fire('Success', targetSessionIds.length > 1 ? 'Corrections finalized successfully!' : 'Correction finalized successfully!', 'success');
+                fetchSessions();
             } catch (error: any) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to finalize correction', 'error');
             }
@@ -373,7 +380,7 @@ export default function ExamCorrectionPage() {
                     </div>
                     <div className="p-4 bg-slate-900 border-t border-slate-800">
                         <button
-                            onClick={handleFinishCorrection}
+                            onClick={() => handleFinishCorrection()}
                             disabled={!selectedSessionId}
                             className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
                         >
@@ -658,9 +665,20 @@ export default function ExamCorrectionPage() {
                                     className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
                                 >
                                     <span className="material-symbols-outlined text-lg">adjust</span>
-                                    <span className="text-xs font-black uppercase tracking-wider">Partial</span>
+                                    <span className="text-xs font-black uppercase tracking-wider">Partial Score</span>
                                 </button>
                             )}
+                            <button
+                                onClick={() => handleFinishCorrection(
+                                    bulkAnswers
+                                        .filter(a => selectedAnswerIds.includes(a.id))
+                                        .map(a => a.session.id)
+                                )}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-lg">verified</span>
+                                <span className="text-xs font-black uppercase tracking-wider">Finalize Sessions</span>
+                            </button>
                             <button
                                 onClick={() => handleBulkAction('no')}
                                 className="flex items-center gap-2 px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
