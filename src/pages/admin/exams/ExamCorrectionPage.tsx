@@ -55,6 +55,7 @@ export default function ExamCorrectionPage() {
     const [viewMode, setViewMode] = useState<'by-student' | 'by-question'>('by-student');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
+    const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
 
     const fetchSessions = useCallback(async () => {
         if (!id) return;
@@ -138,25 +139,49 @@ export default function ExamCorrectionPage() {
 
     const handleUpdateCorrection = async (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string) => {
         const targetSessionId = sessionIdOverride || selectedSessionId;
-        const currentQuestion = questions[selectedQuestionIndex];
+        const currentQuestion = viewMode === 'by-student' ? questions[selectedQuestionIndex] : null;
         const targetDetailId = detailIdOverride || currentQuestion?.id;
 
         if (!targetSessionId || !targetDetailId) return;
 
+        // Determine marking status
+        let markingStatus: 'full' | 'partial' | 'no' = 'partial';
+        const maxScore = detailIdOverride
+            ? bulkAnswers.find(a => a.id === detailIdOverride)?.max_score
+            : currentQuestion?.max_score;
+
+        if (score === maxScore) markingStatus = 'full';
+        else if (score === 0 && !isCorrect) markingStatus = 'no';
+
         try {
             const response = await examApi.updateCorrection(targetSessionId, targetDetailId, {
-                score_earned: score,
+                marking_status: markingStatus,
+                score_earned: markingStatus === 'partial' ? score : undefined,
                 is_correct: isCorrect,
                 correction_notes: ''
             });
 
             if (response.success) {
-                // Update local state
-                const newQuestions = [...questions];
-                const idx = newQuestions.findIndex(q => q.id === targetDetailId);
-                if (idx !== -1) {
-                    newQuestions[idx] = { ...newQuestions[idx], score_earned: response.data.score_earned, is_correct: response.data.is_correct };
-                    setQuestions(newQuestions);
+                // Update local student-based state if applicable
+                if (viewMode === 'by-student') {
+                    const newQuestions = [...questions];
+                    const idx = newQuestions.findIndex(q => q.id === targetDetailId);
+                    if (idx !== -1) {
+                        newQuestions[idx] = { ...newQuestions[idx], score_earned: response.data.score_earned, is_correct: response.data.is_correct };
+                        setQuestions(newQuestions);
+                    }
+                } else {
+                    // Update bulk answers list
+                    const newBulkAnswers = [...bulkAnswers];
+                    const idx = newBulkAnswers.findIndex(a => a.id === targetDetailId);
+                    if (idx !== -1) {
+                        newBulkAnswers[idx] = {
+                            ...newBulkAnswers[idx],
+                            score_earned: response.data.score_earned,
+                            is_correct: response.data.is_correct
+                        };
+                        setBulkAnswers(newBulkAnswers);
+                    }
                 }
 
                 Swal.fire({
@@ -168,7 +193,7 @@ export default function ExamCorrectionPage() {
                     position: 'top-end'
                 });
 
-                if (!detailIdOverride && selectedQuestionIndex < questions.length - 1) {
+                if (!detailIdOverride && viewMode === 'by-student' && selectedQuestionIndex < questions.length - 1) {
                     setSelectedQuestionIndex(selectedQuestionIndex + 1);
                 }
 
@@ -176,6 +201,68 @@ export default function ExamCorrectionPage() {
             }
         } catch (error: any) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to update correction', 'error');
+        }
+    };
+
+    const toggleAnswerSelection = (answerId: string) => {
+        setSelectedAnswerIds(prev =>
+            prev.includes(answerId)
+                ? prev.filter(id => id !== answerId)
+                : [...prev, answerId]
+        );
+    };
+
+    const handleBulkAction = async (status: 'full' | 'no') => {
+        if (!id || selectedAnswerIds.length === 0) return;
+
+        const confirmData = {
+            title: `Mark ${selectedAnswerIds.length} answers?`,
+            text: status === 'full' ? 'All selected answers will get max score.' : 'All selected answers will get 0 score.',
+            icon: 'warning' as const,
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update all'
+        };
+
+        const result = await Swal.fire(confirmData);
+        if (!result.isConfirmed) return;
+
+        setIsBulkLoading(true);
+        try {
+            const updates = selectedAnswerIds.map(detailId => ({
+                id: detailId,
+                marking_status: status
+            }));
+
+            const response = await examApi.bulkCorrection(id, updates as any);
+            if (response.success) {
+                Swal.fire({
+                    title: 'Updated',
+                    text: response.message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+                setSelectedAnswerIds([]);
+                const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                if (currentQuestionId) {
+                    fetchByQuestion(currentQuestionId);
+                }
+                fetchSessions();
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to update bulk correction', 'error');
+        } finally {
+            setIsBulkLoading(false);
+        }
+    };
+
+    const handleToggleSelectAll = () => {
+        if (selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0) {
+            setSelectedAnswerIds([]);
+        } else {
+            setSelectedAnswerIds(bulkAnswers.map(a => a.id));
         }
     };
 
@@ -618,7 +705,22 @@ export default function ExamCorrectionPage() {
                                                     dangerouslySetInnerHTML={{ __html: currentQuestionContent }}
                                                 />
                                             </div>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 items-center">
+                                                <button
+                                                    onClick={handleToggleSelectAll}
+                                                    className={cn(
+                                                        "flex items-center gap-2 px-3 py-2 border rounded-xl transition-all text-[10px] font-black uppercase",
+                                                        selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0
+                                                            ? "bg-primary text-white border-primary"
+                                                            : "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">
+                                                        {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'deselect' : 'select_all'}
+                                                    </span>
+                                                    {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'Deselect All' : 'Select All'}
+                                                </button>
+                                                <div className="h-6 w-px bg-slate-100 dark:bg-slate-800 mx-1" />
                                                 <button
                                                     onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
                                                     disabled={selectedQuestionIndex === 0}
@@ -654,6 +756,17 @@ export default function ExamCorrectionPage() {
                                                 >
                                                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-50 dark:border-slate-800/50">
                                                         <div className="flex items-center gap-3">
+                                                            <div
+                                                                onClick={() => toggleAnswerSelection(answer.id)}
+                                                                className={cn(
+                                                                    "size-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all shrink-0",
+                                                                    selectedAnswerIds.includes(answer.id)
+                                                                        ? "bg-primary border-primary text-white"
+                                                                        : "border-slate-200 dark:border-slate-800 hover:border-primary/50"
+                                                                )}
+                                                            >
+                                                                {selectedAnswerIds.includes(answer.id) && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                            </div>
                                                             <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
                                                                 {answer.session?.user?.name?.charAt(0) || '?'}
                                                             </div>
@@ -734,6 +847,41 @@ export default function ExamCorrectionPage() {
 
                 {renderSidebarRight()}
             </main>
+
+            {/* Bulk Action Bar */}
+            {selectedAnswerIds.length > 0 && (
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="bg-slate-900/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/10 px-6 py-4 rounded-[40px] shadow-2xl flex items-center gap-6">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Marking</span>
+                            <span className="text-white font-black text-sm">{selectedAnswerIds.length} Students Selected</span>
+                        </div>
+                        <div className="h-10 w-px bg-white/10" />
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleBulkAction('full')}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                <span className="text-xs font-black uppercase tracking-wider">Mark as Correct</span>
+                            </button>
+                            <button
+                                onClick={() => handleBulkAction('no')}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-lg">cancel</span>
+                                <span className="text-xs font-black uppercase tracking-wider">Mark as Incorrect</span>
+                            </button>
+                            <button
+                                onClick={() => setSelectedAnswerIds([])}
+                                className="p-2.5 text-slate-400 hover:text-white transition-colors"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }

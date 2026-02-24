@@ -818,7 +818,11 @@ export const examApi = {
         const response = await api.get(`/exams/${examId}/questions/${questionId}/correction`);
         return response.data;
     },
-    async updateCorrection(sessionId: string, detailId: string, data: { score_earned: number; correction_notes?: string; is_correct: boolean }) {
+    async bulkCorrection(examId: string, updates: { id: string; score_earned?: number; marking_status?: 'full' | 'partial' | 'no'; correction_notes?: string }[]) {
+        const response = await api.post(`/exams/${examId}/bulk-correction`, { updates });
+        return response.data;
+    },
+    async updateCorrection(sessionId: string, detailId: string, data: { score_earned?: number; marking_status?: 'full' | 'partial' | 'no'; correction_notes?: string; is_correct?: boolean }) {
         const response = await api.put(`/sessions/${sessionId}/details/${detailId}`, data);
         return response.data;
     },
