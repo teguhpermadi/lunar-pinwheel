@@ -1,6 +1,12 @@
 import { QuestionOption } from '@/lib/api';
 import MultipleChoiceCorrection from './MultipleChoiceCorrection';
 import EssayCorrection from './EssayCorrection';
+import MultipleSelectionCorrection from './MultipleSelectionCorrection';
+import TrueFalseCorrection from './TrueFalseCorrection';
+import ShortAnswerCorrection from './ShortAnswerCorrection';
+import ArabicResponseCorrection from './ArabicResponseCorrection';
+import JavaneseResponseCorrection from './JavaneseResponseCorrection';
+import MathInputCorrection from './MathInputCorrection';
 import MatchingCorrection from './MatchingCorrection';
 import CategorizationCorrection from './CategorizationCorrection';
 import SequenceCorrection from './SequenceCorrection';
@@ -14,22 +20,25 @@ interface CorrectionDisplayProps {
     scoreEarned: number;
 }
 
-export default function CorrectionDisplay({ type, studentAnswer, options, keyAnswer, maxScore, scoreEarned }: CorrectionDisplayProps) {
+export default function CorrectionDisplay({ type, studentAnswer, options, keyAnswer }: CorrectionDisplayProps) {
     const renderComponent = () => {
         switch (type) {
             case 'multiple_choice':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={false} />;
+                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             case 'multiple_selection':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={true} />;
+                return <MultipleSelectionCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             case 'true_false':
-                return <MultipleChoiceCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} isMultiple={false} />;
+                return <TrueFalseCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             case 'essay':
+                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'short_answer':
-                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
+                return <ShortAnswerCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'arabic_response':
+                return <ArabicResponseCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'javanese_response':
+                return <JavaneseResponseCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'math_input':
-                return <EssayCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
+                return <MathInputCorrection studentAnswer={studentAnswer as string} options={options} keyAnswer={keyAnswer} />;
             case 'matching':
                 return <MatchingCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             case 'sequence':

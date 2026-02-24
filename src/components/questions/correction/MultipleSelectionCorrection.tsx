@@ -2,15 +2,15 @@ import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
 
-interface MultipleChoiceCorrectionProps {
+interface MultipleSelectionCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // string (id/key)
-    keyAnswer?: any;    // { answer: string }
+    studentAnswer: any; // string[] (ids/keys)
+    keyAnswer?: any;    // { answers: string[] }
 }
 
-export default function MultipleChoiceCorrection({ options, studentAnswer, keyAnswer }: MultipleChoiceCorrectionProps) {
+export default function MultipleSelectionCorrection({ options, studentAnswer, keyAnswer }: MultipleSelectionCorrectionProps) {
     const isSelected = (opt: QuestionOption) => {
-        if (!studentAnswer) return false;
+        if (!studentAnswer || !Array.isArray(studentAnswer)) return false;
 
         const optionId = String(opt.id);
         const optionKey = String(opt.option_key).toUpperCase();
@@ -22,30 +22,22 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
             return String(val).toUpperCase();
         };
 
-        const normalizedStudentAnswer = normalize(studentAnswer);
-        return normalizedStudentAnswer === optionId.toUpperCase() || normalizedStudentAnswer === optionKey;
+        return studentAnswer.some(val => {
+            const normalizedVal = normalize(val);
+            return normalizedVal === optionId.toUpperCase() || normalizedVal === optionKey;
+        });
     };
 
     const isCorrect = (opt: QuestionOption) => {
         const optionId = String(opt.id);
         const optionKey = String(opt.option_key).toUpperCase();
 
-        // 1. Check if keyAnswer exists and contains this option
         if (keyAnswer) {
             const extractValues = (val: any): string[] => {
                 const normalizeVal = (v: any) => String(v).toUpperCase();
-
                 if (typeof val === 'object' && val !== null) {
-                    // Try plural 'answers' first, then singular 'answer', then other identifiers
                     const inner = val.answers || val.answer || val.id || val.option_id || val.option_key || val;
                     if (Array.isArray(inner)) return inner.map(normalizeVal);
-
-                    // If it's still an object and we haven't found a primitive/array, 
-                    // and it's NOT the root val we started with, try to stringify or return empty
-                    if (typeof inner === 'object' && inner !== null && inner !== val) {
-                        return [normalizeVal(JSON.stringify(inner))];
-                    }
-
                     return [normalizeVal(inner)];
                 }
                 if (Array.isArray(val)) return val.map(normalizeVal);
@@ -58,17 +50,8 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
             }
         }
 
-        // 2. Fallbacks for various formats in the opt object itself
         const o = opt as any;
-        return !!opt.is_correct ||
-            !!o.isCorrect ||
-            !!o.correct ||
-            !!o.is_answer ||
-            opt.metadata?.is_correct === true ||
-            opt.metadata?.is_correct === 1 ||
-            opt.metadata?.is_correct === "1" ||
-            opt.metadata?.is_answer === true ||
-            opt.metadata?.is_answer === 1;
+        return !!opt.is_correct || !!o.is_answer || opt.metadata?.is_correct || opt.metadata?.is_answer;
     };
 
     const correctOptions = options.filter(isCorrect);
@@ -84,7 +67,7 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
                         <h5 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Answer Key</h5>
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-                        <div className="flex flex-wrap gap-2 items-center mb-1">
+                        <div className="flex flex-wrap gap-2 items-center">
                             {correctOptions.map((opt) => (
                                 <div key={opt.id} className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-xl border border-emerald-100 dark:border-emerald-800/50 flex-1 min-w-[200px]">
                                     <div className="size-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-black text-sm shrink-0">
