@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 
+const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'multiple_selection', 'true_false'];
+
 interface StudentSession {
     id: string;
     student: {
@@ -57,6 +59,19 @@ export default function ExamCorrectionPage() {
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
+
+    // Partial Score Modal State
+    const [isPartialModalOpen, setIsPartialModalOpen] = useState(false);
+    const [partialScoreData, setPartialScoreData] = useState<{
+        detailId?: string;
+        sessionId?: string;
+        maxScore: number;
+        currentScore: number;
+        studentName?: string;
+    } | null>(null);
+
+    const [isBulkPartialModalOpen, setIsBulkPartialModalOpen] = useState(false);
+    const [bulkPartialScore, setBulkPartialScore] = useState(0);
 
     const fetchSessions = useCallback(async () => {
         if (!id) return;
@@ -213,25 +228,29 @@ export default function ExamCorrectionPage() {
         );
     };
 
-    const handleBulkAction = async (status: 'full' | 'no') => {
+    const handleBulkAction = async (status: 'full' | 'no' | 'partial', score?: number) => {
         if (!id || selectedAnswerIds.length === 0) return;
 
-        const confirmData = {
-            title: `Mark ${selectedAnswerIds.length} answers?`,
-            text: status === 'full' ? 'All selected answers will get max score.' : 'All selected answers will get 0 score.',
-            icon: 'warning' as const,
-            showCancelButton: true,
-            confirmButtonText: 'Yes, update all'
-        };
+        // Skip confirmation for partial as the modal has its own save button
+        if (status !== 'partial') {
+            const confirmData = {
+                title: `Mark ${selectedAnswerIds.length} answers?`,
+                text: status === 'full' ? 'All selected answers will get max score.' : 'All selected answers will get 0 score.',
+                icon: 'warning' as const,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update all'
+            };
 
-        const result = await Swal.fire(confirmData);
-        if (!result.isConfirmed) return;
+            const result = await Swal.fire(confirmData);
+            if (!result.isConfirmed) return;
+        }
 
         setIsBulkLoading(true);
         try {
             const updates = selectedAnswerIds.map(detailId => ({
                 id: detailId,
-                marking_status: status
+                marking_status: status,
+                score_earned: status === 'partial' ? score : undefined
             }));
 
             const response = await examApi.bulkCorrection(id, updates as any);
@@ -620,18 +639,27 @@ export default function ExamCorrectionPage() {
                                                         <span className="material-symbols-outlined text-2xl">check_circle</span>
                                                         <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleUpdateCorrection(currentQuestion.max_score / 2, true)}
-                                                        className={cn(
-                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                            (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
-                                                                ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
-                                                        )}
-                                                    >
-                                                        <span className="material-symbols-outlined text-2xl">adjust</span>
-                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
-                                                    </button>
+                                                    {!EXCLUDED_PARTIAL_TYPES.includes(currentQuestion.question_type) && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setPartialScoreData({
+                                                                    maxScore: currentQuestion.max_score,
+                                                                    currentScore: currentQuestion.score_earned || 0,
+                                                                    studentName: sessions.find(s => s.id === selectedSessionId)?.student.name
+                                                                });
+                                                                setIsPartialModalOpen(true);
+                                                            }}
+                                                            className={cn(
+                                                                "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
+                                                                (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
+                                                                    ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                                                    : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
+                                                            )}
+                                                        >
+                                                            <span className="material-symbols-outlined text-2xl">adjust</span>
+                                                            <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleUpdateCorrection(0, false)}
                                                         className={cn(
@@ -792,18 +820,29 @@ export default function ExamCorrectionPage() {
                                                                 <span className="material-symbols-outlined text-sm">check_circle</span>
                                                                 <span className="text-[9px] font-black uppercase">Full</span>
                                                             </button>
-                                                            <button
-                                                                onClick={() => handleUpdateCorrection(answer.max_score / 2, true, answer.id, answer.session.id)}
-                                                                className={cn(
-                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
-                                                                    (answer.is_correct === true && answer.score_earned < answer.max_score && answer.score_earned > 0)
-                                                                        ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200"
-                                                                )}
-                                                            >
-                                                                <span className="material-symbols-outlined text-sm">adjust</span>
-                                                                <span className="text-[9px] font-black uppercase">Partial</span>
-                                                            </button>
+                                                            {!EXCLUDED_PARTIAL_TYPES.includes(answer.exam_question?.question_type || answer.question_type) && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setPartialScoreData({
+                                                                            detailId: answer.id,
+                                                                            sessionId: answer.session.id,
+                                                                            maxScore: answer.max_score,
+                                                                            currentScore: answer.score_earned || 0,
+                                                                            studentName: answer.session?.user?.name
+                                                                        });
+                                                                        setIsPartialModalOpen(true);
+                                                                    }}
+                                                                    className={cn(
+                                                                        "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
+                                                                        (answer.is_correct === true && answer.score_earned < answer.max_score && answer.score_earned > 0)
+                                                                            ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                                                            : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200"
+                                                                    )}
+                                                                >
+                                                                    <span className="material-symbols-outlined text-sm">adjust</span>
+                                                                    <span className="text-[9px] font-black uppercase">Partial</span>
+                                                                </button>
+                                                            )}
                                                             <button
                                                                 onClick={() => handleUpdateCorrection(0, false, answer.id, answer.session.id)}
                                                                 className={cn(
@@ -868,6 +907,19 @@ export default function ExamCorrectionPage() {
                                 <span className="material-symbols-outlined text-lg">check_circle</span>
                                 <span className="text-xs font-black uppercase tracking-wider">Mark as Correct</span>
                             </button>
+                            {!EXCLUDED_PARTIAL_TYPES.includes(masterQuestions[selectedQuestionIndex]?.question_type) && (
+                                <button
+                                    onClick={() => {
+                                        const firstBulk = bulkAnswers[0];
+                                        setBulkPartialScore(firstBulk?.score_earned || 0);
+                                        setIsBulkPartialModalOpen(true);
+                                    }}
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                                >
+                                    <span className="material-symbols-outlined text-lg">adjust</span>
+                                    <span className="text-xs font-black uppercase tracking-wider">Partial</span>
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleBulkAction('no')}
                                 className="flex items-center gap-2 px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
@@ -885,6 +937,161 @@ export default function ExamCorrectionPage() {
                     </div>
                 </div>
             )}
+
+            {/* Partial Score Modal */}
+            <AnimatePresence>
+                {isPartialModalOpen && partialScoreData && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="size-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+                                        <span className="material-symbols-outlined">adjust</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Partial Score</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{partialScoreData.studentName || 'Student Response'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Award Score</span>
+                                            <span className="text-xs font-bold text-primary">Max: {partialScoreData.maxScore}</span>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max={partialScoreData.maxScore}
+                                                step="0.01"
+                                                value={partialScoreData.currentScore}
+                                                onChange={(e) => setPartialScoreData({ ...partialScoreData, currentScore: parseFloat(e.target.value) || 0 })}
+                                                className="w-full text-4xl font-black text-center bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white tabular-nums"
+                                            />
+                                            <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                                        </div>
+                                        <div className="mt-8">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max={partialScoreData.maxScore}
+                                                step="0.01"
+                                                value={partialScoreData.currentScore}
+                                                onChange={(e) => setPartialScoreData({ ...partialScoreData, currentScore: parseFloat(e.target.value) || 0 })}
+                                                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setIsPartialModalOpen(false)}
+                                            className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const finalScore = Math.min(Math.max(0, partialScoreData.currentScore), partialScoreData.maxScore);
+                                                handleUpdateCorrection(finalScore, true, partialScoreData.detailId, partialScoreData.sessionId);
+                                                setIsPartialModalOpen(false);
+                                            }}
+                                            className="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all"
+                                        >
+                                            Save Score
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Bulk Partial Score Modal */}
+            <AnimatePresence>
+                {isBulkPartialModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="size-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+                                        <span className="material-symbols-outlined">adjust</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Bulk Partial Score</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Apply to {selectedAnswerIds.length} Students</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Award Score</span>
+                                            <span className="text-xs font-bold text-primary">Max: {bulkAnswers[0]?.max_score}</span>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max={bulkAnswers[0]?.max_score}
+                                                step="0.01"
+                                                value={bulkPartialScore}
+                                                onChange={(e) => setBulkPartialScore(parseFloat(e.target.value) || 0)}
+                                                className="w-full text-4xl font-black text-center bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white tabular-nums"
+                                            />
+                                            <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                                        </div>
+                                        <div className="mt-8">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max={bulkAnswers[0]?.max_score}
+                                                step="0.01"
+                                                value={bulkPartialScore}
+                                                onChange={(e) => setBulkPartialScore(parseFloat(e.target.value) || 0)}
+                                                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setIsBulkPartialModalOpen(false)}
+                                            className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const maxPossible = bulkAnswers[0]?.max_score || 0;
+                                                const finalScore = Math.min(Math.max(0, bulkPartialScore), maxPossible);
+                                                handleBulkAction('partial', finalScore);
+                                                setIsBulkPartialModalOpen(false);
+                                            }}
+                                            className="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all"
+                                        >
+                                            Apply to All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
