@@ -814,6 +814,10 @@ export const examApi = {
         const response = await api.get(`/exams/${examId}/sessions/${sessionId}/correction`);
         return response.data;
     },
+    async getCorrectionByQuestion(examId: string, questionId: string) {
+        const response = await api.get(`/exams/${examId}/questions/${questionId}/correction`);
+        return response.data;
+    },
     async updateCorrection(sessionId: string, detailId: string, data: { score_earned: number; correction_notes?: string; is_correct: boolean }) {
         const response = await api.put(`/sessions/${sessionId}/details/${detailId}`, data);
         return response.data;

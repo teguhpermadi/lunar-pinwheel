@@ -49,7 +49,12 @@ export default function ExamCorrectionPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSessionsLoading, setIsSessionsLoading] = useState(true);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
+    const [isBulkLoading, setIsBulkLoading] = useState(false);
     const [studentSearchQuery, setStudentSearchQuery] = useState(''); // Specifically for right navigation
+
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question'>('by-student');
+    const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
+    const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
 
     const fetchSessions = useCallback(async () => {
         if (!id) return;
@@ -61,6 +66,9 @@ export default function ExamCorrectionPage() {
                 if (response.data.sessions) {
                     setSessions(response.data.sessions);
                     setExam(response.data.exam);
+                    if (response.data.questions) {
+                        setMasterQuestions(response.data.questions);
+                    }
 
                     // Auto select first session if none selected
                     if (!selectedSessionId && response.data.sessions.length > 0) {
@@ -97,16 +105,35 @@ export default function ExamCorrectionPage() {
         }
     }, [id]);
 
+    const fetchByQuestion = useCallback(async (questionId: string) => {
+        if (!id) return;
+        setIsBulkLoading(true);
+        try {
+            const response = await examApi.getCorrectionByQuestion(id, questionId);
+            if (response.success) {
+                setBulkAnswers(response.data.answers || []);
+            }
+        } catch (error) {
+            console.error('Error fetching bulk answers:', error);
+        } finally {
+            setIsBulkLoading(false);
+        }
+    }, [id]);
 
     useEffect(() => {
         fetchSessions();
     }, [id]); // Only refetch if ID changes
 
     useEffect(() => {
-        if (selectedSessionId) {
+        if (viewMode === 'by-student' && selectedSessionId) {
             fetchDetail(selectedSessionId);
+        } else if (viewMode === 'by-question' && masterQuestions.length > 0) {
+            const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+            if (currentQuestionId) {
+                fetchByQuestion(currentQuestionId);
+            }
         }
-    }, [id, selectedSessionId, fetchDetail]);
+    }, [id, selectedSessionId, selectedQuestionIndex, viewMode, masterQuestions, fetchDetail, fetchByQuestion]);
 
 
     const handleUpdateCorrection = async (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string) => {
@@ -180,93 +207,190 @@ export default function ExamCorrectionPage() {
     // Sub-renderers
     const renderSidebarLeft = () => (
         <aside className="w-[280px] border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 shrink-0">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Students</h2>
-                    <span className="text-[10px] font-bold text-slate-400">{sessions.length}</span>
-                </div>
-                <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                    <input
-                        className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
-                        placeholder="Search..."
-                        value={studentSearchQuery}
-                        onChange={(e) => setStudentSearchQuery(e.target.value)}
-                    />
-                </div>
-            </div>
-            <div className="flex-grow overflow-y-auto custom-scrollbar">
-                {isSessionsLoading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="p-4 border-b border-slate-100 animate-pulse">
-                            <Skeleton className="h-8 w-full rounded" />
+            {viewMode === 'by-student' ? (
+                <>
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Students</h2>
+                            <span className="text-[10px] font-bold text-slate-400">{sessions.length}</span>
                         </div>
-                    ))
-                ) : (
-                    sessions
-                        .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                        .map(session => (
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input
+                                className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                placeholder="Search..."
+                                value={studentSearchQuery}
+                                onChange={(e) => setStudentSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex-grow overflow-y-auto custom-scrollbar">
+                        {isSessionsLoading ? (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="p-4 border-b border-slate-100 animate-pulse">
+                                    <Skeleton className="h-8 w-full rounded" />
+                                </div>
+                            ))
+                        ) : (
+                            sessions
+                                .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                                .map(session => (
+                                    <button
+                                        key={session.id}
+                                        onClick={() => setSelectedSessionId(session.id)}
+                                        className={cn(
+                                            "w-full p-4 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                            selectedSessionId === session.id ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200">
+                                                {session.student.name.charAt(0)}
+                                            </div>
+                                            <div className="flex-1 overflow-hidden">
+                                                <p className="text-xs font-bold truncate">{session.student.name}</p>
+                                                <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))
+                        )}
+                    </div>
+                    <div className="p-4 bg-slate-900 border-t border-slate-800">
+                        <button
+                            onClick={handleFinishCorrection}
+                            disabled={!selectedSessionId}
+                            className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                        >
+                            Finalize Session
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exam Questions</h2>
+                        <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Fixed List</span>
+                    </div>
+                    <div className="flex-grow overflow-y-auto custom-scrollbar">
+                        {masterQuestions.map((q, index) => (
                             <button
-                                key={session.id}
-                                onClick={() => setSelectedSessionId(session.id)}
+                                key={q.id}
+                                onClick={() => setSelectedQuestionIndex(index)}
                                 className={cn(
-                                    "w-full p-4 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
-                                    selectedSessionId === session.id ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                    "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                    selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
                                 )}
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200">
-                                        {session.student.name.charAt(0)}
-                                    </div>
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-xs font-bold truncate">{session.student.name}</p>
-                                        <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
-                                    </div>
+                                <span className={cn(
+                                    "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
+                                    selectedQuestionIndex === index ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
+                                )}>
+                                    {(index + 1).toString().padStart(2, '0')}
+                                </span>
+                                <div className="flex-grow overflow-hidden">
+                                    <p className={cn(
+                                        "text-xs truncate",
+                                        selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                    )}>
+                                        {(q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}`}
+                                    </p>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">
+                                        Type: {(q.question_type || '').replace('_', ' ')}
+                                    </p>
                                 </div>
                             </button>
-                        ))
-                )}
-            </div>
-            <div className="p-4 bg-slate-900 border-t border-slate-800">
-                <button
-                    onClick={handleFinishCorrection}
-                    disabled={!selectedSessionId}
-                    className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
-                >
-                    Finalize Session
-                </button>
-            </div>
+                        ))}
+                    </div>
+                </>
+            )}
         </aside>
     );
 
+    const scrollToAnswer = (sessionId: string) => {
+        const element = document.getElementById(`session-${sessionId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
     const renderSidebarRight = () => (
         <aside className="w-[300px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden shrink-0 relative">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</h2>
-                <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Question List</span>
-            </div>
-            <div className="flex-grow overflow-y-auto custom-scrollbar">
-                {questions.map((q, index) => (
-                    <button
-                        key={q.id}
-                        onClick={() => setSelectedQuestionIndex(index)}
-                        className={cn(
-                            "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
-                            selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+            {viewMode === 'by-student' ? (
+                <>
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</h2>
+                        <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Question List</span>
+                    </div>
+                    <div className="flex-grow overflow-y-auto custom-scrollbar">
+                        {questions.map((q, index) => (
+                            <button
+                                key={q.id}
+                                onClick={() => setSelectedQuestionIndex(index)}
+                                className={cn(
+                                    "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                    selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                )}
+                            >
+                                <span className={cn(
+                                    "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
+                                    q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
+                                        q.is_correct === false ? "bg-rose-100 text-rose-600" :
+                                            "bg-slate-100 text-slate-400"
+                                )}>
+                                    {(index + 1).toString().padStart(2, '0')}
+                                </span>
+                                <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
+                            </button>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Navigation</h2>
+                        <div className="mt-3 relative">
+                            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input
+                                className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                placeholder="Find Student..."
+                                value={studentSearchQuery}
+                                onChange={(e) => setStudentSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex-grow overflow-y-auto custom-scrollbar">
+                        {isSessionsLoading ? (
+                            Array.from({ length: 10 }).map((_, i) => (
+                                <Skeleton key={i} className="h-12 w-full mb-1" />
+                            ))
+                        ) : (
+                            sessions
+                                .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                                .map((session) => (
+                                    <button
+                                        key={session.id}
+                                        onClick={() => scrollToAnswer(session.id)}
+                                        className={cn(
+                                            "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3 text-left overflow-hidden">
+                                            <div className={cn(
+                                                "w-2 h-2 rounded-full shrink-0",
+                                                session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
+                                            )}></div>
+                                            <p className="text-xs font-medium text-slate-500 truncate">{session.student.name}</p>
+                                        </div>
+                                        {session.is_corrected && (
+                                            <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0">check_circle</span>
+                                        )}
+                                    </button>
+                                ))
                         )}
-                    >
-                        <span className={cn(
-                            "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                            q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
-                                q.is_correct === false ? "bg-rose-100 text-rose-600" :
-                                    "bg-slate-100 text-slate-400"
-                        )}>
-                            {(index + 1).toString().padStart(2, '0')}
-                        </span>
-                        <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
-                    </button>
-                ))}
-            </div>
+                    </div>
+                </>
+            )}
         </aside>
     );
 
@@ -281,7 +405,13 @@ export default function ExamCorrectionPage() {
         );
     }
 
-    const currentQuestion = questions[selectedQuestionIndex];
+    const currentQuestion = viewMode === 'by-student'
+        ? questions[selectedQuestionIndex]
+        : masterQuestions[selectedQuestionIndex];
+
+    const currentQuestionContent = viewMode === 'by-student'
+        ? currentQuestion?.question_content
+        : currentQuestion?.content || currentQuestion?.question_content || '';
 
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-background-dark font-lexend">
@@ -297,9 +427,36 @@ export default function ExamCorrectionPage() {
                         <div>
                             <h1 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{exam?.title || 'Exam Correction'}</h1>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                {sessions.length} Students • {questions.length} Questions
+                                {sessions.length} Students • {masterQuestions.length || questions.length} Questions
                             </p>
                         </div>
+                    </div>
+
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                        <button
+                            onClick={() => {
+                                setViewMode('by-student');
+                                setSelectedQuestionIndex(0);
+                            }}
+                            className={cn(
+                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                viewMode === 'by-student' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            By Student
+                        </button>
+                        <button
+                            onClick={() => {
+                                setViewMode('by-question');
+                                setSelectedQuestionIndex(0);
+                            }}
+                            className={cn(
+                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                viewMode === 'by-question' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            By Question
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -317,130 +474,260 @@ export default function ExamCorrectionPage() {
                 <section className="flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-8">
                     <div className="max-w-4xl mx-auto w-full space-y-6">
                         <AnimatePresence mode="wait">
-                            <motion.div
-                                key={`${selectedSessionId}-${selectedQuestionIndex}`}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="space-y-6"
-                            >
-                                {isDetailLoading || !currentQuestion ? (
-                                    <div className="space-y-6 animate-pulse">
-                                        <Skeleton className="h-[200px] w-full rounded-2xl" />
-                                        <Skeleton className="h-[300px] w-full rounded-2xl" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <div className="flex items-center gap-4 mb-6">
-                                                <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
-                                                    Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
-                                                </span>
-                                                <div
-                                                    className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed flex-1"
-                                                    dangerouslySetInnerHTML={{ __html: currentQuestion.question_content }}
+                            {viewMode === 'by-student' ? (
+                                <motion.div
+                                    key={`${selectedSessionId}-${selectedQuestionIndex}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="space-y-6"
+                                >
+                                    {isDetailLoading || !currentQuestion ? (
+                                        <div className="space-y-6 animate-pulse">
+                                            <Skeleton className="h-[200px] w-full rounded-2xl" />
+                                            <Skeleton className="h-[300px] w-full rounded-2xl" />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
+                                                <div className="flex items-center gap-4 mb-6">
+                                                    <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
+                                                        Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
+                                                    </span>
+                                                    <div
+                                                        className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed flex-1"
+                                                        dangerouslySetInnerHTML={{ __html: currentQuestion.question_content }}
+                                                    />
+                                                </div>
+
+                                                <CorrectionDisplay
+                                                    type={currentQuestion.question_type}
+                                                    studentAnswer={currentQuestion.student_answer}
+                                                    options={currentQuestion.options || []}
+                                                    maxScore={currentQuestion.max_score}
+                                                    scoreEarned={currentQuestion.score_earned}
                                                 />
                                             </div>
 
-                                            <CorrectionDisplay
-                                                type={currentQuestion.question_type}
-                                                studentAnswer={currentQuestion.student_answer}
-                                                options={currentQuestion.options || []}
-                                                maxScore={currentQuestion.max_score}
-                                                scoreEarned={currentQuestion.score_earned}
-                                            />
-                                        </div>
-
-                                        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluate Response</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Max Score:</span>
-                                                    <span className="text-sm font-black text-primary tabular-nums">{currentQuestion.max_score}</span>
+                                            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluate Response</h4>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Max Score:</span>
+                                                        <span className="text-sm font-black text-primary tabular-nums">{currentQuestion.max_score}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="grid grid-cols-3 gap-4 mb-6">
-                                                <button
-                                                    onClick={() => handleUpdateCorrection(currentQuestion.max_score, true)}
-                                                    className={cn(
-                                                        "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                        currentQuestion.is_correct === true && currentQuestion.score_earned === currentQuestion.max_score
-                                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50/50"
-                                                    )}
-                                                >
-                                                    <span className="material-symbols-outlined text-2xl">check_circle</span>
-                                                    <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleUpdateCorrection(currentQuestion.max_score / 2, true)}
-                                                    className={cn(
-                                                        "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                        (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
-                                                            ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                                                            : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
-                                                    )}
-                                                >
-                                                    <span className="material-symbols-outlined text-2xl">adjust</span>
-                                                    <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleUpdateCorrection(0, false)}
-                                                    className={cn(
-                                                        "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                                        currentQuestion.is_correct === false
-                                                            ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
-                                                            : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200 hover:bg-rose-50/50"
-                                                    )}
-                                                >
-                                                    <span className="material-symbols-outlined text-2xl">cancel</span>
-                                                    <span className="font-bold text-[10px] uppercase tracking-wider">Incorrect</span>
-                                                </button>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <div className="relative">
-                                                    <textarea
-                                                        className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl focus:ring-primary focus:border-primary placeholder-slate-300 min-h-[100px] p-4 pt-8"
-                                                        placeholder="Type feedback or evaluation notes..."
-                                                        value={currentQuestion.correction_notes || ''}
-                                                        onChange={(e) => {
-                                                            const newQuestions = [...questions];
-                                                            newQuestions[selectedQuestionIndex].correction_notes = e.target.value;
-                                                            setQuestions(newQuestions);
-                                                        }}
-                                                    ></textarea>
-                                                    <label className="absolute top-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Teacher's Comment</label>
+                                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                                    <button
+                                                        onClick={() => handleUpdateCorrection(currentQuestion.max_score, true)}
+                                                        className={cn(
+                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
+                                                            currentQuestion.is_correct === true && currentQuestion.score_earned === currentQuestion.max_score
+                                                                ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50/50"
+                                                        )}
+                                                    >
+                                                        <span className="material-symbols-outlined text-2xl">check_circle</span>
+                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUpdateCorrection(currentQuestion.max_score / 2, true)}
+                                                        className={cn(
+                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
+                                                            (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
+                                                                ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
+                                                        )}
+                                                    >
+                                                        <span className="material-symbols-outlined text-2xl">adjust</span>
+                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUpdateCorrection(0, false)}
+                                                        className={cn(
+                                                            "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
+                                                            currentQuestion.is_correct === false
+                                                                ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                                : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200 hover:bg-rose-50/50"
+                                                        )}
+                                                    >
+                                                        <span className="material-symbols-outlined text-2xl">cancel</span>
+                                                        <span className="font-bold text-[10px] uppercase tracking-wider">Incorrect</span>
+                                                    </button>
                                                 </div>
-                                                <div className="flex justify-between items-center">
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                                        Evaluation is autosaved on button click
-                                                    </p>
-                                                    <div className="flex gap-3">
-                                                        <button
-                                                            onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
-                                                            disabled={selectedQuestionIndex === 0}
-                                                            className="px-6 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 disabled:opacity-30"
-                                                        >
-                                                            <span className="material-symbols-outlined text-sm">keyboard_arrow_left</span>
-                                                            Previous
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setSelectedQuestionIndex(Math.min(questions.length - 1, selectedQuestionIndex + 1))}
-                                                            disabled={selectedQuestionIndex === questions.length - 1}
-                                                            className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 disabled:opacity-30"
-                                                        >
-                                                            Next
-                                                            <span className="material-symbols-outlined text-sm">keyboard_arrow_right</span>
-                                                        </button>
+
+                                                <div className="space-y-4">
+                                                    <div className="relative">
+                                                        <textarea
+                                                            className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl focus:ring-primary focus:border-primary placeholder-slate-300 min-h-[100px] p-4 pt-8"
+                                                            placeholder="Type feedback or evaluation notes..."
+                                                            value={currentQuestion.correction_notes || ''}
+                                                            onChange={(e) => {
+                                                                const newQuestions = [...questions];
+                                                                newQuestions[selectedQuestionIndex].correction_notes = e.target.value;
+                                                                setQuestions(newQuestions);
+                                                            }}
+                                                        ></textarea>
+                                                        <label className="absolute top-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Teacher's Comment</label>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                                            Evaluation is autosaved on button click
+                                                        </p>
+                                                        <div className="flex gap-3">
+                                                            <button
+                                                                onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
+                                                                disabled={selectedQuestionIndex === 0}
+                                                                className="px-6 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 disabled:opacity-30"
+                                                            >
+                                                                <span className="material-symbols-outlined text-sm">keyboard_arrow_left</span>
+                                                                Previous
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setSelectedQuestionIndex(Math.min(questions.length - 1, selectedQuestionIndex + 1))}
+                                                                disabled={selectedQuestionIndex === questions.length - 1}
+                                                                className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 disabled:opacity-30"
+                                                            >
+                                                                Next
+                                                                <span className="material-symbols-outlined text-sm">keyboard_arrow_right</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </>
+                                    )}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key={`bulk-${selectedQuestionIndex}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="space-y-8"
+                                >
+                                    <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                                                <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20 shrink-0">
+                                                    Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
+                                                </span>
+                                                <div
+                                                    className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate"
+                                                    dangerouslySetInnerHTML={{ __html: currentQuestionContent }}
+                                                />
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setSelectedQuestionIndex(Math.max(0, selectedQuestionIndex - 1))}
+                                                    disabled={selectedQuestionIndex === 0}
+                                                    className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
+                                                >
+                                                    <span className="material-symbols-outlined">chevron_left</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedQuestionIndex(Math.min(masterQuestions.length - 1, selectedQuestionIndex + 1))}
+                                                    disabled={selectedQuestionIndex === masterQuestions.length - 1}
+                                                    className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
+                                                >
+                                                    <span className="material-symbols-outlined">chevron_right</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </>
-                                )}
-                            </motion.div>
+                                    </div>
+
+                                    {isBulkLoading ? (
+                                        Array.from({ length: 3 }).map((_, i) => (
+                                            <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse space-y-4">
+                                                <Skeleton className="h-8 w-40 rounded-lg" />
+                                                <Skeleton className="h-[150px] w-full rounded-xl" />
+                                            </div>
+                                        ))
+                                    ) : bulkAnswers.length > 0 ? (
+                                        <div className="space-y-6 pb-20">
+                                            {bulkAnswers.map((answer) => (
+                                                <div
+                                                    key={answer.id}
+                                                    id={`session-${answer.exam_session_id}`}
+                                                    className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md scroll-mt-24"
+                                                >
+                                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-50 dark:border-slate-800/50">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
+                                                                {answer.session?.user?.name?.charAt(0) || '?'}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                                                                    {answer.session?.user?.name}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleUpdateCorrection(answer.max_score, true, answer.id, answer.session.id)}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
+                                                                    answer.is_correct === true && answer.score_earned === answer.max_score
+                                                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200"
+                                                                )}
+                                                            >
+                                                                <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                                <span className="text-[9px] font-black uppercase">Full</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleUpdateCorrection(answer.max_score / 2, true, answer.id, answer.session.id)}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
+                                                                    (answer.is_correct === true && answer.score_earned < answer.max_score && answer.score_earned > 0)
+                                                                        ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200"
+                                                                )}
+                                                            >
+                                                                <span className="material-symbols-outlined text-sm">adjust</span>
+                                                                <span className="text-[9px] font-black uppercase">Partial</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleUpdateCorrection(0, false, answer.id, answer.session.id)}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all",
+                                                                    answer.is_correct === false
+                                                                        ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                                        : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200"
+                                                                )}
+                                                            >
+                                                                <span className="material-symbols-outlined text-sm">cancel</span>
+                                                                <span className="text-[9px] font-black uppercase">No</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <CorrectionDisplay
+                                                        type={answer.exam_question?.question_type || answer.question_type}
+                                                        studentAnswer={answer.student_answer}
+                                                        options={answer.exam_question?.options || answer.options || []}
+                                                        maxScore={answer.max_score}
+                                                        scoreEarned={answer.score_earned}
+                                                    />
+
+                                                    <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                                                        <div className="text-[10px] font-bold text-slate-400 uppercase">
+                                                            Score: <span className="text-primary tabular-nums">{answer.score_earned}</span>/{answer.max_score}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="py-10 text-center bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                                            <span className="material-symbols-outlined text-5xl text-slate-200 mb-4 block">person_off</span>
+                                            <p className="text-slate-400 font-medium">No student responses found for this question.</p>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
                         </AnimatePresence>
                     </div>
                 </section>
