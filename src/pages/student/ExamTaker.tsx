@@ -28,7 +28,7 @@ export default function ExamTaker() {
     // Data State
     const [exam, setExam] = useState<Exam | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
-    const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
+    const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // UI State
@@ -40,6 +40,9 @@ export default function ExamTaker() {
     });
     const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [gracePeriodSeconds, setGracePeriodSeconds] = useState<number | null>(null);
 
     useEffect(() => {
         if (id) {
@@ -53,21 +56,80 @@ export default function ExamTaker() {
 
     // Timer logic
     useEffect(() => {
-        if (remainingSeconds <= 0 || !exam || exam.timer_type !== 'strict') return;
+        if (!exam || exam.timer_type !== 'strict' || (remainingSeconds === null)) return;
 
-        const timer = setInterval(() => {
-            setRemainingSeconds(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    handleAutoFinish();
-                    return 0;
+        // Normal countdown logic
+        if (remainingSeconds > 0) {
+            const timer = setInterval(() => {
+                setRemainingSeconds(prev => {
+                    if (prev === null) return null;
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        // Start grace period instead of auto-finishing immediately
+                        setGracePeriodSeconds(60);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+
+        // Grace period countdown logic
+        if (remainingSeconds <= 0 && gracePeriodSeconds !== null && gracePeriodSeconds > 0) {
+            const graceTimer = setInterval(() => {
+                setGracePeriodSeconds(prev => {
+                    if (prev === null) return null;
+                    if (prev <= 1) {
+                        clearInterval(graceTimer);
+                        handleAutoFinish();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(graceTimer);
+        }
+    }, [exam?.id, exam?.timer_type, remainingSeconds === 0, gracePeriodSeconds === null]);
+
+    // Polling for time synchronization & extra time
+    useEffect(() => {
+        if (!id || !exam || exam.timer_type !== 'strict') return;
+
+        // Dynamic polling interval: 30s normally, 5s if in grace period or very low on time
+        const isLowTime = remainingSeconds !== null && remainingSeconds <= 60;
+        const isInGrace = gracePeriodSeconds !== null;
+        const pollInterval = (isLowTime || isInGrace) ? 5000 : 30000;
+
+        const syncTimer = setInterval(async () => {
+            setIsSyncing(true);
+            try {
+                const response = await studentApi.takeExam(id);
+                if (response.success && response.data.remaining_seconds !== undefined) {
+                    const newSeconds = parseInt(response.data.remaining_seconds);
+
+                    if (newSeconds > 0) {
+                        // Resurrect: If server says we have more time, clear grace period
+                        setGracePeriodSeconds(null);
+                    }
+
+                    // Only update if discrepancy is significant (> 5s) to avoid jumping
+                    setRemainingSeconds(prev => {
+                        if (prev === null || Math.abs(prev - newSeconds) > 5) {
+                            return newSeconds;
+                        }
+                        return prev;
+                    });
                 }
-                return prev - 1;
-            });
-        }, 1000);
+            } catch (error) {
+                console.error('Failed to sync timer:', error);
+            } finally {
+                setIsSyncing(false);
+            }
+        }, pollInterval);
 
-        return () => clearInterval(timer);
-    }, [remainingSeconds, exam]);
+        return () => clearInterval(syncTimer);
+    }, [id, exam?.id, exam?.timer_type, (remainingSeconds !== null && remainingSeconds <= 60), (gracePeriodSeconds !== null)]);
 
     const fetchExamData = async () => {
         if (!id) return;
@@ -100,7 +162,10 @@ export default function ExamTaker() {
                 });
 
                 setQuestions(questionsData);
-                setRemainingSeconds(response.data.remaining_seconds);
+                if (response.data.remaining_seconds !== undefined) {
+                    setRemainingSeconds(parseInt(response.data.remaining_seconds));
+                }
+                setExam(response.data.exam);
             } else {
                 MySwal.fire({
                     icon: 'error',
@@ -117,6 +182,7 @@ export default function ExamTaker() {
             }).then(() => navigate('/exams'));
         } finally {
             setIsLoading(false);
+            setIsInitialLoad(false);
         }
     };
 
@@ -143,6 +209,7 @@ export default function ExamTaker() {
     };
 
     const handleAutoFinish = async () => {
+        if (isInitialLoad || isSyncing || remainingSeconds === null || remainingSeconds > 5) return;
         setIsSubmitting(true);
         try {
             const response = await studentApi.finishExam(id!);
@@ -210,10 +277,15 @@ export default function ExamTaker() {
         }
     };
 
-    const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
+    const formatTime = (seconds: number | null) => {
+        if (seconds === null) return '--:--:--';
+        if (seconds <= 0 && gracePeriodSeconds !== null) {
+            return `EXPIRED (Syncing... ${gracePeriodSeconds}s)`;
+        }
+        const totalSeconds = Math.max(0, Math.floor(seconds));
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
         return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
     };
 
@@ -378,8 +450,8 @@ export default function ExamTaker() {
                         {user?.name?.substring(0, 2).toUpperCase() || 'ST'}
                     </div>
                     <div>
-                        <h1 className="text-lg font-semibold leading-tight line-clamp-1">{exam.title}</h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{exam.subject?.name || 'Exam'}</p>
+                        <h1 className="text-lg font-semibold leading-tight line-clamp-1">{exam?.title || 'Loading...'}</h1>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{exam?.subject?.name || 'Exam'}</p>
                     </div>
                 </div>
 
@@ -387,7 +459,7 @@ export default function ExamTaker() {
                     {exam.timer_type === 'strict' && (
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
-                            <div className={`flex items-center font-bold text-xl font-mono ${remainingSeconds < 300 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
+                            <div className={`flex items-center font-bold text-xl font-mono ${remainingSeconds !== null && remainingSeconds < 300 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
                                 <span className="material-icons text-lg mr-1">timer</span>
                                 {formatTime(remainingSeconds)}
                             </div>
