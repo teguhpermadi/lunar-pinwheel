@@ -33,8 +33,10 @@ export default function SequenceCorrection({ options, studentAnswer = [], keyAns
                     </div>
                     <div className="space-y-2">
                         {studentAnswer.length > 0 ? (
-                            studentAnswer.map((id, index) => {
-                                const option = options.find(o => o.id === id);
+                            studentAnswer.map((val, index) => {
+                                // Find option by ID or Key
+                                const option = options.find(o => o.id === val || o.option_key === val);
+                                const id = option?.id || val;
                                 const isCorrectPos = correctSequence[index]?.id === id;
 
                                 return (

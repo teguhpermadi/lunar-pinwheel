@@ -32,13 +32,21 @@ export default function MatchingCorrection({ options, studentAnswer = {}, keyAns
             <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Matching Pairs Analysis</h5>
             <div className="grid gap-3">
                 {leftOptions.map((left) => {
-                    const studentRightId = studentAnswer[left.id];
+                    // studentAnswer can be { [leftId]: rightId } or { [leftKey]: rightKey }
+                    const studentChoice = studentAnswer[left.id] || studentAnswer[left.option_key];
                     const correctRightId = getCorrectRightId(left);
 
-                    const studentRight = rightOptions.find(o => o.id === studentRightId);
+                    // Finder helper to handle both ID and Key in studentChoice
+                    const findRightOption = (choice: any) => {
+                        if (!choice) return null;
+                        const val = String(choice);
+                        return rightOptions.find(o => o.id === val || o.option_key === val);
+                    };
+
+                    const studentRight = findRightOption(studentChoice);
                     const correctRight = rightOptions.find(o => o.id === correctRightId);
 
-                    const isCorrect = studentRightId === correctRightId;
+                    const isCorrect = studentRight && correctRight && (studentRight.id === correctRight.id);
 
                     return (
                         <div key={left.id} className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">

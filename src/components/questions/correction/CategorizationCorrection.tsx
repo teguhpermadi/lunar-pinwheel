@@ -34,11 +34,11 @@ export default function CategorizationCorrection({ options, studentAnswer = {}, 
 
                         <div className="space-y-3">
                             {group.items.map((item) => {
-                                const studentCategoryId = studentAnswer[item.id];
+                                const studentChoice = studentAnswer[item.id] || studentAnswer[item.option_key];
                                 // We check if this item belongs to THIS category title
                                 // In Categorization, often any item from the same group title is "correct" in that group
                                 // But here we usually compare if student placed item A into category X
-                                const isPlacedHere = studentCategoryId === group.title || studentCategoryId === item.metadata?.group_title;
+                                const isPlacedHere = studentChoice === group.title || studentChoice === item.metadata?.group_title;
 
                                 return (
                                     <div key={item.id} className={cn(
