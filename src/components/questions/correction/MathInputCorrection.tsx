@@ -1,4 +1,4 @@
-import MathRenderer from '@/components/ui/MathRenderer';
+import MathSpan from '@/components/ui/MathSpan';
 import { QuestionOption } from '@/lib/api';
 
 interface MathInputCorrectionProps {
@@ -10,8 +10,12 @@ interface MathInputCorrectionProps {
 export default function MathInputCorrection({ studentAnswer, options = [], keyAnswer }: MathInputCorrectionProps) {
     const extractValue = (val: any): string => {
         if (typeof val === 'object' && val !== null) {
-            const inner = val.answer || val.id || val.option_id || val.option_key || val;
-            return Array.isArray(inner) ? inner.join(', ') : String(inner);
+            // Check for answer field primarily for Math
+            const inner = val.answer || val.answers || val.id || val.option_id || val.option_key || val;
+
+            if (Array.isArray(inner)) return inner.join(', ');
+            if (typeof inner === 'object' && inner !== null) return JSON.stringify(inner);
+            return String(inner);
         }
         return Array.isArray(val) ? val.join(', ') : String(val);
     };
@@ -19,7 +23,12 @@ export default function MathInputCorrection({ studentAnswer, options = [], keyAn
     let referenceAnswer = keyAnswer ? extractValue(keyAnswer) : null;
 
     if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined') {
-        referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer || o.metadata?.correct_answer)?.content || options[0]?.content;
+        const mathOpt = options.find(o => o.option_key === 'MATH' || o.metadata?.correct_answer || o.is_correct || (o as any).is_answer);
+        if (mathOpt) {
+            referenceAnswer = mathOpt.metadata?.correct_answer || mathOpt.content;
+        } else {
+            referenceAnswer = options[0]?.content;
+        }
     }
 
     return (
@@ -32,9 +41,9 @@ export default function MathInputCorrection({ studentAnswer, options = [], keyAn
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student Response</h5>
                 </div>
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center">
-                    <div className="text-slate-700 dark:text-slate-200 text-3xl">
+                    <div className="text-slate-700 dark:text-slate-200">
                         {studentAnswer ? (
-                            <MathRenderer content={studentAnswer} />
+                            <MathSpan content={studentAnswer} className="text-3xl" />
                         ) : (
                             <span className="italic text-slate-400 text-sm">No answer provided.</span>
                         )}
@@ -50,8 +59,8 @@ export default function MathInputCorrection({ studentAnswer, options = [], keyAn
                         </div>
                         <h5 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Key</h5>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800 shadow-sm flex items-center justify-center">
-                        <MathRenderer
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800 shadow-sm flex items-center justify-center overflow-x-auto">
+                        <MathSpan
                             className="text-slate-700 dark:text-slate-200 text-3xl"
                             content={referenceAnswer}
                         />

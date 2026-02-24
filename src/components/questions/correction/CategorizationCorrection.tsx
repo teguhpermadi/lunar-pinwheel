@@ -8,7 +8,7 @@ interface CategorizationCorrectionProps {
     keyAnswer?: any;
 }
 
-export default function CategorizationCorrection({ options, studentAnswer = {}, keyAnswer }: CategorizationCorrectionProps) {
+export default function CategorizationCorrection({ options, studentAnswer = {} }: CategorizationCorrectionProps) {
     // Categories are typically options with metadata group_title
     const groupsMap = new Map<string, QuestionOption[]>();
     options.forEach(opt => {
