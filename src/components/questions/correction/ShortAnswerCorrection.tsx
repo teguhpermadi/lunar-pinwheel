@@ -1,4 +1,4 @@
-import MathSpan from '@/components/ui/MathSpan';
+import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 
 interface ShortAnswerCorrectionProps {
@@ -55,7 +55,7 @@ export default function ShortAnswerCorrection({ studentAnswer, options = [], key
                             <div className="size-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
                                 {i + 1}
                             </div>
-                            <MathSpan
+                            <MathRenderer
                                 className="text-slate-700 dark:text-slate-200 font-bold"
                                 content={answer}
                             />

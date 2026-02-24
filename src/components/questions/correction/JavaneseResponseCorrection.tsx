@@ -1,4 +1,4 @@
-import MathSpan from '@/components/ui/MathSpan';
+import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 
 interface JavaneseResponseCorrectionProps {
@@ -47,7 +47,7 @@ export default function JavaneseResponseCorrection({ studentAnswer, options = []
                         <h5 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Key</h5>
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-                        <MathSpan
+                        <MathRenderer
                             className="text-slate-700 dark:text-slate-200 text-3xl font-javanese leading-loose"
                             content={referenceAnswer}
                         />
