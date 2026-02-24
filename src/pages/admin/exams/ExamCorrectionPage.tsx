@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
 import CorrectionByQuestion from './correction/CorrectionByQuestion';
+import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
 
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
 
@@ -24,6 +25,8 @@ export interface StudentSession {
     is_corrected: boolean;
     is_finished: boolean;
     progress_percent?: number;
+    start_time?: string;
+    finish_time?: string;
 }
 
 export interface QuestionDetail {
@@ -56,7 +59,7 @@ export default function ExamCorrectionPage() {
     const [isBulkLoading, setIsBulkLoading] = useState(false);
     const [studentSearchQuery, setStudentSearchQuery] = useState(''); // Specifically for right navigation
 
-    const [viewMode, setViewMode] = useState<'by-student' | 'by-question'>('by-student');
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('by-student');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
@@ -584,6 +587,17 @@ export default function ExamCorrectionPage() {
                         >
                             By Question
                         </button>
+                        <button
+                            onClick={() => {
+                                setViewMode('leaderboard');
+                            }}
+                            className={cn(
+                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            Leaderboard
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -596,10 +610,16 @@ export default function ExamCorrectionPage() {
             </header>
 
             <main className="flex-grow flex overflow-hidden">
-                {renderSidebarLeft()}
+                {viewMode !== 'leaderboard' && renderSidebarLeft()}
 
-                <section className="flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-8">
-                    <div className="max-w-4xl mx-auto w-full space-y-6">
+                <section className={cn(
+                    "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-8 transition-all duration-300",
+                    viewMode === 'leaderboard' && "max-w-[1600px] mx-auto w-full px-12"
+                )}>
+                    <div className={cn(
+                        "mx-auto w-full space-y-6",
+                        viewMode === 'leaderboard' ? "max-w-none" : "max-w-4xl"
+                    )}>
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
                                 <CorrectionByStudent
@@ -615,7 +635,7 @@ export default function ExamCorrectionPage() {
                                     selectedSessionId={selectedSessionId}
                                     setQuestions={setQuestions}
                                 />
-                            ) : (
+                            ) : viewMode === 'by-question' ? (
                                 <CorrectionByQuestion
                                     selectedQuestionIndex={selectedQuestionIndex}
                                     masterQuestions={masterQuestions}
@@ -630,12 +650,19 @@ export default function ExamCorrectionPage() {
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                 />
+                            ) : (
+                                <CorrectionLeaderboard
+                                    sessions={sessions}
+                                    searchQuery={studentSearchQuery}
+                                    onRefresh={fetchSessions}
+                                    id={id!}
+                                />
                             )}
                         </AnimatePresence>
                     </div>
                 </section>
 
-                {renderSidebarRight()}
+                {viewMode !== 'leaderboard' && renderSidebarRight()}
             </main>
 
             {/* Bulk Action Bar */}

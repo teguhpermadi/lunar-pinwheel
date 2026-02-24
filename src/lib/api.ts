@@ -830,6 +830,14 @@ export const examApi = {
         const response = await api.post(`/sessions/${sessionId}/finish-correction`);
         return response.data;
     },
+    recalculateScore: async (sessionId: string) => {
+        const response = await api.post(`/sessions/${sessionId}/recalculate`);
+        return response.data;
+    },
+    recalculateAllScores: async (examId: string) => {
+        const response = await api.post(`/exams/${examId}/recalculate-all`);
+        return response.data;
+    },
 };
 
 export const questionSuggestionApi = {
