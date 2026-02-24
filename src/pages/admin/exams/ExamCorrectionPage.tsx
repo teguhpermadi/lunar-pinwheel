@@ -355,9 +355,16 @@ export default function ExamCorrectionPage() {
                                             <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200">
                                                 {session.student.name.charAt(0)}
                                             </div>
-                                            <div className="flex-1 overflow-hidden">
-                                                <p className="text-xs font-bold truncate">{session.student.name}</p>
-                                                <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                            <div className="flex-1 overflow-hidden flex items-center justify-between gap-2">
+                                                <div className="flex-1 overflow-hidden">
+                                                    <p className="text-xs font-bold truncate">{session.student.name}</p>
+                                                    <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                                </div>
+                                                {session.is_finished && (
+                                                    <span className="shrink-0 px-2.5 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg border border-primary/20 tabular-nums">
+                                                        {session.final_score}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </button>
@@ -483,15 +490,20 @@ export default function ExamCorrectionPage() {
                                             "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
                                         )}
                                     >
-                                        <div className="flex items-center gap-3 text-left overflow-hidden">
+                                        <div className="flex items-center gap-3 text-left flex-1 overflow-hidden">
                                             <div className={cn(
                                                 "w-2 h-2 rounded-full shrink-0",
                                                 session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
                                             )}></div>
-                                            <p className="text-xs font-medium text-slate-500 truncate">{session.student.name}</p>
+                                            <p className="text-xs font-medium text-slate-500 truncate flex-1">{session.student.name}</p>
+                                            {session.is_finished && (
+                                                <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
+                                                    {session.final_score}
+                                                </span>
+                                            )}
                                         </div>
                                         {session.is_corrected && (
-                                            <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0">check_circle</span>
+                                            <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0 ml-2">check_circle</span>
                                         )}
                                     </button>
                                 ))
