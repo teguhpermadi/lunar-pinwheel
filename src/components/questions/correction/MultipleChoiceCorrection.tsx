@@ -71,35 +71,8 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
             opt.metadata?.is_answer === 1;
     };
 
-    const correctOptions = options.filter(isCorrect);
-
     return (
         <div className="space-y-6">
-            {correctOptions.length > 0 && (
-                <div className="bg-emerald-50 dark:bg-emerald-500/5 rounded-3xl p-6 border border-emerald-100 dark:border-emerald-800/50">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="size-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <span className="material-symbols-outlined text-sm">verified</span>
-                        </div>
-                        <h5 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Answer Key</h5>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-                        <div className="flex flex-wrap gap-2 items-center mb-1">
-                            {correctOptions.map((opt) => (
-                                <div key={opt.id} className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-xl border border-emerald-100 dark:border-emerald-800/50 flex-1 min-w-[200px]">
-                                    <div className="size-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-black text-sm shrink-0">
-                                        {opt.option_key}
-                                    </div>
-                                    <div className="flex-1 text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
-                                        <MathRenderer content={opt.content} />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="space-y-3">
                 <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Options Analysis</h5>
                 <div className="grid gap-3">
@@ -166,6 +139,6 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
                     })}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -15,7 +15,13 @@ export default function EssayCorrection({ studentAnswer, options = [], keyAnswer
             const inner = val.answers || val.answer || val.rubric || val.id || val.option_id || val.option_key || val;
 
             if (Array.isArray(inner)) return inner.join(', ');
-            if (typeof inner === 'object' && inner !== null) return JSON.stringify(inner);
+
+            // If it's a specific object structure commonly used as a pointer (like {"type": "rubric"})
+            // return a marker so we know to check options
+            if (typeof inner === 'object' && inner !== null) {
+                if (inner.type === 'rubric' || val.rubric?.type === 'rubric') return '__rubric_pointer__';
+                return JSON.stringify(inner);
+            }
             return String(inner);
         }
         return Array.isArray(val) ? val.join(', ') : String(val);
@@ -23,9 +29,21 @@ export default function EssayCorrection({ studentAnswer, options = [], keyAnswer
 
     let referenceAnswer = keyAnswer ? extractValue(keyAnswer) : null;
 
-    // 2. Fallback to options array if keyAnswer is missing or extracted value is invalid
-    if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined') {
-        referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer)?.content || options[0]?.content;
+    // 2. Fallback to options array if:
+    // - keyAnswer is missing OR
+    // - extracted value is a pointer (__rubric_pointer__) OR
+    // - extracted value looks like raw metadata JSON
+    const looksLikeMetadata = referenceAnswer?.startsWith('{"type":') || referenceAnswer === '__rubric_pointer__';
+
+    if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined' || looksLikeMetadata) {
+        // Priority for essay: 1. Try to find rubric in metadata
+        const rubricOpt = options.find(o => o.metadata?.type === 'rubric' || (o as any).type === 'rubric');
+        if (rubricOpt) {
+            referenceAnswer = rubricOpt.content;
+        } else {
+            // Fallback to standard identification
+            referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer)?.content || options[0]?.content;
+        }
     }
 
     return (
