@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useAuth } from '@/contexts/AuthContext';
+import { echo } from '@/lib/echo';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -41,7 +42,6 @@ export default function ExamTaker() {
     const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [isSyncing, setIsSyncing] = useState(false);
     const [gracePeriodSeconds, setGracePeriodSeconds] = useState<number | null>(null);
 
     useEffect(() => {
@@ -92,44 +92,57 @@ export default function ExamTaker() {
         }
     }, [exam?.id, exam?.timer_type, remainingSeconds === 0, gracePeriodSeconds === null]);
 
-    // Polling for time synchronization & extra time
+    // Real-time synchronization & extra time via Echo
+    useEffect(() => {
+        if (!id || !user || !exam || exam.timer_type !== 'strict') return;
+
+        const channel = echo.channel(`exam.${id}.user.${user.id}`);
+
+        channel.listen('.TimerSynchronized', (event: { remainingSeconds: number }) => {
+            console.log('Timer sync received:', event.remainingSeconds);
+            setGracePeriodSeconds(null);
+            setRemainingSeconds(event.remainingSeconds);
+        });
+
+        channel.listen('.ExamForceFinished', () => {
+            console.log('Force finish received');
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Exam Terminated',
+                text: 'Your exam session has been closed by the administrator.',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false,
+            }).then(() => navigate('/exams'));
+        });
+
+        return () => {
+            channel.stopListening('.TimerSynchronized');
+            channel.stopListening('.ExamForceFinished');
+        };
+    }, [id, user?.id, exam?.id, exam?.timer_type]);
+
+    // Polling as fallback (optional, reduced frequency)
     useEffect(() => {
         if (!id || !exam || exam.timer_type !== 'strict') return;
 
-        // Dynamic polling interval: 30s normally, 5s if in grace period or very low on time
-        const isLowTime = remainingSeconds !== null && remainingSeconds <= 60;
-        const isInGrace = gracePeriodSeconds !== null;
-        const pollInterval = (isLowTime || isInGrace) ? 5000 : 30000;
+        // Increased interval as it's now a fallback
+        const pollInterval = 60000; // 1 minute fallback
 
         const syncTimer = setInterval(async () => {
-            setIsSyncing(true);
+            // ... existing polling logic if needed as fallback ...
+            // For now, let's keep it but at a much lower frequency
             try {
                 const response = await studentApi.takeExam(id);
                 if (response.success && response.data.remaining_seconds !== undefined) {
                     const newSeconds = parseInt(response.data.remaining_seconds);
-
-                    if (newSeconds > 0) {
-                        // Resurrect: If server says we have more time, clear grace period
-                        setGracePeriodSeconds(null);
-                    }
-
-                    // Only update if discrepancy is significant (> 5s) to avoid jumping
-                    setRemainingSeconds(prev => {
-                        if (prev === null || Math.abs(prev - newSeconds) > 5) {
-                            return newSeconds;
-                        }
-                        return prev;
-                    });
+                    if (newSeconds > 0) setGracePeriodSeconds(null);
+                    setRemainingSeconds(prev => (prev === null || Math.abs(prev - newSeconds) > 10) ? newSeconds : prev);
                 }
-            } catch (error) {
-                console.error('Failed to sync timer:', error);
-            } finally {
-                setIsSyncing(false);
-            }
+            } catch (e) { }
         }, pollInterval);
 
         return () => clearInterval(syncTimer);
-    }, [id, exam?.id, exam?.timer_type, (remainingSeconds !== null && remainingSeconds <= 60), (gracePeriodSeconds !== null)]);
+    }, [id, exam?.id, exam?.timer_type]);
 
     const fetchExamData = async () => {
         if (!id) return;
@@ -192,8 +205,10 @@ export default function ExamTaker() {
         const currentQ = questions[currentQuestionIndex];
 
         // Optimistic Update
-        const newQuestions = [...questions];
-        newQuestions[currentQuestionIndex].student_answer = answer;
+        // Immutable Update
+        const newQuestions = questions.map((q, idx) =>
+            idx === currentQuestionIndex ? { ...q, student_answer: answer } : q
+        );
         setQuestions(newQuestions);
 
         try {
@@ -209,7 +224,7 @@ export default function ExamTaker() {
     };
 
     const handleAutoFinish = async () => {
-        if (isInitialLoad || isSyncing || remainingSeconds === null || remainingSeconds > 5) return;
+        if (isInitialLoad || remainingSeconds === null || remainingSeconds > 5) return;
         setIsSubmitting(true);
         try {
             const response = await studentApi.finishExam(id!);
@@ -659,7 +674,7 @@ export default function ExamTaker() {
                                     </span>
                                 </button>
                                 <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
-                                    {isAllAnswered() ? "You've answered all questions!" : `You have ${questions.filter(q => q.student_answer === null).length} unanswered questions`}
+                                    {isAllAnswered() ? "You've answered all questions!" : `You have ${questions.length - questions.filter(isQuestionAnswered).length} unanswered questions`}
                                 </p>
                             </div>
                         </motion.aside>

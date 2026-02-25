@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { echo } from '@/lib/echo';
 
 interface LiveScoreData {
     exam: Exam;
@@ -53,9 +54,51 @@ export default function ExamLiveScorePage() {
     };
 
     useEffect(() => {
+        const ticker = setInterval(() => {
+            setData(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    sessions: prev.sessions.map(s => {
+                        if (s.status === 'in_progress' && s.remaining_time > 0) {
+                            return { ...s, remaining_time: s.remaining_time - 1 };
+                        }
+                        return s;
+                    })
+                };
+            });
+        }, 1000);
+
+        return () => clearInterval(ticker);
+    }, []);
+
+    useEffect(() => {
         fetchLiveScore();
-        const interval = setInterval(fetchLiveScore, 5000); // 5 seconds poll
-        return () => clearInterval(interval);
+
+        if (!id) return;
+
+        const channel = echo.channel(`exam.${id}.live-score`);
+
+        channel.listen('.LiveScoreUpdated', (event: { sessionData: any }) => {
+            console.log('Real-time update received:', event);
+            setData(prev => {
+                if (!prev) return prev;
+                const sessions = [...prev.sessions];
+                const index = sessions.findIndex(s => s.student.id === event.sessionData.id);
+
+                if (index !== -1) {
+                    sessions[index] = { ...sessions[index], ...event.sessionData };
+                } else {
+                    sessions.push(event.sessionData);
+                }
+
+                return { ...prev, sessions };
+            });
+        });
+
+        return () => {
+            channel.stopListening('.LiveScoreUpdated');
+        };
     }, [id]);
 
     const sortedSessions = [...(data?.sessions || [])]
