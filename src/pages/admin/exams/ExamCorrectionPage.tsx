@@ -565,6 +565,17 @@ export default function ExamCorrectionPage() {
                     <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                         <button
                             onClick={() => {
+                                setViewMode('leaderboard');
+                            }}
+                            className={cn(
+                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            Leaderboard
+                        </button>
+                        <button
+                            onClick={() => {
                                 setViewMode('by-student');
                                 setSelectedQuestionIndex(0);
                             }}
@@ -586,17 +597,6 @@ export default function ExamCorrectionPage() {
                             )}
                         >
                             By Question
-                        </button>
-                        <button
-                            onClick={() => {
-                                setViewMode('leaderboard');
-                            }}
-                            className={cn(
-                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
-                                viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
-                            )}
-                        >
-                            Leaderboard
                         </button>
                     </div>
 
@@ -746,33 +746,44 @@ export default function ExamCorrectionPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Award Score</span>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 text-center">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Select Score</span>
                                             <span className="text-xs font-bold text-primary">Max: {partialScoreData.maxScore}</span>
                                         </div>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max={partialScoreData.maxScore}
-                                                step="0.01"
-                                                value={partialScoreData.currentScore}
-                                                onChange={(e) => setPartialScoreData({ ...partialScoreData, currentScore: parseFloat(e.target.value) || 0 })}
-                                                className="w-full text-4xl font-black text-center bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white tabular-nums"
-                                            />
-                                            <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                                        </div>
-                                        <div className="mt-8">
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max={partialScoreData.maxScore}
-                                                step="0.01"
-                                                value={partialScoreData.currentScore}
-                                                onChange={(e) => setPartialScoreData({ ...partialScoreData, currentScore: parseFloat(e.target.value) || 0 })}
-                                                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
-                                            />
+
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {partialScoreData.maxScore === 1 ? (
+                                                [0, 0.5, 1].map((score) => (
+                                                    <button
+                                                        key={score}
+                                                        onClick={() => setPartialScoreData({ ...partialScoreData, currentScore: score })}
+                                                        className={cn(
+                                                            "py-4 rounded-xl border-2 font-black text-sm transition-all animate-in fade-in zoom-in duration-300",
+                                                            partialScoreData.currentScore === score
+                                                                ? "border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                                                : "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 hover:border-primary/30"
+                                                        )}
+                                                    >
+                                                        {score}
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                Array.from({ length: Math.floor(partialScoreData.maxScore) + 1 }).map((_, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setPartialScoreData({ ...partialScoreData, currentScore: i })}
+                                                        className={cn(
+                                                            "py-3 rounded-xl border-2 font-black text-sm transition-all animate-in fade-in zoom-in duration-300",
+                                                            partialScoreData.currentScore === i
+                                                                ? "border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                                                : "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 hover:border-primary/30"
+                                                        )}
+                                                    >
+                                                        {i}
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
 
@@ -785,7 +796,7 @@ export default function ExamCorrectionPage() {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                const finalScore = Math.min(Math.max(0, partialScoreData.currentScore), partialScoreData.maxScore);
+                                                const finalScore = partialScoreData.currentScore;
                                                 handleUpdateCorrection(finalScore, true, partialScoreData.detailId, partialScoreData.sessionId);
                                                 setIsPartialModalOpen(false);
                                             }}
@@ -823,33 +834,44 @@ export default function ExamCorrectionPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Award Score</span>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 text-center">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Select Score</span>
                                             <span className="text-xs font-bold text-primary">Max: {bulkAnswers[0]?.max_score}</span>
                                         </div>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max={bulkAnswers[0]?.max_score}
-                                                step="0.01"
-                                                value={bulkPartialScore}
-                                                onChange={(e) => setBulkPartialScore(parseFloat(e.target.value) || 0)}
-                                                className="w-full text-4xl font-black text-center bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white tabular-nums"
-                                            />
-                                            <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                                        </div>
-                                        <div className="mt-8">
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max={bulkAnswers[0]?.max_score}
-                                                step="0.01"
-                                                value={bulkPartialScore}
-                                                onChange={(e) => setBulkPartialScore(parseFloat(e.target.value) || 0)}
-                                                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
-                                            />
+
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {bulkAnswers[0]?.max_score === 1 ? (
+                                                [0, 0.5, 1].map((score) => (
+                                                    <button
+                                                        key={score}
+                                                        onClick={() => setBulkPartialScore(score)}
+                                                        className={cn(
+                                                            "py-4 rounded-xl border-2 font-black text-sm transition-all animate-in fade-in zoom-in duration-300",
+                                                            bulkPartialScore === score
+                                                                ? "border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                                                : "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 hover:border-primary/30"
+                                                        )}
+                                                    >
+                                                        {score}
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                Array.from({ length: Math.floor(bulkAnswers[0]?.max_score) + 1 }).map((_, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setBulkPartialScore(i)}
+                                                        className={cn(
+                                                            "py-3 rounded-xl border-2 font-black text-sm transition-all animate-in fade-in zoom-in duration-300",
+                                                            bulkPartialScore === i
+                                                                ? "border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                                                : "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 hover:border-primary/30"
+                                                        )}
+                                                    >
+                                                        {i}
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
 
@@ -862,8 +884,7 @@ export default function ExamCorrectionPage() {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                const maxPossible = bulkAnswers[0]?.max_score || 0;
-                                                const finalScore = Math.min(Math.max(0, bulkPartialScore), maxPossible);
+                                                const finalScore = bulkPartialScore;
                                                 handleBulkAction('partial', finalScore);
                                                 setIsBulkPartialModalOpen(false);
                                             }}
