@@ -1,6 +1,6 @@
 import { Node, mergeAttributes, nodeInputRule } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
-import MathNodeView from './MathNodeView.tsx';
+import MathNodeView from './MathNodeView';
 
 export interface MathOptions {
     HTMLAttributes: Record<string, any>;
@@ -57,7 +57,7 @@ export const MathExtension = Node.create<MathOptions>({
     },
 
     renderHTML({ HTMLAttributes }) {
-        const latex = HTMLAttributes.latex || '';
+        const latex = HTMLAttributes['data-latex'] || '';
         return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), `$${latex}$`];
     },
 

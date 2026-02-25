@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 import 'katex/dist/katex.min.css';
 
@@ -10,6 +10,14 @@ interface MathRendererProps {
 
 export default function MathRenderer({ content, isHtml = true, className = "" }: MathRendererProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const processedContent = useMemo(() => {
+        if (!content) return '';
+        // Replace [ara]...[/ara] with a styled span
+        return content.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (_, text) => {
+            return `<span class="font-arabic text-xl leading-relaxed inline-block" dir="rtl">${text}</span>`;
+        });
+    }, [content]);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -40,15 +48,15 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
                 // Silently fail if KaTeX fails to render
             }
         }
-    }, [content]);
+    }, [processedContent]);
 
     if (isHtml) {
         return (
             <div
                 ref={containerRef}
                 className={`math-rendered prose prose-slate dark:prose-invert max-w-none ${className}`}
-                data-content-hash={content.length}
-                dangerouslySetInnerHTML={{ __html: content }}
+                data-content-hash={processedContent.length}
+                dangerouslySetInnerHTML={{ __html: processedContent }}
             />
         );
     }
@@ -57,9 +65,9 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
         <div
             ref={containerRef}
             className={`math-rendered prose prose-slate dark:prose-invert max-w-none ${className}`}
-            data-content-hash={content.length}
+            data-content-hash={processedContent.length}
         >
-            {content}
+            {processedContent}
         </div>
     );
 }

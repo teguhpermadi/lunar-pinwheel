@@ -1,9 +1,15 @@
-import { useState } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 import MathDialog from './MathDialog';
+import ArabicDialog from './ArabicDialog';
 
 export default function QuestionToolbar() {
-    const { activeEditor, isMathDialogOpen, setIsMathDialogOpen } = useEditorStore();
+    const {
+        activeEditor,
+        isMathDialogOpen,
+        setIsMathDialogOpen,
+        isArabicDialogOpen,
+        setIsArabicDialogOpen
+    } = useEditorStore();
 
     if (!activeEditor) {
         return (
@@ -25,7 +31,7 @@ export default function QuestionToolbar() {
 
     const handleMathConfirm = (latex: string) => {
         const { state } = activeEditor;
-        const { from, to } = state.selection;
+        const { from } = state.selection;
         const node = state.doc.nodeAt(from);
 
         if (node && node.type.name === 'math') {
@@ -35,8 +41,28 @@ export default function QuestionToolbar() {
         }
     };
 
+    const openArabicDialog = () => {
+        setIsArabicDialogOpen(true);
+    };
+
+    const handleArabicConfirm = (text: string) => {
+        const { state } = activeEditor;
+        const { from } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'arabic') {
+            activeEditor.chain().focus().updateArabic({ text }).run();
+        } else {
+            activeEditor.chain().focus().setArabic({ text }).run();
+        }
+    };
+
     const currentMathLatex = activeEditor.isActive('math')
         ? activeEditor.getAttributes('math').latex
+        : '';
+
+    const currentArabicText = activeEditor.isActive('arabic')
+        ? activeEditor.getAttributes('arabic').text
         : '';
 
     return (
@@ -79,12 +105,25 @@ export default function QuestionToolbar() {
                 icon="functions"
                 tooltip="Math Formula"
             />
+            <ToolbarButton
+                onClick={openArabicDialog}
+                active={activeEditor.isActive('arabic')}
+                icon="translate"
+                tooltip="Arabic Text"
+            />
 
             <MathDialog
                 isOpen={isMathDialogOpen}
                 onClose={() => setIsMathDialogOpen(false)}
                 initialValue={currentMathLatex}
                 onConfirm={handleMathConfirm}
+            />
+
+            <ArabicDialog
+                isOpen={isArabicDialogOpen}
+                onClose={() => setIsArabicDialogOpen(false)}
+                initialValue={currentArabicText}
+                onConfirm={handleArabicConfirm}
             />
         </div>
     );

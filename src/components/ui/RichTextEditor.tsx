@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { MathExtension } from '@/lib/tiptap/MathExtension';
+import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 
@@ -14,26 +15,46 @@ interface RichTextEditorProps {
     minHeight?: string;
 }
 
-// Helper to convert $latex$ in HTML to data-latex spans for TipTap
+// Helper to convert $latex$ and [ara]arabic[/ara] in HTML to data-latex spans for TipTap
 const toEditorHtml = (html: string) => {
     if (!html) return '';
-    // Replace $...$ with <span data-latex="...">$...$</span>
-    // Use a negative lookahead to avoid matching already wrapped spans or other $ signs
-    return html.replace(/\$([^$]+)\$/g, (match, latex) => {
+
+    let processed = html;
+
+    // Math: $...$ -> <span data-latex="...">$...$</span>
+    processed = processed.replace(/\$([^$]+)\$/g, (match, latex) => {
         return `<span data-latex="${latex}">$${latex}$</span>`;
     });
+
+    // Arabic: [ara]...[/ara] -> <span data-arabic="...">...</span>
+    processed = processed.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (match, text) => {
+        return `<span data-arabic="${text}">${text}</span>`;
+    });
+
+    return processed;
 };
 
-// Helper to convert data-latex spans back to simple $latex$ for DB
+// Helper to convert data-latex and data-arabic spans back to simple delimiters for DB
 const toPersistenceHtml = (html: string) => {
     if (!html) return '';
     const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    // Math
     doc.querySelectorAll('span[data-latex]').forEach(span => {
         const latex = span.getAttribute('data-latex');
         if (latex) {
             span.replaceWith(`$${latex}$`);
         }
     });
+
+    // Arabic
+    doc.querySelectorAll('span[data-arabic]').forEach(span => {
+        const text = span.getAttribute('data-arabic');
+        if (text) {
+            span.replaceWith(`[ara]${text}[/ara]`);
+        }
+    });
+
     return doc.body.innerHTML;
 };
 
@@ -54,6 +75,7 @@ export default function RichTextEditor({
                 placeholder,
             }),
             MathExtension,
+            ArabicExtension,
         ],
         content: toEditorHtml(value),
         onUpdate: ({ editor }) => {
