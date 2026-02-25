@@ -126,7 +126,6 @@ function App() {
               <Route path="admin/question-banks/create" element={<CreateQuestionBank />} />
 
               <Route path="admin/exams" element={<ExamManagementPage />} />
-              <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
               <Route path="admin/exams/:id/edit" element={<EditExamPage />} />
 
               {/* Student Only Routes */}
@@ -136,6 +135,7 @@ function App() {
             </Route>
 
             {/* Standalone Routes (No Sidebar) */}
+            <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
             <Route path="admin/question-banks/:id" element={<EditQuestionBank />} />
             <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />
             <Route path="admin/question-banks/:bankId/questions/create" element={<QuestionFormPage />} />

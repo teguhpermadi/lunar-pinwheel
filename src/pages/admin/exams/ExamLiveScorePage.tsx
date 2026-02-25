@@ -80,7 +80,6 @@ export default function ExamLiveScorePage() {
         const channel = echo.channel(`exam.${id}.live-score`);
 
         channel.listen('.LiveScoreUpdated', (event: { sessionData: any }) => {
-            console.log('Real-time update received:', event);
             setData(prev => {
                 if (!prev) return prev;
                 const sessions = [...prev.sessions];
@@ -127,6 +126,28 @@ export default function ExamLiveScorePage() {
         const mins = Math.floor(totalSeconds / 60);
         const secs = totalSeconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Keep track of previous ranks for animation
+    const [prevRanks, setPrevRanks] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        if (sortedSessions.length > 0) {
+            const currentRanks: Record<string, number> = {};
+            sortedSessions.forEach((s, i) => {
+                currentRanks[s.student.id] = i;
+            });
+
+            // Only update if it's the first time or if something actually changed
+            // To avoid infinite loops, we use a timeout or check if values are different
+            setPrevRanks(currentRanks);
+        }
+    }, [data?.sessions]); // Update when data.sessions changes
+
+    const getRankChange = (studentId: string, currentIndex: number) => {
+        const prevIndex = prevRanks[studentId];
+        if (prevIndex === undefined) return 0;
+        return prevIndex - currentIndex; // positive means moved up (index decreased)
     };
 
     const handleForceFinish = async (user_id: string, name: string) => {
@@ -416,16 +437,34 @@ export default function ExamLiveScorePage() {
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="relative">
-                                                                    <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                                                                    <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center relative shadow-sm">
                                                                         {session.student.avatar ? (
-                                                                            <img alt="avatar" className="w-full h-full object-cover" src={session.student.avatar} />
+                                                                            <img alt="avatar" className="w-full h-full object-cover rounded-full" src={session.student.avatar} />
                                                                         ) : (
                                                                             <span className="material-symbols-outlined text-slate-400">person</span>
+                                                                        )}
+
+                                                                        {/* Rank Change Indicator */}
+                                                                        {getRankChange(session.student.id, index) !== 0 && (
+                                                                            <motion.div
+                                                                                initial={{ scale: 0, opacity: 0 }}
+                                                                                animate={{ scale: 1, opacity: 1 }}
+                                                                                className={cn(
+                                                                                    "absolute -right-1 -bottom-1 size-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-sm z-10",
+                                                                                    getRankChange(session.student.id, index) > 0
+                                                                                        ? "bg-emerald-500 text-white"
+                                                                                        : "bg-rose-500 text-white"
+                                                                                )}
+                                                                            >
+                                                                                <span className="material-symbols-outlined text-[14px] font-black">
+                                                                                    {getRankChange(session.student.id, index) > 0 ? "expand_less" : "expand_more"}
+                                                                                </span>
+                                                                            </motion.div>
                                                                         )}
                                                                     </div>
                                                                     {index < 3 && (
                                                                         <div className={cn(
-                                                                            "absolute -top-1 -right-1 size-5 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white dark:border-slate-900 shadow-sm",
+                                                                            "absolute -top-1 -left-1 size-5 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white dark:border-slate-900 shadow-sm z-10",
                                                                             index === 0 ? "bg-yellow-400 text-yellow-900" :
                                                                                 index === 1 ? "bg-slate-300 text-slate-700" :
                                                                                     "bg-amber-600 text-amber-50"
