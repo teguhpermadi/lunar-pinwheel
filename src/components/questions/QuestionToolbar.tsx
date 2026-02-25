@@ -1,6 +1,7 @@
 import { useEditorStore } from '@/store/useEditorStore';
 import MathDialog from './MathDialog';
 import ArabicDialog from './ArabicDialog';
+import JavaneseDialog from './JavaneseDialog';
 
 export default function QuestionToolbar() {
     const {
@@ -8,7 +9,9 @@ export default function QuestionToolbar() {
         isMathDialogOpen,
         setIsMathDialogOpen,
         isArabicDialogOpen,
-        setIsArabicDialogOpen
+        setIsArabicDialogOpen,
+        isJavaneseDialogOpen,
+        setIsJavaneseDialogOpen
     } = useEditorStore();
 
     if (!activeEditor) {
@@ -57,12 +60,32 @@ export default function QuestionToolbar() {
         }
     };
 
+    const openJavaneseDialog = () => {
+        setIsJavaneseDialogOpen(true);
+    };
+
+    const handleJavaneseConfirm = (text: string) => {
+        const { state } = activeEditor;
+        const { from } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'javanese') {
+            activeEditor.chain().focus().updateJavanese({ text }).run();
+        } else {
+            activeEditor.chain().focus().setJavanese({ text }).run();
+        }
+    };
+
     const currentMathLatex = activeEditor.isActive('math')
         ? activeEditor.getAttributes('math').latex
         : '';
 
     const currentArabicText = activeEditor.isActive('arabic')
         ? activeEditor.getAttributes('arabic').text
+        : '';
+
+    const currentJavaneseText = activeEditor.isActive('javanese')
+        ? activeEditor.getAttributes('javanese').text
         : '';
 
     return (
@@ -111,6 +134,12 @@ export default function QuestionToolbar() {
                 icon="translate"
                 tooltip="Arabic Text"
             />
+            <ToolbarButton
+                onClick={openJavaneseDialog}
+                active={activeEditor.isActive('javanese')}
+                icon="history_edu"
+                tooltip="Javanese Script"
+            />
 
             <MathDialog
                 isOpen={isMathDialogOpen}
@@ -124,6 +153,13 @@ export default function QuestionToolbar() {
                 onClose={() => setIsArabicDialogOpen(false)}
                 initialValue={currentArabicText}
                 onConfirm={handleArabicConfirm}
+            />
+
+            <JavaneseDialog
+                isOpen={isJavaneseDialogOpen}
+                onClose={() => setIsJavaneseDialogOpen(false)}
+                initialValue={currentJavaneseText}
+                onConfirm={handleJavaneseConfirm}
             />
         </div>
     );

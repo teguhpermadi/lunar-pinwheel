@@ -13,10 +13,19 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
 
     const processedContent = useMemo(() => {
         if (!content) return '';
+        let processed = content;
+
         // Replace [ara]...[/ara] with a styled span
-        return content.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (_, text) => {
+        processed = processed.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (_, text) => {
             return `<span class="font-arabic text-xl leading-relaxed inline-block" dir="rtl">${text}</span>`;
         });
+
+        // Replace [jav]...[/jav] with a styled span
+        processed = processed.replace(/\[jav\]([\s\S]*?)\[\/jav\]/g, (_, text) => {
+            return `<span class="font-javanese text-xl leading-relaxed inline-block">${text}</span>`;
+        });
+
+        return processed;
     }, [content]);
 
     useEffect(() => {

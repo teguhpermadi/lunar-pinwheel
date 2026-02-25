@@ -4,6 +4,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { MathExtension } from '@/lib/tiptap/MathExtension';
 import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
+import { JavaneseExtension } from '@/lib/tiptap/JavaneseExtension';
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 
@@ -22,13 +23,18 @@ const toEditorHtml = (html: string) => {
     let processed = html;
 
     // Math: $...$ -> <span data-latex="...">$...$</span>
-    processed = processed.replace(/\$([^$]+)\$/g, (match, latex) => {
+    processed = processed.replace(/\$([^$]+)\$/g, (_, latex) => {
         return `<span data-latex="${latex}">$${latex}$</span>`;
     });
 
     // Arabic: [ara]...[/ara] -> <span data-arabic="...">...</span>
-    processed = processed.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (match, text) => {
+    processed = processed.replace(/\[ara\]([\s\S]*?)\[\/ara\]/g, (_, text) => {
         return `<span data-arabic="${text}">${text}</span>`;
+    });
+
+    // Javanese: [jav]...[/jav] -> <span data-javanese="...">...</span>
+    processed = processed.replace(/\[jav\]([\s\S]*?)\[\/jav\]/g, (_, text) => {
+        return `<span data-javanese="${text}">${text}</span>`;
     });
 
     return processed;
@@ -55,6 +61,14 @@ const toPersistenceHtml = (html: string) => {
         }
     });
 
+    // Javanese
+    doc.querySelectorAll('span[data-javanese]').forEach(span => {
+        const text = span.getAttribute('data-javanese');
+        if (text) {
+            span.replaceWith(`[jav]${text}[/jav]`);
+        }
+    });
+
     return doc.body.innerHTML;
 };
 
@@ -76,6 +90,7 @@ export default function RichTextEditor({
             }),
             MathExtension,
             ArabicExtension,
+            JavaneseExtension,
         ],
         content: toEditorHtml(value),
         onUpdate: ({ editor }) => {
