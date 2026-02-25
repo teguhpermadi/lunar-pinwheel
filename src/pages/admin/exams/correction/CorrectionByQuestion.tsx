@@ -122,9 +122,19 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                         <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                                             {answer.session?.user?.name}
                                         </h4>
-                                        {answer.session?.is_corrected && (
-                                            <span className="text-[9px] font-black uppercase text-emerald-500 tracking-wider">Corrected</span>
-                                        )}
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className={cn(
+                                                "px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1 border",
+                                                answer.score_earned === answer.max_score ? "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/20" :
+                                                    answer.score_earned > 0 ? "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-500/20" : "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/20"
+                                            )}>
+                                                <span className="material-symbols-outlined text-[12px]">stars</span>
+                                                {answer.score_earned} / {answer.max_score}
+                                            </div>
+                                            {answer.session?.is_corrected && (
+                                                <span className="text-[8px] font-black uppercase text-indigo-500 tracking-wider">Corrected</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StudentSession } from '../ExamCorrectionPage';
@@ -13,6 +14,7 @@ interface CorrectionLeaderboardProps {
 }
 
 const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions, searchQuery, onRefresh, id }) => {
+    const navigate = useNavigate();
     const [isRecalculating, setIsRecalculating] = useState<string | null>(null);
     const [isRecalculatingAll, setIsRecalculatingAll] = useState(false);
 
@@ -159,7 +161,11 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {filteredSessions.map((session, index) => (
-                                <tr key={session.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors group">
+                                <tr
+                                    key={session.id}
+                                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors group cursor-pointer"
+                                    onClick={() => navigate(`/admin/exams/${id}/sessions/${session.id}/detail`)}
+                                >
                                     <td className="px-8 py-5">
                                         <span className={cn(
                                             "flex items-center justify-center size-8 rounded-xl text-xs font-black",
@@ -211,7 +217,10 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <button
-                                            onClick={() => handleRecalculate(session.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRecalculate(session.id);
+                                            }}
                                             disabled={isRecalculating === session.id}
                                             className={cn(
                                                 "p-2 rounded-xl border transition-all active:scale-95 group/btn",

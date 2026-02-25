@@ -28,6 +28,7 @@ import EditExamPage from "@/pages/admin/exams/EditExamPage"
 import ExamCorrectionPage from "@/pages/admin/exams/ExamCorrectionPage.tsx"
 import StudentExamsPage from "@/pages/student/StudentExamsPage"
 import ExamTaker from "@/pages/student/ExamTaker"
+import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -140,6 +141,7 @@ function App() {
             <Route path="admin/question-banks/:bankId/questions/create" element={<QuestionFormPage />} />
             <Route path="admin/questions/:questionId/edit" element={<QuestionFormPage />} />
             <Route path="admin/exams/:id/correction" element={<ExamCorrectionPage />} />
+            <Route path="admin/exams/:id/sessions/:sessionId/detail" element={<StudentResultDetailPage />} />
 
             <Route path="exams/:id/take" element={<ExamTaker />} />
           </Route>
