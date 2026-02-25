@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import { MathExtension } from '@/lib/tiptap/MathExtension';
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 
@@ -12,6 +13,29 @@ interface RichTextEditorProps {
     className?: string;
     minHeight?: string;
 }
+
+// Helper to convert $latex$ in HTML to data-latex spans for TipTap
+const toEditorHtml = (html: string) => {
+    if (!html) return '';
+    // Replace $...$ with <span data-latex="...">$...$</span>
+    // Use a negative lookahead to avoid matching already wrapped spans or other $ signs
+    return html.replace(/\$([^$]+)\$/g, (match, latex) => {
+        return `<span data-latex="${latex}">$${latex}$</span>`;
+    });
+};
+
+// Helper to convert data-latex spans back to simple $latex$ for DB
+const toPersistenceHtml = (html: string) => {
+    if (!html) return '';
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('span[data-latex]').forEach(span => {
+        const latex = span.getAttribute('data-latex');
+        if (latex) {
+            span.replaceWith(`$${latex}$`);
+        }
+    });
+    return doc.body.innerHTML;
+};
 
 export default function RichTextEditor({
     value,
@@ -29,10 +53,11 @@ export default function RichTextEditor({
             Placeholder.configure({
                 placeholder,
             }),
+            MathExtension,
         ],
-        content: value,
+        content: toEditorHtml(value),
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            onChange(toPersistenceHtml(editor.getHTML()));
         },
         onFocus: ({ editor }) => {
             setActiveEditor(editor);
@@ -46,8 +71,11 @@ export default function RichTextEditor({
 
     // Update content if value changes externally (e.g. from state reset)
     useEffect(() => {
-        if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value);
+        if (editor) {
+            const currentPersistenceHtml = toPersistenceHtml(editor.getHTML());
+            if (value !== currentPersistenceHtml) {
+                editor.commands.setContent(toEditorHtml(value));
+            }
         }
     }, [value, editor]);
 

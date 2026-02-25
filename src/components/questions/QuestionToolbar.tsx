@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
+import MathDialog from './MathDialog';
 
 export default function QuestionToolbar() {
     const { activeEditor } = useEditorStore();
+    const [isMathOpen, setIsMathOpen] = useState(false);
 
     if (!activeEditor) {
         return (
@@ -16,6 +19,26 @@ export default function QuestionToolbar() {
     const toggleUnderline = () => activeEditor.chain().focus().toggleUnderline().run();
     const toggleBulletList = () => activeEditor.chain().focus().toggleBulletList().run();
     const toggleOrderedList = () => activeEditor.chain().focus().toggleOrderedList().run();
+
+    const openMathDialog = () => {
+        setIsMathOpen(true);
+    };
+
+    const handleMathConfirm = (latex: string) => {
+        const { state } = activeEditor;
+        const { from, to } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'math') {
+            activeEditor.chain().focus().updateMath({ latex }).run();
+        } else {
+            activeEditor.chain().focus().setMath({ latex }).run();
+        }
+    };
+
+    const currentMathLatex = activeEditor.isActive('math')
+        ? activeEditor.getAttributes('math').latex
+        : '';
 
     return (
         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 shadow-sm">
@@ -49,6 +72,20 @@ export default function QuestionToolbar() {
                 active={activeEditor.isActive('orderedList')}
                 icon="format_list_numbered"
                 tooltip="Numbered List"
+            />
+            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <ToolbarButton
+                onClick={openMathDialog}
+                active={activeEditor.isActive('math')}
+                icon="functions"
+                tooltip="Math Formula"
+            />
+
+            <MathDialog
+                isOpen={isMathOpen}
+                onClose={() => setIsMathOpen(false)}
+                initialValue={currentMathLatex}
+                onConfirm={handleMathConfirm}
             />
         </div>
     );
