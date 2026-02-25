@@ -3,8 +3,7 @@ import { useEditorStore } from '@/store/useEditorStore';
 import MathDialog from './MathDialog';
 
 export default function QuestionToolbar() {
-    const { activeEditor } = useEditorStore();
-    const [isMathOpen, setIsMathOpen] = useState(false);
+    const { activeEditor, isMathDialogOpen, setIsMathDialogOpen } = useEditorStore();
 
     if (!activeEditor) {
         return (
@@ -21,7 +20,7 @@ export default function QuestionToolbar() {
     const toggleOrderedList = () => activeEditor.chain().focus().toggleOrderedList().run();
 
     const openMathDialog = () => {
-        setIsMathOpen(true);
+        setIsMathDialogOpen(true);
     };
 
     const handleMathConfirm = (latex: string) => {
@@ -82,8 +81,8 @@ export default function QuestionToolbar() {
             />
 
             <MathDialog
-                isOpen={isMathOpen}
-                onClose={() => setIsMathOpen(false)}
+                isOpen={isMathDialogOpen}
+                onClose={() => setIsMathDialogOpen(false)}
                 initialValue={currentMathLatex}
                 onConfirm={handleMathConfirm}
             />

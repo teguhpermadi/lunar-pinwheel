@@ -1,10 +1,12 @@
 import { NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 import { useEffect, useRef } from 'react';
+import { useEditorStore } from '@/store/useEditorStore';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
 const MathNodeView = (props: NodeViewProps) => {
     const containerRef = useRef<HTMLSpanElement>(null);
+    const { setIsMathDialogOpen } = useEditorStore();
     const { latex } = props.node.attrs;
 
     useEffect(() => {
@@ -26,6 +28,7 @@ const MathNodeView = (props: NodeViewProps) => {
             className={`inline-block mx-1 px-1 rounded transition-all cursor-pointer hover:bg-primary/10 border border-transparent hover:border-primary/20 bg-slate-100 dark:bg-slate-800 align-middle ${props.selected ? 'ring-2 ring-primary border-primary bg-primary/5' : ''
                 }`}
             data-latex={latex}
+            onClick={() => setIsMathDialogOpen(true)}
         >
             <span ref={containerRef} className="katex-rendered-inline" />
         </NodeViewWrapper>
