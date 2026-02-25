@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface Option {
     id?: string;
@@ -74,13 +75,13 @@ export default function ShortAnswerInput({ options, onChange }: ShortAnswerInput
                                 {index + 1}
                             </div>
 
-                            <div className="flex-1">
-                                <input
-                                    type="text"
+                            <div className="flex-1 min-w-0">
+                                <RichTextEditor
                                     value={option.content}
-                                    onChange={(e) => handleContentChange(option.uuid, e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none border"
+                                    onChange={(val) => handleContentChange(option.uuid, val)}
                                     placeholder="Ketik jawaban yang diterima..."
+                                    minHeight="min-h-[44px]"
+                                    className="text-sm px-4 py-3"
                                 />
                             </div>
 

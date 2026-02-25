@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface SequenceItem {
     id?: string;
@@ -67,13 +67,15 @@ export default function SequenceInput({ items, onChange }: SequenceInputProps) {
                                 {index + 1}
                             </div>
 
-                            <input
-                                type="text"
-                                value={item.content}
-                                onChange={(e) => handleContentChange(item.uuid, e.target.value)}
-                                className="flex-1 bg-transparent border-none focus:ring-0 text-sm p-0"
-                                placeholder={`Step ${index + 1}`}
-                            />
+                            <div className="flex-1 min-w-0">
+                                <RichTextEditor
+                                    value={item.content}
+                                    onChange={(val) => handleContentChange(item.uuid, val)}
+                                    placeholder={`Step ${index + 1}`}
+                                    minHeight="min-h-[44px]"
+                                    className="text-sm p-0"
+                                />
+                            </div>
 
                             <button
                                 onClick={() => handleRemoveStep(item.uuid)}

@@ -4,6 +4,7 @@ import QuestionDifficultySelector from './QuestionDifficultySelector';
 import QuestionTimerSelector from './QuestionTimerSelector';
 import QuestionScoreSelector from './QuestionScoreSelector';
 import QuestionTypeSelector from './QuestionTypeSelector';
+import QuestionToolbar from './QuestionToolbar';
 
 interface QuestionFormLayoutProps {
     children: ReactNode;
@@ -44,7 +45,7 @@ export default function QuestionFormLayout({
     setHint,
     onSave,
     isSaving,
-    isEditing = false
+    isEditing: _isEditing = false
 }: QuestionFormLayoutProps) {
     const navigate = useNavigate();
     const [isHintOpen, setIsHintOpen] = useState(false);
@@ -69,6 +70,10 @@ export default function QuestionFormLayout({
                             manual={true}
                         />
                     </div>
+                </div>
+
+                <div className="flex-1 flex justify-center px-4">
+                    <QuestionToolbar />
                 </div>
 
                 <div className="flex items-center gap-6">

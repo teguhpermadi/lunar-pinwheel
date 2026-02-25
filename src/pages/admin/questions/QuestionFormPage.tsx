@@ -5,6 +5,7 @@ import { questionApi, optionsApi } from '@/lib/api';
 import QuestionFormLayout from '@/components/questions/QuestionFormLayout';
 import QuestionInputs from '@/components/questions/QuestionInputs';
 import MediaModal from '@/components/questions/MediaModal';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 export default function QuestionFormPage() {
     const { bankId, questionId } = useParams();
@@ -263,22 +264,6 @@ export default function QuestionFormPage() {
         setIsMediaModalOpen(false);
     };
 
-    const handlePaste = (e: React.ClipboardEvent) => {
-        const items = e.clipboardData?.items;
-        if (!items) return;
-
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const file = items[i].getAsFile();
-                if (file) {
-                    handleQuestionMediaUpload(file);
-                    // Prevent pasting the image as text if supported by browser/target
-                    e.preventDefault();
-                    break;
-                }
-            }
-        }
-    };
 
     const handleQuestionMediaDelete = async () => {
         setIsMediaModalOpen(false);
@@ -475,13 +460,15 @@ export default function QuestionFormPage() {
 
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-all">
                     <div className="flex flex-col md:flex-row min-h-[220px]">
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            onPaste={handlePaste}
-                            className="flex-1 bg-transparent border-none text-xl leading-relaxed focus:ring-0 p-8 text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700 resize-none min-h-[200px]"
-                            placeholder="Tuliskan pertanyaan Anda di sini..."
-                        />
+                        <div className="flex-1 p-8">
+                            <RichTextEditor
+                                value={content}
+                                onChange={setContent}
+                                placeholder="Tuliskan pertanyaan Anda di sini..."
+                                minHeight="min-h-[220px]"
+                                className="text-md leading-relaxed"
+                            />
+                        </div>
 
                         <div className="md:w-72 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 p-6 bg-slate-50/50 dark:bg-slate-800/30 shrink-0 flex flex-col items-center justify-center">
                             <div

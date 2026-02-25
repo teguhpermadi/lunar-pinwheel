@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 export interface CategorizationItem {
     uuid: string;
@@ -119,21 +120,6 @@ export default function CategorizationInput({ groups, onChange, onDeleteMedia }:
         onChange(newGroups);
     };
 
-    const handlePaste = (groupIndex: number, itemIndex: number, e: React.ClipboardEvent) => {
-        const items = e.clipboardData?.items;
-        if (!items) return;
-
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const file = items[i].getAsFile();
-                if (file) {
-                    handleItemImageUpload(groupIndex, itemIndex, file);
-                    e.preventDefault();
-                    break;
-                }
-            }
-        }
-    };
 
     // Simple drag and drop logic
     const onDragStart = (groupIndex: number, itemIndex: number) => {
@@ -259,12 +245,12 @@ export default function CategorizationInput({ groups, onChange, onDeleteMedia }:
                                         </div>
 
                                         {/* Card Text */}
-                                        <textarea
+                                        <RichTextEditor
                                             value={item.content}
-                                            onChange={(e) => handleUpdateItemContent(gIdx, iIdx, e.target.value)}
-                                            onPaste={(e) => handlePaste(gIdx, iIdx, e)}
-                                            className="w-full bg-transparent border-none text-sm focus:ring-0 p-0 resize-none min-h-[60px]"
+                                            onChange={(val) => handleUpdateItemContent(gIdx, iIdx, val)}
                                             placeholder="Item content..."
+                                            minHeight="min-h-[60px]"
+                                            className="text-sm"
                                         />
                                     </motion.div>
                                 ))}

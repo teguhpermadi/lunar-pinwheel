@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useAuth } from '@/contexts/AuthContext';
 import { echo } from '@/lib/echo';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -520,16 +521,9 @@ export default function ExamTaker() {
                         >
                             {/* Question Container */}
                             <div className="relative z-10">
-                                <div
+                                <MathRenderer
                                     className="font-medium leading-relaxed mb-8 text-gray-900 dark:text-white question-content"
-                                    style={{ fontSize: '1.25em' }}
-                                    dangerouslySetInnerHTML={{ __html: currentQuestion?.exam_question?.content || '' }}
-                                    onClick={(e) => {
-                                        const target = e.target as HTMLElement;
-                                        if (target.tagName === 'IMG') {
-                                            setZoomImageUrl((target as HTMLImageElement).src);
-                                        }
-                                    }}
+                                    content={currentQuestion?.exam_question?.content || ''}
                                 />
 
                                 {/* Answers rendering */}

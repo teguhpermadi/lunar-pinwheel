@@ -46,7 +46,7 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
         return (
             <div
                 ref={containerRef}
-                className={`math-rendered ${className}`}
+                className={`math-rendered prose prose-slate dark:prose-invert max-w-none ${className}`}
                 data-content-hash={content.length}
                 dangerouslySetInnerHTML={{ __html: content }}
             />
@@ -56,7 +56,7 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
     return (
         <div
             ref={containerRef}
-            className={`math-rendered ${className}`}
+            className={`math-rendered prose prose-slate dark:prose-invert max-w-none ${className}`}
             data-content-hash={content.length}
         >
             {content}

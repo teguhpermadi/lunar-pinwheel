@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface MatchingPair {
     id?: string;
@@ -123,12 +124,15 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                         <Reorder.Item key={pair.uuid} value={pair} className="relative group">
                             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all flex items-center gap-3">
                                 <span className="material-symbols-outlined text-slate-300 cursor-grab active:cursor-grabbing text-lg select-none">drag_indicator</span>
-                                <textarea
-                                    value={pair.left}
-                                    onChange={(e) => handleChange(index, 'left', e.target.value)}
-                                    className="w-full bg-transparent border-none text-sm focus:ring-0 p-0 resize-none h-16"
-                                    placeholder={`Item ${index + 1}`}
-                                />
+                                <div className="flex-1 min-w-0">
+                                    <RichTextEditor
+                                        value={pair.left}
+                                        onChange={(val) => handleChange(index, 'left', val)}
+                                        placeholder={`Item ${index + 1}`}
+                                        minHeight="min-h-[64px]"
+                                        className="text-sm"
+                                    />
+                                </div>
                             </div>
                             <button
                                 onClick={() => handleRemovePair(index)}
@@ -155,12 +159,15 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                         <Reorder.Item key={item.rightUuid} value={item}>
                             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-emerald-200/50 dark:border-emerald-900/30 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all flex items-center gap-3">
                                 <span className="material-symbols-outlined text-slate-300 cursor-grab active:cursor-grabbing text-lg select-none">drag_indicator</span>
-                                <textarea
-                                    value={item.content}
-                                    onChange={(e) => handleChange(index, 'right', e.target.value)}
-                                    className="w-full bg-transparent border-none text-sm focus:ring-0 p-0 resize-none h-16"
-                                    placeholder={`Match for Item ${index + 1}`}
-                                />
+                                <div className="flex-1 min-w-0">
+                                    <RichTextEditor
+                                        value={item.content}
+                                        onChange={(val) => handleChange(index, 'right', val)}
+                                        placeholder={`Match for Item ${index + 1}`}
+                                        minHeight="min-h-[64px]"
+                                        className="text-sm"
+                                    />
+                                </div>
                             </div>
                         </Reorder.Item>
                     ))}

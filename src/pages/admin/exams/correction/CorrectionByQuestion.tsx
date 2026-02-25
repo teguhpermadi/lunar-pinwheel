@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
+import MathRenderer from '@/components/ui/MathRenderer';
 import { EXCLUDED_PARTIAL_TYPES } from '../ExamCorrectionPage';
 
 interface CorrectionByQuestionProps {
@@ -48,9 +49,9 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                         <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20 shrink-0">
                             Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
                         </span>
-                        <div
+                        <MathRenderer
                             className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate"
-                            dangerouslySetInnerHTML={{ __html: currentQuestionContent }}
+                            content={currentQuestionContent}
                         />
                     </div>
                     <div className="flex gap-2 items-center">

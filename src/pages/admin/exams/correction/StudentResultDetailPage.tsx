@@ -5,6 +5,7 @@ import { examApi, Exam } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
+import MathRenderer from '@/components/ui/MathRenderer';
 import { StudentSession, QuestionDetail } from '@/pages/admin/exams/ExamCorrectionPage';
 
 const StudentResultDetailPage: React.FC = () => {
@@ -229,7 +230,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-8 leading-relaxed" dangerouslySetInnerHTML={{ __html: q.question_content }} />
+                                            <MathRenderer className="text-xl font-bold text-slate-800 dark:text-white mb-8 leading-relaxed" content={q.question_content} />
 
                                             <div className="bg-slate-50 dark:bg-slate-950/50 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800">
                                                 <CorrectionDisplay

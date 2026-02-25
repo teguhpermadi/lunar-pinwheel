@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MediaModal from '../MediaModal';
 import Swal from 'sweetalert2';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface Option {
     id?: string;
@@ -82,21 +83,6 @@ export default function MultipleChoiceInput({ options, onChange, onDeleteMedia }
         setSelectedOptionUuid(null);
     };
 
-    const handlePaste = (uuid: string, e: React.ClipboardEvent) => {
-        const items = e.clipboardData?.items;
-        if (!items) return;
-
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const file = items[i].getAsFile();
-                if (file) {
-                    handleFileChange(uuid, file);
-                    e.preventDefault();
-                    break;
-                }
-            }
-        }
-    };
 
     const handleRemoveMedia = (uuid: string) => {
         const option = options.find((o: Option) => o.uuid === uuid);
@@ -150,14 +136,15 @@ export default function MultipleChoiceInput({ options, onChange, onDeleteMedia }
                                             <span className="material-symbols-outlined text-lg">image</span>
                                         )}
                                     </div>
-                                    <input
-                                        type="text"
-                                        value={option.content}
-                                        onChange={(e) => handleContentChange(option.uuid, e.target.value)}
-                                        onPaste={(e) => handlePaste(option.uuid, e)}
-                                        placeholder="Option text..."
-                                        className="flex-1 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary transition-all"
-                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <RichTextEditor
+                                            value={option.content}
+                                            onChange={(val) => handleContentChange(option.uuid, val)}
+                                            placeholder="Option text..."
+                                            minHeight="min-h-[44px]"
+                                            className="text-sm px-4 py-3"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
