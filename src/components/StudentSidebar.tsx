@@ -12,11 +12,11 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
 
     const navItems = [
         { icon: 'dashboard', label: 'Dashboard', path: '/' },
-        { icon: 'menu_book', label: 'My Courses', path: '/courses' },
+        // { icon: 'menu_book', label: 'My Courses', path: '/courses' },
         { icon: 'quiz', label: 'Exams', path: '/exams' },
-        { icon: 'emoji_events', label: 'Leaderboard', path: '/leaderboard' },
-        { icon: 'military_tech', label: 'Achievements', path: '/achievements' },
-        { icon: 'settings', label: 'Profile', path: '/profile' },
+        // { icon: 'emoji_events', label: 'Leaderboard', path: '/leaderboard' },
+        // { icon: 'military_tech', label: 'Achievements', path: '/achievements' },
+        // { icon: 'settings', label: 'Profile', path: '/profile' },
     ];
 
     return (
@@ -71,7 +71,7 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
             </nav>
 
             <div className={cn("p-4 mt-auto", isCollapsed ? "px-3" : "")}>
-                <div className={cn(
+                {/* <div className={cn(
                     "bg-white/5 rounded-2xl p-4 mb-4 overflow-hidden transition-all",
                     isCollapsed ? "hidden" : "block"
                 )}>
@@ -80,7 +80,7 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
                         <div className="bg-yellow-400 h-1.5 rounded-full w-3/4"></div>
                     </div>
                     <p className="text-white text-xs font-semibold">Level 14 • 12,450 XP</p>
-                </div>
+                </div> */}
                 <button
                     onClick={logout}
                     className={cn(

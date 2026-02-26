@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import StudentSidebar from '../components/StudentSidebar';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StudentLayout() {
+    const { user } = useAuth();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const toggleSidebar = () => {
@@ -48,14 +50,14 @@ export default function StudentLayout() {
                         <div className="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
                         <div className="flex items-center gap-3">
                             <div className="text-right hidden sm:block">
-                                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Alex Rivers</p>
-                                <p className="text-xs text-slate-500 font-medium">B.Sc Computer Science</p>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{user?.name ?? 'Student'}</p>
+                                <p className="text-xs text-slate-500 font-medium">{user?.email}</p>
                             </div>
                             <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
                                 <img
                                     alt="Student Profile Avatar"
                                     className="rounded-full size-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUZUfJ34sqTHda9fh-tRRUn0_RLr_fDgt6Bc_IQFyA5vu8mYKaWXObrhz_6PrUPp3LkS5Ts6NxWcnidc8C2KdbyIlVMG5DEUcO4xFIbexbWSno_CI3LpJp-PTae8a-uBCX5PlJo7PbYClQ_FwODwb0uxNElzM_h2rORoaNB_vR3FkmiijQys6uLnCBzNyUXxzxYTEXDhajv2gCRPDbznr3b_AjtL0Tqio34NprggbHqbZbsBU5BJ2xqBRVA_rRBrWf7DVl0h0_N-iR"
+                                    src={user?.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name ?? 'S')}
                                 />
                             </div>
                         </div>
