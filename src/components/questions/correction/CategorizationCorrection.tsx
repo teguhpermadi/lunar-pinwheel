@@ -8,10 +8,13 @@ interface CategorizationCorrectionProps {
     keyAnswer?: any;
 }
 
-export default function CategorizationCorrection({ options, studentAnswer = {} }: CategorizationCorrectionProps) {
+export default function CategorizationCorrection({ options = [], studentAnswer = {} }: CategorizationCorrectionProps) {
+    if (!options || !Array.isArray(options)) return null;
+
     // Categories are typically options with metadata group_title
     const groupsMap = new Map<string, QuestionOption[]>();
     options.forEach(opt => {
+        if (!opt) return;
         const title = opt.metadata?.group_title || opt.metadata?.category_title || 'Uncategorized';
         if (!groupsMap.has(title)) groupsMap.set(title, []);
         groupsMap.get(title)!.push(opt);
@@ -19,9 +22,19 @@ export default function CategorizationCorrection({ options, studentAnswer = {} }
 
     const groups = Array.from(groupsMap.entries()).map(([title, items]) => ({ title, items }));
 
+    if (groups.length === 0) {
+        return (
+            <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400">
+                <p className="text-sm font-medium">No categories found for this question.</p>
+            </div>
+        );
+    }
+
+    const safeStudentAnswer = (studentAnswer && typeof studentAnswer === 'object') ? studentAnswer : {};
+
     return (
         <div className="space-y-6">
-            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Categorization Analysis</h5>
+            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Categorization Analysis Preview</h5>
             <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
                 {groups.map((group, idx) => (
                     <div key={idx} className="min-w-[250px] bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col gap-4">
@@ -34,11 +47,9 @@ export default function CategorizationCorrection({ options, studentAnswer = {} }
 
                         <div className="space-y-3">
                             {group.items.map((item) => {
-                                const studentChoice = studentAnswer[item.id] || studentAnswer[item.option_key];
+                                const studentChoice = safeStudentAnswer[item.id] || safeStudentAnswer[item.option_key];
                                 // We check if this item belongs to THIS category title
-                                // In Categorization, often any item from the same group title is "correct" in that group
-                                // But here we usually compare if student placed item A into category X
-                                const isPlacedHere = studentChoice === group.title || studentChoice === item.metadata?.group_title;
+                                const isPlacedHere = studentChoice === group.title || studentChoice === (item.metadata?.group_title || item.metadata?.category_title);
 
                                 return (
                                     <div key={item.id} className={cn(
@@ -63,7 +74,7 @@ export default function CategorizationCorrection({ options, studentAnswer = {} }
                     </div>
                 ))}
             </div>
-            <p className="text-[10px] text-slate-400 italic">Note: Highlighting items that student correctly placed in each category.</p>
+            <p className="text-[10px] text-slate-400 italic">Note: Highlighting items from this category according to the teacher's key.</p>
         </div>
     );
 }
