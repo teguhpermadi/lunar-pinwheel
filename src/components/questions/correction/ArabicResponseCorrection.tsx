@@ -10,7 +10,7 @@ interface ArabicResponseCorrectionProps {
 export default function ArabicResponseCorrection({ studentAnswer, options = [], keyAnswer }: ArabicResponseCorrectionProps) {
     const extractValue = (val: any): string => {
         if (typeof val === 'object' && val !== null) {
-            const inner = val.answer || val.id || val.option_id || val.option_key || val;
+            const inner = val.answers || val.answer || val.id || val.option_id || val.option_key || val;
             return Array.isArray(inner) ? inner.join(', ') : String(inner);
         }
         return Array.isArray(val) ? val.join(', ') : String(val);
