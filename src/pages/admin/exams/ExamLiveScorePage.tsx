@@ -327,7 +327,10 @@ export default function ExamLiveScorePage() {
                     </div>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
                     <div className="flex items-center gap-2">
-                        <button className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center gap-2">
+                        <button
+                            onClick={() => navigate(`/admin/exams/${id}/correction`)}
+                            className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center gap-2"
+                        >
                             <span className="material-symbols-outlined text-lg">fact_check</span>
                             Correction Exam
                         </button>
