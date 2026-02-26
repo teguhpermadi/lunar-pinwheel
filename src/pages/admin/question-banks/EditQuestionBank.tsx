@@ -11,6 +11,7 @@ import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
+import WordImportModal from '@/components/admin/question-banks/WordImportModal';
 import MediaModal from '@/components/questions/MediaModal';
 
 export default function EditQuestionBank() {
@@ -23,6 +24,7 @@ export default function EditQuestionBank() {
     const [isLoadingBank, setIsLoadingBank] = useState(true);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -198,6 +200,13 @@ export default function EditQuestionBank() {
                     >
                         <span className="material-symbols-outlined text-lg">settings</span>
                         Settings
+                    </button>
+                    <button
+                        onClick={() => setIsImportOpen(true)}
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-lg">description</span>
+                        Import Word
                     </button>
                     <Link to={`/admin/question-banks/${id}/show`} className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-lg">quiz</span>
@@ -410,6 +419,12 @@ export default function EditQuestionBank() {
                 onSaved={(updatedBank) => {
                     setBank(updatedBank);
                 }}
+            />
+            <WordImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                questionBankId={id || ''}
+                onImportSuccess={() => fetchBank()}
             />
             <MediaModal
                 isOpen={!!previewImageUrl}

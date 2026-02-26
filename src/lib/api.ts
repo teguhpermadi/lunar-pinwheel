@@ -706,6 +706,21 @@ export const questionApi = {
             headers: { 'Content-Type': undefined },
         });
         return response.data;
+    },
+    importWord: async (questionBankId: string, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('question_bank_id', questionBankId);
+        const response = await api.post('/questions/import-word', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+    downloadImportTemplate: async () => {
+        const response = await api.get('/questions/import-template', {
+            responseType: 'blob'
+        });
+        return response.data;
     }
 };
 
