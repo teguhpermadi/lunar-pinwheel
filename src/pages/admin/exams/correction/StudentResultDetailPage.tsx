@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { examApi, Exam } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
@@ -46,6 +47,9 @@ const StudentResultDetailPage: React.FC = () => {
         return hours > 0 ? `${hours}h ${mins}m` : `${mins} mins`;
     };
 
+    const { user } = useAuth();
+    const isStudent = user?.role === 'student';
+
     useEffect(() => {
         if (examId && sessionId) {
             fetchDetail();
@@ -53,9 +57,10 @@ const StudentResultDetailPage: React.FC = () => {
     }, [examId, sessionId]);
 
     const fetchDetail = async () => {
+        if (!examId || !sessionId) return;
         setIsLoading(true);
         try {
-            const response = await examApi.getCorrectionDetail(examId!, sessionId!);
+            const response = await examApi.getCorrectionDetail(examId, sessionId);
             if (response.success) {
                 const answersData = response.data.answers;
                 const fetchedQuestions = Array.isArray(answersData) ? answersData : (answersData.data || []);
@@ -121,15 +126,19 @@ const StudentResultDetailPage: React.FC = () => {
             <div className="h-16 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-10">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Link to={`/admin/exams/${examId}/correction`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        <Link to={isStudent ? "/exams/history" : `/admin/exams/${examId}/correction`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                             <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                         </Link>
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="text-slate-400">Exams</span>
+                            <span className="text-slate-400">{isStudent ? 'History' : 'Exams'}</span>
                             <span className="material-symbols-outlined text-xs text-slate-300">chevron_right</span>
-                            <span className="text-slate-400">Correction</span>
-                            <span className="material-symbols-outlined text-xs text-slate-300">chevron_right</span>
-                            <span className="font-bold text-primary">Student Detail</span>
+                            {!isStudent && (
+                                <>
+                                    <span className="text-slate-400">Correction</span>
+                                    <span className="material-symbols-outlined text-xs text-slate-300">chevron_right</span>
+                                </>
+                            )}
+                            <span className="font-bold text-primary">Result Detail</span>
                         </div>
                     </div>
                 </div>

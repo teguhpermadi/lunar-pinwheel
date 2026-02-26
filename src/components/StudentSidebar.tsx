@@ -14,6 +14,7 @@ export default function StudentSidebar({ isCollapsed }: StudentSidebarProps) {
         { icon: 'dashboard', label: 'Dashboard', path: '/' },
         // { icon: 'menu_book', label: 'My Courses', path: '/courses' },
         { icon: 'quiz', label: 'Exams', path: '/exams' },
+        { icon: 'history_edu', label: 'Exam History', path: '/exams/history' },
         // { icon: 'emoji_events', label: 'Leaderboard', path: '/leaderboard' },
         // { icon: 'military_tech', label: 'Achievements', path: '/achievements' },
         // { icon: 'settings', label: 'Profile', path: '/profile' },

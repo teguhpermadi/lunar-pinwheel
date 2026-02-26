@@ -456,7 +456,7 @@ export const studentApi = {
         return response.data;
     },
     getExamResults: async (params?: any) => {
-        const response = await api.get('/students/exam-results', { params });
+        const response = await api.get('/students/exams/history', { params });
         return response.data;
     },
     getStudentExams: async (params?: any) => {

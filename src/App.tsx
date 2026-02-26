@@ -27,6 +27,7 @@ import ExamLiveScorePage from "@/pages/admin/exams/ExamLiveScorePage"
 import EditExamPage from "@/pages/admin/exams/EditExamPage"
 import ExamCorrectionPage from "@/pages/admin/exams/ExamCorrectionPage.tsx"
 import StudentExamsPage from "@/pages/student/StudentExamsPage"
+import StudentExamHistoryPage from "@/pages/student/StudentExamHistoryPage"
 import ExamTaker from "@/pages/student/ExamTaker"
 import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
 
@@ -131,6 +132,7 @@ function App() {
               {/* Student Only Routes */}
               <Route element={<RequireRole role="student" />}>
                 <Route path="exams" element={<StudentExamsPage />} />
+                <Route path="exams/history" element={<StudentExamHistoryPage />} />
               </Route>
             </Route>
 
@@ -142,6 +144,7 @@ function App() {
             <Route path="admin/questions/:questionId/edit" element={<QuestionFormPage />} />
             <Route path="admin/exams/:id/correction" element={<ExamCorrectionPage />} />
             <Route path="admin/exams/:id/sessions/:sessionId/detail" element={<StudentResultDetailPage />} />
+            <Route path="exams/history/:id/:sessionId" element={<StudentResultDetailPage />} />
 
             <Route path="exams/:id/take" element={<ExamTaker />} />
           </Route>
