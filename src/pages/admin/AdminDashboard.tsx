@@ -1,16 +1,30 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import StatsCard from '@/components/Dashboard/StatsCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import { dashboardApi, DashboardData } from '@/lib/api';
+import { format } from 'date-fns';
 
 export default function AdminDashboard() {
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
+    const [data, setData] = useState<DashboardData | null>(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        const fetchDashboardData = async () => {
+            try {
+                const response = await dashboardApi.getDashboardData();
+                setData(response.data);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
     }, []);
 
     const container = {
@@ -33,17 +47,17 @@ export default function AdminDashboard() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Overview</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Welcome back, Alex. Here's what's happening today.</p>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">Welcome back, {user?.name || 'Admin'}. Here's what's happening today.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:shadow-sm transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-lg">calendar_today</span>
-                        This Month
+                        {format(new Date(), 'MMMM yyyy')}
                     </button>
-                    <button className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+                    {/* <button className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-lg">add</span>
                         New Course
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
@@ -55,8 +69,8 @@ export default function AdminDashboard() {
             >
                 <StatsCard
                     title="Total Students"
-                    value="1,240"
-                    change="+5.2%"
+                    value={data?.stats.students_count?.toLocaleString() || '0'}
+                    change="+0%"
                     icon="group"
                     colorClass="bg-blue-500 shadow-blue-500/20"
                     iconBgClass="bg-white/20"
@@ -64,7 +78,7 @@ export default function AdminDashboard() {
                 />
                 <StatsCard
                     title="Active Classes"
-                    value="42"
+                    value={data?.stats.classrooms_count?.toLocaleString() || '0'}
                     change="Steady"
                     icon="meeting_room"
                     colorClass="bg-amber-400 text-slate-900 shadow-amber-400/20"
@@ -73,17 +87,17 @@ export default function AdminDashboard() {
                 />
                 <StatsCard
                     title="Ongoing Exams"
-                    value="12"
-                    change="+3"
+                    value={data?.stats.ongoing_exams_count?.toLocaleString() || '0'}
+                    change="+0"
                     icon="timer"
                     colorClass="bg-rose-500 shadow-rose-500/20"
                     iconBgClass="bg-white/20"
                     isLoading={isLoading}
                 />
                 <StatsCard
-                    title="Revenue Growth"
-                    value="$42.5k"
-                    change="+12%"
+                    title="System Health"
+                    value="Excellent"
+                    change="Stable"
                     icon="bolt"
                     colorClass="bg-primary shadow-primary/20"
                     iconBgClass="bg-white/20"
@@ -94,38 +108,62 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <motion.div
                     variants={container}
-                    initial="hidden" // Re-trigger for nested stagger if needed, or inherit from parent if parent was motion.div
+                    initial="hidden"
                     animate="show"
                     className="lg:col-span-2 space-y-8"
                 >
-                    {isLoading ? (
-                        <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800 space-y-6">
-                            <div className="flex justify-between">
-                                <Skeleton className="h-8 w-48" />
-                                <Skeleton className="h-6 w-32" />
+                    <motion.div variants={item} className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h4 className="text-lg font-bold text-slate-900 dark:text-white">Ongoing Exams</h4>
+                                <p className="text-sm text-slate-500 font-medium">Exams currently in progress</p>
                             </div>
-                            <Skeleton className="h-64 w-full rounded-xl" />
+                            <div className="flex gap-2">
+                                <span className="px-3 py-1 bg-rose-100 text-rose-600 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <span className="size-2 rounded-full bg-rose-600 animate-pulse"></span>
+                                    LIVE
+                                </span>
+                            </div>
                         </div>
-                    ) : (
-                        <motion.div variants={item} className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center justify-between mb-8">
-                                <div>
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Student Engagement</h4>
-                                    <p className="text-sm text-slate-500 font-medium">Activity levels over the last 7 days</p>
+
+                        <div className="space-y-4">
+                            {isLoading ? (
+                                Array(3).fill(0).map((_, i) => (
+                                    <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+                                ))
+                            ) : data?.ongoing_exams.length === 0 ? (
+                                <div className="h-40 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
+                                    <span className="material-symbols-outlined text-4xl mb-2">event_busy</span>
+                                    <p className="font-medium text-sm">No ongoing exams at the moment</p>
                                 </div>
-                                <div className="flex gap-2">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="size-2 rounded-full bg-primary"></span>
-                                        <span className="text-xs text-slate-500 font-medium">Active Sessions</span>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Placeholder for Chart */}
-                            <div className="relative h-64 w-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                                <p className="text-slate-400 font-medium">Chart visualization would go here</p>
-                            </div>
-                        </motion.div>
-                    )}
+                            ) : (
+                                data?.ongoing_exams.map((exam) => (
+                                    <Link key={exam.id} to={`/admin/exams/${exam.id}/live`} className="group p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent hover:border-primary/30 transition-all flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="size-12 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                                <span className="material-symbols-outlined">assignment</span>
+                                            </div>
+                                            <div>
+                                                <h5 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{exam.title}</h5>
+                                                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                                                    <span className="font-semibold text-slate-700 dark:text-slate-300">{exam.subject}</span>
+                                                    •
+                                                    <span>{exam.classrooms.join(', ')}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="text-xs font-bold text-slate-900 dark:text-white">{exam.duration} mins</p>
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mt-0.5">Duration</p>
+                                            </div>
+                                            <span className="material-symbols-outlined text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+                                        </div>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+                    </motion.div>
 
                     <motion.div variants={item} className="space-y-4">
                         <h4 className="text-lg font-bold text-slate-900 dark:text-white px-2">Quick Actions</h4>
@@ -136,17 +174,17 @@ export default function AdminDashboard() {
                                 ))
                             ) : (
                                 [
-                                    { icon: 'person_add', label: 'Add Student', color: 'blue' },
-                                    { icon: 'assignment', label: 'Create Exam', color: 'rose' },
-                                    { icon: 'mail', label: 'Message All', color: 'amber' },
-                                    { icon: 'analytics', label: 'Reports', color: 'primary' },
+                                    { icon: 'group', label: 'Students', color: 'blue', to: '/admin/students' },
+                                    { icon: 'meeting_room', label: 'Classroom', color: 'amber', to: '/admin/classrooms' },
+                                    { icon: 'assignment', label: 'Exam', color: 'rose', to: '/admin/exams' },
+                                    { icon: 'task_alt', label: 'Correction', color: 'primary', to: '/admin/exams' },
                                 ].map((action) => (
-                                    <button key={action.label} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+                                    <Link key={action.label} to={action.to} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
                                         <div className={`size-12 rounded-xl bg-${action.color === 'primary' ? 'primary/10' : action.color + '-100'} text-${action.color === 'primary' ? 'primary' : action.color + '-600'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                             <span className="material-symbols-outlined">{action.icon}</span>
                                         </div>
                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">{action.label}</span>
-                                    </button>
+                                    </Link>
                                 ))
                             )}
                         </div>
@@ -173,13 +211,13 @@ export default function AdminDashboard() {
                                         </div>
                                     </div>
                                 ))
+                            ) : data?.recent_activities.length === 0 ? (
+                                <div className="mt-20 flex flex-col items-center text-slate-400">
+                                    <span className="material-symbols-outlined text-4xl mb-2 opacity-20">history</span>
+                                    <p className="text-xs font-bold uppercase tracking-widest opacity-50">No activities yet</p>
+                                </div>
                             ) : (
-                                [
-                                    { title: "Jane Doe enrolled in UI Design", time: "2 minutes ago", icon: "person_add", color: "blue" },
-                                    { title: "Midterm results published", time: "45 minutes ago", icon: "task_alt", color: "rose" },
-                                    { title: "New Instructor joined", time: "3 hours ago", icon: "school", color: "amber" },
-                                    { title: "System update completed", time: "6 hours ago", icon: "update", color: "primary" },
-                                ].map((activity, idx) => (
+                                data?.recent_activities.map((activity, idx) => (
                                     <motion.div
                                         key={idx}
                                         initial={{ opacity: 0, x: -10 }}
@@ -187,18 +225,18 @@ export default function AdminDashboard() {
                                         transition={{ delay: idx * 0.1 }}
                                         className="relative flex gap-4"
                                     >
-                                        <div className={`z-10 size-8 rounded-full bg-${activity.color === 'primary' ? 'primary/10' : activity.color + '-100'} flex items-center justify-center ring-4 ring-white dark:ring-slate-900`}>
-                                            <span className={`material-symbols-outlined text-sm text-${activity.color === 'primary' ? 'primary' : activity.color + '-600'}`}>{activity.icon}</span>
+                                        <div className="z-10 size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center ring-4 ring-white dark:ring-slate-900">
+                                            <span className="material-symbols-outlined text-sm text-slate-500">history</span>
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{activity.title}</p>
-                                            <p className="text-xs text-slate-500">{activity.time}</p>
+                                            <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">{activity.description.replace(/_/g, ' ')}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{format(new Date(activity.created_at), 'HH:mm • dd MMM')}</p>
                                         </div>
                                     </motion.div>
                                 ))
                             )}
 
-                            {!isLoading && (
+                            {!isLoading && data?.recent_activities.length! > 0 && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 0.2 }}

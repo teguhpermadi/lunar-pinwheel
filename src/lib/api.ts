@@ -67,6 +67,28 @@ export interface SingleResponse<T> {
     data: T;
 }
 
+export interface DashboardStats {
+    students_count: number;
+    classrooms_count: number;
+    ongoing_exams_count: number;
+}
+
+export interface OngoingExam {
+    id: string;
+    title: string;
+    subject: string;
+    classrooms: string[];
+    start_time: string;
+    end_time: string;
+    duration: number;
+}
+
+export interface DashboardData {
+    stats: DashboardStats;
+    ongoing_exams: OngoingExam[];
+    recent_activities: any[]; // Or use ActivityLogResource structure if defined
+}
+
 export interface ActionResponse {
     success: boolean;
     message: string;
@@ -974,6 +996,13 @@ export const optionsApi = {
         const response = await api.post(`/options/${id}/media/${mediaId}`, formData, {
             headers: { 'Content-Type': undefined },
         });
+        return response.data;
+    }
+};
+
+export const dashboardApi = {
+    getDashboardData: async () => {
+        const response = await api.get('/dashboard');
         return response.data;
     }
 };

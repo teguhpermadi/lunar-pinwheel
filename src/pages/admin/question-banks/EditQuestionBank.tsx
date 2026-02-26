@@ -227,7 +227,7 @@ export default function EditQuestionBank() {
                 <main className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-background-dark/30 scroll-smooth">
                     <div className="max-w-4xl mx-auto space-y-6 pb-20">
                         {/* AI Generator Mock */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-primary/20 p-6 flex items-center gap-4">
+                        {/* <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-primary/20 p-6 flex items-center gap-4">
                             <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
                                 <span className="material-symbols-outlined text-2xl">auto_awesome</span>
                             </div>
@@ -245,7 +245,7 @@ export default function EditQuestionBank() {
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Question List */}
                         <div className="space-y-6">
