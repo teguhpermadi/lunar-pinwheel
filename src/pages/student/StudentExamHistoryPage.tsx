@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { studentApi } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
@@ -89,7 +90,7 @@ export default function StudentExamHistoryPage() {
     const groupedResults = groupResults();
 
     return (
-        <div className="flex-1 flex overflow-hidden p-6 gap-8 h-full bg-background-light dark:bg-background-dark/50">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden p-4 md:p-6 gap-6 md:gap-8 h-full bg-background-light dark:bg-background-dark/50 relative">
             {/* Left side: Results List */}
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between mb-6 px-2">
@@ -171,14 +172,19 @@ export default function StudentExamHistoryPage() {
             <motion.div
                 initial={false}
                 animate={{
-                    width: selectedResult || isLoading ? 450 : 0,
+                    width: window.innerWidth >= 1024 ? (selectedResult || isLoading ? 450 : 0) : '100%',
                     opacity: selectedResult || isLoading ? 1 : 0,
-                    marginLeft: selectedResult || isLoading ? 32 : 0
+                    x: window.innerWidth >= 1024 ? 0 : (selectedResult || isLoading ? 0 : '100%'),
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 120 }}
-                className="flex flex-col h-full overflow-hidden"
+                className={cn(
+                    "flex flex-col h-full overflow-hidden",
+                    "fixed inset-0 z-[60] lg:relative lg:inset-auto lg:z-auto",
+                    "bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-sm lg:backdrop-blur-none",
+                    !(selectedResult || isLoading) && "pointer-events-none lg:pointer-events-auto"
+                )}
             >
-                <div className="w-[450px] flex flex-col h-full">
+                <div className="w-full lg:w-[450px] flex flex-col h-full ml-auto">
                     <div className="px-2 mb-4 flex justify-between items-center">
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Result Detail</h3>
                         <button

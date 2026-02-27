@@ -277,12 +277,12 @@ export default function ExamLiveScorePage() {
     if (isLoading && !data) {
         return (
             <div className="flex flex-col h-screen bg-slate-50 dark:bg-background-dark/30 animate-pulse">
-                <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="min-h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
                         <Skeleton className="size-10 rounded-full" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-6 w-64" />
-                            <Skeleton className="h-3 w-48" />
+                        <div className="space-y-2 flex-1">
+                            <Skeleton className="h-6 w-full sm:w-64" />
+                            <Skeleton className="h-3 w-3/4 sm:w-48" />
                         </div>
                     </div>
                 </header>
@@ -295,51 +295,52 @@ export default function ExamLiveScorePage() {
 
     return (
         <div className="flex flex-col h-screen overflow-hidden">
-            <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
-                <div className="flex items-center gap-4 flex-1">
+            <header className="min-h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-4 flex flex-col lg:flex-row items-center justify-between z-20 shrink-0 gap-4">
+                <div className="flex items-center gap-3 md:gap-4 w-full lg:flex-1">
                     <button
                         onClick={() => navigate('/admin/exams')}
                         className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
-                    <div className="flex-1 max-w-xl">
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-base md:text-xl font-bold text-slate-900 dark:text-white truncate">
                             {data?.exam.title}
                         </h1>
-                        <p className="text-xs text-slate-400 font-medium tracking-wide">
+                        <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wide truncate">
                             {data?.exam.subject?.name} • {data?.exam.academic_year?.year} • Live Dashboard
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 md:gap-3 w-full lg:w-auto">
                     <button
                         onClick={() => setShowTokenModal(true)}
-                        className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[10px] font-bold tabular-nums hover:bg-primary/20 transition-colors group/token"
+                        className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[9px] md:text-[10px] font-bold tabular-nums hover:bg-primary/20 transition-colors group/token"
                     >
                         <span className="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">vpn_key</span>
                         TOKEN: {data?.exam.token || '---'}
                     </button>
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold animate-pulse">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] md:text-[10px] font-bold animate-pulse">
                         <span className="size-2 rounded-full bg-emerald-500"></span>
-                        LIVE MONITORING
+                        <span className="hidden sm:inline">LIVE MONITORING</span>
+                        <span className="sm:hidden">LIVE</span>
                     </div>
-                    <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
-                    <div className="flex items-center gap-2">
+                    <div className="hidden lg:block h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
                         <button
                             onClick={() => navigate(`/admin/exams/${id}/correction`)}
-                            className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center gap-2"
+                            className="flex-1 sm:flex-none px-3 md:px-5 py-2 md:py-2.5 bg-primary text-white rounded-xl text-xs md:text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
-                            <span className="material-symbols-outlined text-lg">fact_check</span>
-                            Correction Exam
+                            <span className="material-symbols-outlined text-base md:text-lg">fact_check</span>
+                            Correction
                         </button>
                         <button
                             onClick={() => navigate(`/admin/exams/${id}/edit`)}
-                            className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+                            className="px-3 md:px-4 py-2 md:py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
                         >
-                            <span className="material-symbols-outlined text-lg">settings</span>
-                            Settings
+                            <span className="material-symbols-outlined text-base md:text-lg">settings</span>
+                            <span className="hidden sm:inline">Settings</span>
                         </button>
                     </div>
                 </div>
@@ -347,12 +348,12 @@ export default function ExamLiveScorePage() {
 
             <div className="flex flex-1 overflow-hidden">
                 <main className="flex-1 overflow-hidden bg-slate-50 dark:bg-background-dark/30 flex flex-col">
-                    <div className="p-6 flex items-center justify-between bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
+                    <div className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 gap-4">
+                        <div className="flex items-center gap-4 w-full sm:w-auto">
+                            <div className="relative flex-1 sm:flex-none">
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
                                 <input
-                                    className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                                    className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm w-full sm:w-64 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                                     placeholder="Search students..."
                                     type="text"
                                     value={searchQuery}
@@ -360,10 +361,10 @@ export default function ExamLiveScorePage() {
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-6 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100 dark:border-slate-800">
                             <div className="text-right">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">Participants</p>
-                                <p className="text-xl font-bold text-slate-900 dark:text-white">
+                                <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
                                     {sortedSessions.length}/{(data?.sessions || []).length}
                                 </p>
                             </div>
@@ -399,20 +400,20 @@ export default function ExamLiveScorePage() {
                             ))}
                         </div>
                     )}
-                    <div className="flex-1 overflow-auto p-6 scrollbar-hide">
+                    <div className="flex-1 overflow-auto p-4 md:p-6 scrollbar-hide">
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[1000px]">
+                                <table className="w-full text-left border-collapse">
                                     <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                                         <tr>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classroom</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Progress</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Actions</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Score</th>
+                                            <th className="px-4 md:px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
+                                            <th className="hidden lg:table-cell px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classroom</th>
+                                            <th className="hidden sm:table-cell px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Progress</th>
+                                            <th className="px-4 md:px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                            <th className="hidden xl:table-cell px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Time</th>
+                                            <th className="hidden md:table-cell px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Remaining</th>
+                                            <th className="px-4 md:px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Actions</th>
+                                            <th className="px-4 md:px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Score</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 relative">
@@ -437,8 +438,8 @@ export default function ExamLiveScorePage() {
                                                         }}
                                                         className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group bg-white dark:bg-slate-900"
                                                     >
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
+                                                        <td className="px-4 md:px-6 py-4">
+                                                            <div className="flex items-center gap-2 md:gap-3">
                                                                 <div className="relative">
                                                                     <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center relative shadow-sm">
                                                                         {session.student.avatar ? (
@@ -482,13 +483,13 @@ export default function ExamLiveScorePage() {
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4">
+                                                        <td className="hidden lg:table-cell px-6 py-4">
                                                             <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase border border-indigo-100 dark:border-indigo-500/20">
                                                                 {session.student.classroom || 'N/A'}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                        <td className="hidden sm:table-cell px-6 py-4">
+                                                            <div className="flex flex-col gap-1.5 min-w-[100px] md:min-w-[120px]">
                                                                 <div className="flex items-center justify-between text-[10px] font-bold">
                                                                     <span className="text-slate-400">{session.progress.answered}/{session.progress.total}</span>
                                                                     <span className="text-primary">{Math.round(progressPercent)}%</span>
@@ -518,12 +519,12 @@ export default function ExamLiveScorePage() {
                                                                 <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-[10px] font-bold uppercase">Finished</span>
                                                             )}
                                                         </td>
-                                                        <td className="px-6 py-4">
+                                                        <td className="hidden xl:table-cell px-6 py-4">
                                                             <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
                                                                 {session.start_time ? new Date(session.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
                                                             </p>
                                                         </td>
-                                                        <td className="px-6 py-4 text-center">
+                                                        <td className="hidden md:table-cell px-6 py-4 text-center">
                                                             <p className={cn(
                                                                 "text-sm font-black tabular-nums",
                                                                 session.remaining_time < 300 && session.remaining_time > 0 ? "text-rose-500 animate-pulse" : "text-slate-900 dark:text-white"
@@ -531,15 +532,15 @@ export default function ExamLiveScorePage() {
                                                                 {formatTime(session.remaining_time)}
                                                             </p>
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center justify-center gap-2">
+                                                        <td className="px-4 md:px-6 py-4">
+                                                            <div className="flex items-center justify-center gap-1.5 md:gap-2">
                                                                 {(session.status === 'in_progress' || session.status === 'completed' || session.status === 'timed_out') && (
                                                                     <button
                                                                         onClick={() => handleForceFinish(session.student.id, session.student.name)}
                                                                         className="p-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
                                                                         title="Force Finish"
                                                                     >
-                                                                        <span className="material-symbols-outlined text-lg">stop_circle</span>
+                                                                        <span className="material-symbols-outlined text-base md:text-lg">stop_circle</span>
                                                                     </button>
                                                                 )}
                                                                 {session.status === 'finished' && (
@@ -548,19 +549,20 @@ export default function ExamLiveScorePage() {
                                                                         className="p-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
                                                                         title="Reopen Exam"
                                                                     >
-                                                                        <span className="material-symbols-outlined text-lg">play_circle</span>
+                                                                        <span className="material-symbols-outlined text-base md:text-lg">play_circle</span>
                                                                     </button>
                                                                 )}
                                                                 <button
                                                                     onClick={() => handleAddTime(session.student.id, session.student.name)}
-                                                                    className="text-[10px] font-bold text-primary hover:underline transition-all active:scale-90 shrink-0"
+                                                                    className="text-[9px] md:text-[10px] font-bold text-primary hover:underline transition-all active:scale-90 shrink-0"
                                                                 >
-                                                                    + Add Time
+                                                                    <span className="hidden sm:inline">+ Add Time</span>
+                                                                    <span className="sm:hidden">+ Time</span>
                                                                 </button>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 text-right">
-                                                            <span className="text-lg font-black text-primary tabular-nums">{session.score}</span>
+                                                        <td className="px-4 md:px-6 py-4 text-right">
+                                                            <span className="text-base md:text-lg font-black text-primary tabular-nums">{session.score}</span>
                                                         </td>
                                                     </motion.tr>
                                                 );

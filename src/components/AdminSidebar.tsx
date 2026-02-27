@@ -4,9 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminSidebarProps {
     isCollapsed: boolean;
+    isMobileOpen: boolean;
+    onMobileClose: () => void;
 }
 
-export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
+export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose }: AdminSidebarProps) {
     const location = useLocation();
     const { logout } = useAuth();
 
@@ -24,8 +26,9 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
     return (
         <aside
             className={cn(
-                "bg-primary dark:bg-background-dark border-r border-primary/10 flex flex-col h-full transition-all duration-300 relative z-20",
-                isCollapsed ? "w-[80px]" : "w-64"
+                "bg-primary dark:bg-background-dark border-r border-primary/10 flex flex-col h-full transition-all duration-300 fixed lg:static z-40 lg:z-20",
+                isCollapsed ? "w-[80px]" : "w-64",
+                isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
             )}
         >
             <div className={cn(
@@ -42,6 +45,13 @@ export default function AdminSidebar({ isCollapsed }: AdminSidebarProps) {
                     <h1 className="text-white text-lg font-bold leading-tight uppercase tracking-wider">LMS Admin</h1>
                     <p className="text-primary/30 text-xs font-medium">Core Management</p>
                 </div>
+
+                <button
+                    onClick={onMobileClose}
+                    className="lg:hidden ml-auto text-white/60 p-1 rounded-lg hover:bg-white/10"
+                >
+                    <span className="material-symbols-outlined">close</span>
+                </button>
             </div>
 
             <nav className={cn(

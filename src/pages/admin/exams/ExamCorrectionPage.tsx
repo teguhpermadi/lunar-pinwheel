@@ -59,6 +59,9 @@ export default function ExamCorrectionPage() {
     const [isBulkLoading, setIsBulkLoading] = useState(false);
     const [studentSearchQuery, setStudentSearchQuery] = useState(''); // Specifically for right navigation
 
+    const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
+    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+
     const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('by-student');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
@@ -324,112 +327,130 @@ export default function ExamCorrectionPage() {
 
     // Sub-renderers
     const renderSidebarLeft = () => (
-        <aside className="w-[280px] border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 shrink-0">
-            {viewMode === 'by-student' ? (
-                <>
-                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                        <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Students</h2>
-                            <span className="text-[10px] font-bold text-slate-400">{sessions.length}</span>
-                        </div>
-                        <div className="relative">
-                            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                            <input
-                                className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
-                                placeholder="Search..."
-                                value={studentSearchQuery}
-                                onChange={(e) => setStudentSearchQuery(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    <div className="flex-grow overflow-y-auto custom-scrollbar">
-                        {isSessionsLoading ? (
-                            Array.from({ length: 6 }).map((_, i) => (
-                                <div key={i} className="p-4 border-b border-slate-100 animate-pulse">
-                                    <Skeleton className="h-8 w-full rounded" />
-                                </div>
-                            ))
-                        ) : (
-                            sessions
-                                .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                                .map(session => (
-                                    <button
-                                        key={session.id}
-                                        onClick={() => setSelectedSessionId(session.id)}
-                                        className={cn(
-                                            "w-full p-4 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
-                                            selectedSessionId === session.id ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200">
-                                                {session.student.name.charAt(0)}
-                                            </div>
-                                            <div className="flex-1 overflow-hidden flex items-center justify-between gap-2">
-                                                <div className="flex-1 overflow-hidden">
-                                                    <p className="text-xs font-bold truncate">{session.student.name}</p>
-                                                    <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
-                                                </div>
-                                                {session.is_finished && (
-                                                    <span className="shrink-0 px-2.5 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg border border-primary/20 tabular-nums">
-                                                        {session.final_score}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))
-                        )}
-                    </div>
-                    <div className="p-4 bg-slate-900 border-t border-slate-800">
-                        <button
-                            onClick={() => handleFinishCorrection()}
-                            disabled={!selectedSessionId}
-                            className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
-                        >
-                            Finalize Session
-                        </button>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exam Questions</h2>
-                        <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Fixed List</span>
-                    </div>
-                    <div className="flex-grow overflow-y-auto custom-scrollbar">
-                        {masterQuestions.map((q, index) => (
-                            <button
-                                key={q.id}
-                                onClick={() => setSelectedQuestionIndex(index)}
-                                className={cn(
-                                    "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
-                                    selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
-                                )}
-                            >
-                                <span className={cn(
-                                    "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                    selectedQuestionIndex === index ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
-                                )}>
-                                    {(index + 1).toString().padStart(2, '0')}
-                                </span>
-                                <div className="flex-grow overflow-hidden">
-                                    <p className={cn(
-                                        "text-xs truncate",
-                                        selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
-                                    )}>
-                                        {(q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}`}
-                                    </p>
-                                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">
-                                        Type: {(q.question_type || '').replace('_', ' ')}
-                                    </p>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </>
+        <>
+            {/* Mobile Backdrop */}
+            {isLeftSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={() => setIsLeftSidebarOpen(false)}
+                />
             )}
-        </aside>
+            <aside className={cn(
+                "w-[280px] border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 shrink-0 transition-all duration-300 z-50 lg:z-10",
+                "fixed lg:static h-full lg:h-auto",
+                isLeftSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            )}>
+                {viewMode === 'by-student' ? (
+                    <>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Students</h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-slate-400">{sessions.length}</span>
+                                    <button onClick={() => setIsLeftSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600">
+                                        <span className="material-symbols-outlined text-sm">close</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input
+                                    className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                    placeholder="Search..."
+                                    value={studentSearchQuery}
+                                    onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-grow overflow-y-auto custom-scrollbar">
+                            {isSessionsLoading ? (
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <div key={i} className="p-4 border-b border-slate-100 animate-pulse">
+                                        <Skeleton className="h-8 w-full rounded" />
+                                    </div>
+                                ))
+                            ) : (
+                                sessions
+                                    .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                                    .map(session => (
+                                        <button
+                                            key={session.id}
+                                            onClick={() => setSelectedSessionId(session.id)}
+                                            className={cn(
+                                                "w-full p-4 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                                selectedSessionId === session.id ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200">
+                                                    {session.student.name.charAt(0)}
+                                                </div>
+                                                <div className="flex-1 overflow-hidden flex items-center justify-between gap-2">
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <p className="text-xs font-bold truncate">{session.student.name}</p>
+                                                        <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                                    </div>
+                                                    {session.is_finished && (
+                                                        <span className="shrink-0 px-2.5 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg border border-primary/20 tabular-nums">
+                                                            {session.final_score}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))
+                            )}
+                        </div>
+                        <div className="p-4 bg-slate-900 border-t border-slate-800">
+                            <button
+                                onClick={() => handleFinishCorrection()}
+                                disabled={!selectedSessionId}
+                                className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                            >
+                                Finalize Session
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exam Questions</h2>
+                            <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Fixed List</span>
+                        </div>
+                        <div className="flex-grow overflow-y-auto custom-scrollbar">
+                            {masterQuestions.map((q, index) => (
+                                <button
+                                    key={q.id}
+                                    onClick={() => setSelectedQuestionIndex(index)}
+                                    className={cn(
+                                        "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                        selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                    )}
+                                >
+                                    <span className={cn(
+                                        "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
+                                        selectedQuestionIndex === index ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
+                                    )}>
+                                        {(index + 1).toString().padStart(2, '0')}
+                                    </span>
+                                    <div className="flex-grow overflow-hidden">
+                                        <p className={cn(
+                                            "text-xs truncate",
+                                            selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                        )}>
+                                            {(q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}`}
+                                        </p>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">
+                                            Type: {(q.question_type || '').replace('_', ' ')}
+                                        </p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </aside>
+        </>
     );
 
     const scrollToAnswer = (sessionId: string) => {
@@ -440,88 +461,106 @@ export default function ExamCorrectionPage() {
     };
 
     const renderSidebarRight = () => (
-        <aside className="w-[300px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden shrink-0 relative">
-            {viewMode === 'by-student' ? (
-                <>
-                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</h2>
-                        <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Question List</span>
-                    </div>
-                    <div className="flex-grow overflow-y-auto custom-scrollbar">
-                        {questions.map((q, index) => (
-                            <button
-                                key={q.id}
-                                onClick={() => setSelectedQuestionIndex(index)}
-                                className={cn(
-                                    "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
-                                    selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
-                                )}
-                            >
-                                <span className={cn(
-                                    "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                    q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
-                                        q.is_correct === false ? "bg-rose-100 text-rose-600" :
-                                            "bg-slate-100 text-slate-400"
-                                )}>
-                                    {(index + 1).toString().padStart(2, '0')}
-                                </span>
-                                <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
-                            </button>
-                        ))}
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Navigation</h2>
-                        <div className="mt-3 relative">
-                            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                            <input
-                                className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
-                                placeholder="Find Student..."
-                                value={studentSearchQuery}
-                                onChange={(e) => setStudentSearchQuery(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    <div className="flex-grow overflow-y-auto custom-scrollbar">
-                        {isSessionsLoading ? (
-                            Array.from({ length: 10 }).map((_, i) => (
-                                <Skeleton key={i} className="h-12 w-full mb-1" />
-                            ))
-                        ) : (
-                            sessions
-                                .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                                .map((session) => (
-                                    <button
-                                        key={session.id}
-                                        onClick={() => scrollToAnswer(session.id)}
-                                        className={cn(
-                                            "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-3 text-left flex-1 overflow-hidden">
-                                            <div className={cn(
-                                                "w-2 h-2 rounded-full shrink-0",
-                                                session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
-                                            )}></div>
-                                            <p className="text-xs font-medium text-slate-500 truncate flex-1">{session.student.name}</p>
-                                            {session.is_finished && (
-                                                <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
-                                                    {session.final_score}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {session.is_corrected && (
-                                            <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0 ml-2">check_circle</span>
-                                        )}
-                                    </button>
-                                ))
-                        )}
-                    </div>
-                </>
+        <>
+            {/* Mobile Backdrop */}
+            {isRightSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={() => setIsRightSidebarOpen(false)}
+                />
             )}
-        </aside>
+            <aside className={cn(
+                "w-[300px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden shrink-0 relative transition-all duration-300 z-50 lg:z-10",
+                "fixed right-0 lg:static h-full lg:h-auto",
+                isRightSidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+            )}>
+                {viewMode === 'by-student' ? (
+                    <>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</h2>
+                                <button onClick={() => setIsRightSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600">
+                                    <span className="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            </div>
+                            <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Question List</span>
+                        </div>
+                        <div className="flex-grow overflow-y-auto custom-scrollbar">
+                            {questions.map((q, index) => (
+                                <button
+                                    key={q.id}
+                                    onClick={() => setSelectedQuestionIndex(index)}
+                                    className={cn(
+                                        "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
+                                        selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
+                                    )}
+                                >
+                                    <span className={cn(
+                                        "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
+                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
+                                            q.is_correct === false ? "bg-rose-100 text-rose-600" :
+                                                "bg-slate-100 text-slate-400"
+                                    )}>
+                                        {(index + 1).toString().padStart(2, '0')}
+                                    </span>
+                                    <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Navigation</h2>
+                            <div className="mt-3 relative">
+                                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input
+                                    className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                    placeholder="Find Student..."
+                                    value={studentSearchQuery}
+                                    onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-grow overflow-y-auto custom-scrollbar">
+                            {isSessionsLoading ? (
+                                Array.from({ length: 10 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-12 w-full mb-1" />
+                                ))
+                            ) : (
+                                sessions
+                                    .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                                    .map((session) => (
+                                        <button
+                                            key={session.id}
+                                            onClick={() => scrollToAnswer(session.id)}
+                                            className={cn(
+                                                "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3 text-left flex-1 overflow-hidden">
+                                                <div className={cn(
+                                                    "w-2 h-2 rounded-full shrink-0",
+                                                    session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
+                                                )}></div>
+                                                <p className="text-xs font-medium text-slate-500 truncate flex-1">{session.student.name}</p>
+                                                {session.is_finished && (
+                                                    <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
+                                                        {session.final_score}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {session.is_corrected && (
+                                                <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0 ml-2">check_circle</span>
+                                            )}
+                                        </button>
+                                    ))
+                            )}
+                        </div>
+                    </>
+                )}
+            </aside>
+        </>
     );
 
     if (isLoading) {
@@ -545,7 +584,7 @@ export default function ExamCorrectionPage() {
 
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-background-dark font-lexend">
-            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 shrink-0 shadow-sm z-10">
+            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-3 md:py-4 shrink-0 shadow-sm z-10">
                 <div className="max-w-[1600px] mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <button
@@ -554,21 +593,36 @@ export default function ExamCorrectionPage() {
                         >
                             <span className="material-symbols-outlined">arrow_back</span>
                         </button>
-                        <div>
+                        <div className="hidden md:block">
                             <h1 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{exam?.title || 'Exam Correction'}</h1>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                                 {sessions.length} Students • {masterQuestions.length || questions.length} Questions
                             </p>
                         </div>
+                        {/* Mobile sidebar triggers */}
+                        <div className="flex lg:hidden gap-1">
+                            <button
+                                onClick={() => setIsLeftSidebarOpen(true)}
+                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
+                            >
+                                <span className="material-symbols-outlined text-lg">person_search</span>
+                            </button>
+                            <button
+                                onClick={() => setIsRightSidebarOpen(true)}
+                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
+                            >
+                                <span className="material-symbols-outlined text-lg">list</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl scale-90 sm:scale-100">
                         <button
                             onClick={() => {
                                 setViewMode('leaderboard');
                             }}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
                                 viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
                             )}
                         >
@@ -580,11 +634,12 @@ export default function ExamCorrectionPage() {
                                 setSelectedQuestionIndex(0);
                             }}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
                                 viewMode === 'by-student' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
                             )}
                         >
-                            By Student
+                            <span className="hidden sm:inline">By Student</span>
+                            <span className="sm:hidden">Student</span>
                         </button>
                         <button
                             onClick={() => {
@@ -592,11 +647,12 @@ export default function ExamCorrectionPage() {
                                 setSelectedQuestionIndex(0);
                             }}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
                                 viewMode === 'by-question' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
                             )}
                         >
-                            By Question
+                            <span className="hidden sm:inline">By Question</span>
+                            <span className="sm:hidden">Question</span>
                         </button>
                     </div>
 
@@ -613,8 +669,8 @@ export default function ExamCorrectionPage() {
                 {viewMode !== 'leaderboard' && renderSidebarLeft()}
 
                 <section className={cn(
-                    "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-8 transition-all duration-300",
-                    viewMode === 'leaderboard' && "max-w-[1600px] mx-auto w-full px-12"
+                    "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-4 md:p-8 transition-all duration-300",
+                    viewMode === 'leaderboard' && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
                 )}>
                     <div className={cn(
                         "mx-auto w-full space-y-6",
@@ -667,20 +723,20 @@ export default function ExamCorrectionPage() {
 
             {/* Bulk Action Bar */}
             {selectedAnswerIds.length > 0 && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="bg-slate-900/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/10 px-6 py-4 rounded-[40px] shadow-2xl flex items-center gap-6">
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Marking</span>
-                            <span className="text-white font-black text-sm">{selectedAnswerIds.length} Students Selected</span>
+                <div className="fixed bottom-4 sm:bottom-10 left-1/2 -translate-x-1/2 z-[60] animate-in fade-in slide-in-from-bottom-4 duration-300 w-[calc(100%-2rem)] sm:w-auto">
+                    <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/10 px-4 sm:px-6 py-3 sm:py-4 rounded-3xl sm:rounded-[40px] shadow-2xl flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+                        <div className="flex flex-row sm:flex-col items-center sm:items-start gap-2 sm:gap-0">
+                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400">Marking</span>
+                            <span className="text-white font-black text-xs sm:text-sm">{selectedAnswerIds.length} Selected</span>
                         </div>
-                        <div className="h-10 w-px bg-white/10" />
-                        <div className="flex gap-2">
+                        <div className="hidden sm:block h-10 w-px bg-white/10" />
+                        <div className="flex flex-wrap justify-center gap-2">
                             <button
                                 onClick={() => handleBulkAction('full')}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-lg">check_circle</span>
-                                <span className="text-xs font-black uppercase tracking-wider">Mark as Correct</span>
+                                <span className="material-symbols-outlined text-base sm:text-lg">check_circle</span>
+                                <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Correct</span>
                             </button>
                             {!EXCLUDED_PARTIAL_TYPES.includes(masterQuestions[selectedQuestionIndex]?.question_type) && (
                                 <button
@@ -689,10 +745,10 @@ export default function ExamCorrectionPage() {
                                         setBulkPartialScore(firstBulk?.score_earned || 0);
                                         setIsBulkPartialModalOpen(true);
                                     }}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                                    className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                                 >
-                                    <span className="material-symbols-outlined text-lg">adjust</span>
-                                    <span className="text-xs font-black uppercase tracking-wider">Partial Score</span>
+                                    <span className="material-symbols-outlined text-base sm:text-lg">adjust</span>
+                                    <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Partial</span>
                                 </button>
                             )}
                             <button
@@ -701,23 +757,23 @@ export default function ExamCorrectionPage() {
                                         .filter(a => selectedAnswerIds.includes(a.id))
                                         .map(a => a.session.id)
                                 )}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-lg">verified</span>
-                                <span className="text-xs font-black uppercase tracking-wider">Finalize Sessions</span>
+                                <span className="material-symbols-outlined text-base sm:text-lg">verified</span>
+                                <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Finalize</span>
                             </button>
                             <button
                                 onClick={() => handleBulkAction('no')}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl transition-all shadow-lg active:scale-95"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-lg">cancel</span>
-                                <span className="text-xs font-black uppercase tracking-wider">Mark as Incorrect</span>
+                                <span className="material-symbols-outlined text-base sm:text-lg">cancel</span>
+                                <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Wrong</span>
                             </button>
                             <button
                                 onClick={() => setSelectedAnswerIds([])}
-                                className="p-2.5 text-slate-400 hover:text-white transition-colors"
+                                className="p-2 text-slate-400 hover:text-white transition-colors"
                             >
-                                <span className="material-symbols-outlined">close</span>
+                                <span className="material-symbols-outlined text-base sm:text-lg">close</span>
                             </button>
                         </div>
                     </div>

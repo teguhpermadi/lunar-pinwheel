@@ -43,11 +43,11 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Overview</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Welcome back, {user?.name || 'Admin'}. Here's what's happening today.</p>
+                    <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Overview</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back, {user?.name || 'Admin'}. Here's what's happening today.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:shadow-sm transition-all flex items-center gap-2">
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
             >
                 <StatsCard
                     title="Total Students"
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
                     animate="show"
                     className="lg:col-span-2 space-y-8"
                 >
-                    <motion.div variants={item} className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+                    <motion.div variants={item} className="bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2rem] p-5 md:p-8 shadow-sm border border-slate-200 dark:border-slate-800">
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <h4 className="text-lg font-bold text-slate-900 dark:text-white">Ongoing Exams</h4>
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
                                     { icon: 'assignment', label: 'Exam', color: 'rose', to: '/admin/exams' },
                                     { icon: 'task_alt', label: 'Correction', color: 'primary', to: '/admin/exams' },
                                 ].map((action) => (
-                                    <Link key={action.label} to={action.to} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
+                                    <Link key={action.label} to={action.to} className="group flex flex-col items-center justify-center gap-3 p-4 md:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
                                         <div className={`size-12 rounded-xl bg-${action.color === 'primary' ? 'primary/10' : action.color + '-100'} text-${action.color === 'primary' ? 'primary' : action.color + '-600'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                             <span className="material-symbols-outlined">{action.icon}</span>
                                         </div>

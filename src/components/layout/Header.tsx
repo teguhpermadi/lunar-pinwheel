@@ -3,26 +3,40 @@ import AcademicYearSelector from '../common/AcademicYearSelector';
 
 interface HeaderProps {
     toggleSidebar: () => void;
+    toggleMobileSidebar: () => void;
     isSidebarCollapsed: boolean;
 }
 
-export default function Header({ toggleSidebar, isSidebarCollapsed }: HeaderProps) {
+export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCollapsed }: HeaderProps) {
     const { user } = useAuth();
 
     return (
-        <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center justify-between transition-all duration-300">
-            <div className="flex items-center gap-6 flex-1">
+        <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300">
+            <div className="flex items-center gap-2 md:gap-6 flex-1">
+                {/* Desktop Toggle */}
                 <button
                     onClick={toggleSidebar}
-                    className="cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+                    className="hidden lg:flex cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
                 >
                     <span className={`material-symbols-outlined toggle-icon block transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`}>
                         menu_open
                     </span>
                 </button>
 
-                {/* Replaced Search Bar with Academic Year Selector */}
-                <AcademicYearSelector />
+                {/* Mobile Toggle */}
+                <button
+                    onClick={toggleMobileSidebar}
+                    className="lg:hidden cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+                >
+                    <span className="material-symbols-outlined">
+                        menu
+                    </span>
+                </button>
+
+                {/* Academic Year Selector - can be wrapped or hidden on very small screens if needed, but keeping it for now */}
+                <div className="scale-90 md:scale-100 origin-left">
+                    <AcademicYearSelector />
+                </div>
             </div>
 
             <div className="flex items-center gap-6">
@@ -37,7 +51,7 @@ export default function Header({ toggleSidebar, isSidebarCollapsed }: HeaderProp
                 </div>
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
                 <div className="flex items-center gap-3 group cursor-pointer">
-                    <div className="text-right hidden sm:block">
+                    <div className="text-right hidden md:block">
                         <p className="text-sm font-bold text-slate-900 dark:text-white leading-none group-hover:text-primary transition-colors">{user?.name || 'User'}</p>
                         <p className="text-xs text-slate-500 font-medium capitalize">{user?.role || 'Admin'}</p>
                     </div>

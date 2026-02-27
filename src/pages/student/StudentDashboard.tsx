@@ -78,7 +78,7 @@ export default function StudentDashboard() {
     };
 
     return (
-        <div className="p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-4 md:p-8 space-y-4 md:space-y-8 max-w-7xl mx-auto">
             {isLoading ? (
                 <Skeleton className="w-full h-[400px] rounded-[2.5rem]" />
             ) : (
@@ -88,12 +88,11 @@ export default function StudentDashboard() {
                     transition={{ duration: 0.5 }}
                     className="bg-primary rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-primary/30 relative overflow-hidden"
                 >
-                    <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 translate-x-1/2"></div>
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 justify-between">
                         <div className="space-y-4 max-w-xl text-center md:text-left">
-                            <span className="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold uppercase tracking-widest">Active Streak: {data?.stats.streak ?? 0} Days 🔥</span>
-                            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Welcome back, {data?.user.name.split(' ')[0]}!</h2>
-                            <p className="text-primary-100 text-lg opacity-80">You're just {data?.stats.xp_to_next ?? 0} XP away from reaching Level {(data?.stats.level ?? 0) + 1}. Keep up the great work!</p>
+                            <span className="px-3 md:px-4 py-1.5 bg-white/20 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest">Active Streak: {data?.stats.streak ?? 0} Days 🔥</span>
+                            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">Welcome back, {data?.user.name.split(' ')[0]}!</h2>
+                            <p className="text-primary-100 text-base md:text-lg opacity-80">You're just {data?.stats.xp_to_next ?? 0} XP away from reaching Level {(data?.stats.level ?? 0) + 1}. Keep up the great work!</p>
                             <div className="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
                                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
                                     <div className="size-10 bg-amber-400 rounded-xl flex items-center justify-center text-slate-900">
@@ -135,12 +134,12 @@ export default function StudentDashboard() {
                 </motion.section>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 <motion.div
                     variants={container}
                     initial="hidden"
                     animate="show"
-                    className="lg:col-span-2 space-y-8"
+                    className="lg:col-span-2 space-y-6 md:space-y-8"
                 >
                     {isLoading ? (
                         <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800 space-y-6">
@@ -228,7 +227,7 @@ export default function StudentDashboard() {
 
                     <motion.div variants={item} className="space-y-4">
                         <h4 className="text-lg font-bold text-slate-900 dark:text-white px-2">Quick Actions</h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                             {isLoading ? (
                                 Array(4).fill(0).map((_, i) => (
                                     <Skeleton key={i} className="h-32 w-full rounded-2xl" />
@@ -248,7 +247,7 @@ export default function StudentDashboard() {
                                         <div className={`size-12 rounded-xl bg-${step.color === 'primary' ? 'primary/10' : step.color + '-100'} text-${step.color === 'primary' ? 'primary' : step.color + '-600'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                             <span className="material-symbols-outlined">{step.icon}</span>
                                         </div>
-                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">{step.label}</span>
+                                        <span className="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">{step.label}</span>
                                     </button>
                                 ))
                             )}
