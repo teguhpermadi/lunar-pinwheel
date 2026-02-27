@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 interface MatchingPair {
     id?: string;
@@ -25,15 +26,15 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
         if (needsPatch) {
             onChange(pairs.map(p => ({
                 ...p,
-                rightUuid: p.rightUuid || crypto.randomUUID()
+                rightUuid: p.rightUuid || generateUUID()
             })));
         }
     }, [pairs, onChange]);
 
     const handleAddPair = () => {
         onChange([...pairs, {
-            uuid: crypto.randomUUID(),
-            rightUuid: crypto.randomUUID(),
+            uuid: generateUUID(),
+            rightUuid: generateUUID(),
             left: '',
             right: ''
         }]);

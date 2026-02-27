@@ -1,6 +1,7 @@
 import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 interface SequenceItem {
     id?: string;
@@ -17,7 +18,7 @@ interface SequenceInputProps {
 export default function SequenceInput({ items, onChange }: SequenceInputProps) {
     const handleAddStep = () => {
         const newItem: SequenceItem = {
-            uuid: crypto.randomUUID(),
+            uuid: generateUUID(),
             content: '',
             order: items.length + 1
         };

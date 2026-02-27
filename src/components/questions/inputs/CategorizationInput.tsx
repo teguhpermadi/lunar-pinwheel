@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 export interface CategorizationItem {
     uuid: string;
@@ -29,7 +30,7 @@ export default function CategorizationInput({ groups, onChange, onDeleteMedia }:
 
     const handleAddGroup = () => {
         onChange([...groups, {
-            uuid: crypto.randomUUID(),
+            uuid: generateUUID(),
             title: `Category ${groups.length + 1}`,
             items: []
         }]);
@@ -73,7 +74,7 @@ export default function CategorizationInput({ groups, onChange, onDeleteMedia }:
     const handleAddItem = (groupIndex: number) => {
         const newGroups = [...groups];
         newGroups[groupIndex].items.push({
-            uuid: crypto.randomUUID(),
+            uuid: generateUUID(),
             content: ''
         });
         onChange(newGroups);

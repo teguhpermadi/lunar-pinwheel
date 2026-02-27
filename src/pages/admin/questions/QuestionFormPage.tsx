@@ -6,6 +6,7 @@ import QuestionFormLayout from '@/components/questions/QuestionFormLayout';
 import QuestionInputs from '@/components/questions/QuestionInputs';
 import MediaModal from '@/components/questions/MediaModal';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 export default function QuestionFormPage() {
     const { bankId, questionId } = useParams();
@@ -32,26 +33,26 @@ export default function QuestionFormPage() {
 
     // Specific Input States
     const [options, setOptions] = useState<any[]>([
-        { key: 'A', content: '', is_correct: false, uuid: crypto.randomUUID() },
-        { key: 'B', content: '', is_correct: false, uuid: crypto.randomUUID() },
-        { key: 'C', content: '', is_correct: false, uuid: crypto.randomUUID() },
-        { key: 'D', content: '', is_correct: false, uuid: crypto.randomUUID() },
+        { key: 'A', content: '', is_correct: false, uuid: generateUUID() },
+        { key: 'B', content: '', is_correct: false, uuid: generateUUID() },
+        { key: 'C', content: '', is_correct: false, uuid: generateUUID() },
+        { key: 'D', content: '', is_correct: false, uuid: generateUUID() },
     ]);
     const [matchingPairs, setMatchingPairs] = useState<any[]>([
-        { uuid: crypto.randomUUID(), rightUuid: crypto.randomUUID(), left: '', right: '' },
-        { uuid: crypto.randomUUID(), rightUuid: crypto.randomUUID(), left: '', right: '' },
+        { uuid: generateUUID(), rightUuid: generateUUID(), left: '', right: '' },
+        { uuid: generateUUID(), rightUuid: generateUUID(), left: '', right: '' },
     ]);
     const [sequenceItems, setSequenceItems] = useState<any[]>([
-        { uuid: crypto.randomUUID(), content: '', order: 1 },
-        { uuid: crypto.randomUUID(), content: '', order: 2 },
+        { uuid: generateUUID(), content: '', order: 1 },
+        { uuid: generateUUID(), content: '', order: 2 },
     ]);
     const [essayKeywords, setEssayKeywords] = useState('');
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
     const [javaneseContent, setJavaneseContent] = useState('');
     const [categorizationGroups, setCategorizationGroups] = useState<any[]>([
-        { uuid: crypto.randomUUID(), title: 'Category 1', items: [{ uuid: crypto.randomUUID(), content: '' }] },
-        { uuid: crypto.randomUUID(), title: 'Category 2', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+        { uuid: generateUUID(), title: 'Category 1', items: [{ uuid: generateUUID(), content: '' }] },
+        { uuid: generateUUID(), title: 'Category 2', items: [{ uuid: generateUUID(), content: '' }] },
     ]);
 
 
@@ -65,24 +66,24 @@ export default function QuestionFormPage() {
     const initializeOptionsForType = (newType: string) => {
         if (newType === 'true_false') {
             setOptions([
-                { key: 'A', content: 'True', is_correct: true, uuid: crypto.randomUUID() },
-                { key: 'B', content: 'False', is_correct: false, uuid: crypto.randomUUID() }
+                { key: 'A', content: 'True', is_correct: true, uuid: generateUUID() },
+                { key: 'B', content: 'False', is_correct: false, uuid: generateUUID() }
             ]);
         } else if (['multiple_choice', 'multiple_selection'].includes(newType)) {
             setOptions([
-                { key: 'A', content: '', is_correct: false, uuid: crypto.randomUUID() },
-                { key: 'B', content: '', is_correct: false, uuid: crypto.randomUUID() },
-                { key: 'C', content: '', is_correct: false, uuid: crypto.randomUUID() },
-                { key: 'D', content: '', is_correct: false, uuid: crypto.randomUUID() },
+                { key: 'A', content: '', is_correct: false, uuid: generateUUID() },
+                { key: 'B', content: '', is_correct: false, uuid: generateUUID() },
+                { key: 'C', content: '', is_correct: false, uuid: generateUUID() },
+                { key: 'D', content: '', is_correct: false, uuid: generateUUID() },
             ]);
         } else if (newType === 'short_answer') {
             setOptions([
-                { key: 'SA1', content: '', is_correct: true, uuid: crypto.randomUUID() }
+                { key: 'SA1', content: '', is_correct: true, uuid: generateUUID() }
             ]);
         } else if (newType === 'sequence') {
             setSequenceItems([
-                { uuid: crypto.randomUUID(), content: '', order: 1 },
-                { uuid: crypto.randomUUID(), content: '', order: 2 },
+                { uuid: generateUUID(), content: '', order: 1 },
+                { uuid: generateUUID(), content: '', order: 2 },
             ]);
         } else if (newType === 'essay') {
             setOptions([]);
@@ -98,8 +99,8 @@ export default function QuestionFormPage() {
             setJavaneseContent('');
         } else if (newType === 'categorization') {
             setCategorizationGroups([
-                { uuid: crypto.randomUUID(), title: 'Category 1', items: [{ uuid: crypto.randomUUID(), content: '' }] },
-                { uuid: crypto.randomUUID(), title: 'Category 2', items: [{ uuid: crypto.randomUUID(), content: '' }] },
+                { uuid: generateUUID(), title: 'Category 1', items: [{ uuid: generateUUID(), content: '' }] },
+                { uuid: generateUUID(), title: 'Category 2', items: [{ uuid: generateUUID(), content: '' }] },
             ]);
         }
     };
@@ -130,7 +131,7 @@ export default function QuestionFormPage() {
                     setOptions(q.options.map((o: any) => ({
                         ...o,
                         key: o.option_key,
-                        uuid: o.id || crypto.randomUUID()
+                        uuid: o.id || generateUUID()
                     })));
                 } else if (q.type === 'matching') {
                     const pairsMap = new Map();
@@ -142,8 +143,8 @@ export default function QuestionFormPage() {
 
                         if (!pairsMap.has(pairId)) {
                             pairsMap.set(pairId, {
-                                uuid: crypto.randomUUID(),
-                                rightUuid: crypto.randomUUID(),
+                                uuid: generateUUID(),
+                                rightUuid: generateUUID(),
                                 pair_id: pairId,
                                 left: '',
                                 right: '',
@@ -168,7 +169,7 @@ export default function QuestionFormPage() {
                         .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
                         .map((o: any) => ({
                             id: o.id,
-                            uuid: o.id || crypto.randomUUID(),
+                            uuid: o.id || generateUUID(),
                             content: o.content,
                             order: o.order
                         })));
@@ -198,14 +199,14 @@ export default function QuestionFormPage() {
                         const title = o.metadata?.category_title || 'Uncategorized';
                         if (!groupsMap.has(title)) {
                             groupsMap.set(title, {
-                                uuid: crypto.randomUUID(),
+                                uuid: generateUUID(),
                                 title: title,
                                 items: []
                             });
                         }
                         groupsMap.get(title).items.push({
                             id: o.id,
-                            uuid: o.id || crypto.randomUUID(),
+                            uuid: o.id || generateUUID(),
                             content: o.content,
                             media: o.media?.option_media?.[0] || null
                         });

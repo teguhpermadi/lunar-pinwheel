@@ -2,6 +2,7 @@ import { useState } from 'react';
 import MediaModal from '../MediaModal';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 interface Option {
     id?: string;
@@ -31,7 +32,7 @@ export default function MultipleChoiceInput({ options, onChange, onDeleteMedia }
             key: nextKey,
             content: '',
             is_correct: false,
-            uuid: crypto.randomUUID()
+            uuid: generateUUID()
         };
         onChange([...options, newOption]);
     };

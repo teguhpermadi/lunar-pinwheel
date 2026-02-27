@@ -1,5 +1,6 @@
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { generateUUID } from '@/lib/utils';
 
 interface Option {
     id?: string;
@@ -22,7 +23,7 @@ export default function ShortAnswerInput({ options, onChange }: ShortAnswerInput
             key: generateKey(options.length),
             content: '',
             is_correct: true,
-            uuid: crypto.randomUUID()
+            uuid: generateUUID()
         };
         onChange([...options, newOption]);
     };
