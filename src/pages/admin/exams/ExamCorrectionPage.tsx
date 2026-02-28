@@ -10,6 +10,7 @@ import CorrectionByQuestion from './correction/CorrectionByQuestion';
 import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
 
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
+export const NEEDS_DOUBLE_CORRECTION_TYPES = ['short_answer', 'essay', 'math_input', 'arabic_input', 'javanese_input'];
 
 export interface StudentSession {
     id: string;
@@ -433,16 +434,21 @@ export default function ExamCorrectionPage() {
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <div className="flex-grow overflow-hidden">
+                                    <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
                                         <p className={cn(
-                                            "text-xs truncate",
+                                            "text-xs truncate w-full",
                                             selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
                                         )}>
                                             {(q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}`}
                                         </p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">
-                                            Type: {(q.question_type || '').replace('_', ' ')}
-                                        </p>
+                                        <div className="flex items-center gap-1.5">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                Type: {(q.question_type || '').replace('_', ' ')}
+                                            </p>
+                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
+                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </button>
                             ))}
@@ -497,13 +503,23 @@ export default function ExamCorrectionPage() {
                                 >
                                     <span className={cn(
                                         "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
-                                            q.is_correct === false ? "bg-rose-100 text-rose-600" :
-                                                "bg-slate-100 text-slate-400"
+                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                            q.is_correct === false ? "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400" :
+                                                "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
+                                    <div className="flex-grow flex items-center justify-between gap-2 overflow-hidden">
+                                        <div className="flex items-center gap-1.5 overflow-hidden">
+                                            <p className="text-[10px] font-bold uppercase text-slate-500 whitespace-nowrap">Question {index + 1}</p>
+                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
+                                                <span className="material-symbols-outlined text-amber-500 text-[12px] shrink-0" title="Needs Review">warning</span>
+                                            )}
+                                        </div>
+                                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 rounded-md tracking-wider truncate shrink-0">
+                                            {(q.question_type || '').replace(/_/g, ' ')}
+                                        </span>
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -696,6 +712,7 @@ export default function ExamCorrectionPage() {
                                     selectedQuestionIndex={selectedQuestionIndex}
                                     masterQuestions={masterQuestions}
                                     currentQuestionContent={currentQuestionContent}
+                                    currentQuestionType={currentQuestion?.question_type}
                                     handleToggleSelectAll={handleToggleSelectAll}
                                     selectedAnswerIds={selectedAnswerIds}
                                     bulkAnswers={bulkAnswers}
