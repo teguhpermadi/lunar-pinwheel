@@ -62,7 +62,7 @@ export default function ExamCorrectionPage() {
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
-    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('by-student');
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('leaderboard');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
@@ -620,6 +620,7 @@ export default function ExamCorrectionPage() {
                         <button
                             onClick={() => {
                                 setViewMode('leaderboard');
+                                setSelectedQuestionIndex(0);
                             }}
                             className={cn(
                                 "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
@@ -631,7 +632,6 @@ export default function ExamCorrectionPage() {
                         <button
                             onClick={() => {
                                 setViewMode('by-student');
-                                setSelectedQuestionIndex(0);
                             }}
                             className={cn(
                                 "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
