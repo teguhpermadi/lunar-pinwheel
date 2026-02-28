@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 export default function LoginPage() {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const [showPassword, setShowPassword] = useState(false);
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<LoginRequest>({
         resolver: zodResolver(LoginSchema),
     });
@@ -101,13 +103,22 @@ export default function LoginPage() {
                             <input
                                 {...register('password')}
                                 id="password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="••••••••"
-                                className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-primary focus:border-primary dark:bg-surface-dark dark:text-white sm:text-sm transition-all duration-200 ${errors.password
+                                className={`block w-full pl-10 pr-10 py-2.5 border rounded-lg focus:ring-primary focus:border-primary dark:bg-surface-dark dark:text-white sm:text-sm transition-all duration-200 ${errors.password
                                     ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                                     : 'border-slate-300 dark:border-slate-600'
                                     }`}
                             />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <span className="material-icons text-slate-400 text-lg hover:text-slate-600 transition-colors cursor-pointer">
+                                    {showPassword ? 'visibility_off' : 'visibility'}
+                                </span>
+                            </button>
                         </div>
                         {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
                     </div>
