@@ -565,12 +565,19 @@ export default function ExamTaker() {
                                 </button>
 
                                 <button
-                                    onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-                                    disabled={currentQuestionIndex === questions.length - 1}
+                                    onClick={() => {
+                                        if (currentQuestionIndex === questions.length - 1) {
+                                            handleSubmitExam();
+                                        } else {
+                                            setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
+                                        }
+                                    }}
                                     className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Next Question
-                                    <span className="material-icons text-lg ml-2">arrow_forward</span>
+                                    {currentQuestionIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
+                                    <span className="material-icons text-lg ml-2">
+                                        {currentQuestionIndex === questions.length - 1 ? 'rocket_launch' : 'arrow_forward'}
+                                    </span>
                                 </button>
                             </div>
                         </div>
