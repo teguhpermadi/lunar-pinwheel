@@ -36,7 +36,7 @@ export default function ExamTaker() {
 
     // UI State
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('exam_font_size');
         return saved ? parseInt(saved) : 16;
