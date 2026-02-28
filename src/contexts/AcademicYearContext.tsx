@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { academicYearApi, AcademicYear } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AcademicYearContextType {
     academicYears: AcademicYear[];
@@ -15,9 +16,10 @@ interface AcademicYearContextType {
 const AcademicYearContext = createContext<AcademicYearContextType | undefined>(undefined);
 
 export function AcademicYearProvider({ children }: { children: ReactNode }) {
+    const { user, token } = useAuth();
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
     const [selectedYearId, setSelectedYearIdState] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -61,10 +63,15 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
                     const storedYearId = localStorage.getItem('selectedAcademicYearId');
                     if (storedYearId && newYears.find(y => y.id === storedYearId)) {
                         setSelectedYearIdState(storedYearId);
-                    } else if (newYears.length > 0 && !selectedYearId) {
-                        const defaultYear = newYears[0];
-                        setSelectedYearIdState(defaultYear.id);
-                        localStorage.setItem('selectedAcademicYearId', defaultYear.id);
+                    } else if (newYears.length > 0) {
+                        setSelectedYearIdState(prev => {
+                            if (!prev) {
+                                const defaultYear = newYears[0];
+                                localStorage.setItem('selectedAcademicYearId', defaultYear.id);
+                                return defaultYear.id;
+                            }
+                            return prev;
+                        });
                     }
                 }
             }
@@ -74,11 +81,13 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
             setIsLoadingMore(false);
         }
-    }, [selectedYearId]);
+    }, []); // Removed selectedYearId to avoid continuous re-fetching
 
     useEffect(() => {
-        fetchAcademicYears(1, true);
-    }, [fetchAcademicYears]);
+        if (token && (user?.role === 'admin' || user?.role === 'teacher')) {
+            fetchAcademicYears(1, true);
+        }
+    }, [fetchAcademicYears, token, user?.role]);
 
     const loadMore = async () => {
         if (!isLoadingMore && hasMore) {
