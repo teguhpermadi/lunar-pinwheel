@@ -121,21 +121,21 @@ const StudentResultDetailPage: React.FC = () => {
     }
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+        <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
             {/* Header / Breadcrumbs */}
-            <div className="h-16 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-10">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Link to={isStudent ? "/exams/history" : `/admin/exams/${examId}/correction`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+            <div className="shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-10">
+                <div className="max-w-7xl mx-auto px-4 py-3 sm:h-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 w-full overflow-x-auto no-scrollbar py-1">
+                        <Link to={isStudent ? "/exams/history" : `/admin/exams/${examId}/correction`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0">
                             <span className="material-symbols-outlined text-slate-400">arrow_back</span>
                         </Link>
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-2 text-[11px] sm:text-sm whitespace-nowrap">
                             <span className="text-slate-400">{isStudent ? 'History' : 'Exams'}</span>
-                            <span className="material-symbols-outlined text-xs text-slate-300">chevron_right</span>
+                            <span className="material-symbols-outlined text-[10px] sm:text-xs text-slate-300">chevron_right</span>
                             {!isStudent && (
                                 <>
                                     <span className="text-slate-400">Correction</span>
-                                    <span className="material-symbols-outlined text-xs text-slate-300">chevron_right</span>
+                                    <span className="material-symbols-outlined text-[10px] sm:text-xs text-slate-300">chevron_right</span>
                                 </>
                             )}
                             <span className="font-bold text-primary">Result Detail</span>
@@ -144,40 +144,81 @@ const StudentResultDetailPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-hidden">
-                <main className="max-w-7xl mx-auto px-4 h-full flex flex-col py-8 overflow-hidden">
-                    <div className="mb-8 shrink-0">
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Post-Exam Deep Dive</h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Review response for <span className="text-slate-900 dark:text-slate-200 font-bold">{sessionInfo?.student.name}</span> in <span className="text-slate-900 dark:text-slate-200 font-bold">{exam?.title}</span></p>
+            <div className="flex-1">
+                <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+                    <div className="mb-6 sm:mb-8">
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Post-Exam Deep Dive</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1 sm:mt-2 font-medium text-xs sm:text-base italic sm:not-italic">Review response for <span className="text-slate-900 dark:text-slate-200 font-bold">{sessionInfo?.student.name}</span> in <span className="text-slate-900 dark:text-slate-200 font-bold">{exam?.title}</span></p>
                     </div>
 
-                    <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-10 overflow-hidden">
-                        {/* Main Content (Left) - Scrollable */}
-                        <div className="lg:col-span-8 h-full overflow-y-auto scroll-smooth pr-4 -mr-4 custom-scrollbar">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
+                        {/* Main Content (Left) */}
+                        <div className="lg:col-span-8 space-y-6 sm:space-y-8">
+                            {/* Score Card - Moved to Top */}
+                            <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-card overflow-hidden group">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
+                                    <div className="text-center sm:text-left">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Score</p>
+                                        <h2 className="text-5xl sm:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent-pink">
+                                            {Math.round(sessionInfo?.final_score || 0)}%
+                                        </h2>
+                                    </div>
+                                    <div className="size-20 sm:size-24 relative">
+                                        <svg className="size-full transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle className="text-slate-100 dark:text-slate-800" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" strokeWidth="10" />
+                                            <circle
+                                                className="text-primary transition-all duration-1000 ease-out"
+                                                cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" strokeWidth="10"
+                                                strokeDasharray="263.89"
+                                                strokeDashoffset={263.89 - (263.89 * (sessionInfo?.final_score || 0) / 100)}
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-2xl sm:text-3xl text-primary/30 group-hover:text-primary transition-colors">emoji_events</span>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto sm:min-w-[240px]">
+                                        <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-3 sm:p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/10 flex flex-col items-center sm:items-start">
+                                            <p className="text-[8px] sm:text-[9px] uppercase font-black text-emerald-600 dark:text-emerald-400 tracking-wider mb-1">Correct</p>
+                                            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                                                {questions.filter(q => q.is_correct === true).length}
+                                            </p>
+                                        </div>
+                                        <div className="bg-rose-50/50 dark:bg-rose-500/5 p-3 sm:p-4 rounded-2xl border border-rose-100 dark:border-rose-500/10 flex flex-col items-center sm:items-start">
+                                            <p className="text-[8px] sm:text-[9px] uppercase font-black text-rose-600 dark:text-rose-400 tracking-wider mb-1">Incorrect</p>
+                                            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                                                {questions.filter(q => q.is_correct === false).length}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Filters */}
-                            <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-900 p-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm w-fit mb-8 sticky top-0 z-10">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl sm:rounded-full border border-slate-200 dark:border-slate-800 shadow-sm w-full sm:w-fit sticky top-[env(safe-area-inset-top,0)] sm:top-0 z-10 transition-all">
                                 <button
                                     onClick={() => setFilter('all')}
                                     className={cn(
-                                        "px-6 py-2 rounded-full text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
                                         filter === 'all' ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
-                                    All Questions ({questions.length})
+                                    All ({questions.length})
                                 </button>
                                 <button
                                     onClick={() => setFilter('incorrect')}
                                     className={cn(
-                                        "px-6 py-2 rounded-full text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
                                         filter === 'incorrect' ? "bg-rose-500 text-white shadow-lg shadow-rose-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
-                                    Incorrect Only ({questions.filter(q => q.is_correct === false).length})
+                                    Incorrect ({questions.filter(q => q.is_correct === false).length})
                                 </button>
                                 <button
                                     onClick={() => setFilter('flagged')}
                                     className={cn(
-                                        "px-6 py-2 rounded-full text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
                                         filter === 'flagged' ? "bg-amber-500 text-white shadow-lg shadow-amber-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
@@ -202,46 +243,46 @@ const StudentResultDetailPage: React.FC = () => {
                                                     "border-slate-100 dark:border-slate-800"
                                         )}
                                     >
-                                        <div className="p-8">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div className="flex items-center gap-4">
+                                        <div className="p-5 sm:p-8">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                                                <div className="flex items-center gap-3 sm:gap-4">
                                                     <span className={cn(
-                                                        "w-10 h-10 rounded-2xl flex items-center justify-center font-black text-lg",
+                                                        "w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-base sm:text-lg shrink-0",
                                                         q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
                                                             q.is_correct === false ? "bg-rose-100 text-rose-600" :
                                                                 "bg-amber-100 text-amber-600"
                                                     )}>
                                                         {(index + 1).toString().padStart(2, '0')}
                                                     </span>
-                                                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-lg">
+                                                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-lg">
                                                         {q.question_type.replace('_', ' ')}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-800">
                                                     <div className={cn(
-                                                        "flex items-center gap-1 font-black text-xs uppercase tracking-widest",
+                                                        "flex items-center gap-1 font-black text-[10px] sm:text-xs uppercase tracking-widest",
                                                         q.is_correct === true ? "text-emerald-500" :
                                                             q.is_correct === false ? "text-rose-500" : "text-amber-500"
                                                     )}>
-                                                        <span className="material-symbols-outlined text-lg">
+                                                        <span className="material-symbols-outlined text-base sm:text-lg">
                                                             {q.is_correct === true ? 'check_circle' : q.is_correct === false ? 'cancel' : 'offline_pin'}
                                                         </span>
                                                         {q.is_correct === true ? 'Correct' : q.is_correct === false ? 'Incorrect' : 'Partial'}
                                                     </div>
                                                     <div className={cn(
-                                                        "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow-sm border",
+                                                        "px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow-sm border",
                                                         q.score_earned === q.max_score ? "bg-emerald-500 text-white border-emerald-400" :
                                                             q.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
                                                     )}>
-                                                        <span className="material-symbols-outlined text-[14px]">stars</span>
+                                                        <span className="material-symbols-outlined text-[12px] sm:text-[14px]">stars</span>
                                                         {q.score_earned} / {q.max_score}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <MathRenderer className="text-xl font-bold text-slate-800 dark:text-white mb-8 leading-relaxed" content={q.question_content} />
+                                            <MathRenderer className="text-base sm:text-xl font-bold text-slate-800 dark:text-white mb-6 sm:mb-8 leading-relaxed" content={q.question_content} />
 
-                                            <div className="bg-slate-50 dark:bg-slate-950/50 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                                            <div className="bg-slate-50 dark:bg-slate-950/50 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 dark:border-slate-800 overflow-x-auto">
                                                 <CorrectionDisplay
                                                     type={q.question_type}
                                                     studentAnswer={q.student_answer}
@@ -254,25 +295,25 @@ const StudentResultDetailPage: React.FC = () => {
                                         </div>
 
                                         {/* Score & Note Footer */}
-                                        <div className="px-8 py-6 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <div className="px-5 sm:px-8 py-4 sm:py-6 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase text-slate-400">Points Earned</span>
+                                                <span className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400">Points</span>
                                                 <span className={cn(
-                                                    "text-xl font-black tabular-nums",
+                                                    "text-lg sm:text-xl font-black tabular-nums",
                                                     q.score_earned === q.max_score ? "text-emerald-500" :
                                                         q.score_earned > 0 ? "text-amber-500" : "text-rose-500"
                                                 )}>
-                                                    {q.score_earned} <span className="text-slate-300 font-bold text-sm">/ {q.max_score}</span>
+                                                    {q.score_earned} <span className="text-slate-300 font-bold text-xs sm:text-sm">/ {q.max_score}</span>
                                                 </span>
                                             </div>
                                         </div>
 
                                         {q.correction_notes && (
-                                            <div className="p-8 bg-primary/5 border-t border-primary/10 flex gap-4">
-                                                <span className="material-symbols-outlined text-primary text-2xl shrink-0">lightbulb</span>
+                                            <div className="p-6 sm:p-8 bg-primary/5 border-t border-primary/10 flex gap-3 sm:gap-4">
+                                                <span className="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">lightbulb</span>
                                                 <div>
-                                                    <h4 className="text-xs font-black uppercase text-primary tracking-widest mb-1">Analytical Feedback</h4>
-                                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic line-clamp-3">
+                                                    <h4 className="text-[10px] sm:text-xs font-black uppercase text-primary tracking-widest mb-1">Analytical Feedback</h4>
+                                                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic line-clamp-3">
                                                         "{q.correction_notes}"
                                                     </p>
                                                 </div>
@@ -283,10 +324,10 @@ const StudentResultDetailPage: React.FC = () => {
                             </motion.div>
                         </div>
 
-                        {/* Sidebar (Right) - Scrollable */}
-                        <aside className="lg:col-span-4 h-full overflow-y-auto scroll-smooth pl-4 -ml-4 custom-scrollbar space-y-6">
+                        {/* Sidebar (Right) */}
+                        <aside className="lg:col-span-4 space-y-6">
                             {/* Candidate & Exam Intelligence Section */}
-                            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                            <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
                                 {/* Segment 1: Candidate Detail */}
                                 <div className="border-b border-slate-100 dark:border-slate-800">
                                     <button
@@ -442,91 +483,6 @@ const StudentResultDetailPage: React.FC = () => {
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
-                                </div>
-                            </div>
-
-                            {/* Score Card */}
-                            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-card overflow-hidden group pb-10">
-                                <div className="flex items-center justify-between mb-8">
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Score</p>
-                                        <h2 className="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent-pink">
-                                            {Math.round(sessionInfo?.final_score || 0)}%
-                                        </h2>
-                                    </div>
-                                    <div className="size-20 relative">
-                                        <svg className="size-full transform -rotate-90" viewBox="0 0 100 100">
-                                            <circle className="text-slate-100 dark:text-slate-800" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" strokeWidth="10" />
-                                            <circle
-                                                className="text-primary transition-all duration-1000 ease-out"
-                                                cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" strokeWidth="10"
-                                                strokeDasharray="263.89"
-                                                strokeDashoffset={263.89 - (263.89 * (sessionInfo?.final_score || 0) / 100)}
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-primary/30 group-hover:text-primary transition-colors">emoji_events</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 mb-10">
-                                    <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-4 rounded-3xl border border-emerald-100 dark:border-emerald-500/10">
-                                        <p className="text-[9px] uppercase font-black text-emerald-600 dark:text-emerald-400 tracking-wider leading-none mb-1">Correct</p>
-                                        <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
-                                            {questions.filter(q => q.is_correct === true).length}
-                                        </p>
-                                    </div>
-                                    <div className="bg-rose-50/50 dark:bg-rose-500/5 p-4 rounded-3xl border border-rose-100 dark:border-rose-500/10">
-                                        <p className="text-[9px] uppercase font-black text-rose-600 dark:text-rose-400 tracking-wider leading-none mb-1">Incorrect</p>
-                                        <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
-                                            {questions.filter(q => q.is_correct === false).length}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                        Knowledge Performance
-                                        <div className="flex-grow h-px bg-slate-100 dark:bg-slate-800" />
-                                    </h3>
-                                    <div className="space-y-5">
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center text-[11px] font-bold">
-                                                <span className="text-slate-600 dark:text-slate-400">Conceptual Accuracy</span>
-                                                <span className="text-indigo-500">82%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: '82%' }}
-                                                    transition={{ duration: 1, delay: 0.5 }}
-                                                    className="bg-indigo-500 h-full rounded-full"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center text-[11px] font-bold">
-                                                <span className="text-slate-600 dark:text-slate-400">Response Consistency</span>
-                                                <span className="text-accent-pink">64%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: '64%' }}
-                                                    transition={{ duration: 1, delay: 0.7 }}
-                                                    className="bg-accent-pink h-full rounded-full"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                                    <p className="text-[11px] text-slate-400 leading-relaxed italic font-medium">
-                                        "Your response suggests a strong grasp of subject matter, though some complex scenarios show room for improvement. Focus on the analytical feedback below."
-                                    </p>
                                 </div>
                             </div>
                         </aside>
