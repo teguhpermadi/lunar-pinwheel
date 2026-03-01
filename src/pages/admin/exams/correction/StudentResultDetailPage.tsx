@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { examApi, Exam } from '@/lib/api';
+import { examApi, Exam, studentApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +24,10 @@ const StudentResultDetailPage: React.FC = () => {
         insight: true,
         targeting: false
     });
+
+    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [userRank, setUserRank] = useState<number | null>(null);
+    const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
 
     const toggleSection = (section: keyof typeof expandedSections) => {
         setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -56,6 +60,22 @@ const StudentResultDetailPage: React.FC = () => {
         }
     }, [examId, sessionId]);
 
+    const fetchLeaderboard = async (studentId: string) => {
+        if (!examId) return;
+        setIsLeaderboardLoading(true);
+        try {
+            const result = await studentApi.getLeaderboard({ exam_id: examId, limit: 5, user_id: studentId });
+            if (result && result.data) {
+                setLeaderboard(result.data);
+                setUserRank(result.meta?.user_rank || null);
+            }
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+        } finally {
+            setIsLeaderboardLoading(false);
+        }
+    };
+
     const fetchDetail = async () => {
         if (!examId || !sessionId) return;
         setIsLoading(true);
@@ -67,6 +87,10 @@ const StudentResultDetailPage: React.FC = () => {
                 setQuestions(fetchedQuestions);
                 setExam(response.data.exam);
                 setSessionInfo(response.data.session);
+
+                if (response.data.session.student?.id) {
+                    fetchLeaderboard(response.data.session.student.id);
+                }
             }
         } catch (error) {
             console.error('Error fetching student result detail:', error);
@@ -554,6 +578,102 @@ const StudentResultDetailPage: React.FC = () => {
                                     </AnimatePresence>
                                 </div>
                             </div>
+
+                            {/* Leaderboard Section */}
+                            {(leaderboard.length > 0 || isLeaderboardLoading) && (
+                                <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-200 dark:border-amber-500/20">
+                                                <span className="material-symbols-outlined text-xl">social_leaderboard</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
+                                                <p className="text-[10px] text-slate-400 font-medium mt-0.5">Exam Excellence</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="px-6 py-4">
+                                        {isLeaderboardLoading ? (
+                                            <div className="space-y-4">
+                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                    <div key={i} className="flex items-center gap-3 animate-pulse">
+                                                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                                                            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-1/3" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {leaderboard.map((leader, index) => (
+                                                    <div key={leader.id} className={cn(
+                                                        "flex items-center justify-between p-3 rounded-2xl border transition-all duration-300",
+                                                        leader.user?.id === sessionInfo?.student.id
+                                                            ? "bg-primary/5 border-primary/20 shadow-[0_0_15px_-3px_rgba(var(--primary-rgb),0.1)]"
+                                                            : "bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-100 dark:hover:border-slate-800"
+                                                    )}>
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <div className="relative shrink-0">
+                                                                <div className={cn(
+                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
+                                                                    index === 0 ? "bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-500/30 text-white" :
+                                                                        index === 1 ? "bg-gradient-to-br from-slate-300 to-slate-400 shadow-md shadow-slate-400/30 text-white" :
+                                                                            index === 2 ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-md shadow-orange-500/30 text-white" :
+                                                                                "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                                                )}>
+                                                                    {leader.user?.avatar ? (
+                                                                        <img src={leader.user.avatar} className="w-full h-full object-cover" alt="" />
+                                                                    ) : (
+                                                                        <span className="material-symbols-outlined text-sm">person</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className={cn(
+                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border border-white dark:border-slate-900 z-20",
+                                                                    index === 0 ? "bg-yellow-400 text-yellow-900" :
+                                                                        index === 1 ? "bg-slate-300 text-slate-800" :
+                                                                            index === 2 ? "bg-orange-400 text-orange-900" :
+                                                                                "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                                                )}>
+                                                                    {index + 1}
+                                                                </div>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                                                    {leader.user?.name || 'Unknown'}
+                                                                </p>
+                                                                {leader.user?.id === sessionInfo?.student.id && (
+                                                                    <p className="text-[9px] font-black uppercase tracking-wider text-primary">This Student</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-sm font-black text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{leader.total_score} pts</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* User Rank Indicator */}
+                                    {userRank !== null && userRank > 0 && !isLeaderboardLoading && (
+                                        <div className="bg-primary text-white p-4 text-center border-t border-primary/20">
+                                            <p className="text-xs font-bold flex items-center justify-center gap-2">
+                                                <span className="material-symbols-outlined text-base">military_tech</span>
+                                                {userRank <= 5
+                                                    ? `Awesome! Ranked #${userRank} overall.`
+                                                    : `Currently ranked #${userRank} out of all participants.`}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                         </aside>
                     </div>
                 </main>

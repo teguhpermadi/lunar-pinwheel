@@ -459,6 +459,10 @@ export const studentApi = {
         const response = await api.get('/students/exams/history', { params });
         return response.data;
     },
+    getLeaderboard: async (params?: { exam_id?: string; subject_id?: string; classroom_id?: string; limit?: number; user_id?: string }) => {
+        const response = await api.get('/students/exam-results/leaderboard', { params });
+        return response.data;
+    },
     getStudentExams: async (params?: any) => {
         const response = await api.get('/students/exams', { params });
         return response.data;
