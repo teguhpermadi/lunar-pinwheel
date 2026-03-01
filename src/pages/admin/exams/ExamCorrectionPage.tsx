@@ -42,6 +42,7 @@ export interface QuestionDetail {
     question_number: number;
     options?: any[];
     key_answer?: any;
+    tags?: string[];
 }
 
 export default function ExamCorrectionPage() {

@@ -77,8 +77,36 @@ const StudentResultDetailPage: React.FC = () => {
 
     const filteredQuestions = questions.filter(q => {
         if (filter === 'incorrect') return q.is_correct === false;
+        if (filter === 'flagged') return false; // Flagging not implemented yet in this component
         return true;
     });
+
+    // Calculate Tag Scores
+    const tagScores = questions.reduce((acc, q) => {
+        if (!q.tags || q.tags.length === 0) {
+            const tag = 'Untagged';
+            if (!acc[tag]) acc[tag] = { max: 0, earned: 0, count: 0 };
+            acc[tag].max += q.max_score;
+            acc[tag].earned += q.score_earned;
+            acc[tag].count += 1;
+        } else {
+            q.tags.forEach(tag => {
+                if (!acc[tag]) acc[tag] = { max: 0, earned: 0, count: 0 };
+                acc[tag].max += q.max_score;
+                acc[tag].earned += q.score_earned;
+                acc[tag].count += 1;
+            });
+        }
+        return acc;
+    }, {} as Record<string, { max: number; earned: number; count: number }>);
+
+    const tagScoresList = Object.entries(tagScores)
+        .map(([name, stats]) => ({
+            name,
+            ...stats,
+            percentage: stats.max > 0 ? (stats.earned / stats.max) * 100 : 0
+        }))
+        .sort((a, b) => b.percentage - a.percentage);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -194,6 +222,47 @@ const StudentResultDetailPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Score by Tag Breakdown */}
+                            {tagScoresList.length > 0 && (
+                                <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-card overflow-hidden">
+                                    <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-200 mb-6">Score By Tags</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {tagScoresList.map((tag) => (
+                                            <div key={tag.name} className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
+                                                <div className="flex justify-between items-start gap-2">
+                                                    <span className="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title={tag.name}>
+                                                        {tag.name}
+                                                    </span>
+                                                    <span className={cn(
+                                                        "text-[9px] sm:text-[10px] font-black tabular-nums px-2 py-0.5 rounded-md shrink-0",
+                                                        tag.percentage >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                                            tag.percentage >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" :
+                                                                "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
+                                                    )}>
+                                                        {Math.round(tag.percentage)}%
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                        className={cn(
+                                                            "h-full rounded-full transition-all duration-1000",
+                                                            tag.percentage >= 80 ? "bg-emerald-500" :
+                                                                tag.percentage >= 50 ? "bg-amber-500" :
+                                                                    "bg-rose-500"
+                                                        )}
+                                                        style={{ width: `${tag.percentage}%` }}
+                                                    />
+                                                </div>
+                                                <div className="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-400 font-medium">
+                                                    <span>{tag.count} Question{tag.count !== 1 ? 's' : ''}</span>
+                                                    <span>{tag.earned} / {tag.max} pts</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Filters */}
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl sm:rounded-full border border-slate-200 dark:border-slate-800 shadow-sm w-full sm:w-fit sticky top-[env(safe-area-inset-top,0)] sm:top-0 z-10 transition-all">
