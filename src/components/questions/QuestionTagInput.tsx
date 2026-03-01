@@ -3,6 +3,7 @@ import { tagApi, Tag } from '@/lib/api';
 
 interface QuestionTagInputProps {
     questionId: string;
+    tagType?: string;
     initialTags: string[] | any[]; // Backend can return array of strings or array of Tag objects
     onTagsChange: (newTags: string[]) => void;
     disabled?: boolean;
@@ -10,6 +11,7 @@ interface QuestionTagInputProps {
 
 export default function QuestionTagInput({
     questionId,
+    tagType,
     initialTags = [],
     onTagsChange,
     disabled = false
@@ -51,7 +53,7 @@ export default function QuestionTagInput({
             setIsSearching(true);
             try {
                 // Adjust per your actual tagApi response structure if different
-                const response = await tagApi.getTags({ search: inputValue });
+                const response = await tagApi.getTags({ search: inputValue, type: tagType });
                 if (response.success && response.data) {
                     // Filter out exact matches that are already selected
                     const filtered = response.data.filter(

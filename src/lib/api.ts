@@ -643,10 +643,11 @@ export interface Tag {
     id: string | number;
     name: string;
     slug?: string;
+    type?: string;
 }
 
 export const tagApi = {
-    getTags: async (params?: { search?: string; limit?: number }) => {
+    getTags: async (params?: { search?: string; type?: string; limit?: number }) => {
         const response = await api.get('/tags', { params });
         return response.data;
     }

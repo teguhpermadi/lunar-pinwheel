@@ -324,13 +324,14 @@ export default function EditQuestionBank() {
                                             <div className="mb-4">
                                                 <QuestionTagInput
                                                     questionId={question.id}
+                                                    tagType={(bank as any).subject_id}
                                                     initialTags={question.tags || []}
                                                     onTagsChange={async (newTags) => {
                                                         // Update visually
                                                         setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, tags: newTags } : q));
                                                         // Update backend
                                                         try {
-                                                            await questionApi.updateQuestion(question.id, { tags: newTags });
+                                                            await questionApi.updateQuestion(question.id, { tags: newTags, tag_type: (bank as any).subject_id });
                                                         } catch (error) {
                                                             console.error('Failed to update tags', error);
                                                         }
