@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
 import CorrectionByQuestion from './correction/CorrectionByQuestion';
 import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
+import ItemAnalysisTab from './correction/ItemAnalysisTab';
 
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
 export const NEEDS_DOUBLE_CORRECTION_TYPES = ['short_answer', 'essay', 'math_input', 'arabic_input', 'javanese_input'];
@@ -64,7 +65,7 @@ export default function ExamCorrectionPage() {
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
-    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('leaderboard');
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis'>('leaderboard');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
@@ -423,7 +424,15 @@ export default function ExamCorrectionPage() {
                             {masterQuestions.map((q, index) => (
                                 <button
                                     key={q.id}
-                                    onClick={() => setSelectedQuestionIndex(index)}
+                                    onClick={() => {
+                                        setSelectedQuestionIndex(index);
+                                        if (viewMode === 'item-analysis') {
+                                            const element = document.getElementById(`analysis-question-${q.id}`);
+                                            if (element) {
+                                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }
+                                        }
+                                    }}
                                     className={cn(
                                         "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
                                         selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
@@ -671,6 +680,18 @@ export default function ExamCorrectionPage() {
                             <span className="hidden sm:inline">By Question</span>
                             <span className="sm:hidden">Question</span>
                         </button>
+                        <button
+                            onClick={() => {
+                                setViewMode('item-analysis');
+                            }}
+                            className={cn(
+                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                viewMode === 'item-analysis' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            <span className="hidden sm:inline">Telaah Soal</span>
+                            <span className="sm:hidden">Telaah</span>
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -687,11 +708,11 @@ export default function ExamCorrectionPage() {
 
                 <section className={cn(
                     "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-4 md:p-8 transition-all duration-300",
-                    viewMode === 'leaderboard' && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
+                    (viewMode === 'leaderboard' || viewMode === 'item-analysis') && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
                 )}>
                     <div className={cn(
                         "mx-auto w-full space-y-6",
-                        viewMode === 'leaderboard' ? "max-w-none" : "max-w-4xl"
+                        (viewMode === 'leaderboard' || viewMode === 'item-analysis') ? "max-w-none" : "max-w-4xl"
                     )}>
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
@@ -724,6 +745,8 @@ export default function ExamCorrectionPage() {
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                 />
+                            ) : viewMode === 'item-analysis' ? (
+                                <ItemAnalysisTab examId={id!} />
                             ) : (
                                 <CorrectionLeaderboard
                                     sessions={sessions}

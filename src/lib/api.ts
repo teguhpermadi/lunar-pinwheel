@@ -893,6 +893,10 @@ export const examApi = {
         const response = await api.post(`/exams/${examId}/recalculate-all`);
         return response.data;
     },
+    getItemAnalysis: async (examId: string) => {
+        const response = await api.get(`/exams/${examId}/item-analysis`);
+        return response.data;
+    },
 };
 
 export const questionSuggestionApi = {
