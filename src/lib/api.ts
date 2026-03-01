@@ -630,7 +630,7 @@ export interface Question {
     timer: number;
     score: number;
     hint?: string;
-    tags?: string; // or array? Schema says string for QuestionResource, array in StoreRequest? Resource: tags: string.
+    tags?: any[] | string[];
     media?: {
         content?: MediaItem[];
     };
@@ -638,6 +638,19 @@ export interface Question {
     created_at: string;
     updated_at: string;
 }
+
+export interface Tag {
+    id: string | number;
+    name: string;
+    slug?: string;
+}
+
+export const tagApi = {
+    getTags: async (params?: { search?: string; limit?: number }) => {
+        const response = await api.get('/tags', { params });
+        return response.data;
+    }
+};
 
 export interface StoreQuestionRequest {
     question_bank_id?: string;

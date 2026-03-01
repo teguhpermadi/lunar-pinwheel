@@ -9,6 +9,7 @@ import QuestionTimerSelector from '@/components/questions/QuestionTimerSelector'
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
+import QuestionTagInput from '@/components/questions/QuestionTagInput';
 import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 import WordImportModal from '@/components/admin/question-banks/WordImportModal';
@@ -320,6 +321,22 @@ export default function EditQuestionBank() {
                                         </div>
 
                                         <div className="p-6 rounded-b-2xl">
+                                            <div className="mb-4">
+                                                <QuestionTagInput
+                                                    questionId={question.id}
+                                                    initialTags={question.tags || []}
+                                                    onTagsChange={async (newTags) => {
+                                                        // Update visually
+                                                        setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, tags: newTags } : q));
+                                                        // Update backend
+                                                        try {
+                                                            await questionApi.updateQuestion(question.id, { tags: newTags });
+                                                        } catch (error) {
+                                                            console.error('Failed to update tags', error);
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
                                             <div className="flex gap-6 mb-6">
                                                 <MathRenderer
                                                     className="flex-1 font-semibold text-slate-800 dark:text-slate-100 leading-relaxed"
