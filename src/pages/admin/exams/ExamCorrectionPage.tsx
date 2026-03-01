@@ -520,16 +520,22 @@ export default function ExamCorrectionPage() {
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <div className="flex-grow flex items-center justify-between gap-2 overflow-hidden">
-                                        <div className="flex items-center gap-1.5 overflow-hidden">
-                                            <p className="text-[10px] font-bold uppercase text-slate-500 whitespace-nowrap">Question {index + 1}</p>
+                                    <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
+                                        <p
+                                            className={cn(
+                                                "text-xs truncate w-full",
+                                                selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                            )}
+                                            dangerouslySetInnerHTML={{ __html: (q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
+                                        />
+                                        <div className="flex items-center gap-1.5 w-full">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                Type: {(q.question_type || '').replace(/_/g, ' ')}
+                                            </p>
                                             {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
-                                                <span className="material-symbols-outlined text-amber-500 text-[12px] shrink-0" title="Needs Review">warning</span>
+                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
                                             )}
                                         </div>
-                                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 rounded-md tracking-wider truncate shrink-0">
-                                            {(q.question_type || '').replace(/_/g, ' ')}
-                                        </span>
                                     </div>
                                 </button>
                             ))}
