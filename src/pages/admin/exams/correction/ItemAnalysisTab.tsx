@@ -176,11 +176,18 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
             {/* Analysis Data */}
             <div className="space-y-4">
                 {data.item_analysis.map((item) => (
-                    <div id={`analysis-question-${item.question_id}`} key={item.question_id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex flex-col lg:flex-row gap-6">
+                    <div id={`analysis-question-${item.question_id}`} key={item.question_id} className={cn(
+                        "border rounded-3xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow",
+                        item.conclusion.status === 'Direvisi'
+                            ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/60 dark:border-amber-800/40"
+                            : item.conclusion.status === 'Ditolak'
+                                ? "bg-rose-50/50 dark:bg-rose-900/10 border-rose-200/60 dark:border-rose-800/40"
+                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                    )}>
+                        <div className="flex flex-col gap-5">
 
                             {/* Question Info & Content */}
-                            <div className="flex-1 min-w-0 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800 pb-5 lg:pb-0 lg:pr-6">
+                            <div className="flex flex-col border-b border-slate-100 dark:border-slate-800 pb-5">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black border border-indigo-100 dark:border-indigo-500/20 shrink-0">
                                         {item.question_number}
@@ -200,16 +207,20 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="text-sm text-slate-600 dark:text-slate-400 prose dark:prose-invert max-w-none prose-p:my-1 line-clamp-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex-1 items-start" dangerouslySetInnerHTML={{ __html: item.content || '<em>[Tanpa Konten]</em>' }} />
-
-                                <div className="mt-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-3.5 rounded-2xl flex gap-3 items-start">
-                                    <span className="material-symbols-outlined text-blue-500 text-xl shrink-0 mt-0.5">lightbulb</span>
-                                    <p className="text-xs text-blue-800 dark:text-blue-300 font-medium leading-relaxed italic">{item.conclusion.recommendation}</p>
-                                </div>
+                                <div className="text-sm text-slate-600 dark:text-slate-400 prose dark:prose-invert max-w-none prose-p:my-1 line-clamp-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl" dangerouslySetInnerHTML={{ __html: item.content || '<em>[Tanpa Konten]</em>' }} />
                             </div>
 
                             {/* Metrics Columns */}
-                            <div className="lg:w-[400px] shrink-0 flex flex-col sm:flex-row gap-4 justify-between">
+                            <div className="flex flex-col md:flex-row gap-4">
+
+                                {/* Keterangan / Rekomendasi */}
+                                <div className="flex-[2] bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-4 rounded-2xl flex flex-col justify-center min-h-[100px]">
+                                    <p className="text-[9px] font-bold uppercase tracking-widest text-blue-500/70 dark:text-blue-400/70 mb-2">Keterangan / Rekomendasi</p>
+                                    <div className="flex gap-3 items-start">
+                                        <span className="material-symbols-outlined text-blue-500 text-xl shrink-0">lightbulb</span>
+                                        <p className="text-sm text-blue-800 dark:text-blue-300 font-medium leading-relaxed italic">{item.conclusion.recommendation}</p>
+                                    </div>
+                                </div>
 
                                 {/* Kesukaran (P) */}
                                 <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 text-center flex flex-col justify-center relative overflow-hidden">
