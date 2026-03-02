@@ -23,6 +23,7 @@ interface LiveScoreData {
         remaining_time: number;
         extra_time: number;
         score: number;
+        history?: number[]; // ADDED HISTORY FROM BACKEND
         progress: {
             answered: number;
             total: number;
@@ -38,6 +39,8 @@ export default function ExamLiveScorePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showTokenModal, setShowTokenModal] = useState(false);
     const [activeTab, setActiveTab] = useState('All');
+
+
 
     const fetchLiveScore = async () => {
         if (!id) return;
@@ -108,9 +111,12 @@ export default function ExamLiveScorePage() {
             return matchesSearch && matchesTab;
         })
         .sort((a, b) => {
+            const scoreA = a.score;
+            const scoreB = b.score;
+
             // Priority 1: Status (Finished first? or In Progress first? Usually high score first)
             // Priority 2: Score (Descending)
-            if (b.score !== a.score) return b.score - a.score;
+            if (scoreB !== scoreA) return scoreB - scoreA;
             // Priority 3: Progress percentage
             const aProgress = a.progress.total > 0 ? a.progress.answered / a.progress.total : 0;
             const bProgress = b.progress.total > 0 ? b.progress.answered / b.progress.total : 0;
@@ -562,7 +568,24 @@ export default function ExamLiveScorePage() {
                                                             </div>
                                                         </td>
                                                         <td className="px-4 md:px-6 py-4 text-right">
-                                                            <span className="text-base md:text-lg font-black text-primary tabular-nums">{session.score}</span>
+                                                            <div className="flex flex-col items-end justify-center h-full gap-1">
+                                                                <span className="text-base md:text-lg font-black text-primary tabular-nums leading-none">
+                                                                    {session.score}
+                                                                </span>
+                                                                {(session.history?.length || 0) > 0 && (
+                                                                    <div className="flex gap-1">
+                                                                        {session.history?.map((h: number, i: number) => (
+                                                                            <span
+                                                                                key={i}
+                                                                                className="text-[9px] px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 font-bold leading-none"
+                                                                                title={`History attempt ${i + 1}`}
+                                                                            >
+                                                                                {h}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     </motion.tr>
                                                 );

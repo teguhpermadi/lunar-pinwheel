@@ -41,6 +41,17 @@ export default function StudentMathInput({ selectedAnswer, onChange }: StudentMa
                 if (selectedAnswer) {
                     mqRef.current.latex(selectedAnswer);
                 }
+
+                // Prevent mobile virtual keyboard
+                const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobileDevice) {
+                    setTimeout(() => {
+                        const textarea = mathFieldRef.current?.querySelector('textarea');
+                        if (textarea) {
+                            textarea.setAttribute('inputmode', 'none');
+                        }
+                    }, 100);
+                }
             }
         };
 
@@ -70,6 +81,8 @@ export default function StudentMathInput({ selectedAnswer, onChange }: StudentMa
                 mqRef.current.write('^2');
             } else if (latex === '\\sqrt{}') {
                 mqRef.current.cmd('\\sqrt');
+            } else if (latex === '\\frac') {
+                mqRef.current.cmd('\\frac');
             } else if (latex === '\\sum' || latex === '\\get' || latex === '\\int') {
                 mqRef.current.cmd(latex);
             } else if (latex === '(' || latex === '[' || latex === '{') {

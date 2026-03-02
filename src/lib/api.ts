@@ -459,6 +459,10 @@ export const studentApi = {
         const response = await api.get('/students/exams/history', { params });
         return response.data;
     },
+    getLeaderboard: async (params?: { exam_id?: string; subject_id?: string; classroom_id?: string; limit?: number; user_id?: string }) => {
+        const response = await api.get('/students/exam-results/leaderboard', { params });
+        return response.data;
+    },
     getStudentExams: async (params?: any) => {
         const response = await api.get('/students/exams', { params });
         return response.data;
@@ -630,7 +634,7 @@ export interface Question {
     timer: number;
     score: number;
     hint?: string;
-    tags?: string; // or array? Schema says string for QuestionResource, array in StoreRequest? Resource: tags: string.
+    tags?: any[] | string[];
     media?: {
         content?: MediaItem[];
     };
@@ -638,6 +642,20 @@ export interface Question {
     created_at: string;
     updated_at: string;
 }
+
+export interface Tag {
+    id: string | number;
+    name: string;
+    slug?: string;
+    type?: string;
+}
+
+export const tagApi = {
+    getTags: async (params?: { search?: string; type?: string; limit?: number }) => {
+        const response = await api.get('/tags', { params });
+        return response.data;
+    }
+};
 
 export interface StoreQuestionRequest {
     question_bank_id?: string;
@@ -873,6 +891,10 @@ export const examApi = {
     },
     recalculateAllScores: async (examId: string) => {
         const response = await api.post(`/exams/${examId}/recalculate-all`);
+        return response.data;
+    },
+    getItemAnalysis: async (examId: string) => {
+        const response = await api.get(`/exams/${examId}/item-analysis`);
         return response.data;
     },
 };

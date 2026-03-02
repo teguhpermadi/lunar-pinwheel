@@ -36,7 +36,7 @@ export default function ExamTaker() {
 
     // UI State
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('exam_font_size');
         return saved ? parseInt(saved) : 16;
@@ -200,6 +200,23 @@ export default function ExamTaker() {
             setIsInitialLoad(false);
         }
     };
+
+    // Automatic Fullscreen on mount
+    useEffect(() => {
+        const enterFullscreen = async () => {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen request failed. Most browsers require a user gesture.", err);
+            }
+        };
+
+        if (!isLoading) {
+            enterFullscreen();
+        }
+    }, [isLoading]);
 
     const handleAnswerChange = async (answer: any) => {
         if (!id || !questions[currentQuestionIndex]) return;
@@ -461,38 +478,38 @@ export default function ExamTaker() {
             </div>
 
             {/* Header */}
-            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 min-h-[4rem] flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-2 sm:py-0 shrink-0 z-30 shadow-sm gap-2">
-                <div className="flex items-center space-x-3 md:space-x-4 w-full sm:w-auto">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sm:min-h-[4rem] min-h-[3rem] flex items-center justify-between px-3 md:px-6 py-1 sm:py-0 shrink-0 z-30 shadow-sm gap-2">
+                <div className="flex items-center space-x-2 md:space-x-4 w-full sm:w-auto">
+                    <div className="sm:h-10 sm:w-10 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs sm:text-base">
                         {user?.name?.substring(0, 2).toUpperCase() || 'ST'}
                     </div>
                     <div>
-                        <h1 className="text-lg font-semibold leading-tight line-clamp-1">{exam?.title || 'Loading...'}</h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{exam?.subject?.name || 'Exam'}</p>
+                        <h1 className="sm:text-lg text-sm font-semibold leading-tight line-clamp-1">{exam?.title || 'Loading...'}</h1>
+                        <p className="sm:text-xs text-[10px] text-gray-500 dark:text-gray-400">{exam?.subject?.name || 'Exam'}</p>
                     </div>
                 </div>
 
                 {exam.timer_type === 'strict' && (
                     <div className="flex flex-col items-center sm:items-end">
-                        <span className="text-[9px] md:text-[10px] font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
-                        <div className={`flex items-center font-bold text-lg md:text-xl font-mono ${remainingSeconds !== null && remainingSeconds < 300 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
-                            <span className="material-icons text-base md:text-lg mr-1">timer</span>
+                        <span className="text-[8px] sm:text-[10px] font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
+                        <div className={`flex items-center font-bold sm:text-lg text-base font-mono ${remainingSeconds !== null && remainingSeconds < 300 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
+                            <span className="material-icons text-sm sm:text-lg mr-1">timer</span>
                             {formatTime(remainingSeconds)}
                         </div>
                     </div>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                     <button
                         onClick={() => document.documentElement.requestFullscreen()}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2"
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 sm:p-2"
                     >
-                        <span className="material-icons">fullscreen</span>
+                        <span className="material-icons text-lg sm:text-2xl">fullscreen</span>
                     </button>
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-all duration-300 active:scale-95 border border-gray-200 dark:border-gray-700"
+                        className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-all duration-300 active:scale-95 border border-gray-200 dark:border-gray-700"
                     >
-                        <span className="material-icons leading-none text-xl">
+                        <span className="material-icons leading-none text-lg sm:text-xl">
                             {isSidebarOpen ? 'format_indent_increase' : 'format_indent_decrease'}
                         </span>
                     </button>
@@ -565,12 +582,19 @@ export default function ExamTaker() {
                                 </button>
 
                                 <button
-                                    onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-                                    disabled={currentQuestionIndex === questions.length - 1}
+                                    onClick={() => {
+                                        if (currentQuestionIndex === questions.length - 1) {
+                                            handleSubmitExam();
+                                        } else {
+                                            setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
+                                        }
+                                    }}
                                     className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Next Question
-                                    <span className="material-icons text-lg ml-2">arrow_forward</span>
+                                    {currentQuestionIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
+                                    <span className="material-icons text-lg ml-2">
+                                        {currentQuestionIndex === questions.length - 1 ? 'rocket_launch' : 'arrow_forward'}
+                                    </span>
                                 </button>
                             </div>
                         </div>

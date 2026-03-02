@@ -8,8 +8,10 @@ import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
 import CorrectionByQuestion from './correction/CorrectionByQuestion';
 import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
+import ItemAnalysisTab from './correction/ItemAnalysisTab';
 
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
+export const NEEDS_DOUBLE_CORRECTION_TYPES = ['short_answer', 'essay', 'math_input', 'arabic_input', 'javanese_input'];
 
 export interface StudentSession {
     id: string;
@@ -41,6 +43,7 @@ export interface QuestionDetail {
     question_number: number;
     options?: any[];
     key_answer?: any;
+    tags?: string[];
 }
 
 export default function ExamCorrectionPage() {
@@ -62,7 +65,7 @@ export default function ExamCorrectionPage() {
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
-    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard'>('by-student');
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis'>('leaderboard');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
@@ -421,7 +424,15 @@ export default function ExamCorrectionPage() {
                             {masterQuestions.map((q, index) => (
                                 <button
                                     key={q.id}
-                                    onClick={() => setSelectedQuestionIndex(index)}
+                                    onClick={() => {
+                                        setSelectedQuestionIndex(index);
+                                        if (viewMode === 'item-analysis') {
+                                            const element = document.getElementById(`analysis-question-${q.id}`);
+                                            if (element) {
+                                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }
+                                        }
+                                    }}
                                     className={cn(
                                         "w-full p-4 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left transition-all",
                                         selectedQuestionIndex === index ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-slate-50"
@@ -433,16 +444,22 @@ export default function ExamCorrectionPage() {
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <div className="flex-grow overflow-hidden">
-                                        <p className={cn(
-                                            "text-xs truncate",
-                                            selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
-                                        )}>
-                                            {(q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}`}
-                                        </p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">
-                                            Type: {(q.question_type || '').replace('_', ' ')}
-                                        </p>
+                                    <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
+                                        <p
+                                            className={cn(
+                                                "text-xs truncate w-full",
+                                                selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                            )}
+                                            dangerouslySetInnerHTML={{ __html: (q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
+                                        />
+                                        <div className="flex items-center gap-1.5">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                Type: {(q.question_type || '').replace('_', ' ')}
+                                            </p>
+                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
+                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </button>
                             ))}
@@ -497,13 +514,29 @@ export default function ExamCorrectionPage() {
                                 >
                                     <span className={cn(
                                         "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
-                                            q.is_correct === false ? "bg-rose-100 text-rose-600" :
-                                                "bg-slate-100 text-slate-400"
+                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                            q.is_correct === false ? "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400" :
+                                                "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <p className="text-[10px] font-bold uppercase text-slate-500">Question {index + 1}</p>
+                                    <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
+                                        <p
+                                            className={cn(
+                                                "text-xs truncate w-full",
+                                                selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                            )}
+                                            dangerouslySetInnerHTML={{ __html: (q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
+                                        />
+                                        <div className="flex items-center gap-1.5 w-full">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                Type: {(q.question_type || '').replace(/_/g, ' ')}
+                                            </p>
+                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
+                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
+                                            )}
+                                        </div>
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -620,6 +653,7 @@ export default function ExamCorrectionPage() {
                         <button
                             onClick={() => {
                                 setViewMode('leaderboard');
+                                setSelectedQuestionIndex(0);
                             }}
                             className={cn(
                                 "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
@@ -631,7 +665,6 @@ export default function ExamCorrectionPage() {
                         <button
                             onClick={() => {
                                 setViewMode('by-student');
-                                setSelectedQuestionIndex(0);
                             }}
                             className={cn(
                                 "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
@@ -654,6 +687,18 @@ export default function ExamCorrectionPage() {
                             <span className="hidden sm:inline">By Question</span>
                             <span className="sm:hidden">Question</span>
                         </button>
+                        <button
+                            onClick={() => {
+                                setViewMode('item-analysis');
+                            }}
+                            className={cn(
+                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                viewMode === 'item-analysis' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                            )}
+                        >
+                            <span className="hidden sm:inline">Telaah Soal</span>
+                            <span className="sm:hidden">Telaah</span>
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -670,11 +715,11 @@ export default function ExamCorrectionPage() {
 
                 <section className={cn(
                     "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-4 md:p-8 transition-all duration-300",
-                    viewMode === 'leaderboard' && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
+                    (viewMode === 'leaderboard' || viewMode === 'item-analysis') && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
                 )}>
                     <div className={cn(
                         "mx-auto w-full space-y-6",
-                        viewMode === 'leaderboard' ? "max-w-none" : "max-w-4xl"
+                        (viewMode === 'leaderboard' || viewMode === 'item-analysis') ? "max-w-none" : "max-w-4xl"
                     )}>
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
@@ -696,6 +741,7 @@ export default function ExamCorrectionPage() {
                                     selectedQuestionIndex={selectedQuestionIndex}
                                     masterQuestions={masterQuestions}
                                     currentQuestionContent={currentQuestionContent}
+                                    currentQuestionType={currentQuestion?.question_type}
                                     handleToggleSelectAll={handleToggleSelectAll}
                                     selectedAnswerIds={selectedAnswerIds}
                                     bulkAnswers={bulkAnswers}
@@ -706,6 +752,8 @@ export default function ExamCorrectionPage() {
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                 />
+                            ) : viewMode === 'item-analysis' ? (
+                                <ItemAnalysisTab examId={id!} />
                             ) : (
                                 <CorrectionLeaderboard
                                     sessions={sessions}

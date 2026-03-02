@@ -4,12 +4,13 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
-import { EXCLUDED_PARTIAL_TYPES } from '../ExamCorrectionPage';
+import { EXCLUDED_PARTIAL_TYPES, NEEDS_DOUBLE_CORRECTION_TYPES } from '../ExamCorrectionPage';
 
 interface CorrectionByQuestionProps {
     selectedQuestionIndex: number;
     masterQuestions: any[];
     currentQuestionContent: string;
+    currentQuestionType?: string;
     handleToggleSelectAll: () => void;
     selectedAnswerIds: string[];
     bulkAnswers: any[];
@@ -25,6 +26,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     selectedQuestionIndex,
     masterQuestions,
     currentQuestionContent,
+    currentQuestionType,
     handleToggleSelectAll,
     selectedAnswerIds,
     bulkAnswers,
@@ -46,11 +48,26 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
             <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                        <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20 shrink-0">
-                            Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
-                        </span>
+                        <div className="flex flex-col gap-1 shrink-0">
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20">
+                                    Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
+                                </span>
+                                {currentQuestionType && (
+                                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[8px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-700 truncate max-w-[100px]">
+                                        {currentQuestionType.replace(/_/g, ' ')}
+                                    </span>
+                                )}
+                            </div>
+                            {currentQuestionType && NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestionType) && (
+                                <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest rounded-md border border-amber-200 dark:border-amber-500/20 flex items-center justify-center gap-1">
+                                    <span className="material-symbols-outlined text-[11px]">warning</span>
+                                    Needs Review
+                                </span>
+                            )}
+                        </div>
                         <MathRenderer
-                            className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate"
+                            className="text-sm font-bold text-slate-900 dark:text-white leading-tight line-clamp-2"
                             content={currentQuestionContent}
                         />
                     </div>

@@ -54,24 +54,24 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                 </p>
             </div>
 
-            <div className="grid grid-cols-[1fr,40px,1fr] gap-4 items-center px-4 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <div className="grid grid-cols-[1fr,20px,1fr] sm:grid-cols-[1fr,40px,1fr] gap-2 sm:gap-4 items-center px-2 sm:px-4 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400">
                 <div className="text-center">Pernyataan</div>
                 <div />
                 <div className="text-center">Jawaban</div>
             </div>
 
-            <div className="relative grid grid-cols-[1fr,40px,1fr] gap-4">
+            <div className="relative grid grid-cols-[1fr,20px,1fr] sm:grid-cols-[1fr,40px,1fr] gap-2 sm:gap-4">
                 {/* Left Column - Fixed */}
-                <div className="space-y-4">
+                <div className="space-y-2 sm:space-y-4">
                     {leftOptions.map((left) => (
                         <div
                             key={left.id}
-                            className="h-[100px] p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 transition-all"
+                            className="h-[100px] md:h-[120px] p-3 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 sm:gap-4 transition-all"
                         >
-                            <div className="flex-1 overflow-auto max-h-full scrollbar-hide">
+                            <div className="flex-1 overflow-auto max-h-full scrollbar-hide flex items-center">
                                 <MathRenderer
                                     content={left.content}
-                                    className="text-base font-bold text-slate-700 dark:text-slate-200 leading-tight"
+                                    className="text-xs sm:text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 leading-tight break-words w-full"
                                 />
                             </div>
                         </div>
@@ -81,28 +81,28 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                 {/* Center link icons */}
                 <div className="flex flex-col items-center justify-around py-4">
                     {leftOptions.map((_, i) => (
-                        <div key={i} className="flex items-center justify-center text-slate-200 dark:text-slate-800">
-                            <span className="material-symbols-outlined text-2xl">link</span>
+                        <div key={i} className="flex items-center justify-center text-slate-200 dark:text-slate-800 h-[100px] md:h-[120px] pb-2 sm:pb-4">
+                            <span className="material-symbols-outlined text-lg sm:text-2xl">link</span>
                         </div>
                     ))}
                 </div>
 
                 {/* Right Column - Reorderable */}
-                <Reorder.Group axis="y" values={orderedRight} onReorder={handleReorder} className="space-y-4">
+                <Reorder.Group axis="y" values={orderedRight} onReorder={handleReorder} className="space-y-2 sm:space-y-4">
                     {orderedRight.map((right) => (
                         <Reorder.Item
                             key={right.id}
                             value={right}
                             className="cursor-grab active:cursor-grabbing"
                         >
-                            <div className="h-[100px] p-6 bg-white dark:bg-slate-900 rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-4 group hover:border-emerald-500/30 transition-all">
-                                <span className="material-symbols-outlined text-slate-200 group-hover:text-emerald-500 transition-colors select-none">
+                            <div className="h-[100px] md:h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all">
+                                <span className="material-symbols-outlined text-slate-200 group-hover:text-emerald-500 transition-colors select-none text-lg sm:text-2xl">
                                     drag_indicator
                                 </span>
-                                <div className="flex-1 overflow-auto max-h-full scrollbar-hide text-center">
+                                <div className="flex-1 overflow-auto max-h-full scrollbar-hide text-center flex items-center justify-center">
                                     <MathRenderer
                                         content={right.content}
-                                        className="text-base font-bold text-slate-700 dark:text-slate-200 leading-tight"
+                                        className="text-xs sm:text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 leading-tight break-words"
                                     />
                                 </div>
                             </div>

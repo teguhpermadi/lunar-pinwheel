@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
-import { QuestionDetail, StudentSession, EXCLUDED_PARTIAL_TYPES } from '../ExamCorrectionPage';
+import { QuestionDetail, StudentSession, EXCLUDED_PARTIAL_TYPES, NEEDS_DOUBLE_CORRECTION_TYPES } from '../ExamCorrectionPage';
 
 interface CorrectionByStudentProps {
     currentQuestion: QuestionDetail | null;
@@ -52,12 +52,23 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                 <>
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex items-start justify-between gap-4 mb-6">
-                            <div className="flex items-center gap-4">
-                                <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
-                                    Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
-                                </span>
+                            <div className="flex flex-col gap-3 mt-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
+                                        Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
+                                    </span>
+                                    <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-slate-200 dark:border-slate-700">
+                                        {(currentQuestion.question_type || '').replace(/_/g, ' ')}
+                                    </span>
+                                    {NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestion.question_type) && (
+                                        <span className="px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-200 dark:border-amber-500/20 flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-[13px]">warning</span>
+                                            Needs Review
+                                        </span>
+                                    )}
+                                </div>
                                 <MathRenderer
-                                    className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed"
+                                    className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed line-clamp-2"
                                     content={currentQuestion.question_content}
                                 />
                             </div>

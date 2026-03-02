@@ -11,6 +11,11 @@ interface StudentLanguageResponseInputProps {
 export default function StudentLanguageResponseInput({ selectedAnswer, onChange, language }: StudentLanguageResponseInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    }, []);
 
     useEffect(() => {
         setValue(selectedAnswer || '');
@@ -100,6 +105,7 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
                 ref={textareaRef}
                 value={value}
                 onChange={handleChange}
+                inputMode={isMobile ? "none" : undefined}
                 placeholder={language === 'arabic' ? 'اكتب إجابتك هنا...' : 'Serat wangsulan panjenengan wonten mriki...'}
                 dir={language === 'arabic' ? 'rtl' : 'ltr'}
                 className={`w-full h-48 p-8 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl text-3xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all custom-scrollbar resize-none text-center leading-relaxed ${language === 'arabic' ? 'font-arabic' : 'font-javanese'
