@@ -15,6 +15,8 @@ export const echo = new Echo({
     wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
     wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
-    enabledTransports: ['ws', 'wss'],
+    // forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
+    // enabledTransports: ['ws', 'wss'],
+    forceTLS: false, // Pastikan ini FALSE jika tidak pakai HTTPS
+    enabledTransports: ['ws'], // Pakai 'ws' saja jika belum SSL
 });
