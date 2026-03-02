@@ -27,26 +27,37 @@ interface JavaneseKeyboardProps {
 }
 
 export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace }: JavaneseKeyboardProps) {
-    const [activeTab, setActiveTab] = useState<'aksara' | 'sandangan' | 'angka'>('aksara');
+    const [activeTab, setActiveTab] = useState<'aksara' | 'pasangan' | 'sandangan' | 'angka'>('aksara');
 
     const tabs = [
         { id: 'aksara', label: 'Aksara' },
+        { id: 'pasangan', label: 'Pasangan' },
         { id: 'sandangan', label: 'Sandangan' },
         { id: 'angka', label: 'Angka & Simbol' },
     ];
 
     const keys = {
         aksara: [
-            'ꦲ', 'ꦤ', 'ꦼ', 'ꦫ', 'ꦏ', // ha na ca ra ka
-            'ꦢ', 'ꦠ', 'ꦯ', 'ꦮ', 'ꦭ', // da ta sa wa la
-            'ꦶ', 'ꦸ', 'ꦺ', 'ꦻ', 'ꦼ', // vowels
+            'ꦲ', 'ꦤ', 'ꦕ', 'ꦫ', 'ꦏ', // ha na ca ra ka
+            'ꦢ', 'ꦠ', 'ꦱ', 'ꦮ', 'ꦭ', // da ta sa wa la
             'ꦥ', 'ꦝ', 'ꦗ', 'ꦪ', 'ꦚ', // pa dha ja ya nya
-            'ꦩ', 'ꦒ', 'ꦧ', 'ꦣ', 'ꦔ', // ma ga ba tha nga
-            '꧀', 'ꦩ', 'ꦶ', 'ꦸ', 'ꦺ'  // pangkon and more
+            'ꦩ', 'ꦒ', 'ꦧ', 'ꦛ', 'ꦔ', // ma ga ba tha nga
+            'ꦶ', 'ꦸ', 'ꦺ', 'ꦼ', 'ꦴ', // wulu, suku, taling, pepet, tarung
+            '꧀', 'ꦁ', 'ꦂ', 'ꦃ', 'ꦿ'  // pangkon, cecak, layar, wignyan, cakra
+        ],
+        pasangan: [
+            '꧀ꦲ', '꧀ꦤ', '꧀ꦕ', '꧀ꦫ', '꧀ꦏ', // ha na ca ra ka
+            '꧀ꦢ', '꧀ꦠ', '꧀ꦱ', '꧀ꦮ', '꧀ꦭ', // da ta sa wa la
+            '꧀ꦥ', '꧀ꦝ', '꧀ꦗ', '꧀ꦪ', '꧀ꦚ', // pa dha ja ya nya
+            '꧀ꦩ', '꧀ꦒ', '꧀ꦧ', '꧀ꦛ', '꧀ꦔ', // ma ga ba tha nga
+            'ꦶ', 'ꦸ', 'ꦺ', 'ꦼ', 'ꦴ', // wulu, suku, taling, pepet, tarung
+            '꧀', 'ꦁ', 'ꦂ', 'ꦃ', 'ꦿ'  // pangkon, cecak, layar, wignyan, cakra
         ],
         sandangan: [
-            'ꦀ', 'ꦁ', 'ꦂ', 'ꦃ', 'ꦄ', 'ꦅ', 'ꦆ', 'ꦇ', 'ꦈ', 'ꦉ',
-            'ꦊ', 'ꦋ', 'ꦌ', 'ꦍ', 'ꦎ', 'ꦏ', 'ꦽ', 'ꦾ', 'ꦿ'
+            'ꦶ', 'ꦸ', 'ꦺ', 'ꦼ', 'ꦴ', // vowels
+            'ꦻ', 'ꦽ', 'ꦾ', 'ꦿ', '꧀', // others
+            'ꦀ', 'ꦁ', 'ꦂ', 'ꦃ', 'ꦄ', // more sandangan + swara A
+            'ꦆ', 'ꦈ', 'ꦌ', 'ꦎ', 'ꦉ', // swara I, swara U, swara E, swara O, pa cerek
         ],
         angka: [
             '꧐', '꧑', '꧒', '꧓', '꧔', '꧕', '꧖', '꧗', '꧘', '꧙',
