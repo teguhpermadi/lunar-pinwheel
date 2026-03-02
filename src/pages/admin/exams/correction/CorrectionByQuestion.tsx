@@ -67,8 +67,9 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                             )}
                         </div>
                         <MathRenderer
+                            key={`math-${selectedQuestionIndex}`}
                             className="text-sm font-bold text-slate-900 dark:text-white leading-tight line-clamp-2"
-                            content={currentQuestionContent}
+                            content={currentQuestionContent || ''}
                         />
                     </div>
                     <div className="flex gap-2 items-center">

@@ -68,8 +68,9 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     )}
                                 </div>
                                 <MathRenderer
+                                    key={`math-${currentQuestion.id || selectedQuestionIndex}`}
                                     className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed line-clamp-2"
-                                    content={currentQuestion.question_content}
+                                    content={currentQuestion.question_content || (currentQuestion as any).content || ''}
                                 />
                             </div>
                             <div className={cn(
