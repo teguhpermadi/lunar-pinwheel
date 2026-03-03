@@ -341,6 +341,16 @@ export default function PreviewQuestionBank() {
                         >
                             {/* Question Container */}
                             <div className="relative z-10">
+                                {currentQuestion?.exam_question?.media?.content?.[0] && (
+                                    <div className="mb-6 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center p-2">
+                                        <img
+                                            src={currentQuestion.exam_question.media.content[0].url}
+                                            alt="Question preview"
+                                            className="max-h-[400px] w-auto object-contain cursor-zoom-in rounded-xl"
+                                            onClick={() => setZoomImageUrl(currentQuestion.exam_question.media.content[0].url)}
+                                        />
+                                    </div>
+                                )}
                                 <MathRenderer
                                     className="font-medium leading-relaxed mb-8 text-gray-900 dark:text-white question-content"
                                     content={currentQuestion?.exam_question?.content || ''}
