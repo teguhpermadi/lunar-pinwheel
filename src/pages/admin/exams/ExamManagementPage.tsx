@@ -3,6 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
+
+const Toast = MySwal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
+});
+
 
 export default function ExamManagementPage() {
     const { selectedYearId } = useAcademicYear();
@@ -79,6 +96,36 @@ export default function ExamManagementPage() {
             fetchExams(newPage, searchQuery);
         }
     };
+
+    const handleDelete = async (id: string) => {
+        const result = await MySwal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await examApi.deleteExam(id);
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Exam has been deleted.'
+                });
+                fetchExams(pagination.currentPage, searchQuery);
+            } catch (error) {
+                console.error("Failed to delete exam:", error);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to delete exam.'
+                });
+            }
+        }
+    };
+
 
     const getStatusBadge = (exam: Exam) => {
         const now = new Date();
@@ -256,7 +303,11 @@ export default function ExamManagementPage() {
                                                 >
                                                     <span className="material-symbols-outlined text-xl">edit</span>
                                                 </Link>
-                                                <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                                                <button
+                                                    onClick={() => handleDelete(exam.id)}
+                                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Delete"
+                                                >
                                                     <span className="material-symbols-outlined text-xl">delete</span>
                                                 </button>
                                             </div>
