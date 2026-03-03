@@ -85,9 +85,9 @@ export default function ArabicKeyboard({ onKeyClick, onBackspace, onSpace }: Ara
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
                         transition={{ duration: 0.2 }}
-                        className="w-full"
+                        className="w-full flex flex-col gap-1.5 sm:gap-2"
                     >
-                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-11 gap-1.5 sm:gap-2">
+                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-11 gap-1.5 sm:gap-2 max-h-[160px] sm:max-h-[220px] md:max-h-none overflow-y-auto scrollbar-hide pr-1 pb-1">
                             {keys[activeTab].map((char, idx) => (
                                 <ArabicKey
                                     key={`${activeTab}-${idx}`}
@@ -96,13 +96,14 @@ export default function ArabicKeyboard({ onKeyClick, onBackspace, onSpace }: Ara
                                     className={`${idx < 10 && activeTab === 'main' ? "bg-slate-50 dark:bg-slate-800/50 font-bold" : ""} ${activeTab === 'lafadz' ? "text-3xl" : ""}`}
                                 />
                             ))}
+                        </div>
 
-
-                            {/* Special Actions */}
+                        {/* Special Actions */}
+                        <div className="flex gap-1.5 sm:gap-2 mt-1 sm:mt-2">
                             <button
                                 type="button"
                                 onClick={onSpace}
-                                className="col-span-3 sm:col-span-4 md:col-span-5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all min-h-[40px] sm:min-h-[50px]"
+                                className="flex-[4] sm:flex-[5] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-slate-100 dark:hover:bg-slate-700 transition-all min-h-[40px] sm:min-h-[50px]"
                             >
                                 Spasi
                             </button>
@@ -110,7 +111,7 @@ export default function ArabicKeyboard({ onKeyClick, onBackspace, onSpace }: Ara
                             <button
                                 type="button"
                                 onClick={onBackspace}
-                                className="col-span-3 sm:col-span-4 md:col-span-6 bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-100 dark:border-red-900/30 flex items-center justify-center p-2 rounded-lg border min-h-[40px] sm:min-h-[50px]"
+                                className="flex-[6] sm:flex-[6] bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-100 dark:border-red-900/30 flex items-center justify-center p-2 rounded-lg border min-h-[40px] sm:min-h-[50px]"
                             >
                                 <Delete size={16} className="ml-1 sm:ml-2 sm:w-[18px] sm:h-[18px]" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Hapus</span>

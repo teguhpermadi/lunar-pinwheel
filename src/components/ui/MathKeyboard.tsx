@@ -157,10 +157,10 @@ export default function MathKeyboard({ onKeyClick, onBackspace }: MathKeyboardPr
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="w-full"
+                        className="w-full flex flex-col gap-1.5 sm:gap-2"
                     >
                         {activeTab === 'basic' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 max-h-[160px] sm:max-h-[220px] md:max-h-none overflow-y-auto scrollbar-hide pr-1 pb-1">
                                 <div className="md:col-span-5 grid grid-cols-3 gap-1.5 sm:gap-2 border-b md:border-b-0 border-slate-100 dark:border-slate-800 md:border-r pb-4 md:pb-0 md:pr-4">
                                     {categories.basic.keypad.map((key, idx) => (
                                         <MathKey
@@ -172,7 +172,7 @@ export default function MathKeyboard({ onKeyClick, onBackspace }: MathKeyboardPr
                                         />
                                     ))}
                                 </div>
-                                <div className="md:col-span-7 grid grid-cols-4 gap-1.5 sm:gap-2 relative">
+                                <div className="md:col-span-7 grid grid-cols-4 gap-1.5 sm:gap-2 h-fit">
                                     {categories.basic.operations.map((key, idx) => (
                                         <MathKey
                                             key={`ops-${idx}`}
@@ -182,18 +182,10 @@ export default function MathKeyboard({ onKeyClick, onBackspace }: MathKeyboardPr
                                             onClick={handleKeyClick}
                                         />
                                     ))}
-                                    <button
-                                        type="button"
-                                        onClick={onBackspace}
-                                        className="math-key col-span-2 bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-100 dark:border-red-900/30 flex items-center justify-center p-2 rounded-lg border min-h-[36px] sm:min-h-[40px]"
-                                    >
-                                        <Delete size={16} className="mr-1 sm:mr-2 sm:w-[18px] sm:h-[18px]" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Backspace</span>
-                                    </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 sm:gap-2">
+                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 sm:gap-2 max-h-[160px] sm:max-h-[220px] md:max-h-none overflow-y-auto scrollbar-hide pr-1 pb-1">
                                 {(categories[activeTab] as KeyboardKey[]).map((key, idx) => (
                                     <MathKey
                                         key={`${activeTab}-${idx}`}
@@ -203,16 +195,18 @@ export default function MathKeyboard({ onKeyClick, onBackspace }: MathKeyboardPr
                                         onClick={handleKeyClick}
                                     />
                                 ))}
-                                <button
-                                    type="button"
-                                    onClick={onBackspace}
-                                    className="math-key col-span-full sm:col-span-2 md:col-span-1 bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-100 dark:border-red-900/30 flex items-center justify-center p-2 rounded-lg border aspect-auto sm:aspect-square min-h-[36px] sm:min-h-[40px]"
-                                >
-                                    <Delete size={18} />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider ml-2 sm:hidden md:hidden">Backspace</span>
-                                </button>
                             </div>
                         )}
+                        <div className="flex gap-1.5 sm:gap-2 mt-1 sm:mt-2 w-full">
+                            <button
+                                type="button"
+                                onClick={onBackspace}
+                                className="w-full bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-100 dark:border-red-900/30 flex items-center justify-center p-2 rounded-lg border min-h-[40px] sm:min-h-[50px]"
+                            >
+                                <Delete size={18} />
+                                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider ml-2">Backspace</span>
+                            </button>
+                        </div>
                     </motion.div>
                 </AnimatePresence>
             </div>
