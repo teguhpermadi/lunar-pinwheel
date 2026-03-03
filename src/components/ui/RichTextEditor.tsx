@@ -11,6 +11,7 @@ import { useEditorStore } from '@/store/useEditorStore';
 interface RichTextEditorProps {
     value: string;
     onChange: (value: string) => void;
+    onBlur?: () => void;
     placeholder?: string;
     className?: string;
     minHeight?: string;
@@ -75,6 +76,7 @@ const toPersistenceHtml = (html: string) => {
 export default function RichTextEditor({
     value,
     onChange,
+    onBlur,
     placeholder = 'Type here...',
     className = '',
     minHeight = 'min-h-[100px]'
@@ -98,6 +100,11 @@ export default function RichTextEditor({
         },
         onFocus: ({ editor }) => {
             setActiveEditor(editor);
+        },
+        onBlur: () => {
+            if (onBlur) {
+                onBlur();
+            }
         },
         editorProps: {
             attributes: {
