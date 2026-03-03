@@ -290,14 +290,37 @@ export default function ExamTaker() {
 
     const handleSubmitExam = async () => {
         if (!id) return;
+        if (!isAllAnswered()) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Pastikan semua soal telah dijawab sebelum menyelesaikan ujian.',
+            });
+            return;
+        }
+
+        const result = await MySwal.fire({
+            title: 'Selesai Ujian?',
+            text: 'Apakah Anda yakin ingin menyelesaikan ujian ini? Jawaban tidak dapat diubah lagi setelah disubmit.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Saya Yakin!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const response = await studentApi.finishExam(id);
             if (response.success) {
                 MySwal.fire({
                     icon: 'success',
-                    title: 'Exam Submitted',
-                    text: 'Your exam has been submitted successfully.',
+                    title: 'Ujian Selesai',
+                    text: 'Ujian Anda telah berhasil disimpan.',
                 }).then(() => navigate('/exams'));
             }
         } catch (error: any) {
@@ -589,7 +612,8 @@ export default function ExamTaker() {
                                             setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
                                         }
                                     }}
-                                    className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={currentQuestionIndex === questions.length - 1 && !isAllAnswered()}
+                                    className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
                                     {currentQuestionIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
                                     <span className="material-icons text-lg ml-2">
