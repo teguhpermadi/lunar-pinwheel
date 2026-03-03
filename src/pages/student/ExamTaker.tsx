@@ -549,8 +549,12 @@ export default function ExamTaker() {
                                     className="mt-8"
                                     onClick={(e) => {
                                         const target = e.target as HTMLElement;
-                                        if (target.tagName === 'IMG') {
-                                            setZoomImageUrl((target as HTMLImageElement).src);
+                                        // Support clicking images even if they're wrapped in <figure>, <a>, or other wrappers
+                                        const imgEl = target.tagName === 'IMG'
+                                            ? (target as HTMLImageElement)
+                                            : (target.closest ? (target.closest('img') as HTMLImageElement | null) : null);
+                                        if (imgEl && imgEl.src) {
+                                            setZoomImageUrl(imgEl.src);
                                         }
                                     }}
                                 >

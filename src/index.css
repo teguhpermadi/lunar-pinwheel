@@ -132,5 +132,18 @@
     max-width: 100%;
     height: auto;
     border-radius: 0.5rem;
+    display: block;
+  }
+
+  /* Force images inside math-rendered/question content to be visible and responsive
+     on small screens and to override any conflicting prose/third-party rules. */
+  .math-rendered.question-content img,
+  .math-rendered.question-content figure img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    border-radius: 0.5rem !important;
   }
 }
