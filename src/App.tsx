@@ -21,6 +21,7 @@ import QuestionBankList from "@/pages/admin/question-banks/QuestionBankList"
 import CreateQuestionBank from "@/pages/admin/question-banks/CreateQuestionBank"
 import EditQuestionBank from "@/pages/admin/question-banks/EditQuestionBank"
 import ShowQuestionBank from "@/pages/admin/question-banks/ShowQuestionBank"
+import PreviewQuestionBank from "@/pages/admin/question-banks/PreviewQuestionBank"
 import QuestionFormPage from "@/pages/admin/questions/QuestionFormPage"
 import ExamManagementPage from "@/pages/admin/exams/ExamManagementPage"
 import ExamLiveScorePage from "@/pages/admin/exams/ExamLiveScorePage"
@@ -140,6 +141,7 @@ function App() {
             <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
             <Route path="admin/question-banks/:id" element={<EditQuestionBank />} />
             <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />
+            <Route path="admin/question-banks/:id/preview" element={<PreviewQuestionBank />} />
             <Route path="admin/question-banks/:bankId/questions/create" element={<QuestionFormPage />} />
             <Route path="admin/questions/:questionId/edit" element={<QuestionFormPage />} />
             <Route path="admin/exams/:id/correction" element={<ExamCorrectionPage />} />
