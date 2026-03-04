@@ -46,6 +46,82 @@ export default function ExamTaker() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [gracePeriodSeconds, setGracePeriodSeconds] = useState<number | null>(null);
 
+    // Offline State Sync Queue
+    const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
+        const saved = localStorage.getItem(`exam_${id}_pending_answers`);
+        return saved ? JSON.parse(saved) : {};
+    });
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    // Track online/offline status
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    // Sync pending answers into localStorage
+    useEffect(() => {
+        if (id) {
+            localStorage.setItem(`exam_${id}_pending_answers`, JSON.stringify(pendingAnswers));
+        }
+    }, [pendingAnswers, id]);
+
+    // Background sync manager
+    useEffect(() => {
+        let syncTimer: any;
+
+        const syncPendingAnswers = async () => {
+            if (!isOnline || isSyncing || !id) return;
+            const pendingIds = Object.keys(pendingAnswers);
+            if (pendingIds.length === 0) return;
+
+            setIsSyncing(true);
+            let syncedCount = 0;
+            const answersToKeep = { ...pendingAnswers };
+
+            try {
+                // Determine order or logic. We can do Promise.all but to avoid overloading concurrent
+                // requests, we'll do sequential processing for failed answers.
+                for (const qId of pendingIds) {
+                    const payload = answersToKeep[qId];
+                    try {
+                        const response = await studentApi.answerQuestion(id, payload);
+                        if (response.success) {
+                            delete answersToKeep[qId];
+                            syncedCount++;
+                        }
+                    } catch (err) {
+                        // Keep in pending loop
+                        console.warn(`Retry failed for answer ${qId}`, err);
+                    }
+                }
+
+                if (syncedCount > 0) {
+                    setPendingAnswers(answersToKeep);
+                }
+            } finally {
+                setIsSyncing(false);
+            }
+        };
+
+        // Try syncing upon coming online
+        if (isOnline) {
+            syncPendingAnswers();
+            // Also retry periodically just in case the connection is flaky
+            syncTimer = setInterval(syncPendingAnswers, 15000);
+        }
+
+        return () => clearInterval(syncTimer);
+    }, [isOnline, pendingAnswers, id, isSyncing]);
+
+
     useEffect(() => {
         if (id) {
             fetchExamData();
@@ -152,73 +228,118 @@ export default function ExamTaker() {
         try {
             const response = await studentApi.takeExam(id);
             if (response.success) {
-                setExam(response.data.exam);
+                // Cache successful fetch to fallback
+                localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(response.data));
 
-                // Handle both plain array and { data: [] } structure
-                const rawQuestions = Array.isArray(response.data.questions)
-                    ? response.data.questions
-                    : (response.data.questions?.data || []);
-
-                // Ensure student_answer is handled if null (important for progress calculation)
-                const questionsData = rawQuestions.map((q: any) => {
-                    const eq = q.exam_question;
-                    const qt = eq?.question_type || eq?.type;
-
-                    // Defensive check: Ensure options is an array
-                    if (eq && eq.options && !Array.isArray(eq.options)) {
-                        eq.options = Object.values(eq.options);
-                    }
-
-                    // Normalize media: endpoints may return media in several shapes
-                    // - admin question bank: exam_question.media.content (array)
-                    // - some responses: q.media.content
-                    // - simplified single path: exam_question.media_path
-                    // We'll prefer exam_question.media, but copy/derive from other keys when missing
-                    if (eq) {
-                        if (!eq.media && q.media) {
-                            try { eq.media = q.media; } catch (e) { /* ignore */ }
-                        }
-
-                        if (!eq.media && eq.media_path) {
-                            // convert single media_path string into the content array shape
-                            try {
-                                eq.media = {
-                                    content: [{ url: eq.media_path, mime_type: '' }]
-                                } as any;
-                            } catch (e) { /* ignore */ }
-                        }
-                    }
-
-                    return {
-                        ...q,
-                        student_answer: q.student_answer || (qt === 'multiple_selection' || qt === 'sequence' ? [] :
-                            (qt === 'matching' || qt === 'categorization' ? {} : null))
-                    };
-                });
-
-                setQuestions(questionsData);
-                if (response.data.remaining_seconds !== undefined) {
-                    setRemainingSeconds(parseInt(response.data.remaining_seconds));
-                }
-                setExam(response.data.exam);
+                processExamData(response.data);
             } else {
-                MySwal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: response.message || 'Failed to load exam data.',
-                }).then(() => navigate('/exams'));
+                handleFetchFallback(response.message || 'Failed to load exam data.');
             }
         } catch (error: any) {
             console.error('Failed to fetch exam data:', error);
-            MySwal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.response?.data?.message || 'An error occurred while loading exam data.',
-            }).then(() => navigate('/exams'));
+            handleFetchFallback(error.response?.data?.message || 'An error occurred while loading exam data.');
         } finally {
             setIsLoading(false);
             setIsInitialLoad(false);
         }
+    };
+
+    const handleFetchFallback = (errorMsg: string) => {
+        if (!id) return;
+        // Attempt to load from offline cache
+        const cachedDataStr = localStorage.getItem(`exam_${id}_cache_data`);
+        if (cachedDataStr) {
+            try {
+                const cachedData = JSON.parse(cachedDataStr);
+                console.log("Loaded exam from local cache.", cachedData);
+                MySwal.fire({
+                    icon: 'info',
+                    title: 'Offline Mode',
+                    text: 'You are currently offline. Loading previously cached exam data. Your answers will be saved locally.',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+                processExamData(cachedData);
+            } catch (e) {
+                showErrorAndRedirect(errorMsg);
+            }
+        } else {
+            showErrorAndRedirect(errorMsg);
+        }
+    };
+
+    const showErrorAndRedirect = (errorMsg: string) => {
+        MySwal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMsg,
+        }).then(() => navigate('/exams'));
+    };
+
+    const processExamData = (data: any) => {
+        setExam(data.exam);
+
+        // Handle both plain array and { data: [] } structure
+        const rawQuestions = Array.isArray(data.questions)
+            ? data.questions
+            : (data.questions?.data || []);
+
+        // Retrieve any pending offline answers for this exam
+        const savedPendingStr = localStorage.getItem(`exam_${id}_pending_answers`);
+        const localPendingAnswers = savedPendingStr ? JSON.parse(savedPendingStr) : {};
+
+        // Merge offline answers if they exist
+        const questionsData = rawQuestions.map((q: any) => {
+            const eq = q.exam_question;
+            const qt = eq?.question_type || eq?.type;
+
+            if (eq && eq.options && !Array.isArray(eq.options)) {
+                eq.options = Object.values(eq.options);
+            }
+
+            if (eq) {
+                if (!eq.media && q.media) {
+                    try { eq.media = q.media; } catch (e) { /* ignore */ }
+                }
+
+                if (!eq.media && eq.media_path) {
+                    try {
+                        eq.media = {
+                            content: [{ url: eq.media_path, mime_type: '' }]
+                        } as any;
+                    } catch (e) { /* ignore */ }
+                }
+            }
+
+            // Reapply locally pending answer so UI matches state
+            let student_answer = q.student_answer;
+            let is_flagged = q.is_flagged;
+
+            if (localPendingAnswers[q.id]) {
+                const pending = localPendingAnswers[q.id];
+                if (pending.answer !== undefined) {
+                    student_answer = pending.answer;
+                }
+                if (pending.is_flagged !== undefined) {
+                    is_flagged = pending.is_flagged;
+                }
+            } else if (student_answer === null || student_answer === undefined) {
+                student_answer = (qt === 'multiple_selection' || qt === 'sequence' ? [] :
+                    (qt === 'matching' || qt === 'categorization' ? {} : null));
+            }
+
+            return {
+                ...q,
+                student_answer,
+                is_flagged
+            };
+        });
+
+        setQuestions(questionsData);
+        if (data.remaining_seconds !== undefined) {
+            setRemainingSeconds(parseInt(data.remaining_seconds));
+        }
+        setExam(data.exam);
     };
 
     // Automatic Fullscreen on mount
@@ -250,24 +371,73 @@ export default function ExamTaker() {
         );
         setQuestions(newQuestions);
 
+        // Update local cache manually
+        const cachedDataStr = localStorage.getItem(`exam_${id}_cache_data`);
+        if (cachedDataStr) {
+            try {
+                const cachedData = JSON.parse(cachedDataStr);
+                if (Array.isArray(cachedData.questions)) {
+                    cachedData.questions = newQuestions;
+                } else if (cachedData.questions?.data) {
+                    cachedData.questions.data = newQuestions;
+                }
+                localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(cachedData));
+            } catch (e) { }
+        }
+
+        const payload = {
+            question_id: currentQ.id,
+            answer: answer,
+            is_flagged: currentQ.is_flagged
+        };
+
+        if (!isOnline) {
+            // Save to queue
+            setPendingAnswers((prev) => ({
+                ...prev,
+                [currentQ.id]: payload
+            }));
+            return;
+        }
+
         try {
-            await studentApi.answerQuestion(id, {
-                question_id: currentQ.id,
-                answer: answer,
-                is_flagged: currentQ.is_flagged
+            await studentApi.answerQuestion(id, payload);
+
+            // If it succeeds, verify it's removed from pending
+            setPendingAnswers((prev) => {
+                if (prev[currentQ.id]) {
+                    const cloned = { ...prev };
+                    delete cloned[currentQ.id];
+                    return cloned;
+                }
+                return prev;
             });
         } catch (error) {
-            console.error('Failed to save answer:', error);
-            // Optionally revert update or show subtle indicator
+            console.error('Failed to save answer, putting in sync queue:', error);
+            // Put in offline queue
+            setPendingAnswers((prev) => ({
+                ...prev,
+                [currentQ.id]: payload
+            }));
         }
     };
 
     const handleAutoFinish = async () => {
         if (isInitialLoad || remainingSeconds === null || remainingSeconds > 5) return;
         setIsSubmitting(true);
+
+        // Wait briefly for sync queue to flush if online
+        if (isOnline && Object.keys(pendingAnswers).length > 0) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
         try {
             const response = await studentApi.finishExam(id!);
             if (response.success) {
+                // Remove caches
+                localStorage.removeItem(`exam_${id}_cache_data`);
+                localStorage.removeItem(`exam_${id}_pending_answers`);
+
                 MySwal.fire({
                     icon: 'warning',
                     title: 'Time is Up!',
@@ -278,8 +448,16 @@ export default function ExamTaker() {
             }
         } catch (error: any) {
             console.error('Auto finish failed:', error);
-            // Even if it fails, we should probably redirect because time is up
-            navigate('/exams');
+            if (!isOnline) {
+                MySwal.fire({
+                    icon: 'warning',
+                    title: 'Ujian Berakhir Offline',
+                    text: 'Waktu ujian telah habis. Karena Anda sedang offline, jawaban Anda tersimpan lokal. Perangkat akan mencoba mensinkronisasikan jawaban saat Anda online dan mengakses kembali.',
+                }).then(() => navigate('/exams'));
+            } else {
+                // Even if it fails, we should probably redirect because time is up
+                navigate('/exams');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -293,19 +471,60 @@ export default function ExamTaker() {
     };
 
     const handleToggleFlag = async () => {
-        if (!currentQuestion) return;
+        if (!currentQuestion || !id) return;
+
+        const newQuestions = [...questions];
+        const newFlagState = !currentQuestion.is_flagged;
+        newQuestions[currentQuestionIndex].is_flagged = newFlagState;
+        setQuestions(newQuestions);
+
+        // Update local cache manually
+        const cachedDataStr = localStorage.getItem(`exam_${id}_cache_data`);
+        if (cachedDataStr) {
+            try {
+                const cachedData = JSON.parse(cachedDataStr);
+                if (Array.isArray(cachedData.questions)) {
+                    cachedData.questions = newQuestions;
+                } else if (cachedData.questions?.data) {
+                    cachedData.questions.data = newQuestions;
+                }
+                localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(cachedData));
+            } catch (e) { }
+        }
+
+        const payload = {
+            question_id: currentQuestion.id,
+            is_flagged: newFlagState,
+            answer: currentQuestion.student_answer
+        };
+
+        if (!isOnline) {
+            // Save to queue
+            setPendingAnswers((prev) => ({
+                ...prev,
+                [currentQuestion.id]: payload
+            }));
+            return;
+        }
+
         try {
-            const response = await studentApi.answerQuestion(id!, {
-                question_id: currentQuestion.id,
-                is_flagged: !currentQuestion.is_flagged,
-                answer: currentQuestion.student_answer
+            await studentApi.answerQuestion(id, payload);
+            // If it succeeds, verify it's removed from pending
+            setPendingAnswers((prev) => {
+                if (prev[currentQuestion.id] && prev[currentQuestion.id].is_flagged === newFlagState) {
+                    const cloned = { ...prev };
+                    delete cloned[currentQuestion.id];
+                    return cloned;
+                }
+                return prev;
             });
-            if (response.success) {
-                const newQuestions = [...questions];
-                newQuestions[currentQuestionIndex].is_flagged = !currentQuestion.is_flagged;
-                setQuestions(newQuestions);
-            }
-        } catch (e) { }
+        } catch (e) {
+            console.error('Failed to change flag, putting in sync queue:', e);
+            setPendingAnswers((prev) => ({
+                ...prev,
+                [currentQuestion.id]: payload
+            }));
+        }
     };
 
     const handleSubmitExam = async () => {
@@ -317,6 +536,31 @@ export default function ExamTaker() {
                 text: 'Pastikan semua soal telah dijawab sebelum menyelesaikan ujian.',
             });
             return;
+        }
+
+        if (!isOnline || Object.keys(pendingAnswers).length > 0) {
+            if (!isOnline) {
+                MySwal.fire({
+                    icon: 'warning',
+                    title: 'Anda Sedang Offline',
+                    text: 'Ujian tidak dapat diakhiri saat koneksi internet terputus. Jawaban Anda telah disimpan secara lokal. Mohon tunggu hingga koneksi pulih.',
+                });
+                return;
+            } else {
+                // Wait a tiny bit to check if sync finishes
+                setIsSubmitting(true);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (Object.keys(pendingAnswers).length > 0) {
+                    setIsSubmitting(false);
+                    MySwal.fire({
+                        icon: 'warning',
+                        title: 'Sinkronisasi Tertunda',
+                        text: 'Masih ada jawaban yang sedang dikirimkan ke server. Tunggu beberapa saat agar semua jawaban tersimpan sebelum menyudahi ujian.',
+                    });
+                    return;
+                }
+                setIsSubmitting(false);
+            }
         }
 
         const result = await MySwal.fire({
@@ -337,6 +581,10 @@ export default function ExamTaker() {
         try {
             const response = await studentApi.finishExam(id);
             if (response.success) {
+                // Clear all local storage caches
+                localStorage.removeItem(`exam_${id}_cache_data`);
+                localStorage.removeItem(`exam_${id}_pending_answers`);
+
                 MySwal.fire({
                     icon: 'success',
                     title: 'Ujian Selesai',
@@ -519,6 +767,20 @@ export default function ExamTaker() {
                     className="h-full bg-primary"
                 />
             </div>
+
+            {/* Offline Status Bar */}
+            {!isOnline && (
+                <div className="bg-red-500 text-white text-xs text-center py-1 font-semibold tracking-wide shrink-0">
+                    <span className="material-icons text-[10px] mr-1 align-middle">cloud_off</span>
+                    You are currently offline. Answers are saved locally and will sync when reconnected.
+                </div>
+            )}
+            {isOnline && Object.keys(pendingAnswers).length > 0 && (
+                <div className="bg-yellow-500 text-white text-xs text-center py-1 font-semibold tracking-wide shrink-0 animate-pulse">
+                    <span className="material-icons text-[10px] mr-1 align-middle">sync</span>
+                    Syncing {Object.keys(pendingAnswers).length} pending answer(s)...
+                </div>
+            )}
 
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sm:min-h-[4rem] min-h-[3rem] flex items-center justify-between px-3 md:px-6 py-1 sm:py-0 shrink-0 z-30 shadow-sm gap-2">
