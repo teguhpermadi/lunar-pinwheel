@@ -341,14 +341,47 @@ export default function PreviewQuestionBank() {
                         >
                             {/* Question Container */}
                             <div className="relative z-10">
-                                {currentQuestion?.exam_question?.media?.content?.[0] && (
-                                    <div className="mb-6 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center p-2">
-                                        <img
-                                            src={currentQuestion.exam_question.media.content[0].url}
-                                            alt="Question preview"
-                                            className="max-h-[400px] w-auto object-contain cursor-zoom-in rounded-xl"
-                                            onClick={() => setZoomImageUrl(currentQuestion.exam_question.media.content[0].url)}
-                                        />
+                                {currentQuestion?.exam_question?.media?.content && currentQuestion.exam_question.media.content.length > 0 && (
+                                    <div className="mb-6 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-2xl bg-gray-50 dark:bg-gray-800/50 p-2">
+                                        <div className="w-full flex flex-col items-center gap-3">
+                                            {currentQuestion.exam_question.media.content.map((m: any, mi: number) => {
+                                                const url = m?.url || m?.path || '';
+                                                const mime = m?.mime || m?.type || '';
+                                                const kind = mime.split('/')[0] || (/(jpe?g|png|gif|webp|svg)$/i.test(url) ? 'image' : (/(mp4|webm|ogg)$/i.test(url) ? 'video' : (/(mp3|wav|ogg)$/i.test(url) ? 'audio' : 'file')));
+
+                                                if (!url) return null;
+
+                                                if (kind === 'image') {
+                                                    return (
+                                                        <img
+                                                            key={mi}
+                                                            src={url}
+                                                            alt={`Question preview ${mi + 1}`}
+                                                            className="max-h-[400px] w-auto object-contain cursor-zoom-in rounded-xl"
+                                                            onClick={() => setZoomImageUrl(url)}
+                                                        />
+                                                    );
+                                                }
+
+                                                if (kind === 'video') {
+                                                    return (
+                                                        <video key={mi} controls src={url} className="max-h-[400px] w-full rounded-xl bg-black" />
+                                                    );
+                                                }
+
+                                                if (kind === 'audio') {
+                                                    return (
+                                                        <audio key={mi} controls src={url} className="w-full" />
+                                                    );
+                                                }
+
+                                                return (
+                                                    <a key={mi} href={url} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
+                                                        Open attachment
+                                                    </a>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 )}
                                 <MathRenderer
