@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,6 +37,15 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     setPartialScoreData,
     setIsPartialModalOpen
 }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        setIsExpanded(false);
+    }, [selectedQuestionIndex]);
+
+    const contentRaw = currentQuestionContent || '';
+    const isLongContent = contentRaw.replace(/<[^>]+>/g, '').length > 100 || /<img|<table|<iframe|<audio|<video/i.test(contentRaw);
+
     return (
         <motion.div
             key={`bulk-${selectedQuestionIndex}`}
@@ -46,9 +55,9 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
             className="space-y-8"
         >
             <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                        <div className="flex flex-col gap-1 shrink-0">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1 overflow-hidden">
+                        <div className="flex flex-col gap-1 shrink-0 mt-1">
                             <div className="flex items-center gap-2">
                                 <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-wider rounded-lg border border-indigo-100 dark:border-indigo-500/20">
                                     Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')}
@@ -66,13 +75,34 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 </span>
                             )}
                         </div>
-                        <MathRenderer
-                            key={`math-${selectedQuestionIndex}`}
-                            className="text-sm font-bold text-slate-900 dark:text-white leading-tight line-clamp-2"
-                            content={currentQuestionContent || ''}
-                        />
+                        <div className="flex flex-col flex-1 min-w-0">
+                            <div
+                                className="cursor-pointer transition-all duration-200"
+                                onClick={() => setIsExpanded(!isExpanded)}
+                            >
+                                <MathRenderer
+                                    key={`math-${selectedQuestionIndex}`}
+                                    className={cn(
+                                        "text-sm font-bold text-slate-900 dark:text-white leading-tight",
+                                        !isExpanded && "line-clamp-2"
+                                    )}
+                                    content={currentQuestionContent || ''}
+                                />
+                            </div>
+                            {isLongContent && (
+                                <button
+                                    onClick={() => setIsExpanded(!isExpanded)}
+                                    className="text-[10px] text-primary hover:text-primary/80 font-bold self-start mt-1 flex items-center gap-0.5"
+                                >
+                                    {isExpanded ? 'Tutup' : 'Lihat Selengkapnya'}
+                                    <span className="material-symbols-outlined text-[14px]">
+                                        {isExpanded ? 'expand_less' : 'expand_more'}
+                                    </span>
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-start mt-1 shrink-0">
                         <button
                             onClick={handleToggleSelectAll}
                             className={cn(
