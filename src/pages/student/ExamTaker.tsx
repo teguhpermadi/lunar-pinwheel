@@ -45,6 +45,7 @@ export default function ExamTaker() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [gracePeriodSeconds, setGracePeriodSeconds] = useState<number | null>(null);
+    const [isWaitingOfflineSubmit, setIsWaitingOfflineSubmit] = useState(false);
 
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
@@ -116,6 +117,18 @@ export default function ExamTaker() {
             syncPendingAnswers();
             // Also retry periodically just in case the connection is flaky
             syncTimer = setInterval(syncPendingAnswers, 15000);
+
+            // Auto submit if we were waiting
+            if (isWaitingOfflineSubmit) {
+                // Let the sync finish first
+                setTimeout(() => {
+                    const pendingIds = Object.keys(pendingAnswers);
+                    if (pendingIds.length === 0) {
+                        setIsWaitingOfflineSubmit(false);
+                        handleSubmitExam();
+                    }
+                }, 3000);
+            }
         }
 
         return () => clearInterval(syncTimer);
@@ -135,6 +148,17 @@ export default function ExamTaker() {
     // Timer logic
     useEffect(() => {
         if (!exam || exam.timer_type !== 'strict' || (remainingSeconds === null)) return;
+
+        // If time is already up upon load
+        if (remainingSeconds <= 0 && gracePeriodSeconds === null) {
+            if (!isInitialLoad) {
+                // Defer slightly to allow react to finish mounting UI
+                setTimeout(() => handleAutoFinish(), 500);
+            } else {
+                setGracePeriodSeconds(5); // Give 5s grace period if reloading right at the end to trigger UI warning
+            }
+            return;
+        }
 
         // Normal countdown logic
         if (remainingSeconds > 0) {
@@ -180,6 +204,7 @@ export default function ExamTaker() {
             console.log('Timer sync received:', event.remainingSeconds);
             setGracePeriodSeconds(null);
             setRemainingSeconds(event.remainingSeconds);
+            localStorage.setItem(`exam_${id}_end_time`, (Date.now() + event.remainingSeconds * 1000).toString());
         });
 
         channel.listen('.ExamForceFinished', () => {
@@ -215,6 +240,7 @@ export default function ExamTaker() {
                     const newSeconds = parseInt(response.data.remaining_seconds);
                     if (newSeconds > 0) setGracePeriodSeconds(null);
                     setRemainingSeconds(prev => (prev === null || Math.abs(prev - newSeconds) > 10) ? newSeconds : prev);
+                    localStorage.setItem(`exam_${id}_end_time`, (Date.now() + newSeconds * 1000).toString());
                 }
             } catch (e) { }
         }, pollInterval);
@@ -231,7 +257,7 @@ export default function ExamTaker() {
                 // Cache successful fetch to fallback
                 localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(response.data));
 
-                processExamData(response.data);
+                processExamData(response.data, false);
             } else {
                 handleFetchFallback(response.message || 'Failed to load exam data.');
             }
@@ -251,15 +277,25 @@ export default function ExamTaker() {
         if (cachedDataStr) {
             try {
                 const cachedData = JSON.parse(cachedDataStr);
+
+                // Recalculate remaining time for offline reload
+                const savedEndTimeStr = localStorage.getItem(`exam_${id}_end_time`);
+                if (savedEndTimeStr) {
+                    const savedEndTime = parseInt(savedEndTimeStr);
+                    const now = Date.now();
+                    const actualRemaining = Math.max(0, Math.floor((savedEndTime - now) / 1000));
+                    cachedData.remaining_seconds = actualRemaining;
+                }
+
                 console.log("Loaded exam from local cache.", cachedData);
                 MySwal.fire({
                     icon: 'info',
-                    title: 'Offline Mode',
-                    text: 'You are currently offline. Loading previously cached exam data. Your answers will be saved locally.',
-                    timer: 3000,
+                    title: 'Offline Mode (Reloaded)',
+                    text: 'Anda merefresh halaman saat offline. Waktu ujian tetap berjalan. Jawaban Anda disimpan lokal dan akan disubmit saat online kembali.',
+                    timer: 5000,
                     showConfirmButton: false
                 });
-                processExamData(cachedData);
+                processExamData(cachedData, true);
             } catch (e) {
                 showErrorAndRedirect(errorMsg);
             }
@@ -276,7 +312,7 @@ export default function ExamTaker() {
         }).then(() => navigate('/exams'));
     };
 
-    const processExamData = (data: any) => {
+    const processExamData = (data: any, isOfflineLoad = false) => {
         setExam(data.exam);
 
         // Handle both plain array and { data: [] } structure
@@ -337,7 +373,11 @@ export default function ExamTaker() {
 
         setQuestions(questionsData);
         if (data.remaining_seconds !== undefined) {
-            setRemainingSeconds(parseInt(data.remaining_seconds));
+            const parsedSeconds = parseInt(data.remaining_seconds);
+            setRemainingSeconds(parsedSeconds);
+            if (!isOfflineLoad) {
+                localStorage.setItem(`exam_${id}_end_time`, (Date.now() + parsedSeconds * 1000).toString());
+            }
         }
         setExam(data.exam);
     };
@@ -449,11 +489,15 @@ export default function ExamTaker() {
         } catch (error: any) {
             console.error('Auto finish failed:', error);
             if (!isOnline) {
+                setIsWaitingOfflineSubmit(true);
                 MySwal.fire({
                     icon: 'warning',
-                    title: 'Ujian Berakhir Offline',
-                    text: 'Waktu ujian telah habis. Karena Anda sedang offline, jawaban Anda tersimpan lokal. Perangkat akan mencoba mensinkronisasikan jawaban saat Anda online dan mengakses kembali.',
-                }).then(() => navigate('/exams'));
+                    title: 'Koneksi Terputus!',
+                    text: 'Waktu ujian telah habis, namun device Anda sedang offline. **JANGAN TUTUP ATAU KELUAR DARI HALAMAN INI!** Biarkan komputer tetap menyala dan segera cari koneksi internet. Sistem akan otomatis mensubmit jawaban ketika koneksi kembali normal.',
+                    allowOutsideClick: false,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Saya Mengerti'
+                });
             } else {
                 // Even if it fails, we should probably redirect because time is up
                 navigate('/exams');
@@ -540,10 +584,13 @@ export default function ExamTaker() {
 
         if (!isOnline || Object.keys(pendingAnswers).length > 0) {
             if (!isOnline) {
+                setIsWaitingOfflineSubmit(true);
                 MySwal.fire({
                     icon: 'warning',
                     title: 'Anda Sedang Offline',
-                    text: 'Ujian tidak dapat diakhiri saat koneksi internet terputus. Jawaban Anda telah disimpan secara lokal. Mohon tunggu hingga koneksi pulih.',
+                    text: 'Ujian tidak dapat diakhiri saat koneksi internet terputus. **JANGAN TUTUP HALAMAN INI!** Jawaban Anda telah disimpan secara lokal. Sistem akan otomatis menyelesaikan ujian begitu koneksi internet Anda pulih.',
+                    allowOutsideClick: false,
+                    confirmButtonText: 'Tunggu Sinyal'
                 });
                 return;
             } else {
@@ -1119,16 +1166,24 @@ export default function ExamTaker() {
             </AnimatePresence>
             {/* Loading Overlay */}
             {
-                isSubmitting && (
-                    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+                (isSubmitting || isWaitingOfflineSubmit) && (
+                    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 text-center">
                         <div className="relative">
                             <div className="size-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-primary text-3xl animate-bounce">rocket_launch</span>
+                                <span className="material-symbols-outlined text-primary text-3xl animate-bounce">
+                                    {isWaitingOfflineSubmit ? 'wifi_off' : 'rocket_launch'}
+                                </span>
                             </div>
                         </div>
-                        <h2 className="mt-6 text-xl font-bold text-slate-800 dark:text-white">Submitting Exam...</h2>
-                        <p className="mt-2 text-slate-500 dark:text-slate-400">Please wait while we secure your answers.</p>
+                        <h2 className={`mt-6 text-xl font-bold ${isWaitingOfflineSubmit ? 'text-red-500' : 'text-slate-800 dark:text-white'}`}>
+                            {isWaitingOfflineSubmit ? 'Menunggu Koneksi Internet...' : 'Submitting Exam...'}
+                        </h2>
+                        <p className="mt-2 text-slate-500 dark:text-slate-400 max-w-md">
+                            {isWaitingOfflineSubmit
+                                ? 'Jawaban Anda sudah siap disubmit, namun koneksi terputus. JANGAN tutup halaman ini. Sistem akan otomatis submit saat internet kembali.'
+                                : 'Please wait while we secure your answers.'}
+                        </p>
                     </div>
                 )
             }
