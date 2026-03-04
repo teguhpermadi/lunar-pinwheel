@@ -42,7 +42,8 @@ interface DashboardData {
 }
 
 export default function StudentDashboard() {
-    const { user: authUser } = useAuth();
+    // call hook for side-effects (auth context); user not used directly here
+    useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState<DashboardData | null>(null);

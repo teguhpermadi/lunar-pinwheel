@@ -1,5 +1,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
+import * as DOMPurify from 'dompurify';
 import 'katex/dist/katex.min.css';
 
 interface MathRendererProps {
@@ -27,6 +28,21 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
 
         return processed;
     }, [content]);
+
+    // Sanitize processedContent when running in the browser to prevent XSS
+    const safeContent = useMemo(() => {
+        if (!processedContent) return '';
+        try {
+            if (typeof window !== 'undefined' && DOMPurify) {
+                // Cast to any to avoid depending on DOMPurify types in this repo
+                return (DOMPurify as any).sanitize(processedContent);
+            }
+        } catch (err) {
+            // If sanitization fails for any reason, fall back to the raw processedContent
+            return processedContent;
+        }
+        return processedContent;
+    }, [processedContent]);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -57,15 +73,15 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
                 // Silently fail if KaTeX fails to render
             }
         }
-    }, [processedContent]);
+    }, [safeContent]);
 
     if (isHtml) {
         return (
             <div
                 ref={containerRef}
                 className={`math-rendered prose prose-slate dark:prose-invert max-w-none ${className}`}
-                data-content-hash={processedContent.length}
-                dangerouslySetInnerHTML={{ __html: processedContent }}
+                data-content-hash={safeContent.length}
+                dangerouslySetInnerHTML={{ __html: safeContent }}
             />
         );
     }

@@ -36,9 +36,16 @@ export default function ShortAnswerCorrection({ studentAnswer, options = [], key
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student Response</h5>
                 </div>
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <div className="text-slate-700 dark:text-slate-200 font-bold text-lg">
-                        {studentAnswer || <span className="italic text-slate-400">No answer provided.</span>}
-                    </div>
+                    {studentAnswer ? (
+                        <MathRenderer
+                            className="text-slate-700 dark:text-slate-200 font-bold text-lg"
+                            content={studentAnswer}
+                        />
+                    ) : (
+                        <div className="text-slate-700 dark:text-slate-200 font-bold text-lg">
+                            <span className="italic text-slate-400">No answer provided.</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

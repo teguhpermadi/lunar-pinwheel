@@ -29,7 +29,8 @@ function timeAgo(dateString: string) {
 }
 
 export default function QuestionBankList() {
-    const { user } = useAuth();
+    // call hook for possible side-effects; user not used here
+    useAuth();
     const { selectedYearId } = useAcademicYear();
     const navigate = useNavigate();
 

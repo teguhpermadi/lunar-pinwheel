@@ -32,9 +32,18 @@ export default function ArabicResponseCorrection({ studentAnswer, options = [], 
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student Response</h5>
                 </div>
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm min-h-[100px] flex items-center justify-end">
-                    <div className="text-slate-700 dark:text-slate-200 text-3xl font-arabic text-right leading-loose" dir="rtl">
-                        {studentAnswer || <span className="italic text-slate-400 text-sm">No answer provided.</span>}
-                    </div>
+                    {studentAnswer ? (
+                        <div dir="rtl" className="w-full">
+                            <MathRenderer
+                                className="text-slate-700 dark:text-slate-200 text-3xl font-arabic text-right leading-loose"
+                                content={studentAnswer}
+                            />
+                        </div>
+                    ) : (
+                        <div className="text-slate-700 dark:text-slate-200 text-3xl font-arabic text-right leading-loose" dir="rtl">
+                            <span className="italic text-slate-400 text-sm">No answer provided.</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -10,7 +10,6 @@ interface QuestionTagInputProps {
 }
 
 export default function QuestionTagInput({
-    questionId,
     tagType,
     initialTags = [],
     onTagsChange,

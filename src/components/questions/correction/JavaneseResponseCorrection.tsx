@@ -32,9 +32,16 @@ export default function JavaneseResponseCorrection({ studentAnswer, options = []
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student Response</h5>
                 </div>
                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm min-h-[100px]">
-                    <div className="text-slate-700 dark:text-slate-200 text-3xl font-javanese leading-loose">
-                        {studentAnswer || <span className="italic text-slate-400 text-sm">No answer provided.</span>}
-                    </div>
+                    {studentAnswer ? (
+                        <MathRenderer
+                            className="text-slate-700 dark:text-slate-200 text-3xl font-javanese leading-loose"
+                            content={studentAnswer}
+                        />
+                    ) : (
+                        <div className="text-slate-700 dark:text-slate-200 text-3xl font-javanese leading-loose">
+                            <span className="italic text-slate-400 text-sm">No answer provided.</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

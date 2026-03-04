@@ -396,6 +396,11 @@ export const teacherApi = {
         const response = await api.get('/teachers/export/template', { responseType: 'blob' });
         return response.data;
     }
+    ,
+    exportTeachers: async () => {
+        const response = await api.get('/teachers/export', { responseType: 'blob' });
+        return response.data;
+    }
 };
 
 export const studentApi = {
@@ -449,6 +454,10 @@ export const studentApi = {
     },
     downloadTemplate: async () => {
         const response = await api.get('/students/export/template', { responseType: 'blob' });
+        return response.data;
+    },
+    exportStudents: async () => {
+        const response = await api.get('/students/export', { responseType: 'blob' });
         return response.data;
     },
     getAvailable: async (params?: any) => {

@@ -7,10 +7,9 @@ interface MathKeyProps {
     latex?: string;
     onClick: (latex: string) => void;
     className?: string;
-    command?: string;
 }
 
-const MathKey = ({ label, latex, onClick, className = "", command }: MathKeyProps) => {
+const MathKey = ({ label, latex, onClick, className = "" }: MathKeyProps) => {
     return (
         <button
             type="button"
