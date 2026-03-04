@@ -135,11 +135,11 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                         {selectedAnswerIds.includes(answer.id) && <span className="material-symbols-outlined text-[14px]">check</span>}
                                     </div>
                                     <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
-                                        {answer.session?.user?.name?.charAt(0) || '?'}
+                                        {answer.session?.student?.name?.charAt(0) || '?'}
                                     </div>
                                     <div className="flex flex-col">
                                         <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                                            {answer.session?.user?.name}
+                                            {answer.session?.student?.name}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-1">
                                             <div className={cn(
@@ -178,7 +178,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                     sessionId: answer.session.id,
                                                     maxScore: answer.max_score,
                                                     currentScore: answer.score_earned || 0,
-                                                    studentName: answer.session?.user?.name
+                                                    studentName: answer.session?.student?.name
                                                 });
                                                 setIsPartialModalOpen(true);
                                             }}
