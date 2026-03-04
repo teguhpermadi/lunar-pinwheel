@@ -33,7 +33,8 @@ export default function MatchingCorrection({ options, studentAnswer = {}, keyAns
             <div className="grid gap-3">
                 {leftOptions.map((left) => {
                     // studentAnswer can be { [leftId]: rightId } or { [leftKey]: rightKey }
-                    const studentChoice = studentAnswer[left.id] || studentAnswer[left.option_key];
+                    // Guard against studentAnswer being null (caller may pass null explicitly)
+                    const studentChoice = (studentAnswer?.[left.id] ?? studentAnswer?.[left.option_key]) ?? null;
                     const correctRightId = getCorrectRightId(left);
 
                     // Finder helper to handle both ID and Key in studentChoice
