@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,6 +34,14 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     setQuestions
 }) => {
     const currentSession = sessions.find(s => s.id === selectedSessionId);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        setIsExpanded(false);
+    }, [selectedQuestionIndex, selectedSessionId]);
+
+    const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.content || '';
+    const isLongContent = contentRaw.replace(/<[^>]+>/g, '').length > 100 || /<img|<table|<iframe|<audio|<video/i.test(contentRaw);
 
     return (
         <motion.div
@@ -52,7 +60,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                 <>
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex items-start justify-between gap-4 mb-6">
-                            <div className="flex flex-col gap-3 mt-1">
+                            <div className="flex flex-col gap-3 mt-1 flex-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
                                         Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
@@ -67,11 +75,32 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         </span>
                                     )}
                                 </div>
-                                <MathRenderer
-                                    key={`math-${currentQuestion.id || selectedQuestionIndex}`}
-                                    className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed line-clamp-2"
-                                    content={currentQuestion.question_content || (currentQuestion as any).content || ''}
-                                />
+                                <div className="flex flex-col">
+                                    <div
+                                        className="cursor-pointer transition-all duration-200"
+                                        onClick={() => setIsExpanded(!isExpanded)}
+                                    >
+                                        <MathRenderer
+                                            key={`math-${currentQuestion.id || selectedQuestionIndex}`}
+                                            className={cn(
+                                                "text-lg font-bold text-slate-900 dark:text-white leading-relaxed",
+                                                !isExpanded && "line-clamp-2"
+                                            )}
+                                            content={contentRaw}
+                                        />
+                                    </div>
+                                    {isLongContent && (
+                                        <button
+                                            onClick={() => setIsExpanded(!isExpanded)}
+                                            className="text-xs text-primary hover:text-primary/80 font-bold self-start mt-2 flex items-center gap-1"
+                                        >
+                                            {isExpanded ? 'Tutup' : 'Lihat Selengkapnya'}
+                                            <span className="material-symbols-outlined text-[16px]">
+                                                {isExpanded ? 'expand_less' : 'expand_more'}
+                                            </span>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className={cn(
                                 "px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase flex items-center gap-2 shadow-sm border shrink-0",
