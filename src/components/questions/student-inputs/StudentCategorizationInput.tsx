@@ -69,6 +69,26 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
         setDraggedItemKey(null);
     };
 
+    const groupSequence = useMemo(() => {
+        return [...categories.map(c => c.uuid), null];
+    }, [categories]);
+
+    const handleMoveItem = (itemKey: string, currentGroup: string | null, direction: 1 | -1) => {
+        const currentIndex = groupSequence.indexOf(currentGroup);
+        if (currentIndex === -1) return;
+        const nextIndex = currentIndex + direction;
+        if (nextIndex >= 0 && nextIndex < groupSequence.length) {
+            const nextGroup = groupSequence[nextIndex];
+            const newSelection = { ...(selectedAnswer || {}) };
+            if (nextGroup) {
+                newSelection[itemKey] = nextGroup;
+            } else {
+                delete newSelection[itemKey];
+            }
+            onChange(newSelection);
+        }
+    };
+
     const onDragOver = (e: React.DragEvent) => {
         e.preventDefault();
     };
@@ -159,6 +179,10 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                                     item={item}
                                     onDragStart={() => setDraggedItemKey(item.option_key)}
                                     onTouchStart={() => setDraggedItemKey(item.option_key)}
+                                    onMovePrev={() => handleMoveItem(item.option_key, category.uuid, -1)}
+                                    onMoveNext={() => handleMoveItem(item.option_key, category.uuid, 1)}
+                                    disablePrev={groupSequence.indexOf(category.uuid) === 0}
+                                    disableNext={groupSequence.indexOf(category.uuid) === groupSequence.length - 1}
                                 />
                             ))}
                             {itemsByGroup.groups[category.uuid].length === 0 && (
@@ -194,6 +218,10 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                                     item={item}
                                     onDragStart={() => setDraggedItemKey(item.option_key)}
                                     onTouchStart={() => setDraggedItemKey(item.option_key)}
+                                    onMovePrev={() => handleMoveItem(item.option_key, null, -1)}
+                                    onMoveNext={() => handleMoveItem(item.option_key, null, 1)}
+                                    disablePrev={groupSequence.indexOf(null) === 0}
+                                    disableNext={groupSequence.indexOf(null) === groupSequence.length - 1}
                                 />
                             ))}
                         </AnimatePresence>
@@ -210,7 +238,23 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
     );
 }
 
-function ItemCard({ item, onDragStart, onTouchStart }: { item: QuestionOption; onDragStart: () => void; onTouchStart?: () => void }) {
+function ItemCard({
+    item,
+    onDragStart,
+    onTouchStart,
+    onMovePrev,
+    onMoveNext,
+    disablePrev,
+    disableNext
+}: {
+    item: QuestionOption;
+    onDragStart: () => void;
+    onTouchStart?: () => void;
+    onMovePrev?: () => void;
+    onMoveNext?: () => void;
+    disablePrev?: boolean;
+    disableNext?: boolean;
+}) {
     return (
         <motion.div
             layout
@@ -223,8 +267,31 @@ function ItemCard({ item, onDragStart, onTouchStart }: { item: QuestionOption; o
                 // start touch-drag using provided handler (sets draggedItemKey)
                 if (onTouchStart) onTouchStart();
             }}
-            className="w-[200px] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-primary/30 transition-all shrink-0"
+            className="w-[200px] relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-primary/30 transition-all shrink-0 group flex flex-col"
         >
+            <div className="flex justify-between items-center mb-2 gap-2">
+                <button
+                    type="button"
+                    disabled={disablePrev}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMovePrev?.(); }}
+                    className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-400 hover:text-primary flex items-center justify-center"
+                >
+                    <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
+                </button>
+                <button
+                    type="button"
+                    disabled={disableNext}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMoveNext?.(); }}
+                    className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-400 hover:text-primary flex items-center justify-center"
+                >
+                    <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
+                </button>
+            </div>
+
             {item.media?.option_media?.[0]?.url && (
                 <div className="mb-2 aspect-video rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 cursor-zoom-in">
                     <img

@@ -56,6 +56,47 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                         <div className="size-8 bg-primary/5 text-primary text-[10px] font-black rounded-full flex items-center justify-center shrink-0 border border-primary/10">
                             {items.indexOf(item) + 1}
                         </div>
+
+                        <div className="flex flex-col gap-1 ml-2">
+                            <button
+                                type="button"
+                                disabled={items.indexOf(item) === 0}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const idx = items.indexOf(item);
+                                    if (idx > 0) {
+                                        const newItems = [...items];
+                                        [newItems[idx - 1], newItems[idx]] = [newItems[idx], newItems[idx - 1]];
+                                        handleReorder(newItems);
+                                    }
+                                }}
+                                className="p-1 lg:p-1.5 text-slate-400 hover:text-primary disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
+                            >
+                                <span className="material-icons text-sm lg:text-base">keyboard_arrow_up</span>
+                            </button>
+                            <button
+                                type="button"
+                                disabled={items.indexOf(item) === items.length - 1}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const idx = items.indexOf(item);
+                                    if (idx < items.length - 1) {
+                                        const newItems = [...items];
+                                        [newItems[idx + 1], newItems[idx]] = [newItems[idx], newItems[idx + 1]];
+                                        handleReorder(newItems);
+                                    }
+                                }}
+                                className="p-1 lg:p-1.5 text-slate-400 hover:text-primary disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
+                            >
+                                <span className="material-icons text-sm lg:text-base">keyboard_arrow_down</span>
+                            </button>
+                        </div>
                     </Reorder.Item>
                 ))}
             </Reorder.Group>

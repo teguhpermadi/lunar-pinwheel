@@ -165,7 +165,48 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                                         className="text-xs sm:text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 leading-tight break-words"
                                     />
                                 </div>
+                                <div className="flex flex-col gap-1 ml-1 sm:ml-2">
+                                    <button
+                                        type="button"
+                                        disabled={orderedRight.indexOf(right) === 0}
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const idx = orderedRight.indexOf(right);
+                                            if (idx > 0) {
+                                                const newOrder = [...orderedRight];
+                                                [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+                                                handleReorder(newOrder);
+                                            }
+                                        }}
+                                        className="p-1 lg:p-1.5 text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
+                                    >
+                                        <span className="material-symbols-outlined text-sm sm:text-base">keyboard_arrow_up</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={orderedRight.indexOf(right) === orderedRight.length - 1}
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const idx = orderedRight.indexOf(right);
+                                            if (idx < orderedRight.length - 1) {
+                                                const newOrder = [...orderedRight];
+                                                [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
+                                                handleReorder(newOrder);
+                                            }
+                                        }}
+                                        className="p-1 lg:p-1.5 text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
+                                    >
+                                        <span className="material-symbols-outlined text-sm sm:text-base">keyboard_arrow_down</span>
+                                    </button>
+                                </div>
                             </div>
+
                         </Reorder.Item>
                     ))}
                 </Reorder.Group>
