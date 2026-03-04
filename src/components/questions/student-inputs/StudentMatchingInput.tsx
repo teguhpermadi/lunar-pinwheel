@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Reorder } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
@@ -14,6 +14,10 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
     const initialRightOptions = options.filter(o => o.metadata?.side === 'right');
 
     const [orderedRight, setOrderedRight] = useState<QuestionOption[]>([]);
+    const [draggedRightKey, setDraggedRightKey] = useState<string | null>(null);
+    const hoveredRightRef = useRef<string | null>(null);
+    // State to drive visual highlight during touch-drag
+    const [hoveredRightKeyState, setHoveredRightKeyState] = useState<string | null>(null);
 
     useEffect(() => {
         if (selectedAnswer && Object.keys(selectedAnswer).length > 0) {
@@ -44,6 +48,60 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
         });
         onChange(newSelection);
     };
+
+    // Touch fallback for mobile: detect target item under touch and perform reorder on touchend
+    useEffect(() => {
+        if (!draggedRightKey) return;
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (!e.touches || e.touches.length === 0) return;
+            const t = e.touches[0];
+            const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
+            let found: string | null = null;
+            let cur = el;
+            while (cur) {
+                const attr = cur.getAttribute && cur.getAttribute('data-right-key');
+                if (attr) {
+                    found = attr;
+                    break;
+                }
+                cur = cur.parentElement;
+            }
+            hoveredRightRef.current = found;
+            setHoveredRightKeyState(found);
+            // prevent page scroll while dragging
+            e.preventDefault();
+        };
+
+        const onTouchEnd = () => {
+            const targetKey = hoveredRightRef.current;
+            if (targetKey && targetKey !== draggedRightKey) {
+                const fromIndex = orderedRight.findIndex(r => r.option_key === draggedRightKey);
+                const toIndex = orderedRight.findIndex(r => r.option_key === targetKey);
+                if (fromIndex >= 0 && toIndex >= 0) {
+                    const newOrder = [...orderedRight];
+                    const [item] = newOrder.splice(fromIndex, 1);
+                    newOrder.splice(toIndex, 0, item);
+                    handleReorder(newOrder);
+                }
+            }
+
+            hoveredRightRef.current = null;
+            setHoveredRightKeyState(null);
+            setDraggedRightKey(null);
+            window.removeEventListener('touchmove', onTouchMove as EventListener);
+            window.removeEventListener('touchend', onTouchEnd as EventListener);
+        };
+
+        window.addEventListener('touchmove', onTouchMove as EventListener, { passive: false });
+        window.addEventListener('touchend', onTouchEnd as EventListener);
+
+        return () => {
+            window.removeEventListener('touchmove', onTouchMove as EventListener);
+            window.removeEventListener('touchend', onTouchEnd as EventListener);
+            hoveredRightRef.current = null;
+        };
+    }, [draggedRightKey, orderedRight]);
 
     return (
         <div className="space-y-8">
@@ -93,9 +151,11 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                         <Reorder.Item
                             key={right.id}
                             value={right}
+                            data-right-key={right.option_key}
+                            onTouchStart={() => setDraggedRightKey(right.option_key)}
                             className="cursor-grab active:cursor-grabbing"
                         >
-                            <div className="h-[100px] md:h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all">
+                            <div className={`h-[100px] md:h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all ${hoveredRightKeyState === right.option_key ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}>
                                 <span className="material-symbols-outlined text-slate-200 group-hover:text-emerald-500 transition-colors select-none text-lg sm:text-2xl">
                                     drag_indicator
                                 </span>

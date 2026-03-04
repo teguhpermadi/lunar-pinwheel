@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
@@ -26,6 +26,10 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
     }, [options]);
 
     const [draggedItemKey, setDraggedItemKey] = useState<string | null>(null);
+    // For touch fallback: track hovered group during touchmove
+    const hoveredGroupRef = useRef<string | null>(null);
+    // State to trigger re-render and show visual highlight during touch-drag
+    const [hoveredGroupUuidState, setHoveredGroupUuidState] = useState<string | null>(null);
 
     // Initial state: separate items based on current selection
     // If an item's key is in selectedAnswer, it's in a category. Otherwise, it's ungrouped.
@@ -69,6 +73,57 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
         e.preventDefault();
     };
 
+    // Touch fallback: when an item is being 'dragged' via touch, listen for touchmove
+    // to detect the underlying drop target and on touchend perform the drop.
+    useEffect(() => {
+        if (!draggedItemKey) return;
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (!e.touches || e.touches.length === 0) return;
+            const t = e.touches[0];
+            // elementFromPoint expects client coordinates
+            const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
+            let found: string | null = null;
+            let cur = el;
+            while (cur) {
+                // our drop containers will have data-group-uuid attributes
+                const attr = cur.getAttribute && cur.getAttribute('data-group-uuid');
+                if (attr !== null) {
+                    found = attr === '__ungrouped__' ? '__ungrouped__' : attr;
+                    break;
+                }
+                cur = cur.parentElement;
+            }
+            hoveredGroupRef.current = found;
+            setHoveredGroupUuidState(found);
+            // prevent scrolling while dragging
+            e.preventDefault();
+        };
+
+        const onTouchEnd = () => {
+            const target = hoveredGroupRef.current;
+            if (target === '__ungrouped__') {
+                handleDrop(null);
+            } else {
+                handleDrop(target);
+            }
+            hoveredGroupRef.current = null;
+            setHoveredGroupUuidState(null);
+            // cleanup
+            window.removeEventListener('touchmove', onTouchMove as EventListener);
+            window.removeEventListener('touchend', onTouchEnd as EventListener);
+        };
+
+        window.addEventListener('touchmove', onTouchMove as EventListener, { passive: false });
+        window.addEventListener('touchend', onTouchEnd as EventListener);
+
+        return () => {
+            window.removeEventListener('touchmove', onTouchMove as EventListener);
+            window.removeEventListener('touchend', onTouchEnd as EventListener);
+            hoveredGroupRef.current = null;
+        };
+    }, [draggedItemKey]);
+
     return (
         <div className="space-y-8">
             {/* Instructions */}
@@ -84,10 +139,10 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                 {categories.map((category) => (
                     <div
                         key={category.uuid}
+                        data-group-uuid={category.uuid}
                         onDragOver={onDragOver}
                         onDrop={() => handleDrop(category.uuid)}
-                        className={`min-h-[200px] bg-slate-50 dark:bg-slate-800/20 rounded-2xl border-2 border-dashed transition-all ${draggedItemKey ? 'border-primary/40 bg-primary/5' : 'border-slate-200 dark:border-slate-800'
-                            }`}
+                        className={`min-h-[200px] bg-slate-50 dark:bg-slate-800/20 rounded-2xl border-2 border-dashed transition-all ${draggedItemKey ? 'border-primary/40 bg-primary/5' : 'border-slate-200 dark:border-slate-800'} ${hoveredGroupUuidState === category.uuid ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}
                     >
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 rounded-t-2xl font-bold text-sm text-slate-600 dark:text-slate-300 flex items-center gap-2">
                             <span className="material-symbols-outlined text-lg text-primary">category</span>
@@ -103,6 +158,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                                     key={item.option_key}
                                     item={item}
                                     onDragStart={() => setDraggedItemKey(item.option_key)}
+                                    onTouchStart={() => setDraggedItemKey(item.option_key)}
                                 />
                             ))}
                             {itemsByGroup.groups[category.uuid].length === 0 && (
@@ -124,6 +180,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                 </div>
 
                 <div
+                    data-group-uuid="__ungrouped__"
                     onDragOver={onDragOver}
                     onDrop={() => handleDrop(null)}
                     className={`min-h-[150px] p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed transition-all ${draggedItemKey ? 'border-primary/40' : 'border-slate-200 dark:border-slate-800'
@@ -136,6 +193,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                                     key={item.option_key}
                                     item={item}
                                     onDragStart={() => setDraggedItemKey(item.option_key)}
+                                    onTouchStart={() => setDraggedItemKey(item.option_key)}
                                 />
                             ))}
                         </AnimatePresence>
@@ -152,7 +210,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
     );
 }
 
-function ItemCard({ item, onDragStart }: { item: QuestionOption; onDragStart: () => void }) {
+function ItemCard({ item, onDragStart, onTouchStart }: { item: QuestionOption; onDragStart: () => void; onTouchStart?: () => void }) {
     return (
         <motion.div
             layout
@@ -161,6 +219,10 @@ function ItemCard({ item, onDragStart }: { item: QuestionOption; onDragStart: ()
             exit={{ opacity: 0, scale: 0.9 }}
             draggable
             onDragStart={onDragStart}
+            onTouchStart={() => {
+                // start touch-drag using provided handler (sets draggedItemKey)
+                if (onTouchStart) onTouchStart();
+            }}
             className="w-[200px] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-primary/30 transition-all shrink-0"
         >
             {item.media?.option_media?.[0]?.url && (
