@@ -11,15 +11,18 @@ interface CategorizationResponseCorrectionProps {
 export default function CategorizationResponseCorrection({ studentAnswer, options = [] }: CategorizationResponseCorrectionProps) {
     const safeStudentAnswer = (studentAnswer && typeof studentAnswer === 'object') ? studentAnswer : {};
 
-    // Categories are defined by metadata category_title or group_title
-    const groupsMap = new Map<string, QuestionOption[]>();
+    // Categories are defined by metadata
+    const groupsMap = new Map<string, { title: string, uuid: string, items: QuestionOption[] }>();
     options.forEach(opt => {
-        const categoryTitle = opt.metadata?.category_title || opt.metadata?.group_title || 'Uncategorized';
-        if (!groupsMap.has(categoryTitle)) groupsMap.set(categoryTitle, []);
-        groupsMap.get(categoryTitle)!.push(opt);
+        const title = opt.metadata?.category_title || opt.metadata?.group_title || 'Uncategorized';
+        const uuid = opt.metadata?.group_uuid || opt.metadata?.group_index?.toString() || title;
+        if (!groupsMap.has(uuid)) {
+            groupsMap.set(uuid, { title, uuid, items: [] });
+        }
+        groupsMap.get(uuid)!.items.push(opt);
     });
 
-    const groups = Array.from(groupsMap.entries()).map(([title, items]) => ({ title, items }));
+    const groups = Array.from(groupsMap.values());
 
     // Helper to get student's chosen category for an item
     const getStudentCategory = (itemId: string, optionKey: string) => {
@@ -43,7 +46,7 @@ export default function CategorizationResponseCorrection({ studentAnswer, option
                         <div className="flex items-center justify-between px-1">
                             <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{group.title}</span>
                             <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-slate-500">
-                                {isKey ? group.items.length : group.items.filter(item => getStudentCategory(item.id, item.option_key) === group.title).length} Items
+                                {isKey ? group.items.length : options.filter(item => getStudentCategory(item.id, item.option_key) === group.uuid).length} Items
                             </span>
                         </div>
 
@@ -59,8 +62,9 @@ export default function CategorizationResponseCorrection({ studentAnswer, option
                                 ))
                             ) : (
                                 // Student board: Show items placed by student in this category
-                                options.filter(item => getStudentCategory(item.id, item.option_key) === group.title).map((item) => {
-                                    const isCorrect = (item.metadata?.category_title || item.metadata?.group_title) === group.title;
+                                options.filter(item => getStudentCategory(item.id, item.option_key) === group.uuid).map((item) => {
+                                    const correctGroupUuid = item.metadata?.group_uuid || item.metadata?.group_index?.toString() || item.metadata?.category_title || item.metadata?.group_title;
+                                    const isCorrect = correctGroupUuid === group.uuid;
 
                                     return (
                                         <div key={item.id} className={cn(
@@ -94,7 +98,7 @@ export default function CategorizationResponseCorrection({ studentAnswer, option
                                     );
                                 })
                             )}
-                            {!isKey && options.filter(item => getStudentCategory(item.id, item.option_key) === group.title).length === 0 && (
+                            {!isKey && options.filter(item => getStudentCategory(item.id, item.option_key) === group.uuid).length === 0 && (
                                 <div className="h-full flex items-center justify-center py-4 opacity-50">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Empty</span>
                                 </div>
