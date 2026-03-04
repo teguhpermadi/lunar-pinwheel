@@ -32,7 +32,7 @@ export default function SequenceCorrection({ options, studentAnswer = [], keyAns
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student's Order</span>
                     </div>
                     <div className="space-y-2">
-                        {studentAnswer.length > 0 ? (
+                        {studentAnswer && studentAnswer.length > 0 ? (
                             studentAnswer.map((val, index) => {
                                 // Find option by ID or Key
                                 const option = options.find(o => o.id === val || o.option_key === val);
