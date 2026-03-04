@@ -510,7 +510,7 @@ export default function ExamTaker() {
     const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-100 h-screen flex flex-col overflow-hidden" style={{ fontSize: `${fontSize}px` }}>
+        <div translate="no" className="notranslate bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-100 h-screen flex flex-col overflow-hidden" style={{ fontSize: `${fontSize}px` }}>
             {/* Progress Bar */}
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 shrink-0">
                 <motion.div
