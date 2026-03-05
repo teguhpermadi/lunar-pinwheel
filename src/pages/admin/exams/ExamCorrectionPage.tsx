@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,9 @@ export interface StudentSession {
     progress_percent?: number;
     start_time?: string;
     finish_time?: string;
+    attempt_number?: number;
+    total_attempts?: number;
+    is_latest_attempt?: boolean;
 }
 
 export interface QuestionDetail {
@@ -56,11 +59,28 @@ export default function ExamCorrectionPage() {
     const [questions, setQuestions] = useState<QuestionDetail[]>([]); // Details for selected session (By Student)
     const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
 
+    const [isAttemptDropdownOpen, setIsAttemptDropdownOpen] = useState(false);
+    const attemptDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (attemptDropdownRef.current && !attemptDropdownRef.current.contains(event.target as Node)) {
+                setIsAttemptDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const [isLoading, setIsLoading] = useState(true);
     const [isSessionsLoading, setIsSessionsLoading] = useState(true);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [isBulkLoading, setIsBulkLoading] = useState(false);
     const [studentSearchQuery, setStudentSearchQuery] = useState(''); // Specifically for right navigation
+
+    const [attemptFilter, setAttemptFilter] = useState<string>('latest');
+    const [isAttemptModalOpen, setIsAttemptModalOpen] = useState(false);
+    const hasShownAttemptModal = useRef(false);
 
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
@@ -83,6 +103,48 @@ export default function ExamCorrectionPage() {
     const [isBulkPartialModalOpen, setIsBulkPartialModalOpen] = useState(false);
     const [bulkPartialScore, setBulkPartialScore] = useState(0);
 
+    const filteredSessions = useMemo(() => {
+        if (attemptFilter === 'all') return sessions;
+        if (attemptFilter === 'latest') return sessions.filter(s => s.is_latest_attempt);
+        const attemptNum = parseInt(attemptFilter);
+        if (!isNaN(attemptNum)) {
+            return sessions.filter(s => s.attempt_number === attemptNum);
+        }
+        return sessions;
+    }, [sessions, attemptFilter]);
+
+    useEffect(() => {
+        if (filteredSessions.length > 0 && selectedSessionId) {
+            const exists = filteredSessions.find(s => s.id === selectedSessionId);
+            if (!exists) {
+                setSelectedSessionId(filteredSessions[0].id);
+            }
+        } else if (filteredSessions.length > 0 && !selectedSessionId) {
+            setSelectedSessionId(filteredSessions[0].id);
+        }
+    }, [filteredSessions, selectedSessionId]);
+
+    const filteredBulkAnswers = useMemo(() => {
+        return bulkAnswers.filter(answer => {
+            return filteredSessions.some(session => session.id === answer.exam_session_id);
+        }).map(answer => {
+            const sessionData = filteredSessions.find(s => s.id === answer.exam_session_id);
+            return {
+                ...answer,
+                session: {
+                    ...answer.session,
+                    attempt_number: sessionData?.attempt_number,
+                    total_attempts: sessionData?.total_attempts,
+                    start_time: sessionData?.start_time,
+                }
+            };
+        });
+    }, [bulkAnswers, filteredSessions]);
+
+    const uniqueAttempts = useMemo(() => {
+        return [...new Set(sessions.map(s => s.attempt_number))].filter(Boolean).sort() as number[];
+    }, [sessions]);
+
     const fetchSessions = useCallback(async () => {
         if (!id) return;
         setIsSessionsLoading(true);
@@ -90,20 +152,61 @@ export default function ExamCorrectionPage() {
             const response = await examApi.getCorrectionSessions(id);
             if (response.success) {
                 // Adjust to the new backend response structure
-                if (response.data.sessions) {
-                    setSessions(response.data.sessions);
-                    setExam(response.data.exam);
-                    if (response.data.questions) {
-                        setMasterQuestions(response.data.questions);
-                    }
+                let rawSessions = response.data.sessions || response.data || [];
 
-                    // Auto select first session if none selected
-                    if (!selectedSessionId && response.data.sessions.length > 0) {
-                        setSelectedSessionId(response.data.sessions[0].id);
+                // Process attempts
+                const studentMap = new Map<string, StudentSession[]>();
+                rawSessions.forEach((s: StudentSession) => {
+                    const studentId = s.student.id;
+                    if (!studentMap.has(studentId)) {
+                        studentMap.set(studentId, []);
                     }
-                } else {
-                    // Fallback for old structure if necessary
-                    setSessions(response.data || []);
+                    studentMap.get(studentId)!.push(s);
+                });
+
+                let processedSessions: StudentSession[] = [];
+                let hasMultipleAttempts = false;
+
+                studentMap.forEach((studentSessions) => {
+                    // Sort by start_time ascending
+                    studentSessions.sort((a, b) => new Date(a.start_time || 0).getTime() - new Date(b.start_time || 0).getTime());
+
+                    if (studentSessions.length > 1) hasMultipleAttempts = true;
+
+                    studentSessions.forEach((s, index) => {
+                        s.attempt_number = index + 1;
+                        s.total_attempts = studentSessions.length;
+                        s.is_latest_attempt = index === studentSessions.length - 1;
+                        processedSessions.push(s);
+                    });
+                });
+
+                // Sort somewhat nicely: name then attempt
+                processedSessions.sort((a, b) => {
+                    const nameCompare = a.student.name.localeCompare(b.student.name);
+                    if (nameCompare !== 0) return nameCompare;
+                    return (a.attempt_number || 1) - (b.attempt_number || 1);
+                });
+
+                setSessions(processedSessions);
+
+                // Trigger modal on first load if there are multiple attempts
+                // Trigger modal on first load if there are multiple attempts
+                if (!hasShownAttemptModal.current && hasMultipleAttempts) {
+                    setIsAttemptModalOpen(true);
+                    hasShownAttemptModal.current = true;
+                }
+
+                if (response.data.exam) {
+                    setExam(response.data.exam);
+                }
+                if (response.data.questions) {
+                    setMasterQuestions(response.data.questions);
+                }
+
+                // Auto select first session based on current filter later, but for now just fallback
+                if (!selectedSessionId && processedSessions.length > 0) {
+                    // We'll update the selected session when filtering changes if needed
                 }
             }
         } catch (error) {
@@ -289,10 +392,10 @@ export default function ExamCorrectionPage() {
     };
 
     const handleToggleSelectAll = () => {
-        if (selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0) {
+        if (selectedAnswerIds.length === filteredBulkAnswers.length && filteredBulkAnswers.length > 0) {
             setSelectedAnswerIds([]);
         } else {
-            setSelectedAnswerIds(bulkAnswers.map(a => a.id));
+            setSelectedAnswerIds(filteredBulkAnswers.map(a => a.id));
         }
     };
 
@@ -349,20 +452,22 @@ export default function ExamCorrectionPage() {
                             <div className="flex items-center justify-between mb-3">
                                 <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Students</h2>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-slate-400">{sessions.length}</span>
+                                    <span className="text-[10px] font-bold text-slate-400">{filteredSessions.length}</span>
                                     <button onClick={() => setIsLeftSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600">
                                         <span className="material-symbols-outlined text-sm">close</span>
                                     </button>
                                 </div>
                             </div>
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                                <input
-                                    className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
-                                    placeholder="Search..."
-                                    value={studentSearchQuery}
-                                    onChange={(e) => setStudentSearchQuery(e.target.value)}
-                                />
+                            <div className="flex flex-col gap-2">
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                    <input
+                                        className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                        placeholder="Search..."
+                                        value={studentSearchQuery}
+                                        onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="flex-grow overflow-y-auto custom-scrollbar">
@@ -373,7 +478,7 @@ export default function ExamCorrectionPage() {
                                     </div>
                                 ))
                             ) : (
-                                sessions
+                                filteredSessions
                                     .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
                                     .map(session => (
                                         <button
@@ -391,7 +496,14 @@ export default function ExamCorrectionPage() {
                                                 <div className="flex-1 overflow-hidden flex items-center justify-between gap-2">
                                                     <div className="flex-1 overflow-hidden">
                                                         <p className="text-xs font-bold truncate">{session.student.name}</p>
-                                                        <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                                        <div className="flex items-center gap-1 mt-0.5">
+                                                            <p className="text-[9px] text-slate-400 uppercase font-black">{session.is_corrected ? 'Corrected' : 'Pending'}</p>
+                                                            {(session.total_attempts || 1) > 1 && (
+                                                                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[8px] rounded font-bold text-slate-500 truncate">
+                                                                    Upaya {session.attempt_number} / {session.total_attempts}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     {session.is_finished && (
                                                         <span className="shrink-0 px-2.5 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg border border-primary/20 tabular-nums">
@@ -545,14 +657,16 @@ export default function ExamCorrectionPage() {
                     <>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                             <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Navigation</h2>
-                            <div className="mt-3 relative">
-                                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                                <input
-                                    className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
-                                    placeholder="Find Student..."
-                                    value={studentSearchQuery}
-                                    onChange={(e) => setStudentSearchQuery(e.target.value)}
-                                />
+                            <div className="mt-3 flex flex-col gap-2">
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                    <input
+                                        className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
+                                        placeholder="Find Student..."
+                                        value={studentSearchQuery}
+                                        onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="flex-grow overflow-y-auto custom-scrollbar">
@@ -561,7 +675,7 @@ export default function ExamCorrectionPage() {
                                     <Skeleton key={i} className="h-12 w-full mb-1" />
                                 ))
                             ) : (
-                                sessions
+                                filteredSessions
                                     .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
                                     .map((session) => (
                                         <button
@@ -576,7 +690,12 @@ export default function ExamCorrectionPage() {
                                                     "w-2 h-2 rounded-full shrink-0",
                                                     session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
                                                 )}></div>
-                                                <p className="text-xs font-medium text-slate-500 truncate flex-1">{session.student.name}</p>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <p className="text-xs font-medium text-slate-500 truncate">{session.student.name}</p>
+                                                    {(session.total_attempts || 1) > 1 && (
+                                                        <span className="text-[9px] font-bold text-slate-400 mt-0.5 block">Upaya {session.attempt_number}</span>
+                                                    )}
+                                                </div>
                                                 {session.is_finished && (
                                                     <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
                                                         {session.final_score}
@@ -649,56 +768,147 @@ export default function ExamCorrectionPage() {
                         </div>
                     </div>
 
-                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl scale-90 sm:scale-100">
-                        <button
-                            onClick={() => {
-                                setViewMode('leaderboard');
-                                setSelectedQuestionIndex(0);
-                            }}
-                            className={cn(
-                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
-                                viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
-                            )}
-                        >
-                            Leaderboard
-                        </button>
-                        <button
-                            onClick={() => {
-                                setViewMode('by-student');
-                            }}
-                            className={cn(
-                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
-                                viewMode === 'by-student' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
-                            )}
-                        >
-                            <span className="hidden sm:inline">By Student</span>
-                            <span className="sm:hidden">Student</span>
-                        </button>
-                        <button
-                            onClick={() => {
-                                setViewMode('by-question');
-                                setSelectedQuestionIndex(0);
-                            }}
-                            className={cn(
-                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
-                                viewMode === 'by-question' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
-                            )}
-                        >
-                            <span className="hidden sm:inline">By Question</span>
-                            <span className="sm:hidden">Question</span>
-                        </button>
-                        <button
-                            onClick={() => {
-                                setViewMode('item-analysis');
-                            }}
-                            className={cn(
-                                "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
-                                viewMode === 'item-analysis' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
-                            )}
-                        >
-                            <span className="hidden sm:inline">Telaah Soal</span>
-                            <span className="sm:hidden">Telaah</span>
-                        </button>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl scale-90 sm:scale-100">
+                            <button
+                                onClick={() => {
+                                    setViewMode('leaderboard');
+                                    setSelectedQuestionIndex(0);
+                                }}
+                                className={cn(
+                                    "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                    viewMode === 'leaderboard' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                                )}
+                            >
+                                Leaderboard
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode('by-student');
+                                }}
+                                className={cn(
+                                    "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                    viewMode === 'by-student' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                                )}
+                            >
+                                <span className="hidden sm:inline">By Student</span>
+                                <span className="sm:hidden">Student</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode('by-question');
+                                    setSelectedQuestionIndex(0);
+                                }}
+                                className={cn(
+                                    "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                    viewMode === 'by-question' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                                )}
+                            >
+                                <span className="hidden sm:inline">By Question</span>
+                                <span className="sm:hidden">Question</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode('item-analysis');
+                                }}
+                                className={cn(
+                                    "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                    viewMode === 'item-analysis' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                                )}
+                            >
+                                <span className="hidden sm:inline">Telaah Soal</span>
+                                <span className="sm:hidden">Telaah</span>
+                            </button>
+                        </div>
+                        {uniqueAttempts.length > 0 && (
+                            <div className="relative" ref={attemptDropdownRef}>
+                                <button
+                                    onClick={() => setIsAttemptDropdownOpen(!isAttemptDropdownOpen)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border shadow-sm transition-all",
+                                        isAttemptDropdownOpen
+                                            ? "bg-white dark:bg-slate-800 border-primary/30 ring-2 ring-primary/20 text-slate-900 dark:text-white"
+                                            : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                    )}
+                                >
+                                    <span className="material-symbols-outlined text-[14px] text-primary">filter_list</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                                        {attemptFilter === 'all' && 'Semua Upaya'}
+                                        {attemptFilter === 'latest' && 'Upaya Terbaru'}
+                                        {attemptFilter !== 'all' && attemptFilter !== 'latest' && `Upaya ke-${attemptFilter}`}
+                                    </span>
+                                    <span className={cn(
+                                        "material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200",
+                                        isAttemptDropdownOpen ? "rotate-180" : ""
+                                    )}>
+                                        expand_more
+                                    </span>
+                                </button>
+                                <AnimatePresence>
+                                    {isAttemptDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                                            transition={{ duration: 0.15, ease: "easeOut" }}
+                                            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 origin-top"
+                                        >
+                                            <div className="py-1">
+                                                <button
+                                                    onClick={() => {
+                                                        setAttemptFilter('all');
+                                                        setIsAttemptDropdownOpen(false);
+                                                    }}
+                                                    className={cn(
+                                                        "w-full text-left px-4 py-2 text-xs font-bold transition-colors flex items-center justify-between group",
+                                                        attemptFilter === 'all'
+                                                            ? "bg-primary/5 text-primary"
+                                                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                                                    )}
+                                                >
+                                                    Semua Upaya
+                                                    {attemptFilter === 'all' && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setAttemptFilter('latest');
+                                                        setIsAttemptDropdownOpen(false);
+                                                    }}
+                                                    className={cn(
+                                                        "w-full text-left px-4 py-2 text-xs font-bold transition-colors flex items-center justify-between group",
+                                                        attemptFilter === 'latest'
+                                                            ? "bg-primary/5 text-primary"
+                                                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                                                    )}
+                                                >
+                                                    Upaya Terbaru
+                                                    {attemptFilter === 'latest' && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                </button>
+                                                <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                                                {uniqueAttempts.map(num => (
+                                                    <button
+                                                        key={`opt-h-${num}`}
+                                                        onClick={() => {
+                                                            setAttemptFilter(num!.toString());
+                                                            setIsAttemptDropdownOpen(false);
+                                                        }}
+                                                        className={cn(
+                                                            "w-full text-left px-4 py-2 text-xs font-bold transition-colors flex items-center justify-between group",
+                                                            attemptFilter === num!.toString()
+                                                                ? "bg-primary/5 text-primary"
+                                                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                                                        )}
+                                                    >
+                                                        Upaya ke-{num}
+                                                        {attemptFilter === num!.toString() && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -744,7 +954,7 @@ export default function ExamCorrectionPage() {
                                     currentQuestionType={currentQuestion?.question_type}
                                     handleToggleSelectAll={handleToggleSelectAll}
                                     selectedAnswerIds={selectedAnswerIds}
-                                    bulkAnswers={bulkAnswers}
+                                    bulkAnswers={filteredBulkAnswers}
                                     setSelectedQuestionIndex={setSelectedQuestionIndex}
                                     isBulkLoading={isBulkLoading}
                                     toggleAnswerSelection={toggleAnswerSelection}
@@ -756,7 +966,7 @@ export default function ExamCorrectionPage() {
                                 <ItemAnalysisTab examId={id!} />
                             ) : (
                                 <CorrectionLeaderboard
-                                    sessions={sessions}
+                                    sessions={filteredSessions}
                                     searchQuery={studentSearchQuery}
                                     onRefresh={fetchSessions}
                                     id={id!}
@@ -999,6 +1209,66 @@ export default function ExamCorrectionPage() {
                                     </div>
                                 </div>
                             </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Initial Attempt Selection Modal */}
+            <AnimatePresence>
+                {isAttemptModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800"
+                        >
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                                    <span className="material-symbols-outlined text-4xl text-primary">filter_list</span>
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2">Pilih Upaya Ujian</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Beberapa siswa mungkin memiliki lebih dari satu upaya. Silakan pilih prioritas yang ingin Anda koreksi saat ini.
+                                </p>
+                            </div>
+
+                            <div className="space-y-3 mb-8">
+                                <button
+                                    onClick={() => setAttemptFilter('latest')}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between",
+                                        attemptFilter === 'latest' ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-white mb-0.5">Upaya Terbaru</div>
+                                        <div className="text-[10px] text-slate-500">Hanya munculkan upaya paling akhir tiap siswa</div>
+                                    </div>
+                                    {attemptFilter === 'latest' && <span className="material-symbols-outlined text-primary">check_circle</span>}
+                                </button>
+                                <button
+                                    onClick={() => setAttemptFilter('all')}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between",
+                                        attemptFilter === 'all' ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-white mb-0.5">Semua Upaya</div>
+                                        <div className="text-[10px] text-slate-500">Tampilkan semua rekaman pengerjaan</div>
+                                    </div>
+                                    {attemptFilter === 'all' && <span className="material-symbols-outlined text-primary">check_circle</span>}
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setIsAttemptModalOpen(false)}
+                                className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20"
+                            >
+                                Lanjutkan
+                            </button>
                         </motion.div>
                     </div>
                 )}

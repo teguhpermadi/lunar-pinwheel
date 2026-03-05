@@ -61,6 +61,23 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex items-start justify-between gap-4 mb-6">
                             <div className="flex flex-col gap-3 mt-1 flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h3 className="text-sm font-black text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                                        {currentSession?.student?.name}
+                                    </h3>
+                                    {(currentSession?.total_attempts || 1) > 1 && (
+                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold rounded shrink-0">
+                                            Upaya {currentSession?.attempt_number} / {currentSession?.total_attempts}
+                                        </span>
+                                    )}
+                                    {currentSession?.start_time && (
+                                        <span className="text-[10px] font-medium text-slate-500 shrink-0">
+                                            {new Date(currentSession.start_time).toLocaleString('id-ID', {
+                                                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-100 dark:border-indigo-500/20">
                                         Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}

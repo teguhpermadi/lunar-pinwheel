@@ -168,12 +168,19 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                         {answer.session?.student?.name?.charAt(0) || '?'}
                                     </div>
                                     <div className="flex flex-col">
-                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                                            {answer.session?.student?.name}
-                                        </h4>
-                                        <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[150px] sm:max-w-[200px]">
+                                                {answer.session?.student?.name}
+                                            </h4>
+                                            {(answer.session?.total_attempts || 1) > 1 && (
+                                                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[8px] font-bold text-slate-500 rounded tracking-wider shrink-0">
+                                                    Upaya {answer.session?.attempt_number}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                                             <div className={cn(
-                                                "px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1 border",
+                                                "px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1 border shrink-0",
                                                 answer.score_earned === answer.max_score ? "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/20" :
                                                     answer.score_earned > 0 ? "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-500/20" : "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/20"
                                             )}>
@@ -181,7 +188,14 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                 {answer.score_earned} / {answer.max_score}
                                             </div>
                                             {answer.session?.is_corrected && (
-                                                <span className="text-[8px] font-black uppercase text-indigo-500 tracking-wider">Corrected</span>
+                                                <span className="text-[8px] font-black uppercase text-indigo-500 tracking-wider shrink-0">Corrected</span>
+                                            )}
+                                            {answer.session?.start_time && (
+                                                <span className="text-[9px] font-bold text-slate-400 shrink-0">
+                                                    {new Date(answer.session.start_time).toLocaleString('id-ID', {
+                                                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </span>
                                             )}
                                         </div>
                                     </div>

@@ -183,7 +183,14 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                                 {session.student.name.charAt(0)}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none mb-1">{session.student.name}</p>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{session.student.name}</p>
+                                                    {(session.total_attempts || 1) > 1 && (
+                                                        <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[8px] font-bold text-slate-500 rounded tracking-wider shrink-0">
+                                                            Upaya {session.attempt_number}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="text-[10px] text-slate-400 font-medium">{session.student.email}</p>
                                             </div>
                                         </div>
@@ -195,9 +202,18 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                         </div>
                                     </td>
                                     <td className="px-8 py-5">
-                                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400 tabular-nums">
-                                            {formatDuration(session.start_time, session.finish_time)}
-                                        </span>
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 tabular-nums">
+                                                {formatDuration(session.start_time, session.finish_time)}
+                                            </span>
+                                            {session.start_time && (
+                                                <span className="text-[9px] font-medium text-slate-400">
+                                                    {new Date(session.start_time).toLocaleString('id-ID', {
+                                                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
