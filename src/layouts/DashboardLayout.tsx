@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom"
-import { Home, BookOpen, Trophy, Settings, Ghost, Menu } from "lucide-react"
+import { Home, BookOpen, Trophy, Settings, Ghost, Menu } from "@/components/ui/Icons"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"

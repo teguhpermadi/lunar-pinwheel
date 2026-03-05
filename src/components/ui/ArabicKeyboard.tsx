@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Delete } from 'lucide-react';
+import { Delete } from '@/components/ui/Icons';
 
 interface ArabicKeyProps {
     label: string;

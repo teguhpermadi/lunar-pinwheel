@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Play, TrendingUp, Star, Calendar } from "lucide-react"
+import { Play, TrendingUp, Star, Calendar } from "@/components/ui/Icons"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
