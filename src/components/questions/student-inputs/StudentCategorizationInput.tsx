@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
-import MathRenderer from '@/components/ui/MathRenderer';
+import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
 
 interface StudentCategorizationInputProps {
     options: QuestionOption[];
@@ -302,9 +302,10 @@ function ItemCard({
                     />
                 </div>
             )}
-            <MathRenderer
+            <CollapsibleMathRenderer
                 content={item.content}
-                className="text-xs font-bold text-slate-700 dark:text-slate-200 line-clamp-3 text-center"
+                className="text-xs font-bold text-slate-700 dark:text-slate-200 text-center"
+                maxLines={3}
             />
         </motion.div>
     );

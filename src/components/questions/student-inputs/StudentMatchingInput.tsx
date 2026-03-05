@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Reorder } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
-import MathRenderer from '@/components/ui/MathRenderer';
+import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
 
 interface StudentMatchingInputProps {
     options: QuestionOption[];
@@ -18,6 +18,63 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
     const hoveredRightRef = useRef<string | null>(null);
     // State to drive visual highlight during touch-drag
     const [hoveredRightKeyState, setHoveredRightKeyState] = useState<string | null>(null);
+
+    // Refs for synchronization
+    const leftInnerRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const rightInnerRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const leftOuterRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const rightOuterRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const centerOuterRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    useEffect(() => {
+        const syncHeights = () => {
+            leftOptions.forEach((_, i) => {
+                const leftInner = leftInnerRefs.current[i];
+                const rightInner = rightInnerRefs.current[i];
+                const leftOuter = leftOuterRefs.current[i];
+                const rightOuter = rightOuterRefs.current[i];
+                const centerOuter = centerOuterRefs.current[i];
+
+                if (leftOuter && rightOuter && leftInner && rightInner && centerOuter) {
+                    // Reset heights
+                    leftOuter.style.height = 'auto';
+                    rightOuter.style.height = 'auto';
+                    centerOuter.style.height = 'auto';
+
+                    const maxConfig = window.innerWidth >= 768 ? 120 : 100;
+                    // Add some padding to the inner height for the container, roughly 48px to account for p-4 (32px) + border + flexibility
+                    const padding = window.innerWidth >= 768 ? 48 : 32;
+                    const leftHeight = leftInner.scrollHeight + padding;
+                    const rightHeight = rightInner.scrollHeight + padding;
+
+                    const max = Math.max(leftHeight, rightHeight, maxConfig);
+
+                    leftOuter.style.height = `${max}px`;
+                    rightOuter.style.height = `${max}px`;
+                    centerOuter.style.height = `${max}px`;
+                }
+            });
+        };
+
+        const observer = new ResizeObserver(() => {
+            requestAnimationFrame(syncHeights);
+        });
+
+        const timer = setTimeout(syncHeights, 100);
+        const timer2 = setTimeout(syncHeights, 500); // Check again after MathJax renders
+        const timer3 = setTimeout(syncHeights, 2000);
+
+        // Important: we observe the inner content so it doesn't trigger a resize loop when outer height changes
+        leftInnerRefs.current.forEach(el => el && observer.observe(el));
+        rightInnerRefs.current.forEach(el => el && observer.observe(el));
+
+        return () => {
+            observer.disconnect();
+            clearTimeout(timer);
+            clearTimeout(timer2);
+            clearTimeout(timer3);
+        };
+    }, [orderedRight, leftOptions]);
 
     useEffect(() => {
         if (selectedAnswer && Object.keys(selectedAnswer).length > 0) {
@@ -121,25 +178,33 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
             <div className="relative grid grid-cols-[1fr,20px,1fr] sm:grid-cols-[1fr,40px,1fr] gap-2 sm:gap-4">
                 {/* Left Column - Fixed */}
                 <div className="space-y-2 sm:space-y-4">
-                    {leftOptions.map((left) => (
+                    {leftOptions.map((left, index) => (
                         <div
+                            ref={(el) => { leftOuterRefs.current[index] = el; }}
                             key={left.id}
-                            className="h-[100px] md:h-[120px] p-3 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 sm:gap-4 transition-all"
+                            className="min-h-[100px] md:min-h-[120px] p-3 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 sm:gap-4 transition-all"
                         >
-                            <div className="flex-1 overflow-auto max-h-full scrollbar-hide flex items-center">
-                                <MathRenderer
+                            <div
+                                className="flex-1 flex items-center"
+                                ref={(el) => { leftInnerRefs.current[index] = el; }}
+                            >
+                                <CollapsibleMathRenderer
                                     content={left.content}
                                     className="text-xs sm:text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 leading-tight break-words w-full"
+                                    maxLines={3}
                                 />
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Center link icons */}
                 <div className="flex flex-col items-center justify-around py-4">
-                    {leftOptions.map((_, i) => (
-                        <div key={i} className="flex items-center justify-center text-slate-200 dark:text-slate-800 h-[100px] md:h-[120px] pb-2 sm:pb-4">
+                    {leftOptions.map((_, index) => (
+                        <div
+                            ref={(el) => { centerOuterRefs.current[index] = el; }}
+                            key={index}
+                            className="flex items-center justify-center text-slate-200 dark:text-slate-800 min-h-[100px] md:min-h-[120px] pb-2 sm:pb-4"
+                        >
                             <span className="material-symbols-outlined text-lg sm:text-2xl">link</span>
                         </div>
                     ))}
@@ -147,7 +212,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
 
                 {/* Right Column - Reorderable */}
                 <Reorder.Group axis="y" values={orderedRight} onReorder={handleReorder} className="space-y-2 sm:space-y-4">
-                    {orderedRight.map((right) => (
+                    {orderedRight.map((right, index) => (
                         <Reorder.Item
                             key={right.id}
                             value={right}
@@ -155,14 +220,21 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                             onTouchStart={() => setDraggedRightKey(right.option_key)}
                             className="cursor-grab active:cursor-grabbing"
                         >
-                            <div className={`h-[100px] md:h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all ${hoveredRightKeyState === right.option_key ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}>
+                            <div
+                                ref={(el) => { rightOuterRefs.current[index] = el; }}
+                                className={`min-h-[100px] md:min-h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all ${hoveredRightKeyState === right.option_key ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}
+                            >
                                 <span className="material-symbols-outlined text-slate-200 group-hover:text-emerald-500 transition-colors select-none text-lg sm:text-2xl">
                                     drag_indicator
                                 </span>
-                                <div className="flex-1 overflow-auto max-h-full scrollbar-hide text-center flex items-center justify-center">
-                                    <MathRenderer
+                                <div
+                                    className="flex-1 text-center flex items-center justify-center"
+                                    ref={(el) => { rightInnerRefs.current[index] = el; }}
+                                >
+                                    <CollapsibleMathRenderer
                                         content={right.content}
                                         className="text-xs sm:text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 leading-tight break-words"
+                                        maxLines={3}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1 ml-1 sm:ml-2">

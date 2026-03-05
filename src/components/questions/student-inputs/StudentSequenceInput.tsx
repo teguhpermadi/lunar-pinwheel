@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QuestionOption } from '@/lib/api';
-import MathRenderer from '@/components/ui/MathRenderer';
+import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
 import { Reorder } from 'framer-motion';
 
 interface StudentSequenceInputProps {
@@ -50,7 +50,7 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                         </div>
 
                         <div className="flex-1">
-                            <MathRenderer content={item.content} className="text-lg font-medium text-gray-700 dark:text-gray-200" />
+                            <CollapsibleMathRenderer content={item.content} className="text-sm md:text-base lg:text-lg font-medium text-gray-700 dark:text-gray-200" maxLines={3} />
                         </div>
 
                         <div className="size-8 bg-primary/5 text-primary text-[10px] font-black rounded-full flex items-center justify-center shrink-0 border border-primary/10">
