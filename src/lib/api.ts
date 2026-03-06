@@ -614,6 +614,12 @@ export const questionBankApi = {
             headers: { 'Content-Type': undefined },
         });
         return response.data;
+    },
+    exportQuestionBank: async (id: string) => {
+        const response = await api.get(`/question-banks/${id}/export`, {
+            responseType: 'blob'
+        });
+        return response.data;
     }
 };
 

@@ -59,6 +59,7 @@ export default function ShowQuestionBank() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const [availableClassrooms, setAvailableClassrooms] = useState<Classroom[]>([]);
     const [selectedClassroomIds, setSelectedClassroomIds] = useState<string[]>([]);
     // Form State
@@ -167,6 +168,43 @@ export default function ShowQuestionBank() {
         }
     };
 
+    const handleExport = async () => {
+        if (!id || !bank) return;
+
+        setIsExporting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost/api/v1';
+            const response = await fetch(`${apiUrl}/question-banks/${id}/export`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                },
+            });
+
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => null);
+                throw new Error(errJson?.message || `Server error: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${bank.name || 'QuestionBank'}.docx`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error: any) {
+            console.error("Failed to export question bank", error);
+            Swal.fire('Error', error.message || 'Failed to export to Word. Please try again.', 'error');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             if (!id) return;
@@ -267,6 +305,16 @@ export default function ShowQuestionBank() {
                     >
                         <span className="material-symbols-outlined text-lg">print</span>
                         Print Questions
+                    </button>
+                    <button
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2 disabled:opacity-50"
+                    >
+                        <span className={cn("material-symbols-outlined text-lg", isExporting && "animate-spin")}>
+                            {isExporting ? 'sync' : 'download'}
+                        </span>
+                        {isExporting ? 'Exporting...' : 'Download Word'}
                     </button>
                     <button
                         onClick={() => navigate(`/admin/question-banks/${id}`)}
