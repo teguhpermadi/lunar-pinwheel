@@ -9,6 +9,7 @@ import MathInputDisplay from './MathInputDisplay';
 import ArabicInputDisplay from '@/components/questions/displays/ArabicInputDisplay';
 import JavaneseInputDisplay from '@/components/questions/displays/JavaneseInputDisplay';
 import CategorizationDisplay from './CategorizationDisplay';
+import ArrangeWordsDisplay from './ArrangeWordsDisplay';
 
 
 interface QuestionOptionDisplayProps {
@@ -44,7 +45,7 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
             );
 
         case 'arrange_words':
-            return <div className="text-sm italic text-slate-400">Arrange words display coming soon.</div>;
+            return <ArrangeWordsDisplay options={question.options || []} />;
 
         case 'math_input':
             return <MathInputDisplay options={question.options} />;

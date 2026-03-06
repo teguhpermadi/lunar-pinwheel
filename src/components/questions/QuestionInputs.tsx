@@ -9,6 +9,7 @@ import MathInput from '@/components/questions/inputs/MathInput';
 import ArabicInput from '@/components/questions/inputs/ArabicInput';
 import JavaneseInput from '@/components/questions/inputs/JavaneseInput';
 import CategorizationInput from '@/components/questions/inputs/CategorizationInput';
+import ArrangeWordsInput from '@/components/questions/inputs/ArrangeWordsInput';
 
 
 interface QuestionInputsProps {
@@ -30,6 +31,10 @@ interface QuestionInputsProps {
     setJavaneseContent: (content: string) => void;
     categorizationGroups: any[];
     setCategorizationGroups: (groups: any[]) => void;
+    arrangeWordsSentence: string;
+    setArrangeWordsSentence: (sentence: string) => void;
+    arrangeWordsDelimiter: string;
+    setArrangeWordsDelimiter: (delimiter: string) => void;
     isEditing?: boolean;
 
 }
@@ -53,6 +58,10 @@ export default function QuestionInputs({
     setJavaneseContent,
     categorizationGroups,
     setCategorizationGroups,
+    arrangeWordsSentence,
+    setArrangeWordsSentence,
+    arrangeWordsDelimiter,
+    setArrangeWordsDelimiter,
     isEditing
 }: QuestionInputsProps) {
 
@@ -79,6 +88,8 @@ export default function QuestionInputs({
             return <JavaneseInput value={javaneseContent} onChange={setJavaneseContent} />;
         case 'categorization':
             return <CategorizationInput groups={categorizationGroups} onChange={setCategorizationGroups} onDeleteMedia={handleDeleteOptionMedia} />;
+        case 'arrange_words':
+            return <ArrangeWordsInput sentence={arrangeWordsSentence} onSentenceChange={setArrangeWordsSentence} delimiter={arrangeWordsDelimiter} onDelimiterChange={setArrangeWordsDelimiter} />;
         default:
 
             return null;

@@ -18,6 +18,7 @@ import StudentSequenceInput from '@/components/questions/student-inputs/StudentS
 import StudentLanguageResponseInput from '@/components/questions/student-inputs/StudentLanguageResponseInput';
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
+import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 
 const MySwal = withReactContent(Swal);
 
@@ -67,7 +68,7 @@ export default function PreviewQuestionBank() {
                     const formattedQ = {
                         id: q.id,
                         exam_question: q, // The component expects exam_question.options, exam_question.content etc.
-                        student_answer: (type === 'multiple_selection' || type === 'sequence') ? [] :
+                        student_answer: (type === 'multiple_selection' || type === 'sequence' || type === 'arrange_words') ? [] :
                             (type === 'matching' || type === 'categorization' ? {} : null),
                         is_flagged: false
                     };
@@ -198,6 +199,12 @@ export default function PreviewQuestionBank() {
                 />;
             case 'categorization':
                 return <StudentCategorizationInput
+                    options={options}
+                    selectedAnswer={q.student_answer}
+                    onChange={handleAnswerChange}
+                />;
+            case 'arrange_words':
+                return <StudentArrangeWordsInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}

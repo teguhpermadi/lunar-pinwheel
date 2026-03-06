@@ -35,6 +35,7 @@ import StudentSequenceInput from '@/components/questions/student-inputs/StudentS
 import StudentLanguageResponseInput from '@/components/questions/student-inputs/StudentLanguageResponseInput';
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
+import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 
 const MySwal = withReactContent(Swal);
 
@@ -758,6 +759,12 @@ export default function ExamTaker() {
                 />;
             case 'categorization':
                 return <StudentCategorizationInput
+                    options={options}
+                    selectedAnswer={q.student_answer}
+                    onChange={handleAnswerChange}
+                />;
+            case 'arrange_words':
+                return <StudentArrangeWordsInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}

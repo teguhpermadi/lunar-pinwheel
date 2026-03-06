@@ -54,6 +54,8 @@ export default function QuestionFormPage() {
         { uuid: generateUUID(), title: 'Category 1', items: [{ uuid: generateUUID(), content: '' }] },
         { uuid: generateUUID(), title: 'Category 2', items: [{ uuid: generateUUID(), content: '' }] },
     ]);
+    const [arrangeWordsSentence, setArrangeWordsSentence] = useState('');
+    const [arrangeWordsDelimiter, setArrangeWordsDelimiter] = useState(' ');
 
 
     // Load question data if editing
@@ -102,6 +104,9 @@ export default function QuestionFormPage() {
                 { uuid: generateUUID(), title: 'Category 1', items: [{ uuid: generateUUID(), content: '' }] },
                 { uuid: generateUUID(), title: 'Category 2', items: [{ uuid: generateUUID(), content: '' }] },
             ]);
+        } else if (newType === 'arrange_words') {
+            setArrangeWordsSentence('');
+            setArrangeWordsDelimiter(' ');
         }
     };
 
@@ -212,6 +217,12 @@ export default function QuestionFormPage() {
                         });
                     });
                     setCategorizationGroups(Array.from(groupsMap.values()));
+                } else if (q.type === 'arrange_words') {
+                    const sentenceOption = q.options.find((o: any) => o.option_key === 'SENTENCE');
+                    if (sentenceOption) {
+                        setArrangeWordsSentence(sentenceOption.content);
+                        setArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
+                    }
                 }
             } else {
 
@@ -391,6 +402,10 @@ export default function QuestionFormPage() {
                         });
                     });
                     break;
+                case 'arrange_words':
+                    formData.append('arrange_words_sentence', arrangeWordsSentence);
+                    formData.append('arrange_words_delimiter', arrangeWordsDelimiter);
+                    break;
             }
 
 
@@ -524,6 +539,10 @@ export default function QuestionFormPage() {
                 setJavaneseContent={setJavaneseContent}
                 categorizationGroups={categorizationGroups}
                 setCategorizationGroups={setCategorizationGroups}
+                arrangeWordsSentence={arrangeWordsSentence}
+                setArrangeWordsSentence={setArrangeWordsSentence}
+                arrangeWordsDelimiter={arrangeWordsDelimiter}
+                setArrangeWordsDelimiter={setArrangeWordsDelimiter}
                 isEditing={isEditing}
             />
 
