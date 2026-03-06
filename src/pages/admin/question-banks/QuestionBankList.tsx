@@ -7,6 +7,15 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import {
+    Plus,
+    Search,
+    Library,
+    Trash2,
+    ChevronLeft,
+    ChevronRight,
+    FileEdit
+} from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -115,7 +124,7 @@ export default function QuestionBankList() {
                         to="/admin/question-banks/create"
                         className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">add</span>
+                        <Plus className="size-4.5" />
                         New Question Bank
                     </Link>
                 </div>
@@ -132,7 +141,7 @@ export default function QuestionBankList() {
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                <span className="material-symbols-outlined text-[20px]">search</span>
+                                <Search className="size-5" />
                             </span>
                             <input
                                 type="text"
@@ -190,7 +199,7 @@ export default function QuestionBankList() {
                                 <tr>
                                     <td colSpan={5} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
-                                            <span className="material-symbols-outlined text-4xl text-slate-300">library_books</span>
+                                            <Library className="size-10 text-slate-300" />
                                             <p>No question banks found.</p>
                                         </div>
                                     </td>
@@ -207,7 +216,7 @@ export default function QuestionBankList() {
                                     <td className="px-4 py-5 max-w-md">
                                         <div className="flex items-start gap-3">
                                             <div className="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                                <span className="material-symbols-outlined">library_books</span>
+                                                <Library className="size-5" />
                                             </div>
                                             <div>
                                                 <span className="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">{bank.name}</span>
@@ -233,7 +242,7 @@ export default function QuestionBankList() {
                                                 to={`/admin/question-banks/${bank.id}`}
                                                 className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1"
                                             >
-                                                <span className="material-symbols-outlined text-sm">edit_document</span>
+                                                <FileEdit className="size-3.5" />
                                                 Manage
                                             </Link>
                                             <button
@@ -241,7 +250,7 @@ export default function QuestionBankList() {
                                                 className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                                 title="Delete"
                                             >
-                                                <span className="material-symbols-outlined text-lg">delete</span>
+                                                <Trash2 className="size-4.5" />
                                             </button>
                                         </div>
                                     </td>
@@ -263,7 +272,7 @@ export default function QuestionBankList() {
                             disabled={page === 1}
                             className="size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_left</span>
+                            <ChevronLeft className="size-4.5" />
                         </button>
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                             <button
@@ -279,7 +288,7 @@ export default function QuestionBankList() {
                             disabled={page === totalPages}
                             className="size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
+                            <ChevronRight className="size-4.5" />
                         </button>
                     </div>
                 </div>

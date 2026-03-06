@@ -1,6 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+    LayoutDashboard,
+    BookOpen,
+    History,
+    GraduationCap,
+    X,
+    LogOut
+} from 'lucide-react';
 
 interface StudentSidebarProps {
     isCollapsed: boolean;
@@ -13,13 +21,13 @@ export default function StudentSidebar({ isCollapsed, isMobileOpen, onMobileClos
     const { logout } = useAuth();
 
     const navItems = [
-        { icon: 'dashboard', label: 'Dashboard', path: '/' },
-        // { icon: 'menu_book', label: 'My Courses', path: '/courses' },
-        { icon: 'quiz', label: 'Exams', path: '/exams' },
-        { icon: 'history_edu', label: 'Exam History', path: '/exams/history' },
-        // { icon: 'emoji_events', label: 'Leaderboard', path: '/leaderboard' },
-        // { icon: 'military_tech', label: 'Achievements', path: '/achievements' },
-        // { icon: 'settings', label: 'Profile', path: '/profile' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+        // { icon: BookOpen, label: 'My Courses', path: '/courses' },
+        { icon: GraduationCap, label: 'Exams', path: '/exams' },
+        { icon: History, label: 'Exam History', path: '/exams/history' },
+        // { icon: Star, label: 'Leaderboard', path: '/leaderboard' },
+        // { icon: Award, label: 'Achievements', path: '/achievements' },
+        // { icon: Settings, label: 'Profile', path: '/profile' },
     ];
 
     return (
@@ -35,7 +43,7 @@ export default function StudentSidebar({ isCollapsed, isMobileOpen, onMobileClos
                 isCollapsed ? "px-0 justify-center" : ""
             )}>
                 <div className="min-w-10 size-10 bg-white rounded-lg flex items-center justify-center shadow-lg shrink-0">
-                    <span className="material-symbols-outlined text-primary text-2xl">school</span>
+                    <GraduationCap className="size-6 text-primary" />
                 </div>
                 <div className={cn(
                     "logo-text overflow-hidden whitespace-nowrap transition-all duration-300",
@@ -49,7 +57,7 @@ export default function StudentSidebar({ isCollapsed, isMobileOpen, onMobileClos
                     onClick={onMobileClose}
                     className="lg:hidden ml-auto text-white/60 p-1 rounded-lg hover:bg-white/10"
                 >
-                    <span className="material-symbols-outlined">close</span>
+                    <X className="size-5" />
                 </button>
             </div>
 
@@ -70,7 +78,7 @@ export default function StudentSidebar({ isCollapsed, isMobileOpen, onMobileClos
                         )}
                         title={isCollapsed ? item.label : undefined}
                     >
-                        <span className="material-symbols-outlined shrink-0">{item.icon}</span>
+                        <item.icon className="size-5 shrink-0" />
                         <span className={cn(
                             "nav-label overflow-hidden whitespace-nowrap transition-all duration-300",
                             isCollapsed ? "hidden w-0 opacity-0" : "block opacity-100"
@@ -98,7 +106,7 @@ export default function StudentSidebar({ isCollapsed, isMobileOpen, onMobileClos
                         "flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full",
                         isCollapsed ? "justify-center px-0" : ""
                     )}>
-                    <span className="material-symbols-outlined shrink-0">logout</span>
+                    <LogOut className="size-5 shrink-0" />
                     <span className={cn(
                         "nav-label overflow-hidden whitespace-nowrap transition-all duration-300",
                         isCollapsed ? "hidden w-0 opacity-0" : "block opacity-100"

@@ -9,6 +9,21 @@ import withReactContent from 'sweetalert2-react-content';
 import { useAuth } from '@/contexts/AuthContext';
 import { echo } from '@/lib/echo';
 import MathRenderer from '@/components/ui/MathRenderer';
+import {
+    CloudOff,
+    RefreshCw,
+    Timer,
+    Maximize,
+    IndentIncrease,
+    IndentDecrease,
+    Flag,
+    ArrowLeft,
+    ArrowRight,
+    HelpCircle,
+    Rocket,
+    X,
+    WifiOff
+} from 'lucide-react';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -818,13 +833,13 @@ export default function ExamTaker() {
             {/* Offline Status Bar */}
             {!isOnline && (
                 <div className="bg-red-500 text-white text-xs text-center py-1 font-semibold tracking-wide shrink-0">
-                    <span className="material-icons text-[10px] mr-1 align-middle">cloud_off</span>
+                    <CloudOff className="size-3 mr-1 inline-block align-middle" />
                     You are currently offline. Answers are saved locally and will sync when reconnected.
                 </div>
             )}
             {isOnline && Object.keys(pendingAnswers).length > 0 && (
                 <div className="bg-yellow-500 text-white text-xs text-center py-1 font-semibold tracking-wide shrink-0 animate-pulse">
-                    <span className="material-icons text-[10px] mr-1 align-middle">sync</span>
+                    <RefreshCw className="size-3 mr-1 inline-block align-middle animate-spin" />
                     Syncing {Object.keys(pendingAnswers).length} pending answer(s)...
                 </div>
             )}
@@ -845,7 +860,7 @@ export default function ExamTaker() {
                     <div className="flex flex-col items-center sm:items-end">
                         <span className="text-[8px] sm:text-[10px] font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
                         <div className={`flex items-center font-bold sm:text-lg text-base font-mono ${remainingSeconds !== null && remainingSeconds < 300 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
-                            <span className="material-icons text-sm sm:text-lg mr-1">timer</span>
+                            <Timer className="size-4 sm:size-5 mr-1" />
                             {formatTime(remainingSeconds)}
                         </div>
                     </div>
@@ -855,15 +870,13 @@ export default function ExamTaker() {
                         onClick={() => document.documentElement.requestFullscreen()}
                         className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 sm:p-2"
                     >
-                        <span className="material-icons text-lg sm:text-2xl">fullscreen</span>
+                        <Maximize className="size-5 sm:size-6" />
                     </button>
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-all duration-300 active:scale-95 border border-gray-200 dark:border-gray-700"
                     >
-                        <span className="material-icons leading-none text-lg sm:text-xl">
-                            {isSidebarOpen ? 'format_indent_increase' : 'format_indent_decrease'}
-                        </span>
+                        {isSidebarOpen ? <IndentIncrease className="size-5 sm:size-6" /> : <IndentDecrease className="size-5 sm:size-6" />}
                     </button>
                 </div>
             </header>
@@ -880,7 +893,7 @@ export default function ExamTaker() {
                                 onClick={handleToggleFlag}
                                 className={`flex items-center space-x-2 transition-colors group ${currentQuestion?.is_flagged ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                             >
-                                <span className="material-icons">{currentQuestion?.is_flagged ? 'flag' : 'outlined_flag'}</span>
+                                <Flag className={cn("size-5", currentQuestion?.is_flagged ? "fill-current" : "")} />
                                 <span className="text-sm font-medium">{currentQuestion?.is_flagged ? 'Flagged' : 'Flag for review'}</span>
                             </button>
                         </div>
@@ -987,7 +1000,7 @@ export default function ExamTaker() {
                                 disabled={currentQuestionIndex === 0}
                                 className="w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center order-2 sm:order-1"
                             >
-                                <span className="material-icons text-lg mr-2">arrow_back</span>
+                                <ArrowLeft className="size-5 mr-2" />
                                 Previous
                             </button>
 
@@ -998,7 +1011,7 @@ export default function ExamTaker() {
                                         ? 'bg-yellow-500 border-yellow-500 text-white'
                                         : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
                                 >
-                                    <span className="material-icons text-lg mr-2">help_outline</span>
+                                    <HelpCircle className="size-5 mr-2" />
                                     Doubtful
                                 </button>
 
@@ -1014,9 +1027,7 @@ export default function ExamTaker() {
                                     className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
                                     {currentQuestionIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
-                                    <span className="material-icons text-lg ml-2">
-                                        {currentQuestionIndex === questions.length - 1 ? 'rocket_launch' : 'arrow_forward'}
-                                    </span>
+                                    {currentQuestionIndex === questions.length - 1 ? <Rocket className="size-5 ml-2" /> : <ArrowRight className="size-5 ml-2" />}
                                 </button>
                             </div>
                         </div>
@@ -1045,7 +1056,7 @@ export default function ExamTaker() {
                                 onClick={() => setIsSidebarOpen(false)}
                                 className="p-2 text-gray-400 hover:text-gray-600"
                             >
-                                <span className="material-icons">close</span>
+                                <X className="size-6" />
                             </button>
                         </div>
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -1126,9 +1137,7 @@ export default function ExamTaker() {
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
                                 )}
                                 <span>Submit Exam</span>
-                                <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">
-                                    rocket_launch
-                                </span>
+                                <Rocket className="size-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
                                 {isAllAnswered() ? "You've answered all questions!" : `You have ${questions.length - questions.filter(isQuestionAnswered).length} unanswered questions`}
@@ -1157,7 +1166,7 @@ export default function ExamTaker() {
                                 setZoomImageUrl(null);
                             }}
                         >
-                            <span className="material-icons">close</span>
+                            <X className="size-6" />
                         </motion.button>
 
                         <motion.div
@@ -1183,9 +1192,7 @@ export default function ExamTaker() {
                         <div className="relative">
                             <div className="size-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-primary text-3xl animate-bounce">
-                                    {isWaitingOfflineSubmit ? 'wifi_off' : 'rocket_launch'}
-                                </span>
+                                {isWaitingOfflineSubmit ? <WifiOff className="size-8 text-primary animate-bounce" /> : <Rocket className="size-8 text-primary animate-bounce" />}
                             </div>
                         </div>
                         <h2 className={`mt-6 text-xl font-bold ${isWaitingOfflineSubmit ? 'text-red-500' : 'text-slate-800 dark:text-white'}`}>

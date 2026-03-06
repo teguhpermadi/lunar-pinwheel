@@ -5,6 +5,16 @@ import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import {
+    Search,
+    FileText,
+    ClipboardCheck,
+    LayoutList,
+    Pencil,
+    Trash2,
+    ChevronLeft,
+    ChevronRight
+} from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -174,7 +184,7 @@ export default function ExamManagementPage() {
                 <div className="flex items-center gap-4">
                     <label className="relative w-full max-w-md">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <span className="material-symbols-outlined">search</span>
+                            <Search className="size-4.5" />
                         </span>
                         <input
                             className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/50 transition-all text-sm outline-none"
@@ -239,7 +249,7 @@ export default function ExamManagementPage() {
                                         <td className="px-4 py-5">
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                                                    <span className="material-symbols-outlined">assignment</span>
+                                                    <FileText className="size-5" />
                                                 </div>
                                                 <div>
                                                     <span className="block font-bold text-slate-800 dark:text-slate-200">{exam.title}</span>
@@ -285,7 +295,7 @@ export default function ExamManagementPage() {
                                                     className="px-4 py-2 bg-indigo-500 text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center gap-2"
                                                     title="Correction"
                                                 >
-                                                    <span className="material-symbols-outlined text-sm">fact_check</span>
+                                                    <ClipboardCheck className="size-3.5" />
                                                     CORRECTION
                                                 </Link>
                                                 <Link
@@ -293,7 +303,7 @@ export default function ExamManagementPage() {
                                                     className="px-4 py-2 bg-primary text-white text-[11px] font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                                                     title="Live Score"
                                                 >
-                                                    <span className="material-symbols-outlined text-sm">leaderboard</span>
+                                                    <LayoutList className="size-3.5" />
                                                     LIVE SCORE
                                                 </Link>
                                                 <Link
@@ -301,14 +311,14 @@ export default function ExamManagementPage() {
                                                     className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                     title="Edit"
                                                 >
-                                                    <span className="material-symbols-outlined text-xl">edit</span>
+                                                    <Pencil className="size-5" />
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(exam.id)}
                                                     className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                                     title="Delete"
                                                 >
-                                                    <span className="material-symbols-outlined text-xl">delete</span>
+                                                    <Trash2 className="size-5" />
                                                 </button>
                                             </div>
                                         </td>
@@ -336,7 +346,7 @@ export default function ExamManagementPage() {
                             disabled={pagination.currentPage <= 1 || isLoading}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-slate-400"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_left</span>
+                            <ChevronLeft className="size-4.5" />
                         </button>
 
                         {(() => {
@@ -389,7 +399,7 @@ export default function ExamManagementPage() {
                             disabled={pagination.currentPage >= pagination.lastPage || isLoading}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-slate-400"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
+                            <ChevronRight className="size-4.5" />
                         </button>
                     </div>
                 </div>

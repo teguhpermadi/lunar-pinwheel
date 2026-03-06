@@ -1,6 +1,16 @@
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Classroom } from '@/lib/api';
+import {
+    Search,
+    Filter,
+    Download,
+    School,
+    Pencil,
+    Trash2,
+    ChevronLeft,
+    ChevronRight
+} from 'lucide-react';
 
 interface ClassroomTableProps {
     classrooms: Classroom[];
@@ -84,9 +94,9 @@ export default function ClassroomTable({
         <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
                 <div className="flex items-center gap-3">
-                    <label className="relative w-full max-w-md">
+                    <label className="relative w-full max-md:max-w-md">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <span className="material-symbols-outlined">search</span>
+                            <Search className="size-4.5" />
                         </span>
                         <input
                             type="text"
@@ -98,10 +108,10 @@ export default function ClassroomTable({
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400">
-                        <span className="material-symbols-outlined">filter_list</span>
+                        <Filter className="size-5" />
                     </button>
                     <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400">
-                        <span className="material-symbols-outlined">download</span>
+                        <Download className="size-5" />
                     </button>
                 </div>
             </div>
@@ -142,7 +152,7 @@ export default function ClassroomTable({
                                             <td className="px-4 py-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="size-10 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600">
-                                                        <span className="material-symbols-outlined">architecture</span>
+                                                        <School className="size-5" />
                                                     </div>
                                                     <div>
                                                         <span className="block font-bold text-slate-800 dark:text-slate-200">{classroom.name}</span>
@@ -164,14 +174,14 @@ export default function ClassroomTable({
                                                         className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                         title="Edit"
                                                     >
-                                                        <span className="material-symbols-outlined text-xl">edit</span>
+                                                        <Pencil className="size-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => onDelete(classroom.id)}
                                                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                                         title="Delete"
                                                     >
-                                                        <span className="material-symbols-outlined text-xl">delete</span>
+                                                        <Trash2 className="size-5" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -193,7 +203,7 @@ export default function ClassroomTable({
                         onClick={() => onPageChange(pagination.currentPage - 1)}
                         className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        <span className="material-symbols-outlined text-lg">chevron_left</span>
+                        <ChevronLeft className="size-4.5" />
                     </button>
                     {/* Simplified pagination for now */}
                     <span className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-bold flex items-center">
@@ -204,7 +214,7 @@ export default function ClassroomTable({
                         onClick={() => onPageChange(pagination.currentPage + 1)}
                         className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        <span className="material-symbols-outlined text-lg">chevron_right</span>
+                        <ChevronRight className="size-4.5" />
                     </button>
                 </div>
             </div>

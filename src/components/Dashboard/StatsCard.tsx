@@ -1,16 +1,17 @@
+import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StatsCardProps {
     title: string;
     value: string;
     change: string;
-    icon: string;
+    icon: LucideIcon;
     colorClass: string; // e.g., 'bg-blue-500'
     iconBgClass: string; // e.g., 'bg-white/20'
     isLoading?: boolean;
 }
 
-export default function StatsCard({ title, value, change, icon, colorClass, iconBgClass, isLoading = false }: StatsCardProps) {
+export default function StatsCard({ title, value, change, icon: Icon, colorClass, iconBgClass, isLoading = false }: StatsCardProps) {
     if (isLoading) {
         return (
             <div className={cn("rounded-3xl p-6 shadow-xl relative overflow-hidden animate-pulse bg-gray-200 dark:bg-gray-800")}>
@@ -38,7 +39,7 @@ export default function StatsCard({ title, value, change, icon, colorClass, icon
 
             <div className="relative z-10 flex flex-col gap-4">
                 <div className={cn("size-10 rounded-xl flex items-center justify-center", iconBgClass)}>
-                    <span className="material-symbols-outlined">{icon}</span>
+                    <Icon className="size-6" />
                 </div>
                 <div>
                     <p className="text-white/80 text-sm font-medium">{title}</p>
