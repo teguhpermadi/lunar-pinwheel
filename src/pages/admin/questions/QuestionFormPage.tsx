@@ -56,6 +56,7 @@ export default function QuestionFormPage() {
     ]);
     const [arrangeWordsSentence, setArrangeWordsSentence] = useState('');
     const [arrangeWordsDelimiter, setArrangeWordsDelimiter] = useState(' ');
+    const [arrangeWordsIsArabic, setArrangeWordsIsArabic] = useState(false);
 
 
     // Load question data if editing
@@ -107,6 +108,7 @@ export default function QuestionFormPage() {
         } else if (newType === 'arrange_words') {
             setArrangeWordsSentence('');
             setArrangeWordsDelimiter(' ');
+            setArrangeWordsIsArabic(false);
         }
     };
 
@@ -222,6 +224,7 @@ export default function QuestionFormPage() {
                     if (sentenceOption) {
                         setArrangeWordsSentence(sentenceOption.content);
                         setArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
+                        setArrangeWordsIsArabic(!!sentenceOption.metadata?.is_arabic);
                     }
                 }
             } else {
@@ -405,6 +408,7 @@ export default function QuestionFormPage() {
                 case 'arrange_words':
                     formData.append('arrange_words_sentence', arrangeWordsSentence);
                     formData.append('arrange_words_delimiter', arrangeWordsDelimiter);
+                    formData.append('arrange_words_is_arabic', arrangeWordsIsArabic ? '1' : '0');
                     break;
             }
 
@@ -543,6 +547,8 @@ export default function QuestionFormPage() {
                 setArrangeWordsSentence={setArrangeWordsSentence}
                 arrangeWordsDelimiter={arrangeWordsDelimiter}
                 setArrangeWordsDelimiter={setArrangeWordsDelimiter}
+                arrangeWordsIsArabic={arrangeWordsIsArabic}
+                setArrangeWordsIsArabic={setArrangeWordsIsArabic}
                 isEditing={isEditing}
             />
 

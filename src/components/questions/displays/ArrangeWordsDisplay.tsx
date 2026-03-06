@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 interface ArrangeWordsDisplayProps {
     options: QuestionOption[];
@@ -6,6 +7,7 @@ interface ArrangeWordsDisplayProps {
 
 export default function ArrangeWordsDisplay({ options }: ArrangeWordsDisplayProps) {
     const option = options?.[0];
+    const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
     const words = option?.content ? option.content.split(delimiter).filter(Boolean) : [];
 
@@ -17,14 +19,19 @@ export default function ArrangeWordsDisplay({ options }: ArrangeWordsDisplayProp
                     Kunci Jawaban (Urutan Benar)
                 </h4>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
                     {words.map((word, i) => (
                         <div key={i} className="flex items-center gap-2">
-                            <span className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 rounded-xl text-sm font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
+                            <span className={cn(
+                                "px-3 py-1.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 rounded-xl text-sm font-bold text-emerald-700 dark:text-emerald-300 shadow-sm",
+                                isArabic && "font-arabic"
+                            )}>
                                 {word}
                             </span>
                             {i < words.length - 1 && (
-                                <span className="material-icons text-slate-300 dark:text-slate-600 text-xs">arrow_forward</span>
+                                <span className={cn("material-icons text-slate-300 dark:text-slate-600 text-xs", isArabic && "rotate-180")}>
+                                    arrow_forward
+                                </span>
                             )}
                         </div>
                     ))}

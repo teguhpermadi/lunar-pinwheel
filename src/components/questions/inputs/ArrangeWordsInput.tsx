@@ -1,17 +1,22 @@
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface ArrangeWordsInputProps {
     sentence: string;
     onSentenceChange: (sentence: string) => void;
     delimiter: string;
     onDelimiterChange: (delimiter: string) => void;
+    isArabic: boolean;
+    onIsArabicChange: (isArabic: boolean) => void;
 }
 
 export default function ArrangeWordsInput({ 
     sentence, 
     onSentenceChange, 
     delimiter, 
-    onDelimiterChange 
+    onDelimiterChange,
+    isArabic,
+    onIsArabicChange
 }: ArrangeWordsInputProps) {
     return (
         <section className="space-y-6">
@@ -28,13 +33,28 @@ export default function ArrangeWordsInput({
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="flex items-center gap-2 mb-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <input
+                        type="checkbox"
+                        id="isArabic"
+                        checked={isArabic}
+                        onChange={(e) => onIsArabicChange(e.target.checked)}
+                        className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                    />
+                    <label htmlFor="isArabic" className="text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-2">
+                        <span className="material-icons text-sm">translate</span>
+                        Teks Arab (RTL)
+                    </label>
+                </div>
+
                 <div className="space-y-2">
                     <Input
                         label="Kalimat Lengkap (Urutan Benar)"
                         value={sentence}
                         onChange={(e) => onSentenceChange(e.target.value)}
                         placeholder="Contoh: Saya sedang belajar React"
-                        className="text-lg py-6"
+                        className={cn("text-lg py-6", isArabic && "text-right font-arabic")}
+                        dir={isArabic ? 'rtl' : 'ltr'}
                     />
                 </div>
 
@@ -52,13 +72,16 @@ export default function ArrangeWordsInput({
 
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Pratinjau Kata (Acak)</h4>
-                <div className="flex flex-wrap gap-2">
+                <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
                     {sentence.trim() ? (
                         sentence.split(delimiter || ' ')
                             .filter(Boolean)
                             .sort(() => Math.random() - 0.5) // Just a visual random for preview
                             .map((word, i) => (
-                                <span key={i} className="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm shadow-sm">
+                                <span key={i} className={cn(
+                                    "px-3 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm shadow-sm",
+                                    isArabic && "font-arabic"
+                                )}>
                                     {word}
                                 </span>
                             ))

@@ -12,6 +12,7 @@ interface StudentArrangeWordsInputProps {
 
 export default function StudentArrangeWordsInput({ options, selectedAnswer, onChange }: StudentArrangeWordsInputProps) {
     const option = options[0];
+    const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
     
     // Full list of words in correct order (from server content)
@@ -27,9 +28,6 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
 
     useEffect(() => {
         // Calculate which words are still available
-        // Note: ARRANGE_WORDS often allows duplicate words if the original sentence had them.
-        // We need to track available words by count or by index.
-        
         let remaining = [...allWords];
         if (selectedAnswer && selectedAnswer.length > 0) {
             selectedAnswer.forEach(word => {
@@ -97,7 +95,8 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
 
                 <div className={cn(
                     "min-h-[80px] p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl flex flex-wrap gap-2 transition-all",
-                    myAnswer.length > 0 ? "border-primary/20 bg-primary/5 dark:bg-primary/5" : ""
+                    myAnswer.length > 0 ? "border-primary/20 bg-primary/5 dark:bg-primary/5" : "",
+                    isArabic && "flex-row-reverse"
                 )}>
                     <AnimatePresence mode="popLayout">
                         {myAnswer.map((word, idx) => (
@@ -108,7 +107,10 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 onClick={() => handleRemoveWord(idx)}
-                                className="group relative px-4 py-2 bg-white dark:bg-slate-800 border border-primary/20 dark:border-primary/40 rounded-xl shadow-sm text-sm md:text-base font-bold text-primary flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 transition-colors"
+                                className={cn(
+                                    "group relative px-4 py-2 bg-white dark:bg-slate-800 border border-primary/20 dark:border-primary/40 rounded-xl shadow-sm text-sm md:text-base font-bold text-primary flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 transition-colors",
+                                    isArabic && "font-arabic"
+                                )}
                             >
                                 {word}
                                 <X className="size-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-500" />
@@ -130,7 +132,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                     Kata-kata tersedia:
                 </p>
 
-                <div className="flex flex-wrap gap-2">
+                <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
                     <AnimatePresence mode="popLayout">
                         {availableWords.map((word, idx) => (
                             <motion.button
@@ -142,7 +144,10 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handlePickWord(word, idx)}
-                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-sm md:text-base font-medium text-slate-700 dark:text-slate-200 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                                className={cn(
+                                    "px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-sm md:text-base font-medium text-slate-700 dark:text-slate-200 hover:border-primary/50 hover:bg-primary/5 transition-all",
+                                    isArabic && "font-arabic"
+                                )}
                             >
                                 {word}
                             </motion.button>

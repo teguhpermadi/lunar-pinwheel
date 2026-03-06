@@ -35,6 +35,8 @@ interface QuestionInputsProps {
     setArrangeWordsSentence: (sentence: string) => void;
     arrangeWordsDelimiter: string;
     setArrangeWordsDelimiter: (delimiter: string) => void;
+    arrangeWordsIsArabic: boolean;
+    setArrangeWordsIsArabic: (isArabic: boolean) => void;
     isEditing?: boolean;
 
 }
@@ -62,6 +64,8 @@ export default function QuestionInputs({
     setArrangeWordsSentence,
     arrangeWordsDelimiter,
     setArrangeWordsDelimiter,
+    arrangeWordsIsArabic,
+    setArrangeWordsIsArabic,
     isEditing
 }: QuestionInputsProps) {
 
@@ -89,7 +93,14 @@ export default function QuestionInputs({
         case 'categorization':
             return <CategorizationInput groups={categorizationGroups} onChange={setCategorizationGroups} onDeleteMedia={handleDeleteOptionMedia} />;
         case 'arrange_words':
-            return <ArrangeWordsInput sentence={arrangeWordsSentence} onSentenceChange={setArrangeWordsSentence} delimiter={arrangeWordsDelimiter} onDelimiterChange={setArrangeWordsDelimiter} />;
+            return <ArrangeWordsInput 
+                sentence={arrangeWordsSentence} 
+                onSentenceChange={setArrangeWordsSentence} 
+                delimiter={arrangeWordsDelimiter} 
+                onDelimiterChange={setArrangeWordsDelimiter}
+                isArabic={arrangeWordsIsArabic}
+                onIsArabicChange={setArrangeWordsIsArabic}
+            />;
         default:
 
             return null;
