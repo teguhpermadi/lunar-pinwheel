@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { QuestionOption } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -9,7 +10,15 @@ export default function ArrangeWordsDisplay({ options }: ArrangeWordsDisplayProp
     const option = options?.[0];
     const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
-    const words = option?.content ? option.content.split(delimiter).filter(Boolean) : [];
+    const shuffleMode = option?.metadata?.shuffle_mode || 'phrase';
+    
+    const words = useMemo(() => {
+        if (!option?.content) return [];
+        if (shuffleMode === 'alphabet') {
+            return option.content.replace(/\s/g, '').split('');
+        }
+        return option.content.split(delimiter).filter(Boolean);
+    }, [option?.content, delimiter, shuffleMode]);
 
     return (
         <div className="space-y-4">

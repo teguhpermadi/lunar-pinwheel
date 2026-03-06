@@ -57,6 +57,7 @@ export default function QuestionFormPage() {
     const [arrangeWordsSentence, setArrangeWordsSentence] = useState('');
     const [arrangeWordsDelimiter, setArrangeWordsDelimiter] = useState(' ');
     const [arrangeWordsIsArabic, setArrangeWordsIsArabic] = useState(false);
+    const [arrangeWordsShuffleMode, setArrangeWordsShuffleMode] = useState<'phrase' | 'alphabet'>('phrase');
 
 
     // Load question data if editing
@@ -109,6 +110,7 @@ export default function QuestionFormPage() {
             setArrangeWordsSentence('');
             setArrangeWordsDelimiter(' ');
             setArrangeWordsIsArabic(false);
+            setArrangeWordsShuffleMode('phrase');
         }
     };
 
@@ -225,6 +227,7 @@ export default function QuestionFormPage() {
                         setArrangeWordsSentence(sentenceOption.content);
                         setArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
                         setArrangeWordsIsArabic(!!sentenceOption.metadata?.is_arabic);
+                        setArrangeWordsShuffleMode(sentenceOption.metadata?.shuffle_mode || 'phrase');
                     }
                 }
             } else {
@@ -409,6 +412,7 @@ export default function QuestionFormPage() {
                     formData.append('arrange_words_sentence', arrangeWordsSentence);
                     formData.append('arrange_words_delimiter', arrangeWordsDelimiter);
                     formData.append('arrange_words_is_arabic', arrangeWordsIsArabic ? '1' : '0');
+                    formData.append('arrange_words_shuffle_mode', arrangeWordsShuffleMode);
                     break;
             }
 
@@ -549,6 +553,8 @@ export default function QuestionFormPage() {
                 setArrangeWordsDelimiter={setArrangeWordsDelimiter}
                 arrangeWordsIsArabic={arrangeWordsIsArabic}
                 setArrangeWordsIsArabic={setArrangeWordsIsArabic}
+                arrangeWordsShuffleMode={arrangeWordsShuffleMode}
+                setArrangeWordsShuffleMode={setArrangeWordsShuffleMode}
                 isEditing={isEditing}
             />
 

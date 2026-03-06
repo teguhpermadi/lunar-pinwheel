@@ -8,6 +8,8 @@ interface ArrangeWordsInputProps {
     onDelimiterChange: (delimiter: string) => void;
     isArabic: boolean;
     onIsArabicChange: (isArabic: boolean) => void;
+    shuffleMode: 'phrase' | 'alphabet';
+    onShuffleModeChange: (mode: 'phrase' | 'alphabet') => void;
 }
 
 export default function ArrangeWordsInput({ 
@@ -16,7 +18,9 @@ export default function ArrangeWordsInput({
     delimiter, 
     onDelimiterChange,
     isArabic,
-    onIsArabicChange
+    onIsArabicChange,
+    shuffleMode,
+    onShuffleModeChange
 }: ArrangeWordsInputProps) {
     return (
         <section className="space-y-6">
@@ -33,18 +37,48 @@ export default function ArrangeWordsInput({
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="flex items-center gap-2 mb-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <input
-                        type="checkbox"
-                        id="isArabic"
-                        checked={isArabic}
-                        onChange={(e) => onIsArabicChange(e.target.checked)}
-                        className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-                    />
-                    <label htmlFor="isArabic" className="text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-2">
-                        <span className="material-icons text-sm">translate</span>
-                        Teks Arab (RTL)
-                    </label>
+                <div className="flex flex-wrap items-center gap-4 mb-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="isArabic"
+                            checked={isArabic}
+                            onChange={(e) => onIsArabicChange(e.target.checked)}
+                            className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                        />
+                        <label htmlFor="isArabic" className="text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-2">
+                            <span className="material-icons text-sm">translate</span>
+                            Teks Arab (RTL)
+                        </label>
+                    </div>
+
+                    <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Mode Acak:</span>
+                        <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input
+                                    type="radio"
+                                    name="shuffleMode"
+                                    checked={shuffleMode === 'phrase'}
+                                    onChange={() => onShuffleModeChange('phrase')}
+                                    className="size-4 border-slate-300 text-blue-600 focus:ring-blue-600"
+                                />
+                                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors">Frasa/Kata</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input
+                                    type="radio"
+                                    name="shuffleMode"
+                                    checked={shuffleMode === 'alphabet'}
+                                    onChange={() => onShuffleModeChange('alphabet')}
+                                    className="size-4 border-slate-300 text-blue-600 focus:ring-blue-600"
+                                />
+                                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors">Alfabet</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="space-y-2">
@@ -74,8 +108,10 @@ export default function ArrangeWordsInput({
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Pratinjau Kata (Acak)</h4>
                 <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
                     {sentence.trim() ? (
-                        sentence.split(delimiter || ' ')
-                            .filter(Boolean)
+                        (shuffleMode === 'phrase' 
+                            ? sentence.split(delimiter || ' ').filter(Boolean)
+                            : sentence.replace(/\s/g, '').split('')
+                        )
                             .sort(() => Math.random() - 0.5) // Just a visual random for preview
                             .map((word, i) => (
                                 <span key={i} className={cn(

@@ -14,12 +14,16 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
     const option = options[0];
     const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
+    const shuffleMode = option?.metadata?.shuffle_mode || 'phrase';
     
     // Full list of words in correct order (from server content)
     const allWords = useMemo(() => {
         if (!option?.content) return [];
+        if (shuffleMode === 'alphabet') {
+            return option.content.replace(/\s/g, '').split('');
+        }
         return option.content.split(delimiter).filter(Boolean);
-    }, [option?.content, delimiter]);
+    }, [option?.content, delimiter, shuffleMode]);
 
     const [myAnswer, setMyAnswer] = useState<string[]>(selectedAnswer || []);
     
@@ -109,17 +113,18 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                                 onClick={() => handleRemoveWord(idx)}
                                 className={cn(
                                     "group relative px-4 py-2 bg-white dark:bg-slate-800 border border-primary/20 dark:border-primary/40 rounded-xl shadow-sm text-sm md:text-base font-bold text-primary flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 transition-colors",
+                                    shuffleMode === 'alphabet' && "px-3 min-w-[40px] justify-center",
                                     isArabic && "font-arabic"
                                 )}
                             >
                                 {word}
-                                <X className="size-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-500" />
+                                <X className={cn("size-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-500", shuffleMode === 'alphabet' && "hidden md:block")} />
                             </motion.button>
                         ))}
                     </AnimatePresence>
                     {myAnswer.length === 0 && (
-                        <div className="w-full flex items-center justify-center text-slate-300 dark:text-slate-700 italic text-sm">
-                            Klik kata-kata di bawah untuk mulai menyusun...
+                        <div className="w-full flex items-center justify-center text-slate-300 dark:text-slate-700 italic text-sm text-center">
+                            {shuffleMode === 'alphabet' ? 'Klik huruf-huruf di bawah untuk mulai menyusun...' : 'Klik kata-kata di bawah untuk mulai menyusun...'}
                         </div>
                     )}
                 </div>
@@ -129,7 +134,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
             <div className="space-y-3">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                     <span className="material-icons text-sm">grid_view</span>
-                    Kata-kata tersedia:
+                    {shuffleMode === 'alphabet' ? 'Huruf tersedia:' : 'Kata-kata tersedia:'}
                 </p>
 
                 <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
@@ -146,6 +151,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                                 onClick={() => handlePickWord(word, idx)}
                                 className={cn(
                                     "px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-sm md:text-base font-medium text-slate-700 dark:text-slate-200 hover:border-primary/50 hover:bg-primary/5 transition-all",
+                                    shuffleMode === 'alphabet' && "px-3 min-w-[40px] justify-center",
                                     isArabic && "font-arabic"
                                 )}
                             >

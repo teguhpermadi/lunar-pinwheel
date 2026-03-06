@@ -37,6 +37,8 @@ interface QuestionInputsProps {
     setArrangeWordsDelimiter: (delimiter: string) => void;
     arrangeWordsIsArabic: boolean;
     setArrangeWordsIsArabic: (isArabic: boolean) => void;
+    arrangeWordsShuffleMode: 'phrase' | 'alphabet';
+    setArrangeWordsShuffleMode: (mode: 'phrase' | 'alphabet') => void;
     isEditing?: boolean;
 
 }
@@ -66,6 +68,8 @@ export default function QuestionInputs({
     setArrangeWordsDelimiter,
     arrangeWordsIsArabic,
     setArrangeWordsIsArabic,
+    arrangeWordsShuffleMode,
+    setArrangeWordsShuffleMode,
     isEditing
 }: QuestionInputsProps) {
 
@@ -100,6 +104,8 @@ export default function QuestionInputs({
                 onDelimiterChange={setArrangeWordsDelimiter}
                 isArabic={arrangeWordsIsArabic}
                 onIsArabicChange={setArrangeWordsIsArabic}
+                shuffleMode={arrangeWordsShuffleMode}
+                onShuffleModeChange={setArrangeWordsShuffleMode}
             />;
         default:
 
