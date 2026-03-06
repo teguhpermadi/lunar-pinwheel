@@ -1,6 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+    LayoutDashboard,
+    GraduationCap,
+    Users,
+    Calendar,
+    Book,
+    BookOpen,
+    Library,
+    FileText,
+    X,
+    LogOut
+} from 'lucide-react';
 
 interface AdminSidebarProps {
     isCollapsed: boolean;
@@ -13,14 +25,14 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
     const { logout } = useAuth();
 
     const navItems = [
-        { icon: 'dashboard', label: 'Dashboard', path: '/admin' },
-        { icon: 'school', label: 'Teachers', path: '/admin/teachers' },
-        { icon: 'groups', label: 'Students', path: '/admin/students' },
-        { icon: 'calendar_month', label: 'Academic Years', path: '/admin/academic-years' },
-        { icon: 'book', label: 'Subjects', path: '/admin/subjects' },
-        { icon: 'class', label: 'Classrooms', path: '/admin/classrooms' },
-        { icon: 'library_books', label: 'Question Bank', path: '/admin/question-banks' },
-        { icon: 'description', label: 'Exams', path: '/admin/exams' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+        { icon: GraduationCap, label: 'Teachers', path: '/admin/teachers' },
+        { icon: Users, label: 'Students', path: '/admin/students' },
+        { icon: Calendar, label: 'Academic Years', path: '/admin/academic-years' },
+        { icon: Book, label: 'Subjects', path: '/admin/subjects' },
+        { icon: BookOpen, label: 'Classrooms', path: '/admin/classrooms' },
+        { icon: Library, label: 'Question Bank', path: '/admin/question-banks' },
+        { icon: FileText, label: 'Exams', path: '/admin/exams' },
     ];
 
     return (
@@ -36,7 +48,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
                 isCollapsed ? "px-0 justify-center" : ""
             )}>
                 <div className="min-w-10 size-10 bg-white rounded-lg flex items-center justify-center shadow-lg shrink-0">
-                    <span className="material-symbols-outlined text-primary text-2xl">school</span>
+                    <GraduationCap className="size-6 text-primary" />
                 </div>
                 <div className={cn(
                     "logo-text overflow-hidden whitespace-nowrap transition-all duration-300",
@@ -50,7 +62,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
                     onClick={onMobileClose}
                     className="lg:hidden ml-auto text-white/60 p-1 rounded-lg hover:bg-white/10"
                 >
-                    <span className="material-symbols-outlined">close</span>
+                    <X className="size-5" />
                 </button>
             </div>
 
@@ -71,7 +83,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
                         )}
                         title={isCollapsed ? item.label : undefined}
                     >
-                        <span className="material-symbols-outlined shrink-0">{item.icon}</span>
+                        <item.icon className="size-5 shrink-0" />
                         <span className={cn(
                             "nav-label overflow-hidden whitespace-nowrap transition-all duration-300",
                             isCollapsed ? "hidden w-0 opacity-0" : "block opacity-100"
@@ -89,7 +101,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
                         "logout-btn flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-colors w-full",
                         isCollapsed ? "justify-center px-0" : ""
                     )}>
-                    <span className="material-symbols-outlined shrink-0">logout</span>
+                    <LogOut className="size-5 shrink-0" />
                     <span className={cn(
                         "nav-label overflow-hidden whitespace-nowrap transition-all duration-300",
                         isCollapsed ? "hidden w-0 opacity-0" : "block opacity-100"

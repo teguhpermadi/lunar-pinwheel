@@ -6,6 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import {
+    Filter,
+    Clock,
+    Timer,
+    ChevronRight,
+    Rocket,
+    X,
+    Info
+} from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -127,7 +136,7 @@ export default function StudentExamsPage() {
     const groupedExams = groupExams();
 
     return (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden p-4 md:p-6 gap-6 md:gap-8 h-full bg-background-light dark:bg-background-dark/50 relative">
+        <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden p-4 md:p-6 gap-6 md:gap-8 lg:h-full min-h-screen lg:min-h-0 bg-background-light dark:bg-background-dark/50 relative">
             {/* Left side: Timeline */}
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between mb-6 px-2">
@@ -136,11 +145,11 @@ export default function StudentExamsPage() {
                         <p className="text-sm text-slate-500 font-medium">You have {exams.length} exams scheduled</p>
                     </div>
                     <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all">
-                        <span className="material-symbols-outlined text-xl">filter_list</span>
+                        <Filter className="size-5" />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 relative timeline-line">
+                <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar pr-4 relative timeline-line">
                     <div className="absolute left-[27px] top-0 bottom-0 w-[2px] bg-slate-200 dark:bg-slate-800 z-0"></div>
 
                     {isLoading ? (
@@ -190,11 +199,11 @@ export default function StudentExamsPage() {
                                                             </div>
                                                             <h4 className="font-bold text-slate-900 dark:text-white truncate">{exam.title}</h4>
                                                             <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
-                                                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> {time}</span>
-                                                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">timer</span> {exam.duration}m</span>
+                                                                <span className="flex items-center gap-1"><Clock className="size-3" /> {time}</span>
+                                                                <span className="flex items-center gap-1"><Timer className="size-3" /> {exam.duration}m</span>
                                                             </div>
                                                         </div>
-                                                        <span className={`material-symbols-outlined ${isSelected ? 'text-primary' : 'text-slate-300'}`}>chevron_right</span>
+                                                        <ChevronRight className={cn("size-5", isSelected ? 'text-primary' : 'text-slate-300')} />
                                                     </div>
                                                 </motion.div>
                                             );
@@ -216,7 +225,7 @@ export default function StudentExamsPage() {
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className={cn(
-                    "flex flex-col h-full overflow-hidden",
+                    "flex flex-col h-full lg:overflow-hidden",
                     "fixed inset-0 z-[60] lg:relative lg:inset-auto lg:z-auto",
                     "bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-sm lg:backdrop-blur-none",
                     !(selectedExam || isLoading) && "pointer-events-none lg:pointer-events-auto"
@@ -229,7 +238,7 @@ export default function StudentExamsPage() {
                             onClick={() => setSelectedExam(null)}
                             className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-400 transition-colors"
                         >
-                            <span className="material-symbols-outlined text-sm">close</span>
+                            <X className="size-4" />
                         </button>
                     </div>
 
@@ -268,7 +277,7 @@ export default function StudentExamsPage() {
                                     <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                                         <div className="flex items-start justify-between mb-6">
                                             <div className="size-14 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-500/30">
-                                                <span className="material-symbols-outlined text-2xl">rocket_launch</span>
+                                                <Rocket className="size-6" />
                                             </div>
                                             <span className={`px-3 py-1 text-[10px] font-bold rounded-full ${selectedExam.is_published ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'}`}>
                                                 {selectedExam.is_published ? 'OPEN' : 'CLOSED'}
@@ -276,8 +285,8 @@ export default function StudentExamsPage() {
                                         </div>
                                         <h4 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">{selectedExam.title}</h4>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-wide">
-                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> {formatDate(selectedExam.start_time).time}</span>
-                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">timer</span> {selectedExam.duration}m</span>
+                                            <span className="flex items-center gap-1"><Clock className="size-3.5" /> {formatDate(selectedExam.start_time).time}</span>
+                                            <span className="flex items-center gap-1"><Timer className="size-3.5" /> {selectedExam.duration}m</span>
                                         </div>
 
                                         <div className="mt-8 p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -311,7 +320,9 @@ export default function StudentExamsPage() {
                                         <div className="mt-4">
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Access Token</p>
                                             <div className="relative">
-                                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">vpn_key</span>
+                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                                    <Info className="size-4" />
+                                                </div>
                                                 <input
                                                     className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-primary focus:border-primary text-sm font-medium tracking-widest placeholder:tracking-normal placeholder:font-normal outline-none transition-all"
                                                     placeholder="Enter provided token..."
@@ -332,7 +343,7 @@ export default function StudentExamsPage() {
                                             <div className="grid grid-cols-1 gap-3">
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                                                     <div className="size-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-blue-500 text-lg">info</span>
+                                                        <Info className="size-5 text-blue-500" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Exam Mode</p>
@@ -341,7 +352,7 @@ export default function StudentExamsPage() {
                                                 </div>
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                                                     <div className="size-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-amber-500 text-lg">timer</span>
+                                                        <Timer className="size-5 text-amber-500" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">{selectedExam.duration} Minute Limit</p>
@@ -359,11 +370,11 @@ export default function StudentExamsPage() {
                                                 disabled={!selectedExam.is_published}
                                                 className={`w-full py-4 rounded-2xl font-bold text-base shadow-xl transition-all flex items-center justify-center gap-2 ${selectedExam.is_published ? 'bg-primary text-white shadow-primary/25 hover:bg-primary/90 hover:-translate-y-0.5' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
                                             >
-                                                <span className="material-symbols-outlined">rocket_launch</span>
+                                                <Rocket className="size-5" />
                                                 <span>{selectedExam.is_published ? 'Start Examination' : 'Exam Not Available'}</span>
                                             </button>
                                             <div className="flex items-center justify-center gap-2 mt-4">
-                                                <span className="material-symbols-outlined text-slate-400 text-sm">info</span>
+                                                <Info className="size-4 text-slate-400" />
                                                 <p className="text-[11px] text-slate-500 font-medium">
                                                     {selectedExam.is_published ? 'Make sure you have a stable connection' : 'This exam is currently closed or not yet scheduled.'}
                                                 </p>

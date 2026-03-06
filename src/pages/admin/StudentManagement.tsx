@@ -5,6 +5,7 @@ import withReactContent from 'sweetalert2-react-content';
 import StudentTable from '@/components/admin/student/StudentTable';
 import StudentModal from '@/components/admin/student/StudentModal';
 import { studentApi, Student } from '@/lib/api';
+import { Download, Upload, Plus } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -218,7 +219,7 @@ export default function StudentManagement() {
                         }}
                         className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">download</span>
+                        <Download className="size-4" />
                         Download Template
                     </button>
                     <div className="border-t border-slate-200 pt-4">
@@ -321,21 +322,21 @@ export default function StudentManagement() {
                         onClick={handleImport}
                         className="px-4 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg text-white">upload_file</span>
+                        <Upload className="size-4.5" />
                         Import Excel
                     </button>
                     <button
                         onClick={handleCreate}
                         className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">add</span>
+                        <Plus className="size-4.5 text-white" />
                         New Student
                     </button>
                     <button
                         onClick={handleDownload}
                         className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-bold hover:shadow-sm transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">download</span>
+                        <Download className="size-4.5" />
                         Export
                     </button>
                 </div>

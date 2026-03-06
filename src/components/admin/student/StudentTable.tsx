@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Student } from '@/lib/api';
+import {
+    Trash2,
+    Search,
+    User,
+    Pencil,
+    ChevronLeft,
+    ChevronRight
+} from 'lucide-react';
 
 interface StudentTableProps {
     students: Student[];
@@ -114,7 +122,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                             }}
                             className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
                         >
-                            <span className="material-symbols-outlined text-lg">delete</span>
+                            <Trash2 className="size-4" />
                             Delete ({selectedIds.length})
                         </motion.button>
                     )}
@@ -132,7 +140,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                             }}
                             className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64"
                         />
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4.5" />
                     </div>
                 </div>
             </div>
@@ -186,7 +194,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                                                         {student.avatar ? (
                                                             <img src={student.avatar} alt={student.name} className="size-full object-cover" />
                                                         ) : (
-                                                            <span className="material-symbols-outlined">person</span>
+                                                            <User className="size-5" />
                                                         )}
                                                     </div>
                                                     <div>
@@ -210,14 +218,14 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                                                         className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                         title="Edit"
                                                     >
-                                                        <span className="material-symbols-outlined text-xl">edit</span>
+                                                        <Pencil className="size-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => onDelete(student.id)}
                                                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                                         title="Delete"
                                                     >
-                                                        <span className="material-symbols-outlined text-xl">delete</span>
+                                                        <Trash2 className="size-5" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -241,7 +249,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                             disabled={pagination.currentPage <= 1}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_left</span>
+                            <ChevronLeft className="size-4.5" />
                         </button>
 
                         {(() => {
@@ -293,7 +301,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                             disabled={pagination.currentPage >= pagination.lastPage}
                             className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
+                            <ChevronRight className="size-4.5" />
                         </button>
                     </div>
                 </div>

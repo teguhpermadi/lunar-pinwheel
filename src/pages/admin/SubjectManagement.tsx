@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SubjectTable from '@/components/admin/subject/SubjectTable';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { subjectApi, Subject } from '@/lib/api';
+import { Plus } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -171,7 +172,7 @@ export default function SubjectManagement() {
                         onClick={handleCreate}
                         className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">add</span>
+                        <Plus className="size-4.5 text-white" />
                         New Subject
                     </button>
                 </div>

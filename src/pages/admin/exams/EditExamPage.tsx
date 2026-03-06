@@ -4,7 +4,29 @@ import { examApi, Exam, Classroom, classroomApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
-// import { useAuth } from '@/contexts/AuthContext';
+import {
+    ArrowLeft,
+    LayoutList,
+    Save,
+    RefreshCw,
+    Settings,
+    Brain,
+    Calendar,
+    Info,
+    Users,
+    CheckCircle2,
+    Users2,
+    Shuffle,
+    ListFilter,
+    Eye,
+    Lightbulb,
+    Infinity,
+    Key,
+    Rocket,
+    Shield,
+    Lock,
+    LucideIcon
+} from 'lucide-react';
 
 type Tab = 'general' | 'behavior' | 'scheduling';
 
@@ -14,16 +36,16 @@ interface ToggleProps {
     description?: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
-    icon?: string;
+    icon?: LucideIcon;
 }
 
-const Toggle = ({ label, hint, description, checked, onChange, icon }: ToggleProps) => (
+const Toggle = ({ label, hint, description, checked, onChange, icon: Icon }: ToggleProps) => (
     <div className="flex flex-col gap-1.5 group">
         <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:border-primary/20">
             <div className="flex items-center gap-3">
-                {icon && (
+                {Icon && (
                     <div className="size-8 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors border border-slate-100 dark:border-slate-700">
-                        <span className="material-symbols-outlined text-lg">{icon}</span>
+                        <Icon className="size-4.5" />
                     </div>
                 )}
                 <div className="flex flex-col">
@@ -189,7 +211,7 @@ export default function EditExamPage() {
                         onClick={() => navigate('/admin/exams')}
                         className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400"
                     >
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft className="size-5" />
                     </button>
                     <div className="flex-1 max-w-xl">
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">
@@ -205,7 +227,7 @@ export default function EditExamPage() {
                         onClick={handleLiveScore}
                         className="px-5 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all flex items-center gap-2 group/live"
                     >
-                        <span className="material-symbols-outlined text-lg animate-pulse">scoreboard</span>
+                        <LayoutList className="size-4.5 animate-pulse" />
                         Live Score
                     </button>
                     <button
@@ -213,9 +235,7 @@ export default function EditExamPage() {
                         disabled={isSaving || !exam.classroom_ids || exam.classroom_ids.length === 0}
                         className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span className="material-symbols-outlined text-lg">
-                            {isSaving ? 'sync' : 'save'}
-                        </span>
+                        {isSaving ? <RefreshCw className="size-4.5 animate-spin" /> : <Save className="size-4.5" />}
                         {isSaving ? 'Saving...' : (!exam.classroom_ids || exam.classroom_ids.length === 0) ? 'Select a Classroom' : 'Save Configuration'}
                     </button>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
@@ -234,9 +254,9 @@ export default function EditExamPage() {
                     <div className="max-w-3xl mx-auto p-8 space-y-8">
                         <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-8">
                             {[
-                                { id: 'general', icon: 'settings', label: 'General Settings' },
-                                { id: 'behavior', icon: 'psychology', label: 'Question Behavior' },
-                                { id: 'scheduling', icon: 'calendar_month', label: 'Scheduling & Security' }
+                                { id: 'general', icon: Settings, label: 'General Settings' },
+                                { id: 'behavior', icon: Brain, label: 'Question Behavior' },
+                                { id: 'scheduling', icon: Calendar, label: 'Scheduling & Security' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -246,7 +266,7 @@ export default function EditExamPage() {
                                         activeTab === tab.id ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
-                                    <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+                                    <tab.icon className="size-4.5" />
                                     {tab.label}
                                 </button>
                             ))}
@@ -257,7 +277,7 @@ export default function EditExamPage() {
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">info</span>
+                                            <Info className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Identity & Purpose</h3>
                                         </div>
                                         <div className="grid grid-cols-1 gap-6">
@@ -300,7 +320,7 @@ export default function EditExamPage() {
 
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">groups</span>
+                                            <Users className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Classrooms</h3>
                                         </div>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -332,7 +352,7 @@ export default function EditExamPage() {
                                                                 {classroom.name}
                                                             </span>
                                                             {isSelected && (
-                                                                <span className="material-symbols-outlined text-primary text-sm animate-in zoom-in duration-200">check_circle</span>
+                                                                <CheckCircle2 className="size-4 text-primary animate-in zoom-in duration-200" />
                                                             )}
                                                         </div>
                                                         <span className="text-[9px] text-slate-400 font-medium">Level {classroom.level}</span>
@@ -342,7 +362,7 @@ export default function EditExamPage() {
                                         </div>
                                         {!availableClassrooms.length && (
                                             <div className="py-8 text-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                                                <span className="material-symbols-outlined text-slate-300 text-3xl mb-2">group_off</span>
+                                                <Users2 className="size-10 text-slate-300 mx-auto mb-2" />
                                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">No classrooms found</p>
                                                 <p className="text-[9px] text-slate-400 mt-1">Check academic year settings</p>
                                             </div>
@@ -355,35 +375,35 @@ export default function EditExamPage() {
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">shuffle</span>
+                                            <Shuffle className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Logic & Randomization</h3>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <Toggle
                                                 label="Randomize Questions"
                                                 description="Shuffle question order for each student"
-                                                icon="shuffle"
+                                                icon={Shuffle}
                                                 checked={exam.is_randomized_question}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_randomized_question: val } : null)}
                                             />
                                             <Toggle
                                                 label="Randomize Options"
                                                 description="Shuffle answer choices within questions"
-                                                icon="reorder"
+                                                icon={ListFilter}
                                                 checked={exam.is_randomized_answer}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_randomized_answer: val } : null)}
                                             />
                                             <Toggle
                                                 label="Show Result"
                                                 description="Show final score to students after finish"
-                                                icon="visibility"
+                                                icon={Eye}
                                                 checked={exam.is_show_result}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_show_result: val } : null)}
                                             />
                                             <Toggle
                                                 label="Visible Hint"
                                                 description="Allow students to view question hints"
-                                                icon="lightbulb"
+                                                icon={Lightbulb}
                                                 checked={exam.is_visible_hint}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_visible_hint: val } : null)}
                                             />
@@ -396,7 +416,7 @@ export default function EditExamPage() {
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">calendar_month</span>
+                                            <Calendar className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Execution Hub</h3>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -421,7 +441,7 @@ export default function EditExamPage() {
                                                                 exam.max_attempts === null ? "bg-primary text-white shadow-sm shadow-primary/20" : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-200"
                                                             )}
                                                         >
-                                                            <span className="material-symbols-outlined text-[12px] leading-none">all_inclusive</span>
+                                                            <Infinity className="size-3 leading-none" />
                                                             {exam.max_attempts === null ? 'Unlimited Active' : 'Set Unlimited'}
                                                         </button>
                                                     </div>
@@ -440,7 +460,7 @@ export default function EditExamPage() {
                                                         {exam.max_attempts === null && (
                                                             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none animate-in fade-in zoom-in-95 duration-300">
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="material-symbols-outlined text-primary text-lg">all_inclusive</span>
+                                                                    <Infinity className="size-5 text-primary" />
                                                                     <span className="text-sm font-bold text-primary/60 italic">Unlimited Retakes</span>
                                                                 </div>
                                                             </div>
@@ -485,7 +505,7 @@ export default function EditExamPage() {
 
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">access_time</span>
+                                            <Calendar className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Access Window</h3>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -534,21 +554,21 @@ export default function EditExamPage() {
 
                                     <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">security</span>
+                                            <Shield className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Security & Publication</h3>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <Toggle
                                                 label="Show Token"
                                                 description="Display access token to students"
-                                                icon="key"
+                                                icon={Key}
                                                 checked={exam.is_token_visible}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_token_visible: val } : null)}
                                             />
                                             <Toggle
                                                 label="Publish Exam"
                                                 description="Make exam live and accessible for students"
-                                                icon="rocket_launch"
+                                                icon={Rocket}
                                                 checked={exam.is_published}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_published: val } : null)}
                                             />
@@ -563,7 +583,7 @@ export default function EditExamPage() {
                 <aside className="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 no-print overflow-hidden">
                     <div className="p-6 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
-                            <span className="material-symbols-outlined text-primary text-xl">visibility</span>
+                            <Eye className="size-5 text-primary" />
                             Overview
                         </h2>
                         <p className="text-[10px] text-slate-400 font-bold mt-1">REAL-TIME SETUP SUMMARY</p>
@@ -571,7 +591,7 @@ export default function EditExamPage() {
                     <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
                         <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="material-symbols-outlined text-primary text-sm">vpn_key</span>
+                                <Lock className="size-4 text-primary" />
                                 <label className="text-[10px] font-bold text-primary uppercase">Security Token</label>
                             </div>
                             <p className="text-3xl font-mono font-black text-primary text-center">
@@ -613,12 +633,7 @@ export default function EditExamPage() {
                                     ].map((item) => (
                                         <div key={item.label} className="flex justify-between items-center text-[11px]">
                                             <span className="text-slate-500">{item.label}</span>
-                                            <span className={cn(
-                                                "material-symbols-outlined text-sm",
-                                                item.val ? "text-emerald-500" : "text-slate-300"
-                                            )}>
-                                                {item.val ? 'check_circle' : 'cancel'}
-                                            </span>
+                                            {item.val ? <CheckCircle2 className="size-4 text-emerald-500" /> : <Shield className="size-4 text-slate-300" />}
                                         </div>
                                     ))}
                                 </div>
@@ -630,4 +645,4 @@ export default function EditExamPage() {
             </div>
         </div>
     );
-}
+};

@@ -6,6 +6,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardApi, DashboardData } from '@/lib/api';
 import { format } from 'date-fns';
+import {
+    Calendar as CalendarIcon,
+    Users,
+    DoorOpen,
+    Timer,
+    Zap,
+    CalendarX,
+    FileText,
+    ChevronRight,
+    History,
+    Sparkles,
+    CheckCircle2
+} from 'lucide-react';
 
 export default function AdminDashboard() {
     const { user } = useAuth();
@@ -51,7 +64,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:shadow-sm transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">calendar_today</span>
+                        <CalendarIcon className="size-4.5" />
                         {format(new Date(), 'MMMM yyyy')}
                     </button>
                     {/* <button className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
@@ -71,7 +84,7 @@ export default function AdminDashboard() {
                     title="Total Students"
                     value={data?.stats.students_count?.toLocaleString() || '0'}
                     change="+0%"
-                    icon="group"
+                    icon={Users}
                     colorClass="bg-blue-500 shadow-blue-500/20"
                     iconBgClass="bg-white/20"
                     isLoading={isLoading}
@@ -80,7 +93,7 @@ export default function AdminDashboard() {
                     title="Active Classes"
                     value={data?.stats.classrooms_count?.toLocaleString() || '0'}
                     change="Steady"
-                    icon="meeting_room"
+                    icon={DoorOpen}
                     colorClass="bg-amber-400 text-slate-900 shadow-amber-400/20"
                     iconBgClass="bg-black/10"
                     isLoading={isLoading}
@@ -89,7 +102,7 @@ export default function AdminDashboard() {
                     title="Ongoing Exams"
                     value={data?.stats.ongoing_exams_count?.toLocaleString() || '0'}
                     change="+0"
-                    icon="timer"
+                    icon={Timer}
                     colorClass="bg-rose-500 shadow-rose-500/20"
                     iconBgClass="bg-white/20"
                     isLoading={isLoading}
@@ -98,7 +111,7 @@ export default function AdminDashboard() {
                     title="System Health"
                     value="Excellent"
                     change="Stable"
-                    icon="bolt"
+                    icon={Zap}
                     colorClass="bg-primary shadow-primary/20"
                     iconBgClass="bg-white/20"
                     isLoading={isLoading}
@@ -133,7 +146,7 @@ export default function AdminDashboard() {
                                 ))
                             ) : data?.ongoing_exams.length === 0 ? (
                                 <div className="h-40 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
-                                    <span className="material-symbols-outlined text-4xl mb-2">event_busy</span>
+                                    <CalendarX className="size-10 mb-2 opacity-50" />
                                     <p className="font-medium text-sm">No ongoing exams at the moment</p>
                                 </div>
                             ) : (
@@ -141,7 +154,7 @@ export default function AdminDashboard() {
                                     <Link key={exam.id} to={`/admin/exams/${exam.id}/live`} className="group p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent hover:border-primary/30 transition-all flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="size-12 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <span className="material-symbols-outlined">assignment</span>
+                                                <FileText className="size-6" />
                                             </div>
                                             <div>
                                                 <h5 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{exam.title}</h5>
@@ -157,7 +170,7 @@ export default function AdminDashboard() {
                                                 <p className="text-xs font-bold text-slate-900 dark:text-white">{exam.duration} mins</p>
                                                 <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mt-0.5">Duration</p>
                                             </div>
-                                            <span className="material-symbols-outlined text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+                                            <ChevronRight className="size-5 text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                                         </div>
                                     </Link>
                                 ))
@@ -174,14 +187,14 @@ export default function AdminDashboard() {
                                 ))
                             ) : (
                                 [
-                                    { icon: 'group', label: 'Students', color: 'blue', to: '/admin/students' },
-                                    { icon: 'meeting_room', label: 'Classroom', color: 'amber', to: '/admin/classrooms' },
-                                    { icon: 'assignment', label: 'Exam', color: 'rose', to: '/admin/exams' },
-                                    { icon: 'task_alt', label: 'Correction', color: 'primary', to: '/admin/exams' },
+                                    { icon: Users, label: 'Students', color: 'blue', to: '/admin/students' },
+                                    { icon: DoorOpen, label: 'Classroom', color: 'amber', to: '/admin/classrooms' },
+                                    { icon: FileText, label: 'Exam', color: 'rose', to: '/admin/exams' },
+                                    { icon: CheckCircle2, label: 'Correction', color: 'primary', to: '/admin/exams' },
                                 ].map((action) => (
                                     <Link key={action.label} to={action.to} className="group flex flex-col items-center justify-center gap-3 p-4 md:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg">
                                         <div className={`size-12 rounded-xl bg-${action.color === 'primary' ? 'primary/10' : action.color + '-100'} text-${action.color === 'primary' ? 'primary' : action.color + '-600'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                            <span className="material-symbols-outlined">{action.icon}</span>
+                                            <action.icon className="size-6" />
                                         </div>
                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">{action.label}</span>
                                     </Link>
@@ -213,7 +226,7 @@ export default function AdminDashboard() {
                                 ))
                             ) : data?.recent_activities.length === 0 ? (
                                 <div className="mt-20 flex flex-col items-center text-slate-400">
-                                    <span className="material-symbols-outlined text-4xl mb-2 opacity-20">history</span>
+                                    <History className="size-10 mb-2 opacity-20" />
                                     <p className="text-xs font-bold uppercase tracking-widest opacity-50">No activities yet</p>
                                 </div>
                             ) : (
@@ -226,7 +239,7 @@ export default function AdminDashboard() {
                                         className="relative flex gap-4"
                                     >
                                         <div className="z-10 size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center ring-4 ring-white dark:ring-slate-900">
-                                            <span className="material-symbols-outlined text-sm text-slate-500">history</span>
+                                            <History className="size-4 text-slate-500" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">{activity.description.replace(/_/g, ' ')}</p>
@@ -243,7 +256,7 @@ export default function AdminDashboard() {
                                     transition={{ delay: 0.5 }}
                                     className="mt-auto pt-8 flex flex-col items-center grayscale select-none"
                                 >
-                                    <span className="material-symbols-outlined text-6xl mb-2">auto_awesome</span>
+                                    <Sparkles className="size-10 mb-2" />
                                     <p className="text-xs font-bold text-center uppercase tracking-widest">Everything is up to date</p>
                                 </motion.div>
                             )}
