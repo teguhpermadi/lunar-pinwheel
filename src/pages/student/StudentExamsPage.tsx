@@ -127,7 +127,7 @@ export default function StudentExamsPage() {
     const groupedExams = groupExams();
 
     return (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden p-4 md:p-6 gap-6 md:gap-8 h-full bg-background-light dark:bg-background-dark/50 relative">
+        <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden p-4 md:p-6 gap-6 md:gap-8 lg:h-full min-h-screen lg:min-h-0 bg-background-light dark:bg-background-dark/50 relative">
             {/* Left side: Timeline */}
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between mb-6 px-2">
@@ -140,7 +140,7 @@ export default function StudentExamsPage() {
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 relative timeline-line">
+                <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar pr-4 relative timeline-line">
                     <div className="absolute left-[27px] top-0 bottom-0 w-[2px] bg-slate-200 dark:bg-slate-800 z-0"></div>
 
                     {isLoading ? (
@@ -216,7 +216,7 @@ export default function StudentExamsPage() {
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className={cn(
-                    "flex flex-col h-full overflow-hidden",
+                    "flex flex-col h-full lg:overflow-hidden",
                     "fixed inset-0 z-[60] lg:relative lg:inset-auto lg:z-auto",
                     "bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-sm lg:backdrop-blur-none",
                     !(selectedExam || isLoading) && "pointer-events-none lg:pointer-events-auto"
