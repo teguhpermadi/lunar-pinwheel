@@ -889,8 +889,20 @@ export default function ExamTaker() {
                             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] md:min-h-[400px] transition-all duration-300"
                             style={{ fontSize: `${fontSize}px` }}
                         >
+                            <style>{`
+                                .zoom-container .prose { font-size: 1em !important; }
+                                .zoom-container .text-xs { font-size: 0.75em !important; line-height: 1.33 !important; }
+                                .zoom-container .text-sm { font-size: 0.875em !important; line-height: 1.428 !important; }
+                                .zoom-container .text-base { font-size: 1em !important; line-height: 1.5 !important; }
+                                .zoom-container .text-lg { font-size: 1.125em !important; line-height: 1.555 !important; }
+                                .zoom-container .text-xl { font-size: 1.25em !important; line-height: 1.4 !important; }
+                                .zoom-container .text-2xl { font-size: 1.5em !important; line-height: 1.333 !important; }
+                                .zoom-container .text-3xl { font-size: 1.875em !important; line-height: 1.2 !important; }
+                                .zoom-container .text-4xl { font-size: 2.25em !important; line-height: 1.111 !important; }
+                                .zoom-container .text-5xl { font-size: 3em !important; line-height: 1 !important; }
+                            `}</style>
                             {/* Question Container */}
-                            <div className="relative z-10">
+                            <div className="relative z-10 zoom-container">
                                 {(() => {
                                     const mediaContent = currentQuestion?.exam_question?.media?.content
                                         || currentQuestion?.media?.content
