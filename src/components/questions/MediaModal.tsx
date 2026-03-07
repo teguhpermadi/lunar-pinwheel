@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import Modal from '@/components/ui/modal';
+import { Image, RefreshCcw, ImagePlus, Trash2 } from 'lucide-react';
 
 interface MediaModalProps {
     isOpen: boolean;
@@ -42,7 +43,7 @@ export default function MediaModal({
                         />
                     ) : (
                         <div className="flex flex-col items-center gap-2 text-slate-400">
-                            <span className="material-symbols-outlined text-4xl">image</span>
+                            <Image className="size-10" />
                             <p className="text-sm font-medium">No image selected</p>
                         </div>
                     )}
@@ -62,9 +63,7 @@ export default function MediaModal({
                             onClick={() => fileInputRef.current?.click()}
                             className="w-full py-3 px-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all"
                         >
-                            <span className="material-symbols-outlined">
-                                {imageUrl ? 'change_circle' : 'add_photo_alternate'}
-                            </span>
+                            {imageUrl ? <RefreshCcw className="size-5" /> : <ImagePlus className="size-5" />}
                             {imageUrl ? 'Change Image' : 'Select Image'}
                         </button>
 
@@ -76,7 +75,7 @@ export default function MediaModal({
                                 }}
                                 className="w-full py-3 px-4 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all"
                             >
-                                <span className="material-symbols-outlined">delete</span>
+                                <Trash2 className="size-5" />
                                 Remove Image
                             </button>
                         )}

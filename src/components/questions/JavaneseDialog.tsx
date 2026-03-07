@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Modal from '@/components/ui/modal';
 import JavaneseKeyboard from '@/components/ui/JavaneseKeyboard';
+import { CheckCircle2 } from 'lucide-react';
 
 interface JavaneseDialogProps {
     isOpen: boolean;
@@ -104,7 +105,7 @@ export default function JavaneseDialog({ isOpen, onClose, initialValue = '', onC
                         onClick={handleConfirm}
                         className="flex-[2] py-3 px-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all font-sans"
                     >
-                        <span className="material-symbols-outlined">check_circle</span>
+                        <CheckCircle2 className="size-5" />
                         Insert Javanese Script
                     </button>
                 </div>

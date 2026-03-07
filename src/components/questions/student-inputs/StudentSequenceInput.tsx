@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
 import { Reorder } from 'framer-motion';
+import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface StudentSequenceInputProps {
     options: QuestionOption[];
@@ -34,7 +35,7 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
     return (
         <div className="space-y-4">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="material-icons text-sm">drag_indicator</span>
+                <GripVertical className="size-4" />
                 Drag and drop to reorder the sequence
             </p>
 
@@ -46,7 +47,7 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                         className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex items-center gap-4 cursor-grab active:cursor-grabbing transition-colors hover:border-primary/20"
                     >
                         <div className="size-8 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold rounded-lg flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
-                            <span className="material-icons text-sm">drag_indicator</span>
+                            <GripVertical className="size-4" />
                         </div>
 
                         <div className="flex-1">
@@ -75,7 +76,7 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                                 }}
                                 className="p-1 lg:p-1.5 text-slate-400 hover:text-primary disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
                             >
-                                <span className="material-icons text-sm lg:text-base">keyboard_arrow_up</span>
+                                <ChevronUp className="size-4 sm:size-5" />
                             </button>
                             <button
                                 type="button"
@@ -94,7 +95,7 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                                 }}
                                 className="p-1 lg:p-1.5 text-slate-400 hover:text-primary disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
                             >
-                                <span className="material-icons text-sm lg:text-base">keyboard_arrow_down</span>
+                                <ChevronDown className="size-4 sm:size-5" />
                             </button>
                         </div>
                     </Reorder.Item>

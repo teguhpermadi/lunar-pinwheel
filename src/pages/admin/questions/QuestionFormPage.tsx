@@ -6,6 +6,7 @@ import QuestionFormLayout from '@/components/questions/QuestionFormLayout';
 import QuestionInputs from '@/components/questions/QuestionInputs';
 import MediaModal from '@/components/questions/MediaModal';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { Image } from 'lucide-react';
 import { generateUUID } from '@/lib/utils';
 
 export default function QuestionFormPage() {
@@ -513,7 +514,7 @@ export default function QuestionFormPage() {
                                 ) : (
                                     <>
                                         <div className="size-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
-                                            <span className="material-symbols-outlined text-3xl">image</span>
+                                            <Image className="w-8 h-8" />
                                         </div>
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">Add Question Image</span>
                                     </>

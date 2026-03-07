@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface Option {
     id?: string;
@@ -16,7 +17,7 @@ interface TrueFalseInputProps {
 // Config per index position: first option = "true" style, second = "false" style
 const OPTION_STYLES = [
     {
-        icon: 'task_alt',
+        icon: CheckCircle2,
         activeColor: {
             border: 'border-emerald-500 shadow-lg shadow-emerald-500/10',
             check: 'text-emerald-500',
@@ -26,7 +27,7 @@ const OPTION_STYLES = [
         hoverColor: 'hover:border-emerald-200 hover:bg-emerald-50/30',
     },
     {
-        icon: 'cancel',
+        icon: XCircle,
         activeColor: {
             border: 'border-red-500 shadow-lg shadow-red-500/10',
             check: 'text-red-500',
@@ -80,14 +81,12 @@ export default function TrueFalseInput({ options, onChange }: TrueFalseInputProp
                                 }
                             `}
                         >
-                            {isCorrect && (
-                                <div className="absolute top-4 right-4">
-                                    <span className={`material-symbols-outlined ${style.activeColor.check} text-3xl font-bold`}>check_circle</span>
-                                </div>
-                            )}
+                            <div className="absolute top-4 right-4">
+                                <CheckCircle2 className={`size-8 ${style.activeColor.check} font-bold`} />
+                            </div>
 
                             <div className={`size-20 rounded-full flex items-center justify-center ${isCorrect ? style.activeColor.circle : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                                <span className="material-symbols-outlined text-5xl">{style.icon}</span>
+                                <style.icon className="size-12" />
                             </div>
 
                             {isEditing ? (

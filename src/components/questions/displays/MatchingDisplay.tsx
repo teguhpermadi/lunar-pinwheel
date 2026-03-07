@@ -1,5 +1,6 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
+import { Link2 } from 'lucide-react';
 
 interface MatchingDisplayProps {
     options?: QuestionOption[];
@@ -74,7 +75,7 @@ export default function MatchingDisplay({ options = [], matchingPairs }: Matchin
                     </div>
 
                     <div className="flex items-center justify-center">
-                        <span className="material-symbols-outlined text-slate-300">link</span>
+                        <Link2 className="size-5 text-slate-300" />
                     </div>
 
                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-300 font-medium">

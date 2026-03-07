@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronUp, ChevronDown, Search, Check } from 'lucide-react';
 
 interface InfiniteSelectProps<T> {
     value?: string;
@@ -128,9 +129,7 @@ export default function InfiniteSelect<T extends { id: string }>({
                         </span>
                     )}
                 </div>
-                <span className="material-symbols-outlined text-slate-400">
-                    {isOpen ? 'expand_less' : 'expand_more'}
-                </span>
+                {isOpen ? <ChevronUp className="size-5 text-slate-400" /> : <ChevronDown className="size-5 text-slate-400" />}
             </div>
 
             <AnimatePresence>
@@ -143,9 +142,7 @@ export default function InfiniteSelect<T extends { id: string }>({
                     >
                         <div className="p-2 border-b border-slate-100 dark:border-slate-800">
                             <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                    <span className="material-symbols-outlined text-lg">search</span>
-                                </span>
+                                <Search className="size-5" />
                                 <input
                                     type="text"
                                     value={search}
@@ -179,7 +176,7 @@ export default function InfiniteSelect<T extends { id: string }>({
                                     >
                                         <span>{String(item[labelKey])}</span>
                                         {value === String(item[valueKey]) && (
-                                            <span className="material-symbols-outlined text-lg">check</span>
+                                            <Check className="size-5" />
                                         )}
                                     </button>
                                 ))

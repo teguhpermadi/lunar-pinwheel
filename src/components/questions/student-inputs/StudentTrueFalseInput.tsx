@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface StudentTrueFalseInputProps {
     options: QuestionOption[];
@@ -14,15 +15,17 @@ export default function StudentTrueFalseInput({ options, selectedAnswer, onChang
                     key={option.id}
                     onClick={() => onChange(option.option_key)}
                     className={`flex flex-col items-center justify-center p-8 rounded-2xl border-2 transition-all duration-300 ${selectedAnswer === option.option_key
-                            ? (option.content?.toLowerCase() === 'true' || option.content?.toLowerCase() === 'benar'
-                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600'
-                                : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600')
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary grayscale-[0.5] hover:grayscale-0'
+                        ? (option.content?.toLowerCase() === 'true' || option.content?.toLowerCase() === 'benar'
+                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600'
+                            : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600')
+                        : 'border-gray-200 dark:border-gray-700 hover:border-primary grayscale-[0.5] hover:grayscale-0'
                         }`}
                 >
-                    <span className="material-icons text-5xl mb-3">
-                        {option.content?.toLowerCase() === 'true' || option.content?.toLowerCase() === 'benar' ? 'check_circle' : 'cancel'}
-                    </span>
+                    {option.content?.toLowerCase() === 'true' || option.content?.toLowerCase() === 'benar' ? (
+                        <CheckCircle2 className="size-12 mb-3" />
+                    ) : (
+                        <XCircle className="size-12 mb-3" />
+                    )}
                     <span className="text-xl font-bold uppercase tracking-wider">{option.content}</span>
                 </button>
             ))}

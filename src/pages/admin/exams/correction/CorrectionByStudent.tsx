@@ -5,6 +5,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionDetail, StudentSession, EXCLUDED_PARTIAL_TYPES, NEEDS_DOUBLE_CORRECTION_TYPES } from '../ExamCorrectionPage';
+import {
+    AlertTriangle,
+    ChevronUp,
+    ChevronDown,
+    Star,
+    CheckCircle2,
+    MinusCircle,
+    XCircle,
+    ChevronLeft,
+    ChevronRight
+} from 'lucide-react';
 
 interface CorrectionByStudentProps {
     currentQuestion: QuestionDetail | null;
@@ -87,7 +98,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     </span>
                                     {NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestion.question_type) && (
                                         <span className="px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-200 dark:border-amber-500/20 flex items-center gap-1.5">
-                                            <span className="material-symbols-outlined text-[13px]">warning</span>
+                                            <AlertTriangle className="w-3.5 h-3.5" />
                                             Needs Review
                                         </span>
                                     )}
@@ -112,9 +123,11 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                             className="text-xs text-primary hover:text-primary/80 font-bold self-start mt-2 flex items-center gap-1"
                                         >
                                             {isExpanded ? 'Tutup' : 'Lihat Selengkapnya'}
-                                            <span className="material-symbols-outlined text-[16px]">
-                                                {isExpanded ? 'expand_less' : 'expand_more'}
-                                            </span>
+                                            {isExpanded ? (
+                                                <ChevronUp className="w-4 h-4" />
+                                            ) : (
+                                                <ChevronDown className="w-4 h-4" />
+                                            )}
                                         </button>
                                     )}
                                 </div>
@@ -124,7 +137,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                 currentQuestion.score_earned === currentQuestion.max_score ? "bg-emerald-500 text-white border-emerald-400" :
                                     currentQuestion.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
                             )}>
-                                <span className="material-symbols-outlined text-[18px]">stars</span>
+                                <Star className="w-4.5 h-4.5" />
                                 {currentQuestion.score_earned} / {currentQuestion.max_score}
                             </div>
                         </div>
@@ -158,7 +171,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50/50"
                                 )}
                             >
-                                <span className="material-symbols-outlined text-2xl">check_circle</span>
+                                <CheckCircle2 className="w-6 h-6" />
                                 <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
                             </button>
                             {!EXCLUDED_PARTIAL_TYPES.includes(currentQuestion.question_type) && (
@@ -178,7 +191,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                             : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
                                     )}
                                 >
-                                    <span className="material-symbols-outlined text-2xl">adjust</span>
+                                    <MinusCircle className="w-6 h-6" />
                                     <span className="font-bold text-[10px] uppercase tracking-wider">Partial</span>
                                 </button>
                             )}
@@ -191,7 +204,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200 hover:bg-rose-50/50"
                                 )}
                             >
-                                <span className="material-symbols-outlined text-2xl">cancel</span>
+                                <XCircle className="w-6 h-6" />
                                 <span className="font-bold text-[10px] uppercase tracking-wider">Incorrect</span>
                             </button>
                         </div>
@@ -220,7 +233,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         disabled={selectedQuestionIndex === 0}
                                         className="px-6 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 disabled:opacity-30"
                                     >
-                                        <span className="material-symbols-outlined text-sm">keyboard_arrow_left</span>
+                                        <ChevronLeft className="w-3.5 h-3.5" />
                                         Previous
                                     </button>
                                     <button
@@ -229,7 +242,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 disabled:opacity-30"
                                     >
                                         Next
-                                        <span className="material-symbols-outlined text-sm">keyboard_arrow_right</span>
+                                        <ChevronRight className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </div>

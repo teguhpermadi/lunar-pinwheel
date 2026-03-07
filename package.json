@@ -31,6 +31,7 @@
     "katex": "^0.16.28",
     "laravel-echo": "^2.3.0",
     "lucide-react": "^0.577.0",
+    "material-symbols": "^0.40.2",
     "mathquill": "^0.10.1-a",
     "pusher-js": "^8.4.0",
     "react": "^18.2.0",

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { QuestionOption } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { X, RotateCcw } from 'lucide-react';
+import { X, RotateCcw, Type, LayoutGrid, CheckCircle2 } from 'lucide-react';
 
 interface StudentArrangeWordsInputProps {
     options: QuestionOption[];
@@ -15,7 +15,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
     const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
     const shuffleMode = option?.metadata?.shuffle_mode || 'phrase';
-    
+
     // Full list of words in correct order (from server content)
     const allWords = useMemo(() => {
         if (!option?.content) return [];
@@ -26,7 +26,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
     }, [option?.content, delimiter, shuffleMode]);
 
     const [myAnswer, setMyAnswer] = useState<string[]>(selectedAnswer || []);
-    
+
     // Words that haven't been picked yet
     const [availableWords, setAvailableWords] = useState<string[]>([]);
 
@@ -83,11 +83,11 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <span className="material-icons text-sm">spellcheck</span>
+                        <Type className="size-4" />
                         Susun jawaban Anda di sini:
                     </p>
                     {myAnswer.length > 0 && (
-                        <button 
+                        <button
                             onClick={handleReset}
                             className="text-xs font-bold text-red-400 hover:text-red-500 flex items-center gap-1 transition-colors"
                         >
@@ -133,7 +133,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
             {/* Source Pool */}
             <div className="space-y-3">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <span className="material-icons text-sm">grid_view</span>
+                    <LayoutGrid className="size-4" />
                     {shuffleMode === 'alphabet' ? 'Huruf tersedia:' : 'Kata-kata tersedia:'}
                 </p>
 
@@ -160,10 +160,10 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
                         ))}
                     </AnimatePresence>
                 </div>
-                
+
                 {availableWords.length === 0 && myAnswer.length > 0 && (
                     <div className="flex items-center gap-2 text-emerald-500 text-xs font-medium bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-lg w-fit">
-                        <span className="material-icons text-sm">check_circle</span>
+                        <CheckCircle2 className="size-4" />
                         Semua kata telah dipilih
                     </div>
                 )}

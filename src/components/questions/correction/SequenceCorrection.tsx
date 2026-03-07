@@ -1,6 +1,7 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
+import { User, CheckCircle2, XCircle, BadgeCheck } from 'lucide-react';
 
 interface SequenceCorrectionProps {
     options: QuestionOption[];
@@ -28,7 +29,7 @@ export default function SequenceCorrection({ options, studentAnswer = [], keyAns
                 {/* Student Sequence */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-indigo-500 text-sm">person</span>
+                        <User className="size-4 text-indigo-500" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student's Order</span>
                     </div>
                     <div className="space-y-2">
@@ -61,12 +62,11 @@ export default function SequenceCorrection({ options, studentAnswer = [], keyAns
                                                 content={option?.content || 'Unknown Item'}
                                             />
                                         </div>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-lg",
-                                            isCorrectPos ? "text-emerald-500" : "text-rose-500"
-                                        )}>
-                                            {isCorrectPos ? 'check_circle' : 'cancel'}
-                                        </span>
+                                        {isCorrectPos ? (
+                                            <CheckCircle2 className="size-5 text-emerald-500" />
+                                        ) : (
+                                            <XCircle className="size-5 text-rose-500" />
+                                        )}
                                     </div>
                                 );
                             })
@@ -81,7 +81,7 @@ export default function SequenceCorrection({ options, studentAnswer = [], keyAns
                 {/* Correct Sequence */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-emerald-500 text-sm">verified</span>
+                        <BadgeCheck className="size-4 text-emerald-500" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Order</span>
                     </div>
                     <div className="space-y-2">

@@ -19,6 +19,10 @@ import StudentLanguageResponseInput from '@/components/questions/student-inputs/
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
+import {
+    X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle, Rocket,
+    ChevronLeft, ChevronRight, Puzzle
+} from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -211,8 +215,8 @@ export default function PreviewQuestionBank() {
                 />;
             default:
                 return (
-                    <div className="p-8 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-400">
-                        <span className="material-icons text-4xl mb-2">extension</span>
+                    <div className="p-8 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-400 flex flex-col items-center">
+                        <Puzzle className="size-12 mb-2" />
                         <p>Question type <b>{type}</b> is not yet supported in this view.</p>
                     </div>
                 );
@@ -285,7 +289,7 @@ export default function PreviewQuestionBank() {
                         className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-all duration-300 border border-gray-200 dark:border-gray-700 mr-2"
                         title="Close Preview"
                     >
-                        <span className="material-icons leading-none text-lg sm:text-xl">close</span>
+                        <X className="size-5" />
                     </button>
                     <div className="sm:h-10 sm:w-10 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs sm:text-base">
                         PRE
@@ -302,7 +306,7 @@ export default function PreviewQuestionBank() {
                 <div className="flex flex-col items-center sm:items-end">
                     <span className="text-[8px] sm:text-[10px] font-medium text-gray-400 uppercase tracking-wider">Time Remaining</span>
                     <div className={`flex items-center font-bold sm:text-lg text-base font-mono text-primary`}>
-                        <span className="material-icons text-sm sm:text-lg mr-1">timer</span>
+                        <Timer className="size-5 mr-1" />
                         --:--:--
                     </div>
                 </div>
@@ -312,15 +316,13 @@ export default function PreviewQuestionBank() {
                         onClick={() => document.documentElement.requestFullscreen()}
                         className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 sm:p-2"
                     >
-                        <span className="material-icons text-lg sm:text-2xl">fullscreen</span>
+                        <Maximize className="size-5" />
                     </button>
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-all duration-300 active:scale-95 border border-gray-200 dark:border-gray-700"
                     >
-                        <span className="material-icons leading-none text-lg sm:text-xl">
-                            {isSidebarOpen ? 'format_indent_increase' : 'format_indent_decrease'}
-                        </span>
+                        {isSidebarOpen ? <Indent className="size-5" /> : <Outdent className="size-5" />}
                     </button>
                 </div>
             </header>
@@ -337,7 +339,7 @@ export default function PreviewQuestionBank() {
                                 onClick={handleToggleFlag}
                                 className={`flex items-center space-x-2 transition-colors group ${currentQuestion?.is_flagged ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                             >
-                                <span className="material-icons">{currentQuestion?.is_flagged ? 'flag' : 'outlined_flag'}</span>
+                                <Flag className={cn("size-5", currentQuestion?.is_flagged ? "fill-yellow-500" : "")} />
                                 <span className="text-sm font-medium">{currentQuestion?.is_flagged ? 'Flagged' : 'Flag for review'}</span>
                             </button>
                         </div>
@@ -418,7 +420,7 @@ export default function PreviewQuestionBank() {
                                 disabled={currentQuestionIndex === 0}
                                 className="w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center order-2 sm:order-1"
                             >
-                                <span className="material-icons text-lg mr-2">arrow_back</span>
+                                <ChevronLeft className="size-5 mr-2" />
                                 Previous
                             </button>
 
@@ -429,7 +431,7 @@ export default function PreviewQuestionBank() {
                                         ? 'bg-yellow-500 border-yellow-500 text-white'
                                         : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
                                 >
-                                    <span className="material-icons text-lg mr-2">help_outline</span>
+                                    <HelpCircle className="size-5 mr-2" />
                                     Doubtful
                                 </button>
 
@@ -444,9 +446,7 @@ export default function PreviewQuestionBank() {
                                     className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
                                     {currentQuestionIndex === questions.length - 1 ? 'Finish Preview' : 'Next Question'}
-                                    <span className="material-icons text-lg ml-2">
-                                        {currentQuestionIndex === questions.length - 1 ? 'rocket_launch' : 'arrow_forward'}
-                                    </span>
+                                    {currentQuestionIndex === questions.length - 1 ? <Rocket className="size-5 ml-2" /> : <ChevronRight className="size-5 ml-2" />}
                                 </button>
                             </div>
                         </div>
@@ -475,7 +475,7 @@ export default function PreviewQuestionBank() {
                                 onClick={() => setIsSidebarOpen(false)}
                                 className="p-2 text-gray-400 hover:text-gray-600"
                             >
-                                <span className="material-icons">close</span>
+                                <X className="size-5" />
                             </button>
                         </div>
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -550,9 +550,7 @@ export default function PreviewQuestionBank() {
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
                                 <span>Finish Preview</span>
-                                <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">
-                                    rocket_launch
-                                </span>
+                                <Rocket className="size-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
                                 Preview mode. Answers will not be saved.
@@ -581,7 +579,7 @@ export default function PreviewQuestionBank() {
                                 setZoomImageUrl(null);
                             }}
                         >
-                            <span className="material-icons">close</span>
+                            <X className="size-5" />
                         </motion.button>
 
                         <motion.div

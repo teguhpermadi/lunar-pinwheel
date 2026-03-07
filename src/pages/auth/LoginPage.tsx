@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { User, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -89,7 +90,7 @@ export default function LoginPage() {
                         placeholder="Enter your email or username"
                         register={register('email')}
                         error={errors.email}
-                        icon={<span className="material-icons text-slate-400 text-lg">person</span>}
+                        icon={<User className="text-slate-400 size-5" />}
                     />
 
                     <div>
@@ -98,7 +99,7 @@ export default function LoginPage() {
                         </div>
                         <div className="relative rounded-md shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span className="material-icons text-slate-400 text-lg">lock</span>
+                                <Lock className="text-slate-400 size-5" />
                             </div>
                             <input
                                 {...register('password')}
@@ -115,9 +116,11 @@ export default function LoginPage() {
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                <span className="material-icons text-slate-400 text-lg hover:text-slate-600 transition-colors cursor-pointer">
-                                    {showPassword ? 'visibility_off' : 'visibility'}
-                                </span>
+                                {showPassword ? (
+                                    <EyeOff className="text-slate-400 size-5 hover:text-slate-600 transition-colors cursor-pointer" />
+                                ) : (
+                                    <Eye className="text-slate-400 size-5 hover:text-slate-600 transition-colors cursor-pointer" />
+                                )}
                             </button>
                         </div>
                         {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}

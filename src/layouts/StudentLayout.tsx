@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import StudentSidebar from '../components/StudentSidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { PanelLeftClose, Menu, Search, Bell, Award } from 'lucide-react';
 
 export default function StudentLayout() {
     const { user } = useAuth();
@@ -40,9 +41,7 @@ export default function StudentLayout() {
                             onClick={toggleSidebar}
                             className="hidden lg:flex cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
                         >
-                            <span className={`material-symbols-outlined toggle-icon block transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`}>
-                                menu_open
-                            </span>
+                            <PanelLeftClose className={`size-5 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
                         </button>
 
                         {/* Mobile Toggle */}
@@ -50,14 +49,12 @@ export default function StudentLayout() {
                             onClick={toggleMobileSidebar}
                             className="lg:hidden cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
                         >
-                            <span className="material-symbols-outlined font-icon">
-                                menu
-                            </span>
+                            <Menu className="size-5" />
                         </button>
 
                         <label className="relative w-full max-w-xs md:max-w-md">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 scale-90 md:scale-100">
-                                <span className="material-symbols-outlined">search</span>
+                                <Search className="size-4" />
                             </span>
                             <input
                                 className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 transition-all text-sm outline-none"
@@ -69,11 +66,11 @@ export default function StudentLayout() {
                     <div className="flex items-center gap-2 md:gap-6">
                         <div className="flex items-center gap-1 md:gap-2">
                             <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 relative">
-                                <span className="material-symbols-outlined">notifications</span>
+                                <Bell className="size-5" />
                                 <span className="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
                             </button>
                             <button className="hidden sm:flex p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                                <span className="material-symbols-outlined">workspace_premium</span>
+                                <Award className="size-5" />
                             </button>
                         </div>
                         <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>

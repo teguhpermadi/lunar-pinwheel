@@ -6,6 +6,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import {
+    Filter,
+    Clock,
+    Medal,
+    ChevronRight,
+    X,
+    CheckCircle2,
+    Timer,
+    BookOpen,
+    History,
+    LayoutGrid,
+    Eye
+} from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
 
@@ -99,7 +112,7 @@ export default function StudentExamHistoryPage() {
                         <p className="text-sm text-slate-500 font-medium">You have completed {results.length} exams</p>
                     </div>
                     <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all">
-                        <span className="material-symbols-outlined text-xl">filter_list</span>
+                        <Filter className="size-5" />
                     </button>
                 </div>
 
@@ -152,11 +165,11 @@ export default function StudentExamHistoryPage() {
                                                         </div>
                                                         <h4 className="font-bold text-slate-900 dark:text-white truncate">{result.exam.title}</h4>
                                                         <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
-                                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> {time}</span>
-                                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">military_tech</span> Score: {result.final_score}</span>
+                                                            <span className="flex items-center gap-1"><Clock className="size-3" /> {time}</span>
+                                                            <span className="flex items-center gap-1"><Medal className="size-3" /> Score: {result.final_score}</span>
                                                         </div>
                                                     </div>
-                                                    <span className={`material-symbols-outlined ${isSelected ? 'text-primary' : 'text-slate-300'}`}>chevron_right</span>
+                                                    <ChevronRight className={cn("size-5", isSelected ? 'text-primary' : 'text-slate-300')} />
                                                 </div>
                                             </motion.div>
                                         );
@@ -191,7 +204,7 @@ export default function StudentExamHistoryPage() {
                             onClick={() => setSelectedResult(null)}
                             className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-400 transition-colors"
                         >
-                            <span className="material-symbols-outlined text-sm">close</span>
+                            <X className="size-4" />
                         </button>
                     </div>
 
@@ -227,7 +240,7 @@ export default function StudentExamHistoryPage() {
                                     <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                                         <div className="flex items-start justify-between mb-6">
                                             <div className={`size-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${selectedResult.is_passed ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-500 shadow-rose-500/30'}`}>
-                                                <span className="material-symbols-outlined text-2xl">{selectedResult.is_passed ? 'verified' : 'error'}</span>
+                                                <CheckCircle2 className="size-6" />
                                             </div>
                                             <span className={`px-3 py-1 text-[10px] font-bold rounded-full ${selectedResult.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'}`}>
                                                 {selectedResult.is_passed ? 'PASSED' : 'FAILED'}
@@ -235,8 +248,8 @@ export default function StudentExamHistoryPage() {
                                         </div>
                                         <h4 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">{selectedResult.exam.title}</h4>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-wide">
-                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> {formatDate(selectedResult.finished_at).full}</span>
-                                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">timer</span> {selectedResult.exam.duration}m</span>
+                                            <span className="flex items-center gap-1"><Clock className="size-3.5" /> {formatDate(selectedResult.finished_at).full}</span>
+                                            <span className="flex items-center gap-1"><Timer className="size-3.5" /> {selectedResult.exam.duration}m</span>
                                         </div>
 
                                         <div className="mt-8 grid grid-cols-2 gap-4">
@@ -260,7 +273,7 @@ export default function StudentExamHistoryPage() {
                                             <div className="grid grid-cols-1 gap-3">
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                                                     <div className="size-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-blue-500 text-lg">subject</span>
+                                                        <BookOpen className="size-5 text-blue-500" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Subject</p>
@@ -269,7 +282,7 @@ export default function StudentExamHistoryPage() {
                                                 </div>
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                                                     <div className="size-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-amber-500 text-lg">history</span>
+                                                        <History className="size-5 text-amber-500" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Completed At</p>
@@ -278,7 +291,7 @@ export default function StudentExamHistoryPage() {
                                                 </div>
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                                                     <div className="size-9 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-purple-500 text-lg">category</span>
+                                                        <LayoutGrid className="size-5 text-purple-500" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Exam Type</p>
@@ -295,7 +308,7 @@ export default function StudentExamHistoryPage() {
                                                 to={`/exams/history/${selectedResult.exam_id}/${selectedResult.exam_session_id}`}
                                                 className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-base shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
                                             >
-                                                <span className="material-symbols-outlined">visibility</span>
+                                                <Eye className="size-5" />
                                                 <span>View Detailed Submissions</span>
                                             </Link>
                                         </div>

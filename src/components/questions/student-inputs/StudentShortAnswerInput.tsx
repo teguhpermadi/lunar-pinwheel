@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PencilLine } from 'lucide-react';
 
 interface StudentShortAnswerInputProps {
     selectedAnswer: string | null;
@@ -39,7 +40,7 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange }: St
                     className="w-full p-5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl text-xl font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-sm group-hover:border-primary/30"
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none group-focus-within:text-primary transition-colors">
-                    <span className="material-symbols-outlined">edit_note</span>
+                    <PencilLine className="size-5" />
                 </div>
             </div>
             <p className="text-sm text-gray-400 italic px-2">

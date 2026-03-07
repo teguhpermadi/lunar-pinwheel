@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import MathKeyboard from '@/components/ui/MathKeyboard';
+import { Info } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -132,7 +133,7 @@ export default function StudentMathInput({ selectedAnswer, onChange }: StudentMa
             </div>
 
             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl flex gap-3">
-                <span className="material-icons text-blue-500 text-sm">info</span>
+                <Info className="size-4 text-blue-500" />
                 <p className="text-[10px] text-blue-700 dark:text-blue-400 leading-relaxed">
                     Use the virtual keyboard provided or type standard LaTeX.
                     The answer is automatically saved as you type.

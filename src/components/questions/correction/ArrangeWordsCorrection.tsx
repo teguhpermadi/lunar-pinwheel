@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { QuestionOption } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { User, CheckCircle2, XCircle, BadgeCheck } from 'lucide-react';
 
 interface ArrangeWordsCorrectionProps {
     options: QuestionOption[];
@@ -30,7 +31,7 @@ export default function ArrangeWordsCorrection({ options, studentAnswer = [] }: 
                 {/* Student Sequence */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-indigo-500 text-sm">person</span>
+                        <User className="size-4 text-indigo-500" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student's Arrangement</span>
                     </div>
                     <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
@@ -58,12 +59,11 @@ export default function ArrangeWordsCorrection({ options, studentAnswer = [] }: 
                                         )}>
                                             {word}
                                         </span>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-base",
-                                            isCorrectPos ? "text-emerald-500" : "text-rose-500"
-                                        )}>
-                                            {isCorrectPos ? 'check_circle' : 'cancel'}
-                                        </span>
+                                        {isCorrectPos ? (
+                                            <CheckCircle2 className="size-4 text-emerald-500" />
+                                        ) : (
+                                            <XCircle className="size-4 text-rose-500" />
+                                        )}
                                     </div>
                                 );
                             })
@@ -78,7 +78,7 @@ export default function ArrangeWordsCorrection({ options, studentAnswer = [] }: 
                 {/* Correct Sequence */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-emerald-500 text-sm">verified</span>
+                        <BadgeCheck className="size-4 text-emerald-500" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Order</span>
                     </div>
                     <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>

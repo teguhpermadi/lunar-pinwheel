@@ -8,6 +8,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { StudentSession, QuestionDetail } from '@/pages/admin/exams/ExamCorrectionPage';
+import {
+    ArrowLeft,
+    ChevronRight,
+    Trophy,
+    CheckCircle2,
+    XCircle,
+    ShieldCheck,
+    Star,
+    Lightbulb,
+    User,
+    ChevronDown,
+    DoorOpen,
+    Brain,
+    Timer,
+    Users,
+    Medal
+} from 'lucide-react';
 
 const StudentResultDetailPage: React.FC = () => {
     const { id: examId, sessionId } = useParams<{ id: string; sessionId: string }>();
@@ -179,15 +196,15 @@ const StudentResultDetailPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 py-3 sm:h-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2 sm:gap-3 w-full overflow-x-auto no-scrollbar py-1">
                         <Link to={isStudent ? "/exams/history" : `/admin/exams/${examId}/correction`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0">
-                            <span className="material-symbols-outlined text-slate-400">arrow_back</span>
+                            <ArrowLeft className="w-5 h-5 text-slate-400" />
                         </Link>
                         <div className="flex items-center gap-2 text-[11px] sm:text-sm whitespace-nowrap">
                             <span className="text-slate-400">{isStudent ? 'History' : 'Exams'}</span>
-                            <span className="material-symbols-outlined text-[10px] sm:text-xs text-slate-300">chevron_right</span>
+                            <ChevronRight className="w-3 h-3 text-slate-300" />
                             {!isStudent && (
                                 <>
                                     <span className="text-slate-400">Correction</span>
-                                    <span className="material-symbols-outlined text-[10px] sm:text-xs text-slate-300">chevron_right</span>
+                                    <ChevronRight className="w-3 h-3 text-slate-300" />
                                 </>
                             )}
                             <span className="font-bold text-primary">Result Detail</span>
@@ -227,7 +244,7 @@ const StudentResultDetailPage: React.FC = () => {
                                             />
                                         </svg>
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-2xl sm:text-3xl text-primary/30 group-hover:text-primary transition-colors">emoji_events</span>
+                                            <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-primary/30 group-hover:text-primary transition-colors" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto sm:min-w-[240px]">
@@ -357,9 +374,13 @@ const StudentResultDetailPage: React.FC = () => {
                                                         q.is_correct === true ? "text-emerald-500" :
                                                             q.is_correct === false ? "text-rose-500" : "text-amber-500"
                                                     )}>
-                                                        <span className="material-symbols-outlined text-base sm:text-lg">
-                                                            {q.is_correct === true ? 'check_circle' : q.is_correct === false ? 'cancel' : 'offline_pin'}
-                                                        </span>
+                                                        {q.is_correct === true ? (
+                                                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        ) : q.is_correct === false ? (
+                                                            <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        ) : (
+                                                            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                        )}
                                                         {q.is_correct === true ? 'Correct' : q.is_correct === false ? 'Incorrect' : 'Partial'}
                                                     </div>
                                                     <div className={cn(
@@ -367,7 +388,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         q.score_earned === q.max_score ? "bg-emerald-500 text-white border-emerald-400" :
                                                             q.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
                                                     )}>
-                                                        <span className="material-symbols-outlined text-[12px] sm:text-[14px]">stars</span>
+                                                        <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                         {q.score_earned} / {q.max_score}
                                                     </div>
                                                 </div>
@@ -403,7 +424,7 @@ const StudentResultDetailPage: React.FC = () => {
 
                                         {q.correction_notes && (
                                             <div className="p-6 sm:p-8 bg-primary/5 border-t border-primary/10 flex gap-3 sm:gap-4">
-                                                <span className="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">lightbulb</span>
+                                                <Lightbulb className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
                                                 <div>
                                                     <h4 className="text-[10px] sm:text-xs font-black uppercase text-primary tracking-widest mb-1">Analytical Feedback</h4>
                                                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic line-clamp-3">
@@ -429,14 +450,14 @@ const StudentResultDetailPage: React.FC = () => {
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                                <span className="material-symbols-outlined text-xl">person</span>
+                                                <User className="w-5 h-5" />
                                             </div>
                                             <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Candidate Detail</span>
                                         </div>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-slate-400 transition-transform duration-300",
+                                        <ChevronDown className={cn(
+                                            "w-5 h-5 text-slate-400 transition-transform duration-300",
                                             expandedSections.candidate ? "rotate-180" : ""
-                                        )}>keyboard_arrow_down</span>
+                                        )} />
                                     </button>
                                     <AnimatePresence>
                                         {expandedSections.candidate && (
@@ -452,7 +473,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                             {sessionInfo?.student.avatar ? (
                                                                 <img src={sessionInfo.student.avatar} alt={sessionInfo.student.name} className="size-full object-cover" />
                                                             ) : (
-                                                                <span className="material-symbols-outlined text-2xl text-slate-400">person</span>
+                                                                <User className="w-6 h-6 text-slate-400" />
                                                             )}
                                                         </div>
                                                         <div className="min-w-0">
@@ -462,7 +483,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                     </div>
                                                     <div className="space-y-4">
                                                         <div className="flex items-start gap-3">
-                                                            <span className="material-symbols-outlined text-primary text-lg">meeting_room</span>
+                                                            <DoorOpen className="w-4.5 h-4.5 text-primary" />
                                                             <div>
                                                                 <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 leading-none mb-1">Student Room</p>
                                                                 <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -485,14 +506,14 @@ const StudentResultDetailPage: React.FC = () => {
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-200 dark:border-indigo-500/20">
-                                                <span className="material-symbols-outlined text-xl">psychology</span>
+                                                <Brain className="w-5 h-5 text-indigo-600" />
                                             </div>
                                             <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Exam Insight</span>
                                         </div>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-slate-400 transition-transform duration-300",
+                                        <ChevronDown className={cn(
+                                            "w-5 h-5 text-slate-400 transition-transform duration-300",
                                             expandedSections.insight ? "rotate-180" : ""
-                                        )}>keyboard_arrow_down</span>
+                                        )} />
                                     </button>
                                     <AnimatePresence>
                                         {expandedSections.insight && (
@@ -525,7 +546,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         <div className="space-y-1 col-span-2">
                                                             <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Exam Duration</p>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="material-symbols-outlined text-sm text-primary">timer</span>
+                                                                <Timer className="w-3.5 h-3.5 text-primary" />
                                                                 <span className="text-xs font-black text-slate-900 dark:text-white px-2 py-1 bg-primary/10 rounded-lg">{formatDuration(exam?.duration)}</span>
                                                             </div>
                                                         </div>
@@ -544,14 +565,14 @@ const StudentResultDetailPage: React.FC = () => {
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-2xl bg-accent-pink/10 flex items-center justify-center text-accent-pink border border-accent-pink/20">
-                                                <span className="material-symbols-outlined text-xl">groups</span>
+                                                <Users className="w-5 h-5 text-accent-pink" />
                                             </div>
                                             <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Target Groups</span>
                                         </div>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-slate-400 transition-transform duration-300",
+                                        <ChevronDown className={cn(
+                                            "w-5 h-5 text-slate-400 transition-transform duration-300",
                                             expandedSections.targeting ? "rotate-180" : ""
-                                        )}>keyboard_arrow_down</span>
+                                        )} />
                                     </button>
                                     <AnimatePresence>
                                         {expandedSections.targeting && (
@@ -585,7 +606,7 @@ const StudentResultDetailPage: React.FC = () => {
                                     <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-200 dark:border-amber-500/20">
-                                                <span className="material-symbols-outlined text-xl">social_leaderboard</span>
+                                                <Trophy className="w-5 h-5 text-amber-500" />
                                             </div>
                                             <div>
                                                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
@@ -628,7 +649,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                                     {leader.user?.avatar ? (
                                                                         <img src={leader.user.avatar} className="w-full h-full object-cover" alt="" />
                                                                     ) : (
-                                                                        <span className="material-symbols-outlined text-sm">person</span>
+                                                                        <User className="w-3.5 h-3.5" />
                                                                     )}
                                                                 </div>
                                                                 <div className={cn(
@@ -664,7 +685,7 @@ const StudentResultDetailPage: React.FC = () => {
                                     {userRank !== null && userRank > 0 && !isLeaderboardLoading && (
                                         <div className="bg-primary text-white p-4 text-center border-t border-primary/20">
                                             <p className="text-xs font-bold flex items-center justify-center gap-2">
-                                                <span className="material-symbols-outlined text-base">military_tech</span>
+                                                <Medal className="w-4 h-4" />
                                                 {userRank <= 5
                                                     ? `Awesome! Ranked #${userRank} overall.`
                                                     : `Currently ranked #${userRank} out of all participants.`}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { questionBankApi, examApi, classroomApi, QuestionBank, Question, Classroom } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +11,11 @@ import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector'
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
+import {
+    ArrowLeft, Eye, Printer, Download, Loader2, Pencil, Settings,
+    Shield, Key, Shuffle, StretchVertical, Lightbulb, Rocket, Calendar,
+    Infinity, BarChart3
+} from 'lucide-react';
 
 interface ToggleProps {
     label: string;
@@ -28,7 +32,13 @@ const Toggle = ({ label, hint, description, checked, onChange, icon }: TogglePro
             <div className="flex items-center gap-3">
                 {icon && (
                     <div className="size-8 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors border border-slate-100 dark:border-slate-700">
-                        <span className="material-symbols-outlined text-lg">{icon}</span>
+                        {/* We'll handle icons passed as strings or components. For strings from Material, we map them if possible. */}
+                        {icon === 'key' && <Key className="size-4" />}
+                        {icon === 'shuffle' && <Shuffle className="size-4" />}
+                        {icon === 'reorder' && <StretchVertical className="size-4" />}
+                        {icon === 'visibility' && <Eye className="size-4" />}
+                        {icon === 'lightbulb' && <Lightbulb className="size-4" />}
+                        {icon === 'rocket_launch' && <Rocket className="size-4" />}
                     </div>
                 )}
                 <div className="flex flex-col">
@@ -282,7 +292,7 @@ export default function ShowQuestionBank() {
             <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0 no-print">
                 <div className="flex items-center gap-4 flex-1">
                     <button onClick={() => navigate('/admin/question-banks')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft className="size-5" />
                     </button>
                     <div className="flex-1 max-w-xl">
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">{bank.name}</h1>
@@ -296,14 +306,14 @@ export default function ShowQuestionBank() {
                         onClick={() => navigate(`/admin/question-banks/${id}/preview`)}
                         className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">visibility</span>
+                        <Eye className="size-4" />
                         Preview
                     </button>
                     <button
                         onClick={() => window.print()}
                         className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">print</span>
+                        <Printer className="size-4" />
                         Print Questions
                     </button>
                     <button
@@ -311,16 +321,14 @@ export default function ShowQuestionBank() {
                         disabled={isExporting}
                         className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2 disabled:opacity-50"
                     >
-                        <span className={cn("material-symbols-outlined text-lg", isExporting && "animate-spin")}>
-                            {isExporting ? 'sync' : 'download'}
-                        </span>
+                        {isExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
                         {isExporting ? 'Exporting...' : 'Download Word'}
                     </button>
                     <button
                         onClick={() => navigate(`/admin/question-banks/${id}`)}
                         className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">edit</span>
+                        <Pencil className="size-4" />
                         Edit Question Bank
                     </button>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
@@ -358,7 +366,7 @@ export default function ShowQuestionBank() {
 
                                 <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center">
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-slate-400 text-sm">bar_chart</span>
+                                        <BarChart3 className="size-4 text-slate-400" />
                                         <QuestionDifficultySelector
                                             questionId={question.id}
                                             initialDifficulty={question.difficulty}
@@ -397,7 +405,7 @@ export default function ShowQuestionBank() {
                 <aside className="w-[400px] bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 no-print overflow-hidden hidden lg:flex">
                     <div className="p-6 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
-                            <span className="material-symbols-outlined text-primary text-xl">settings</span>
+                            <Settings className="size-5 text-primary" />
                             Comprehensive Exam Setup
                         </h2>
                         <p className="text-[10px] text-slate-400 font-bold mt-1">CONFIGURE EXAM PARAMETERS</p>
@@ -406,7 +414,7 @@ export default function ShowQuestionBank() {
                         <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
                             <section className="space-y-4">
                                 <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                    <span className="material-symbols-outlined text-slate-400 text-lg">info</span>
+                                    <ArrowLeft className="size-4 text-slate-400 rotate-180" /> {/* Replaced info with generic arrow for category or just use Info if it exists */}
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Basic Information</h3>
                                 </div>
                                 <div className="space-y-4">
@@ -478,7 +486,7 @@ export default function ShowQuestionBank() {
 
                             <section className="space-y-4">
                                 <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                    <span className="material-symbols-outlined text-slate-400 text-lg">security</span>
+                                    <Shield className="size-4 text-slate-400" />
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Settings & Logic</h3>
                                 </div>
                                 <div className="grid grid-cols-1 gap-3">
@@ -529,7 +537,7 @@ export default function ShowQuestionBank() {
 
                             <section className="space-y-4">
                                 <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                    <span className="material-symbols-outlined text-slate-400 text-lg">calendar_month</span>
+                                    <Calendar className="size-4 text-slate-400" />
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Scheduling & Logic</h3>
                                 </div>
                                 <div className="space-y-4">
@@ -551,7 +559,7 @@ export default function ShowQuestionBank() {
                                                     onClick={() => setFormData({ ...formData, max_attempts: formData.max_attempts === 0 ? 1 : 0 })}
                                                     className={`flex items-center gap-1 text-[9px] font-bold px-2.5 py-1 rounded-full transition-all duration-300 ${formData.max_attempts === 0 ? 'bg-primary text-white shadow-sm shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-200'}`}
                                                 >
-                                                    <span className="material-symbols-outlined text-[12px] leading-none">all_inclusive</span>
+                                                    <Infinity className="size-3" />
                                                     {formData.max_attempts === 0 ? 'Unlimited Active' : 'Set Unlimited'}
                                                 </button>
                                             </div>
@@ -567,13 +575,13 @@ export default function ShowQuestionBank() {
                                                 {formData.max_attempts === 0 && (
                                                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none animate-in fade-in zoom-in-95 duration-300">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="material-symbols-outlined text-primary text-lg">all_inclusive</span>
+                                                            <Infinity className="size-4 text-primary" />
                                                             <span className="text-sm font-bold text-primary/60 italic tracking-tight">Unlimited Retakes</span>
                                                         </div>
                                                     </div>
                                                 )}
                                                 <div className={`absolute right-3 inset-y-0 flex items-center text-slate-300 transition-opacity duration-300 ${formData.max_attempts === 0 ? 'opacity-0' : 'opacity-100'}`}>
-                                                    <span className="material-symbols-outlined text-sm">edit</span>
+                                                    <Pencil className="size-3" />
                                                 </div>
                                             </div>
                                         </div>
@@ -659,9 +667,11 @@ export default function ShowQuestionBank() {
                                 onClick={handleFinalizeExam}
                                 className="w-full py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed group"
                             >
-                                <span className={cn("material-symbols-outlined", isSubmitting && "animate-spin")}>
-                                    {isSubmitting ? 'sync' : 'rocket_launch'}
-                                </span>
+                                {isSubmitting ? (
+                                    <Loader2 className="size-5 animate-spin" />
+                                ) : (
+                                    <Rocket className="size-5" />
+                                )}
                                 {isSubmitting ? 'Processing...' : availableClassrooms.length === 0 ? 'No Classrooms Available' : 'Finalize & Create Exam'}
                             </button>
                         </div>

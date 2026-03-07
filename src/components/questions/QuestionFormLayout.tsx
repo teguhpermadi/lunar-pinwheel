@@ -5,6 +5,7 @@ import QuestionTimerSelector from './QuestionTimerSelector';
 import QuestionScoreSelector from './QuestionScoreSelector';
 import QuestionTypeSelector from './QuestionTypeSelector';
 import QuestionToolbar from './QuestionToolbar';
+import { ArrowLeft, Loader2, Save, Lightbulb, X, Info } from 'lucide-react';
 
 interface QuestionFormLayoutProps {
     children: ReactNode;
@@ -59,7 +60,7 @@ export default function QuestionFormLayout({
                         onClick={() => navigate(-1)}
                         className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400 flex items-center"
                     >
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft className="size-5" />
                     </button>
 
                     <div className="flex flex-col">
@@ -113,9 +114,9 @@ export default function QuestionFormLayout({
                         `}
                     >
                         {isSaving ? (
-                            <span className="material-symbols-outlined text-lg animate-spin">refresh</span>
+                            <Loader2 className="size-5 animate-spin" />
                         ) : (
-                            <span className="material-symbols-outlined text-lg">save</span>
+                            <Save className="size-5" />
                         )}
                         Simpan
                     </button>
@@ -131,7 +132,7 @@ export default function QuestionFormLayout({
                             onClick={() => setIsHintOpen(true)}
                             className="size-10 bg-white dark:bg-slate-800 shadow-md rounded-full flex items-center justify-center text-primary cursor-pointer hover:scale-110 transition-transform border border-slate-100 dark:border-slate-700"
                         >
-                            <span className="material-symbols-outlined">lightbulb</span>
+                            <Lightbulb className="size-6" />
                         </button>
                     </div>
 
@@ -153,12 +154,12 @@ export default function QuestionFormLayout({
                             onClick={() => setIsHintOpen(false)}
                             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500"
                         >
-                            <span className="material-symbols-outlined">close</span>
+                            <X className="size-5" />
                         </button>
                     </div>
 
                     <div className="flex items-center gap-2 mb-8 text-slate-800 dark:text-slate-100">
-                        <span className="material-symbols-outlined text-yellow-500">lightbulb</span>
+                        <Lightbulb className="size-6 text-yellow-500" />
                         <h2 className="font-bold text-lg">Question Hint</h2>
                     </div>
 
@@ -171,7 +172,7 @@ export default function QuestionFormLayout({
                             placeholder="Type hint here..."
                         />
                         <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <span className="material-symbols-outlined text-xs">info</span>
+                            <Info className="size-3" />
                             Optional Feature
                         </div>
                     </div>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StudentSession } from '../ExamCorrectionPage';
 import { examApi } from '@/lib/api';
+import { RefreshCw, Calculator, Search, User } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface CorrectionLeaderboardProps {
@@ -137,9 +138,11 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                         : "bg-white dark:bg-slate-900 shadow-sm text-primary hover:bg-primary hover:text-white"
                                 )}
                             >
-                                <span className={cn("material-symbols-outlined text-sm", isRecalculatingAll && "animate-spin")}>
-                                    {isRecalculatingAll ? 'sync' : 'calculate'}
-                                </span>
+                                {isRecalculatingAll ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <Calculator className="w-3.5 h-3.5" />
+                                )}
                                 {isRecalculatingAll ? 'Recalculating...' : 'Recalculate All'}
                             </button>
                         </div>
@@ -180,7 +183,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-3">
                                             <div className="size-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-slate-200 dark:border-slate-800">
-                                                {session.student.name.charAt(0)}
+                                                <User className="w-5 h-5" />
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
@@ -246,12 +249,11 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                             )}
                                             title="Recalculate Score"
                                         >
-                                            <span className={cn(
-                                                "material-symbols-outlined text-lg block",
-                                                isRecalculating === session.id && "animate-spin"
-                                            )}>
-                                                {isRecalculating === session.id ? 'sync' : 'calculate'}
-                                            </span>
+                                            {isRecalculating === session.id ? (
+                                                <RefreshCw className="w-4.5 h-4.5 animate-spin" />
+                                            ) : (
+                                                <Calculator className="w-4.5 h-4.5" />
+                                            )}
                                         </button>
                                     </td>
                                 </tr>
@@ -262,7 +264,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
 
                 {filteredSessions.length === 0 && (
                     <div className="p-20 text-center">
-                        <span className="material-symbols-outlined text-4xl text-slate-200 mb-2">person_search</span>
+                        <Search className="w-10 h-10 text-slate-200 mb-2 mx-auto" />
                         <p className="text-sm font-bold text-slate-300 uppercase tracking-widest">No students found matching your search</p>
                     </div>
                 )}

@@ -1,5 +1,6 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface TrueFalseDisplayProps {
     options?: QuestionOption[];
@@ -8,7 +9,7 @@ interface TrueFalseDisplayProps {
 export default function TrueFalseDisplay({ options = [] }: TrueFalseDisplayProps) {
     if (!options || options.length === 0) return null;
 
-    const icons = ['check_circle', 'cancel'];
+    const icons = [CheckCircle2, XCircle];
 
     return (
         <div className="grid grid-cols-2 gap-4 w-full">
@@ -22,7 +23,10 @@ export default function TrueFalseDisplay({ options = [] }: TrueFalseDisplayProps
                             : 'border-slate-200 dark:border-slate-700 text-slate-400 opacity-50'}
                     `}
                 >
-                    <span className="material-symbols-outlined">{icons[index] ?? icons[0]}</span>
+                    {(() => {
+                        const Icon = icons[index] ?? icons[0];
+                        return <Icon className="size-5" />;
+                    })()}
                     <MathRenderer content={opt.content} />
                 </div>
             ))}

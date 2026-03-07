@@ -4,6 +4,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/axios';
 import { useNavigate } from 'react-router-dom';
+import {
+    Star,
+    Sparkles,
+    CheckCircle2,
+    FileQuestion,
+    History,
+    Trophy,
+    Settings,
+    CalendarCheck
+} from 'lucide-react';
 
 interface DashboardData {
     user: {
@@ -97,7 +107,7 @@ export default function StudentDashboard() {
                             <div className="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
                                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
                                     <div className="size-10 bg-amber-400 rounded-xl flex items-center justify-center text-slate-900">
-                                        <span className="material-symbols-outlined">stars</span>
+                                        <Star className="size-5" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold uppercase opacity-60">Level</p>
@@ -106,7 +116,7 @@ export default function StudentDashboard() {
                                 </div>
                                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
                                     <div className="size-10 bg-blue-400 rounded-xl flex items-center justify-center text-white">
-                                        <span className="material-symbols-outlined">auto_awesome</span>
+                                        <Sparkles className="size-5" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold uppercase opacity-60">Total XP</p>
@@ -181,7 +191,8 @@ export default function StudentDashboard() {
                                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`size-12 bg-${exam.color}-100 dark:bg-${exam.color}-500/10 rounded-2xl flex items-center justify-center text-${exam.color}-600 group-hover:scale-110 transition-transform`}>
-                                                        <span className="material-symbols-outlined text-2xl">{exam.icon}</span>
+                                                        {/* Dynamic icon from API, assuming it maps or fallback to default */}
+                                                        <FileQuestion className="size-6" />
                                                     </div>
                                                     <div>
                                                         <span className="text-xs font-black text-primary uppercase tracking-widest">{exam.subject ?? 'General'}</span>
@@ -216,7 +227,7 @@ export default function StudentDashboard() {
                                 ) : (
                                     <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
                                         <div className="size-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
-                                            <span className="material-symbols-outlined text-slate-300 text-3xl">task_alt</span>
+                                            <CheckCircle2 className="size-8 text-slate-300" />
                                         </div>
                                         <h5 className="font-bold text-slate-900 dark:text-white">All caught up!</h5>
                                         <p className="text-xs text-slate-500 font-medium mt-1">No active exams assigned to your classroom today.</p>
@@ -235,10 +246,10 @@ export default function StudentDashboard() {
                                 ))
                             ) : (
                                 [
-                                    { label: "My Exams", icon: "quiz", color: "rose", path: "/exams" },
-                                    { label: "My Results", icon: "history", color: "blue", path: "/history" },
-                                    { label: "Leaderboard", icon: "leaderboard", color: "amber", path: "/leaderboard" },
-                                    { label: "Settings", icon: "settings", color: "primary", path: "/settings" },
+                                    { label: "My Exams", icon: FileQuestion, color: "rose", path: "/exams" },
+                                    { label: "My Results", icon: History, color: "blue", path: "/history" },
+                                    { label: "Leaderboard", icon: Trophy, color: "amber", path: "/leaderboard" },
+                                    { label: "Settings", icon: Settings, color: "primary", path: "/settings" },
                                 ].map((step) => (
                                     <button
                                         key={step.label}
@@ -246,7 +257,7 @@ export default function StudentDashboard() {
                                         className="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg"
                                     >
                                         <div className={`size-12 rounded-xl bg-${step.color === 'primary' ? 'primary/10' : step.color + '-100'} text-${step.color === 'primary' ? 'primary' : step.color + '-600'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                            <span className="material-symbols-outlined">{step.icon}</span>
+                                            <step.icon className="size-6" />
                                         </div>
                                         <span className="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight text-center">{step.label}</span>
                                     </button>
@@ -287,7 +298,7 @@ export default function StudentDashboard() {
                                             className="relative flex gap-4"
                                         >
                                             <div className={`z-10 size-8 rounded-full bg-${exam.color === 'rose' ? 'rose-500 text-white' : exam.color + '-100 text-' + exam.color + '-600'} flex items-center justify-center ring-4 ring-white dark:ring-slate-900`}>
-                                                <span className="material-symbols-outlined text-sm">{exam.icon}</span>
+                                                <FileQuestion className="size-4" />
                                             </div>
                                             <div className="flex-1">
                                                 <p className={`text-sm font-black ${exam.color === 'rose' ? 'text-rose-600' : 'text-slate-400'} uppercase tracking-widest mb-1`}>{exam.time_label}</p>
@@ -310,7 +321,7 @@ export default function StudentDashboard() {
                                     transition={{ delay: 0.5 }}
                                     className="mt-auto pt-8 flex flex-col items-center grayscale select-none"
                                 >
-                                    <span className="material-symbols-outlined text-6xl mb-2">event_available</span>
+                                    <CalendarCheck className="size-16 mb-2" />
                                     <p className="text-xs font-bold text-center uppercase tracking-widest">Study hard, score big</p>
                                 </motion.div>
                             )}

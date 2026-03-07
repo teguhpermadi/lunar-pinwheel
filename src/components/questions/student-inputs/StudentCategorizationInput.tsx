@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
+import { Info, LayoutGrid, Archive, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface StudentCategorizationInputProps {
     options: QuestionOption[];
@@ -148,7 +149,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
         <div className="space-y-8">
             {/* Instructions */}
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 rounded-xl flex gap-3">
-                <span className="material-symbols-outlined text-blue-500">info</span>
+                <Info className="size-5 text-blue-500" />
                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                     Geser (drag) kartu jawaban di bawah ke dalam kotak kategori yang sesuai.
                 </p>
@@ -165,7 +166,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                         className={`min-h-[200px] bg-slate-50 dark:bg-slate-800/20 rounded-2xl border-2 border-dashed transition-all ${draggedItemKey ? 'border-primary/40 bg-primary/5' : 'border-slate-200 dark:border-slate-800'} ${hoveredGroupUuidState === category.uuid ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}
                     >
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 rounded-t-2xl font-bold text-sm text-slate-600 dark:text-slate-300 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-lg text-primary">category</span>
+                            <LayoutGrid className="size-5 text-primary" />
                             {category.title}
                             <span className="ml-auto text-[10px] bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                                 {itemsByGroup.groups[category.uuid].length}
@@ -227,7 +228,7 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
                         </AnimatePresence>
                         {itemsByGroup.ungrouped.length === 0 && (
                             <div className="text-sm text-slate-400 flex flex-col items-center gap-2 py-4">
-                                <span className="material-symbols-outlined text-3xl opacity-20">inventory_2</span>
+                                <Archive className="size-8 opacity-20" />
                                 <span>Semua jawaban telah dikelompokkan</span>
                             </div>
                         )}
@@ -278,7 +279,7 @@ function ItemCard({
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMovePrev?.(); }}
                     className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-400 hover:text-primary flex items-center justify-center"
                 >
-                    <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
+                    <ArrowUp className="size-4" />
                 </button>
                 <button
                     type="button"
@@ -288,7 +289,7 @@ function ItemCard({
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMoveNext?.(); }}
                     className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-400 hover:text-primary flex items-center justify-center"
                 >
-                    <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
+                    <ArrowDown className="size-4" />
                 </button>
             </div>
 

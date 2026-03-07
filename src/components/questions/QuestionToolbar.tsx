@@ -2,6 +2,17 @@ import { useEditorStore } from '@/store/useEditorStore';
 import MathDialog from './MathDialog';
 import ArabicDialog from './ArabicDialog';
 import JavaneseDialog from './JavaneseDialog';
+import {
+    Bold,
+    Italic,
+    Underline,
+    List,
+    ListOrdered,
+    Sigma,
+    Languages,
+    GraduationCap,
+    type LucideIcon
+} from 'lucide-react';
 
 export default function QuestionToolbar() {
     const {
@@ -93,51 +104,51 @@ export default function QuestionToolbar() {
             <ToolbarButton
                 onClick={toggleBold}
                 active={activeEditor.isActive('bold')}
-                icon="format_bold"
+                icon={Bold}
                 tooltip="Bold"
             />
             <ToolbarButton
                 onClick={toggleItalic}
                 active={activeEditor.isActive('italic')}
-                icon="format_italic"
+                icon={Italic}
                 tooltip="Italic"
             />
             <ToolbarButton
                 onClick={toggleUnderline}
                 active={activeEditor.isActive('underline')}
-                icon="format_underlined"
+                icon={Underline}
                 tooltip="Underline"
             />
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
             <ToolbarButton
                 onClick={toggleBulletList}
                 active={activeEditor.isActive('bulletList')}
-                icon="format_list_bulleted"
+                icon={List}
                 tooltip="Bullet List"
             />
             <ToolbarButton
                 onClick={toggleOrderedList}
                 active={activeEditor.isActive('orderedList')}
-                icon="format_list_numbered"
+                icon={ListOrdered}
                 tooltip="Numbered List"
             />
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
             <ToolbarButton
                 onClick={openMathDialog}
                 active={activeEditor.isActive('math')}
-                icon="functions"
+                icon={Sigma}
                 tooltip="Math Formula"
             />
             <ToolbarButton
                 onClick={openArabicDialog}
                 active={activeEditor.isActive('arabic')}
-                icon="translate"
+                icon={Languages}
                 tooltip="Arabic Text"
             />
             <ToolbarButton
                 onClick={openJavaneseDialog}
                 active={activeEditor.isActive('javanese')}
-                icon="history_edu"
+                icon={GraduationCap}
                 tooltip="Javanese Script"
             />
 
@@ -165,7 +176,7 @@ export default function QuestionToolbar() {
     );
 }
 
-function ToolbarButton({ onClick, active, icon, tooltip }: { onClick: () => void; active: boolean; icon: string; tooltip: string }) {
+function ToolbarButton({ onClick, active, icon: Icon, tooltip }: { onClick: () => void; active: boolean; icon: LucideIcon; tooltip: string }) {
     return (
         <button
             onClick={(e) => {
@@ -180,7 +191,7 @@ function ToolbarButton({ onClick, active, icon, tooltip }: { onClick: () => void
                     : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'}
             `}
         >
-            <span className="material-symbols-outlined text-xl">{icon}</span>
+            <Icon className="size-5" />
         </button>
     );
 }

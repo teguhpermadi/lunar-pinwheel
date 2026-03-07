@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { subjectApi, questionBankApi, Subject } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Loader2, Save } from 'lucide-react';
 
 const schema = z.object({
     name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -88,7 +89,7 @@ export default function CreateQuestionBank() {
         <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50 h-full">
             <header className="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex items-center gap-4">
                 <Link to="/admin/question-banks" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <ArrowLeft className="size-5" />
                 </Link>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">Create Question Bank</h1>
             </header>
@@ -141,9 +142,9 @@ export default function CreateQuestionBank() {
                             className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2 disabled:opacity-70"
                         >
                             {isLoading ? (
-                                <span className="material-symbols-outlined animate-spin">refresh</span>
+                                <Loader2 className="size-5 animate-spin" />
                             ) : (
-                                <span className="material-symbols-outlined">save</span>
+                                <Save className="size-5" />
                             )}
                             Save & Continue
                         </button>

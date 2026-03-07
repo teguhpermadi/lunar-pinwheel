@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import AcademicYearSelector from '../common/AcademicYearSelector';
+import { PanelLeftClose, Menu, Bell, MessageSquare } from 'lucide-react';
 
 interface HeaderProps {
     toggleSidebar: () => void;
@@ -18,9 +19,7 @@ export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCo
                     onClick={toggleSidebar}
                     className="hidden lg:flex cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
                 >
-                    <span className={`material-symbols-outlined toggle-icon block transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`}>
-                        menu_open
-                    </span>
+                    <PanelLeftClose className={`size-5 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Mobile Toggle */}
@@ -28,9 +27,7 @@ export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCo
                     onClick={toggleMobileSidebar}
                     className="lg:hidden cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
                 >
-                    <span className="material-symbols-outlined">
-                        menu
-                    </span>
+                    <Menu className="size-5" />
                 </button>
 
                 {/* Academic Year Selector - can be wrapped or hidden on very small screens if needed, but keeping it for now */}
@@ -42,11 +39,11 @@ export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCo
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                     <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 relative transition-transform hover:scale-105 active:scale-95">
-                        <span className="material-symbols-outlined">notifications</span>
+                        <Bell className="size-5" />
                         <span className="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark animate-pulse"></span>
                     </button>
                     <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-transform hover:scale-105 active:scale-95">
-                        <span className="material-symbols-outlined">chat_bubble</span>
+                        <MessageSquare className="size-5" />
                     </button>
                 </div>
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>

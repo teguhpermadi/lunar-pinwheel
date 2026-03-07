@@ -3,6 +3,7 @@ import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { generateUUID } from '@/lib/utils';
+import { PlusCircle, GripVertical, Trash2, Link2 } from 'lucide-react';
 
 interface MatchingPair {
     id?: string;
@@ -108,7 +109,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                     onClick={handleAddPair}
                     className="text-primary text-xs font-bold flex items-center gap-1 hover:underline"
                 >
-                    <span className="material-symbols-outlined text-sm">add_circle</span> Add Pair
+                    <PlusCircle className="size-4" /> Add Pair
                 </button>
             </div>
 
@@ -124,7 +125,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                     {leftItems.map((pair, index) => (
                         <Reorder.Item key={pair.uuid} value={pair} className="relative group">
                             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all flex items-center gap-3">
-                                <span className="material-symbols-outlined text-slate-300 cursor-grab active:cursor-grabbing text-lg select-none">drag_indicator</span>
+                                <GripVertical className="size-5 text-slate-300 cursor-grab active:cursor-grabbing select-none" />
                                 <div className="flex-1 min-w-0">
                                     <RichTextEditor
                                         value={pair.left}
@@ -139,7 +140,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                                 onClick={() => handleRemovePair(index)}
                                 className="absolute -left-8 top-1/2 -translate-y-1/2 p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                             >
-                                <span className="material-symbols-outlined">delete</span>
+                                <Trash2 className="size-4" />
                             </button>
                         </Reorder.Item>
                     ))}
@@ -149,7 +150,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                 <div className="flex flex-col items-center">
                     {pairs.map((_, i) => (
                         <div key={i} className="flex items-center justify-center" style={{ height: i === 0 ? '82px' : '98px' }}>
-                            <span className="material-symbols-outlined text-slate-300">link</span>
+                            <Link2 className="size-5 text-slate-300" />
                         </div>
                     ))}
                 </div>
@@ -159,7 +160,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
                     {rightItems.map((item, index) => (
                         <Reorder.Item key={item.rightUuid} value={item}>
                             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-emerald-200/50 dark:border-emerald-900/30 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all flex items-center gap-3">
-                                <span className="material-symbols-outlined text-slate-300 cursor-grab active:cursor-grabbing text-lg select-none">drag_indicator</span>
+                                <GripVertical className="size-5 text-slate-300 cursor-grab active:cursor-grabbing select-none" />
                                 <div className="flex-1 min-w-0">
                                     <RichTextEditor
                                         value={item.content}

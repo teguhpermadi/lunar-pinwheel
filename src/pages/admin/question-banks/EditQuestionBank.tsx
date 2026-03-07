@@ -14,6 +14,10 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 import WordImportModal from '@/components/admin/question-banks/WordImportModal';
 import MediaModal from '@/components/questions/MediaModal';
+import {
+    ArrowLeft, Settings, FileText, HelpCircle, Sparkles, Pencil,
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus
+} from 'lucide-react';
 
 export default function EditQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -184,7 +188,7 @@ export default function EditQuestionBank() {
             <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
                 <div className="flex items-center gap-4 flex-1">
                     <button onClick={() => navigate('/admin/question-banks')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft className="size-5" />
                     </button>
                     <div className="flex-1 max-w-xl">
                         {/* Editable Title Implementation could go here */}
@@ -199,18 +203,18 @@ export default function EditQuestionBank() {
                         onClick={() => setIsSettingsOpen(true)}
                         className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-lg">settings</span>
+                        <Settings className="size-4" />
                         Settings
                     </button>
                     <button
                         onClick={() => setIsImportOpen(true)}
                         className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
                     >
-                        <span className="material-symbols-outlined text-lg">description</span>
+                        <FileText className="size-4" />
                         Import Word
                     </button>
                     <Link to={`/admin/question-banks/${id}/show`} className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">quiz</span>
+                        <HelpCircle className="size-4" />
                         Exam
                     </Link>
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
@@ -230,7 +234,7 @@ export default function EditQuestionBank() {
                         {/* AI Generator Mock */}
                         {/* <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-primary/20 p-6 flex items-center gap-4">
                             <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
-                                <span className="material-symbols-outlined text-2xl">auto_awesome</span>
+                                <Sparkles className="size-6" />
                             </div>
                             <div className="flex-1">
                                 <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-1">Generate Question by AI</label>
@@ -276,14 +280,14 @@ export default function EditQuestionBank() {
                                                     className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                     title="Edit Question"
                                                 >
-                                                    <span className="material-symbols-outlined text-xl">edit</span>
+                                                    <Pencil className="size-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteQuestion(question.id)}
                                                     className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                                     title="Delete Question"
                                                 >
-                                                    <span className="material-symbols-outlined text-xl">delete</span>
+                                                    <Trash2 className="size-5" />
                                                 </button>
                                             </div>
                                         </div>
@@ -291,7 +295,7 @@ export default function EditQuestionBank() {
                                         <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center">
                                             {/* Badge Stats */}
                                             <div className="flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-slate-400 text-sm">bar_chart</span>
+                                                <BarChart3 className="size-4 text-slate-400" />
                                                 <QuestionDifficultySelector
                                                     questionId={question.id}
                                                     initialDifficulty={question.difficulty}
@@ -374,7 +378,7 @@ export default function EditQuestionBank() {
                             {questions.length === 0 && (
                                 <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
                                     <div className="size-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                                        <span className="material-symbols-outlined text-3xl">library_add</span>
+                                        <PlusSquare className="size-8" />
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No Questions Yet</h3>
                                     <p className="text-slate-500 text-sm mb-6">Start adding questions to this bank.</p>
@@ -387,7 +391,7 @@ export default function EditQuestionBank() {
                             onClick={() => navigate(`/admin/question-banks/${id}/questions/create`)}
                             className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12"
                         >
-                            <span className="material-symbols-outlined">add_circle</span>
+                            <PlusCircle className="size-5" />
                             Add New Question
                         </button>
                     </div>
@@ -423,12 +427,12 @@ export default function EditQuestionBank() {
                                 onClick={() => navigate(`/admin/question-banks/${id}/questions/create`)}
                                 className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all"
                             >
-                                <span className="material-symbols-outlined">add</span>
+                                <Plus className="size-5" />
                             </button>
                         </div>
                     </div>
                 </aside>
-            </div>
+            </div >
 
             <QuestionBankSettingsModal
                 isOpen={isSettingsOpen}
@@ -450,6 +454,6 @@ export default function EditQuestionBank() {
                 imageUrl={previewImageUrl}
                 readOnly={true}
             />
-        </div>
+        </div >
     );
 }

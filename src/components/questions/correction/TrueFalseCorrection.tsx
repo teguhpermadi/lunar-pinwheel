@@ -1,6 +1,7 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface TrueFalseCorrectionProps {
     options: QuestionOption[];
@@ -107,9 +108,9 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
                                     </span>
                                 )}
                                 {correct ? (
-                                    <span className="material-symbols-outlined text-emerald-500 text-2xl font-bold">check_circle</span>
+                                    <CheckCircle2 className="size-6 text-emerald-500 font-bold" />
                                 ) : selected ? (
-                                    <span className="material-symbols-outlined text-rose-500 text-2xl font-bold">cancel</span>
+                                    <XCircle className="size-6 text-rose-500 font-bold" />
                                 ) : null}
                             </div>
                         </div>

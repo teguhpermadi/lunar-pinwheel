@@ -3,6 +3,7 @@ import { useState } from 'react';
 import MediaModal from '../MediaModal';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { generateUUID } from '@/lib/utils';
+import { Image as ImageIcon, Square, CheckSquare, Trash2, PlusCircle } from 'lucide-react';
 
 interface Option {
     id?: string;
@@ -130,7 +131,7 @@ export default function MultipleSelectionInput({ options, onChange, onDeleteMedi
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <span className="material-symbols-outlined text-lg">image</span>
+                                        <ImageIcon className="size-5 text-slate-400" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -153,15 +154,17 @@ export default function MultipleSelectionInput({ options, onChange, onDeleteMedi
                                         }`}
                                     title="Toggle Correct"
                                 >
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                        {option.is_correct ? 'check_box' : 'check_box_outline_blank'}
-                                    </span>
+                                    {option.is_correct ? (
+                                        <CheckSquare className="size-5" />
+                                    ) : (
+                                        <Square className="size-5" />
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => handleRemoveOption(option.uuid)}
                                     className="p-2 text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center"
                                 >
-                                    <span className="material-symbols-outlined">delete</span>
+                                    <Trash2 className="size-5" />
                                 </button>
                             </div>
                         </div>
@@ -173,7 +176,7 @@ export default function MultipleSelectionInput({ options, onChange, onDeleteMedi
                 onClick={handleAddOption}
                 className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12"
             >
-                <span className="material-symbols-outlined">add_circle</span>
+                <PlusCircle className="size-5" />
                 Add New Option
             </button>
 

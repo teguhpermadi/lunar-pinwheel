@@ -5,6 +5,7 @@ import { RegisterSchema, RegisterRequest, authApi } from '@/lib/api';
 import AuthLayout from '@/layouts/AuthLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { User, Mail, Lock } from 'lucide-react';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -62,7 +63,7 @@ export default function RegisterPage() {
                         placeholder="John Doe"
                         register={register('name')}
                         error={errors.name}
-                        icon={<span className="material-icons text-slate-400 text-lg">person</span>}
+                        icon={<User className="text-slate-400 size-5" />}
                     />
 
                     <Input
@@ -72,7 +73,7 @@ export default function RegisterPage() {
                         placeholder="name@school.edu"
                         register={register('email')}
                         error={errors.email}
-                        icon={<span className="material-icons text-slate-400 text-lg">mail</span>}
+                        icon={<Mail className="text-slate-400 size-5" />}
                     />
 
                     <Input
@@ -82,7 +83,7 @@ export default function RegisterPage() {
                         placeholder="••••••••"
                         register={register('password')}
                         error={errors.password}
-                        icon={<span className="material-icons text-slate-400 text-lg">lock</span>}
+                        icon={<Lock className="text-slate-400 size-5" />}
                     />
 
                     <Input
@@ -92,7 +93,7 @@ export default function RegisterPage() {
                         placeholder="••••••••"
                         register={register('password_confirmation')}
                         error={errors.password_confirmation}
-                        icon={<span className="material-icons text-slate-400 text-lg">lock</span>}
+                        icon={<Lock className="text-slate-400 size-5" />}
                     />
 
                     <div>

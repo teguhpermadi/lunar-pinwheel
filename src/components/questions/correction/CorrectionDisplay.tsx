@@ -1,4 +1,5 @@
 import { QuestionOption } from '@/lib/api';
+import { Blocks } from 'lucide-react';
 import MultipleChoiceCorrection from './MultipleChoiceCorrection';
 import EssayCorrection from './EssayCorrection';
 import MultipleSelectionCorrection from './MultipleSelectionCorrection';
@@ -51,7 +52,7 @@ export default function CorrectionDisplay({ type, studentAnswer, options, keyAns
             default:
                 return (
                     <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400">
-                        <span className="material-symbols-outlined text-4xl mb-2">extension</span>
+                        <Blocks className="size-10 text-slate-300 mb-2" />
                         <p>Visual correction for <b>{type}</b> is not yet implemented.</p>
                         <div className="mt-4 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-left overflow-auto max-h-[200px]">
                             <h6 className="text-[10px] font-bold uppercase mb-2">Raw Answer:</h6>

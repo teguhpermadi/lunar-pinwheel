@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { tagApi, Tag } from '@/lib/api';
+import { X, Loader2, PlusCircle } from 'lucide-react';
 
 interface QuestionTagInputProps {
     questionId: string;
@@ -128,7 +129,7 @@ export default function QuestionTagInput({
                                 onClick={() => handleRemoveTag(tag)}
                                 className="ml-0.5 hover:bg-primary/20 hover:text-primary-700 dark:hover:text-primary text-primary/70 rounded-full p-0.5 outline-none flex items-center justify-center transition-colors"
                             >
-                                <span className="material-symbols-outlined text-[14px]">close</span>
+                                <X className="size-[14px]" />
                             </button>
                         )}
                     </span>
@@ -150,7 +151,7 @@ export default function QuestionTagInput({
 
                 {isSearching && (
                     <div className="px-2">
-                        <span className="material-symbols-outlined text-slate-400 text-sm animate-spin">progress_activity</span>
+                        <Loader2 className="size-4 text-slate-400 animate-spin" />
                     </div>
                 )}
             </div>
@@ -180,7 +181,7 @@ export default function QuestionTagInput({
                                         onClick={() => handleAddTag(inputValue)}
                                     >
                                         <span>Create tag "<span className="font-bold">{inputValue.trim()}</span>"</span>
-                                        <span className="material-symbols-outlined text-sm">add_circle</span>
+                                        <PlusCircle className="size-4" />
                                     </button>
                                 </li>
                             )}
@@ -193,7 +194,7 @@ export default function QuestionTagInput({
                                 onClick={() => handleAddTag(inputValue)}
                             >
                                 <span>Create tag "<span className="font-bold">{inputValue.trim()}</span>"</span>
-                                <span className="material-symbols-outlined text-sm">add_circle</span>
+                                <PlusCircle className="size-4" />
                             </button>
                         </div>
                     )}

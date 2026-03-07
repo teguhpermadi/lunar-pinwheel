@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { examApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle, BarChart4, Lightbulb, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface DistractorDetail {
     option_id: string;
@@ -99,7 +100,7 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
         return (
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 flex flex-col items-center justify-center min-h-[400px]">
                 <div className="size-16 rounded-3xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-6 border border-rose-100 dark:border-rose-500/20">
-                    <span className="material-symbols-outlined text-3xl text-rose-500">error</span>
+                    <AlertCircle className="w-8 h-8 text-rose-500" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Telaah Soal Gagal</h3>
                 <p className="text-slate-500 text-center max-w-sm">{error}</p>
@@ -111,7 +112,7 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
         return (
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 flex flex-col items-center justify-center min-h-[400px]">
                 <div className="size-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 border border-slate-100 dark:border-slate-700">
-                    <span className="material-symbols-outlined text-3xl text-slate-400">analytics</span>
+                    <BarChart4 className="w-8 h-8 text-slate-400" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Belum Ada Data</h3>
                 <p className="text-slate-500 text-center max-w-sm">Data telaah soal belum tersedia atau tidak cukup siswa yang telah menyelesaikan ujian.</p>
@@ -127,7 +128,7 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
 
                 <div className="relative z-10 flex-1">
                     <h2 className="text-2xl font-black mb-2 flex items-center gap-3">
-                        <span className="material-symbols-outlined text-3xl">analytics</span>
+                        <BarChart4 className="w-8 h-8" />
                         Analisis Butir Soal (Klasikal)
                     </h2>
                     <p className="opacity-90 max-w-2xl text-sm leading-relaxed mb-6">
@@ -217,7 +218,7 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
                                 <div className="flex-[2] bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-4 rounded-2xl flex flex-col justify-center min-h-[100px]">
                                     <p className="text-[9px] font-bold uppercase tracking-widest text-blue-500/70 dark:text-blue-400/70 mb-2">Keterangan / Rekomendasi</p>
                                     <div className="flex gap-3 items-start">
-                                        <span className="material-symbols-outlined text-blue-500 text-xl shrink-0">lightbulb</span>
+                                        <Lightbulb className="w-5 h-5 text-blue-500 shrink-0" />
                                         <p className="text-sm text-blue-800 dark:text-blue-300 font-medium leading-relaxed italic">{item.conclusion.recommendation}</p>
                                     </div>
                                 </div>
@@ -254,12 +255,11 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
                                 {item.question_type === 'multiple_choice' && (
                                     <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 text-center flex flex-col justify-center relative overflow-hidden">
                                         <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-2 relative z-10">Efektivitas Pengecoh</p>
-                                        <span className={cn(
-                                            "material-symbols-outlined text-3xl mb-1 relative z-10",
-                                            ['Sangat Baik', 'Berfungsi'].includes(item.distractor.status) ? "text-emerald-500" : "text-rose-500"
-                                        )}>
-                                            {['Sangat Baik', 'Berfungsi'].includes(item.distractor.status) ? 'rule' : 'warning'}
-                                        </span>
+                                        {['Sangat Baik', 'Berfungsi'].includes(item.distractor.status) ? (
+                                            <CheckCircle2 className="w-8 h-8 mb-1 text-emerald-500 mx-auto" />
+                                        ) : (
+                                            <AlertTriangle className="w-8 h-8 mb-1 text-rose-500 mx-auto" />
+                                        )}
                                         <span className={cn(
                                             "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider mx-auto relative z-10",
                                             ['Sangat Baik', 'Berfungsi'].includes(item.distractor.status) ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"

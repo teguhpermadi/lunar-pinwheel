@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
+import {
+    ArrowLeft,
+    Key,
+    ClipboardCheck,
+    Settings,
+    Search,
+    User,
+    ChevronUp,
+    ChevronDown,
+    CircleStop,
+    CirclePlay,
+    Copy
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -307,7 +320,7 @@ export default function ExamLiveScorePage() {
                         onClick={() => navigate('/admin/exams')}
                         className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400"
                     >
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div className="flex-1 min-w-0">
                         <h1 className="text-base md:text-xl font-bold text-slate-900 dark:text-white truncate">
@@ -324,7 +337,7 @@ export default function ExamLiveScorePage() {
                         onClick={() => setShowTokenModal(true)}
                         className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[9px] md:text-[10px] font-bold tabular-nums hover:bg-primary/20 transition-colors group/token"
                     >
-                        <span className="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">vpn_key</span>
+                        <Key className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
                         TOKEN: {data?.exam.token || '---'}
                     </button>
                     <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] md:text-[10px] font-bold animate-pulse">
@@ -338,14 +351,14 @@ export default function ExamLiveScorePage() {
                             onClick={() => navigate(`/admin/exams/${id}/correction`)}
                             className="flex-1 sm:flex-none px-3 md:px-5 py-2 md:py-2.5 bg-primary text-white rounded-xl text-xs md:text-sm font-bold hover:shadow-lg hover:shadow-primary/25 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
-                            <span className="material-symbols-outlined text-base md:text-lg">fact_check</span>
+                            <ClipboardCheck className="w-4 h-4 md:w-5 md:h-5" />
                             Correction
                         </button>
                         <button
                             onClick={() => navigate(`/admin/exams/${id}/edit`)}
                             className="px-3 md:px-4 py-2 md:py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
                         >
-                            <span className="material-symbols-outlined text-base md:text-lg">settings</span>
+                            <Settings className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="hidden sm:inline">Settings</span>
                         </button>
                     </div>
@@ -357,7 +370,7 @@ export default function ExamLiveScorePage() {
                     <div className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 gap-4">
                         <div className="flex items-center gap-4 w-full sm:w-auto">
                             <div className="relative flex-1 sm:flex-none">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 md:w-5 md:h-5" />
                                 <input
                                     className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm w-full sm:w-64 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                                     placeholder="Search students..."
@@ -451,7 +464,7 @@ export default function ExamLiveScorePage() {
                                                                         {session.student.avatar ? (
                                                                             <img alt="avatar" className="w-full h-full object-cover rounded-full" src={session.student.avatar} />
                                                                         ) : (
-                                                                            <span className="material-symbols-outlined text-slate-400">person</span>
+                                                                            <User className="w-5 h-5 text-slate-400" />
                                                                         )}
 
                                                                         {/* Rank Change Indicator */}
@@ -466,9 +479,11 @@ export default function ExamLiveScorePage() {
                                                                                         : "bg-rose-500 text-white"
                                                                                 )}
                                                                             >
-                                                                                <span className="material-symbols-outlined text-[14px] font-black">
-                                                                                    {getRankChange(session.student.id, index) > 0 ? "expand_less" : "expand_more"}
-                                                                                </span>
+                                                                                {getRankChange(session.student.id, index) > 0 ? (
+                                                                                    <ChevronUp className="w-3.5 h-3.5" />
+                                                                                ) : (
+                                                                                    <ChevronDown className="w-3.5 h-3.5" />
+                                                                                )}
                                                                             </motion.div>
                                                                         )}
                                                                     </div>
@@ -546,7 +561,7 @@ export default function ExamLiveScorePage() {
                                                                         className="p-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
                                                                         title="Force Finish"
                                                                     >
-                                                                        <span className="material-symbols-outlined text-base md:text-lg">stop_circle</span>
+                                                                        <CircleStop className="w-4 h-4 md:w-5 md:h-5" />
                                                                     </button>
                                                                 )}
                                                                 {session.status === 'finished' && (
@@ -555,7 +570,7 @@ export default function ExamLiveScorePage() {
                                                                         className="p-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all active:scale-90 flex items-center justify-center"
                                                                         title="Reopen Exam"
                                                                     >
-                                                                        <span className="material-symbols-outlined text-base md:text-lg">play_circle</span>
+                                                                        <CirclePlay className="w-4 h-4 md:w-5 md:h-5" />
                                                                     </button>
                                                                 )}
                                                                 <button
@@ -643,7 +658,7 @@ const TokenModal = ({ token, isOpen, onClose }: { token: string; isOpen: boolean
                     >
                         <div className="p-8 flex flex-col items-center text-center">
                             <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                                <span className="material-symbols-outlined text-3xl">vpn_key</span>
+                                <Key className="w-8 h-8" />
                             </div>
                             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Security Token</h2>
                             <p className="text-xs text-slate-500 mb-8 max-w-[200px]">Give this token to students to access the exam.</p>
@@ -657,7 +672,7 @@ const TokenModal = ({ token, isOpen, onClose }: { token: string; isOpen: boolean
                                 </span>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase group-hover:text-primary transition-colors">Click to copy</span>
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="material-symbols-outlined text-primary text-sm">content_copy</span>
+                                    <Copy className="w-4 h-4 text-primary" />
                                 </div>
                             </div>
 

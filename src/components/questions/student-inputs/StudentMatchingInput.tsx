@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Reorder } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
+import { MousePointer2, Link2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface StudentMatchingInputProps {
     options: QuestionOption[];
@@ -163,7 +164,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
     return (
         <div className="space-y-8">
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 rounded-xl flex gap-3">
-                <span className="material-icons text-blue-500">touch_app</span>
+                <MousePointer2 className="size-5 text-blue-500" />
                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                     Susunlah jawaban di kolom kanan dengan cara <strong>menarik (drag)</strong> ikon indikator agar sesuai dengan pernyataan di kolom kiri.
                 </p>
@@ -205,7 +206,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                             key={index}
                             className="flex items-center justify-center text-slate-200 dark:text-slate-800 min-h-[100px] md:min-h-[120px] pb-2 sm:pb-4"
                         >
-                            <span className="material-symbols-outlined text-lg sm:text-2xl">link</span>
+                            <Link2 className="size-6 text-slate-200 dark:text-slate-800" />
                         </div>
                     ))}
                 </div>
@@ -224,9 +225,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                                 ref={(el) => { rightOuterRefs.current[index] = el; }}
                                 className={`min-h-[100px] md:min-h-[120px] p-2 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-emerald-100 dark:border-emerald-500/10 shadow-sm flex items-center gap-1 sm:gap-4 group hover:border-emerald-500/30 transition-all ${hoveredRightKeyState === right.option_key ? 'ring-2 ring-emerald-300 bg-emerald-50 border-emerald-300' : ''}`}
                             >
-                                <span className="material-symbols-outlined text-slate-200 group-hover:text-emerald-500 transition-colors select-none text-lg sm:text-2xl">
-                                    drag_indicator
-                                </span>
+                                <GripVertical className="size-6 text-slate-200 group-hover:text-emerald-500 transition-colors select-none" />
                                 <div
                                     className="flex-1 text-center flex items-center justify-center"
                                     ref={(el) => { rightInnerRefs.current[index] = el; }}
@@ -255,7 +254,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                                         }}
                                         className="p-1 lg:p-1.5 text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
                                     >
-                                        <span className="material-symbols-outlined text-sm sm:text-base">keyboard_arrow_up</span>
+                                        <ChevronUp className="size-4" />
                                     </button>
                                     <button
                                         type="button"
@@ -274,7 +273,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                                         }}
                                         className="p-1 lg:p-1.5 text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center"
                                     >
-                                        <span className="material-symbols-outlined text-sm sm:text-base">keyboard_arrow_down</span>
+                                        <ChevronDown className="size-4" />
                                     </button>
                                 </div>
                             </div>

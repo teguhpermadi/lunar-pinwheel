@@ -1,6 +1,7 @@
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
+import { Calendar, ChevronDown, Check } from 'lucide-react';
 
 export default function AcademicYearSelector() {
     const { academicYears, selectedYearId, setSelectedYearId, isLoading: isContextLoading, loadMore, hasMore } = useAcademicYear();
@@ -46,7 +47,7 @@ export default function AcademicYearSelector() {
                 className="w-full flex items-center justify-between px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors group"
             >
                 <div className="flex items-center gap-3 overflow-hidden">
-                    <span className="material-symbols-outlined text-primary">calendar_month</span>
+                    <Calendar className="size-5 text-primary" />
                     <div className="flex flex-col items-start truncate">
                         <span className="text-xs text-slate-500 font-medium tracking-wide">Academic Year</span>
                         <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
@@ -54,9 +55,7 @@ export default function AcademicYearSelector() {
                         </span>
                     </div>
                 </div>
-                <span className={`material-symbols-outlined text-slate-400 text-sm transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-                    expand_more
-                </span>
+                <ChevronDown className={`size-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
@@ -92,7 +91,7 @@ export default function AcademicYearSelector() {
                                                 <span className="text-xs opacity-70">Semester {year.semester}</span>
                                             </div>
                                             {selectedYearId === year.id && (
-                                                <span className="material-symbols-outlined text-lg">check</span>
+                                                <Check className="size-5" />
                                             )}
                                         </button>
                                     ))}

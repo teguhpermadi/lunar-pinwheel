@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { questionApi } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, LayoutGrid, ChevronDown, Check } from 'lucide-react';
 
 interface QuestionTypeSelectorProps {
     questionId?: string;
@@ -132,15 +133,13 @@ export default function QuestionTypeSelector({ questionId, initialType, onTypeCh
                 title={disabled ? "Modification disabled" : "Change Question Type"}
             >
                 {isLoading ? (
-                    <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
+                    <Loader2 className="size-[14px] animate-spin" />
                 ) : (
-                    <span className="material-symbols-outlined text-[14px]">category</span>
+                    <LayoutGrid className="size-[14px]" />
                 )}
                 <span>{currentOption.label}</span>
                 {!disabled && (
-                    <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                        expand_more
-                    </span>
+                    <ChevronDown className={`size-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                 )}
             </button>
 
@@ -172,7 +171,7 @@ export default function QuestionTypeSelector({ questionId, initialType, onTypeCh
                                             <span>{option.label}</span>
                                         </div>
                                         {isActive && (
-                                            <span className="material-symbols-outlined text-[14px] text-primary">check</span>
+                                            <Check className="size-[14px] text-primary" />
                                         )}
                                     </button>
                                 );

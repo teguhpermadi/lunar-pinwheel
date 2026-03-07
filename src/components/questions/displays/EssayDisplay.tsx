@@ -1,5 +1,6 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
+import { Sparkles } from 'lucide-react';
 
 interface EssayDisplayProps {
     options?: QuestionOption[];
@@ -24,7 +25,7 @@ export default function EssayDisplay({ options = [], keywords }: EssayDisplayPro
             {rubric ? (
                 <div className="space-y-3">
                     <h5 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                        <Sparkles className="size-4" />
                         Grading Keywords / Rubric
                     </h5>
                     <MathRenderer

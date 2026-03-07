@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { questionApi } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Smile, Meh, Frown, ChevronDown, Check } from 'lucide-react';
 
 interface QuestionDifficultySelectorProps {
     questionId?: string;
@@ -16,19 +17,19 @@ const difficultyConfig = {
         label: 'Mudah',
         color: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
         hover: 'hover:bg-emerald-100 dark:hover:bg-emerald-900/40',
-        icon: 'sentiment_satisfied'
+        icon: Smile
     },
     sedang: {
         label: 'Sedang',
         color: 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
         hover: 'hover:bg-amber-100 dark:hover:bg-amber-900/40',
-        icon: 'sentiment_neutral'
+        icon: Meh
     },
     sulit: {
         label: 'Sulit',
         color: 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800',
         hover: 'hover:bg-rose-100 dark:hover:bg-rose-900/40',
-        icon: 'sentiment_very_dissatisfied'
+        icon: Frown
     }
 };
 
@@ -140,15 +141,13 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
                 disabled={isLoading || disabled}
             >
                 {isLoading ? (
-                    <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
+                    <Loader2 className="size-[14px] animate-spin" />
                 ) : (
-                    <span className="material-symbols-outlined text-[14px]">{currentConfig.icon}</span>
+                    <currentConfig.icon className="size-[14px]" />
                 )}
                 <span>{currentConfig.label}</span>
                 {!disabled && (
-                    <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                        expand_more
-                    </span>
+                    <ChevronDown className={`size-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                 )}
             </button>
 
@@ -185,7 +184,7 @@ export default function QuestionDifficultySelector({ questionId, initialDifficul
                                             {config.label}
                                         </div>
                                         {isActive && (
-                                            <span className="material-symbols-outlined text-[14px] text-primary">check</span>
+                                            <Check className="size-[14px] text-primary" />
                                         )}
                                     </button>
                                 );

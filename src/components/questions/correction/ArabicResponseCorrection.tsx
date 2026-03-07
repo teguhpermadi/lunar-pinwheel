@@ -1,5 +1,6 @@
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
+import { User, BadgeCheck } from 'lucide-react';
 
 interface ArabicResponseCorrectionProps {
     studentAnswer: string;
@@ -27,7 +28,7 @@ export default function ArabicResponseCorrection({ studentAnswer, options = [], 
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-6 border border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="size-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center">
-                        <span className="material-symbols-outlined text-sm">person</span>
+                        <User className="size-4" />
                     </div>
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Student Response</h5>
                 </div>
@@ -51,7 +52,7 @@ export default function ArabicResponseCorrection({ studentAnswer, options = [], 
                 <div className="bg-emerald-50/50 dark:bg-emerald-500/5 rounded-3xl p-6 border border-emerald-100 dark:border-emerald-800/50">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="size-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center">
-                            <span className="material-symbols-outlined text-sm">verified</span>
+                            <BadgeCheck className="size-4" />
                         </div>
                         <h5 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Correct Key</h5>
                     </div>

@@ -1,6 +1,7 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface MultipleSelectionCorrectionProps {
     options: QuestionOption[];
@@ -112,9 +113,9 @@ export default function MultipleSelectionCorrection({ options, studentAnswer, ke
                                         </span>
                                     )}
                                     {correct ? (
-                                        <span className="material-symbols-outlined text-emerald-500 text-xl font-bold">check_circle</span>
+                                        <CheckCircle2 className="size-5 text-emerald-500 font-bold" />
                                     ) : selected ? (
-                                        <span className="material-symbols-outlined text-rose-500 text-xl font-bold">cancel</span>
+                                        <XCircle className="size-5 text-rose-500 font-bold" />
                                     ) : null}
                                 </div>
                             </div>

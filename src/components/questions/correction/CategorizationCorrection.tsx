@@ -1,6 +1,7 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
+import { CheckCircle2 } from 'lucide-react';
 
 interface CategorizationCorrectionProps {
     options: QuestionOption[];
@@ -63,7 +64,7 @@ export default function CategorizationCorrection({ options = [], studentAnswer =
                                                 {item.option_key}
                                             </span>
                                             {isPlacedHere && (
-                                                <span className="material-symbols-outlined text-emerald-500 text-sm font-bold">check_circle</span>
+                                                <CheckCircle2 className="size-4 text-emerald-500 font-bold" />
                                             )}
                                         </div>
                                         <MathRenderer className="text-xs font-bold text-slate-700 dark:text-slate-300" content={item.content} />

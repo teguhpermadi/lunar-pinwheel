@@ -1,4 +1,5 @@
 import React from 'react';
+import { Star } from 'lucide-react';
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -26,11 +27,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-xl shadow-2xl transform translate-x-4">
                         <div className="flex items-center mb-4">
                             <div className="flex text-accent-yellow">
-                                <span className="material-icons text-sm">star</span>
-                                <span className="material-icons text-sm">star</span>
-                                <span className="material-icons text-sm">star</span>
-                                <span className="material-icons text-sm">star</span>
-                                <span className="material-icons text-sm">star</span>
+                                <Star className="size-4 fill-current" />
+                                <Star className="size-4 fill-current" />
+                                <Star className="size-4 fill-current" />
+                                <Star className="size-4 fill-current" />
+                                <Star className="size-4 fill-current" />
                             </div>
                         </div>
                         <p className="text-sm italic mb-4">"The platform is incredibly intuitive. I was able to set up my entire course curriculum in a single afternoon!"</p>

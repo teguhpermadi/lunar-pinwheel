@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 
 interface ModalProps {
     isOpen: boolean;
@@ -48,7 +49,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
                                         onClick={onClose}
                                         className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors"
                                     >
-                                        <span className="material-symbols-outlined text-xl">close</span>
+                                        <X className="size-5" />
                                     </button>
                                 </div>
                             )}

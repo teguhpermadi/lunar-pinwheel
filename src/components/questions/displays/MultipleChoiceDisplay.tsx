@@ -1,5 +1,6 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
+import { CheckCircle2 } from 'lucide-react';
 
 interface MultipleChoiceDisplayProps {
     options?: QuestionOption[];
@@ -42,7 +43,7 @@ export default function MultipleChoiceDisplay({ options = [], onMediaClick }: Mu
                         className="text-sm text-slate-700 dark:text-slate-300"
                         content={opt.content}
                     />
-                    {opt.is_correct && <span className="ml-auto material-symbols-outlined text-emerald-500 text-lg">check_circle</span>}
+                    {opt.is_correct && <CheckCircle2 className="ml-auto size-5 text-emerald-500" />}
                 </div>
             ))}
         </div>

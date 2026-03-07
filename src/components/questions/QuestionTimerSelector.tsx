@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { questionApi } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Clock, ChevronDown, Check } from 'lucide-react';
 
 interface QuestionTimerSelectorProps {
     questionId?: string;
@@ -136,15 +137,13 @@ export default function QuestionTimerSelector({ questionId, initialTimer, onTime
                 disabled={isLoading || disabled}
             >
                 {isLoading ? (
-                    <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
+                    <Loader2 className="size-[14px] animate-spin" />
                 ) : (
-                    <span className="material-symbols-outlined text-[14px]">schedule</span>
+                    <Clock className="size-[14px]" />
                 )}
                 <span>{formatLabel(timer)}</span>
                 {!disabled && (
-                    <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                        expand_more
-                    </span>
+                    <ChevronDown className={`size-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                 )}
             </button>
 
@@ -176,7 +175,7 @@ export default function QuestionTimerSelector({ questionId, initialTimer, onTime
                                             <span>{option.label}</span>
                                         </div>
                                         {isActive && (
-                                            <span className="material-symbols-outlined text-[14px] text-primary">check</span>
+                                            <Check className="size-[14px] text-primary" />
                                         )}
                                     </button>
                                 );

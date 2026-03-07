@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { generateUUID } from '@/lib/utils';
+import { Type, CheckCircle2, Trash2, PlusCircle } from 'lucide-react';
 
 interface Option {
     id?: string;
@@ -59,7 +60,7 @@ export default function ShortAnswerInput({ options, onChange }: ShortAnswerInput
             <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest">Accepted Answers</label>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm border-l-4 border-l-emerald-500 flex items-start gap-4">
-                <span className="material-symbols-outlined text-emerald-500 text-3xl">spellcheck</span>
+                <Type className="size-8 text-emerald-500" />
                 <div>
                     <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Short Answer</h3>
                     <p className="text-slate-500 text-sm mt-1">
@@ -88,14 +89,14 @@ export default function ShortAnswerInput({ options, onChange }: ShortAnswerInput
 
                             <div className="flex items-center gap-2">
                                 <div className="p-2 text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg" title="Accepted Answer">
-                                    <span className="material-symbols-outlined">check_circle</span>
+                                    <CheckCircle2 className="size-5" />
                                 </div>
                                 <button
                                     onClick={() => handleRemoveOption(option.uuid)}
                                     className="p-2 text-slate-300 hover:text-red-500 transition-colors"
                                     title="Hapus Jawaban"
                                 >
-                                    <span className="material-symbols-outlined">delete</span>
+                                    <Trash2 className="size-5" />
                                 </button>
                             </div>
                         </div>
@@ -107,7 +108,7 @@ export default function ShortAnswerInput({ options, onChange }: ShortAnswerInput
                 onClick={handleAddOption}
                 className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2 mb-12"
             >
-                <span className="material-symbols-outlined">add_circle</span>
+                <PlusCircle className="size-5" />
                 Tambah Jawaban
             </button>
         </section>

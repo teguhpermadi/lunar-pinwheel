@@ -5,6 +5,14 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
+import {
+    Info,
+    UserPlus,
+    Search,
+    Plus,
+    User,
+    UserMinus
+} from 'lucide-react';
 import { classroomApi, studentApi, Student, Classroom } from '@/lib/api';
 
 const MySwal = withReactContent(Swal);
@@ -314,7 +322,7 @@ export default function ClassroomForm() {
             <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined">info</span>
+                        <Info className="w-5 h-5" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">Classroom Details</h3>
                 </div>
@@ -373,7 +381,7 @@ export default function ClassroomForm() {
                     <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                         <div className="flex items-center gap-3">
                             <div className="size-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
-                                <span className="material-symbols-outlined">person_add</span>
+                                <UserPlus className="w-5 h-5" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Assign Students</h3>
                         </div>
@@ -392,7 +400,7 @@ export default function ClassroomForm() {
                                 </div>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <span className="material-symbols-outlined text-lg">search</span>
+                                        <Search className="w-5 h-5" />
                                     </span>
                                     <input
                                         type="text"
@@ -407,7 +415,7 @@ export default function ClassroomForm() {
                                     disabled={selectedAvailable.length === 0 || loading}
                                     className="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <span className="material-symbols-outlined text-lg">add</span>
+                                    <Plus className="w-5 h-5" />
                                     Add Selected Students ({selectedAvailable.length})
                                 </button>
                             </div>
@@ -450,7 +458,7 @@ export default function ClassroomForm() {
                                                         />
                                                         <div className="size-9 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                                             <div className="size-full flex items-center justify-center text-slate-400 bg-slate-200 dark:bg-slate-700">
-                                                                <span className="material-symbols-outlined text-lg">person</span>
+                                                                <User className="w-5 h-5" />
                                                             </div>
                                                         </div>
                                                         <div className="flex flex-col">
@@ -485,7 +493,7 @@ export default function ClassroomForm() {
                                 </div>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <span className="material-symbols-outlined text-lg">search</span>
+                                        <Search className="w-5 h-5" />
                                     </span>
                                     <input
                                         type="text"
@@ -500,7 +508,7 @@ export default function ClassroomForm() {
                                     disabled={selectedAssigned.length === 0 || loading}
                                     className="w-full py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <span className="material-symbols-outlined text-lg">person_remove</span>
+                                    <UserMinus className="w-5 h-5" />
                                     Remove Selected Students ({selectedAssigned.length})
                                 </button>
                             </div>
@@ -538,7 +546,7 @@ export default function ClassroomForm() {
                                                     />
                                                     <div className="size-9 bg-primary/10 rounded-full overflow-hidden">
                                                         <div className="size-full flex items-center justify-center text-primary bg-primary/5">
-                                                            <span className="material-symbols-outlined text-lg">person</span>
+                                                            <User className="w-5 h-5" />
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col">

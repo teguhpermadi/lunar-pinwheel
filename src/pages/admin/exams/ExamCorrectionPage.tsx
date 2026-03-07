@@ -4,6 +4,21 @@ import { examApi, Exam } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+    X,
+    Search,
+    AlertTriangle,
+    CheckCircle2,
+    ArrowLeft,
+    UserSearch,
+    List,
+    Filter,
+    ChevronDown,
+    Check,
+    ShieldCheck,
+    XCircle,
+    MinusCircle
+} from 'lucide-react';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
 import CorrectionByQuestion from './correction/CorrectionByQuestion';
@@ -454,13 +469,13 @@ export default function ExamCorrectionPage() {
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-slate-400">{filteredSessions.length}</span>
                                     <button onClick={() => setIsLeftSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600">
-                                        <span className="material-symbols-outlined text-sm">close</span>
+                                        <X className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                     <input
                                         className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
                                         placeholder="Search..."
@@ -569,7 +584,9 @@ export default function ExamCorrectionPage() {
                                                 Type: {(q.question_type || '').replace('_', ' ')}
                                             </p>
                                             {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
-                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
+                                                <span title="Needs Review">
+                                                    <AlertTriangle className="w-2.5 h-2.5 text-amber-500" />
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -609,7 +626,7 @@ export default function ExamCorrectionPage() {
                             <div className="flex items-center justify-between">
                                 <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation</h2>
                                 <button onClick={() => setIsRightSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600">
-                                    <span className="material-symbols-outlined text-sm">close</span>
+                                    <X className="w-4 h-4" />
                                 </button>
                             </div>
                             <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Question List</span>
@@ -645,7 +662,9 @@ export default function ExamCorrectionPage() {
                                                 Type: {(q.question_type || '').replace(/_/g, ' ')}
                                             </p>
                                             {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
-                                                <span className="material-symbols-outlined text-amber-500 text-[10px]" title="Needs Review">warning</span>
+                                                <span title="Needs Review">
+                                                    <AlertTriangle className="w-2.5 h-2.5 text-amber-500" />
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -659,7 +678,7 @@ export default function ExamCorrectionPage() {
                             <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Navigation</h2>
                             <div className="mt-3 flex flex-col gap-2">
                                 <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                     <input
                                         className="w-full pl-8 py-1.5 text-xs border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg outline-none"
                                         placeholder="Find Student..."
@@ -703,7 +722,7 @@ export default function ExamCorrectionPage() {
                                                 )}
                                             </div>
                                             {session.is_corrected && (
-                                                <span className="material-symbols-outlined text-emerald-500 text-sm shrink-0 ml-2">check_circle</span>
+                                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />
                                             )}
                                         </button>
                                     ))
@@ -743,7 +762,7 @@ export default function ExamCorrectionPage() {
                             onClick={() => navigate('/admin/exams')}
                             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
                         >
-                            <span className="material-symbols-outlined">arrow_back</span>
+                            <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div className="hidden md:block">
                             <h1 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{exam?.title || 'Exam Correction'}</h1>
@@ -757,13 +776,13 @@ export default function ExamCorrectionPage() {
                                 onClick={() => setIsLeftSidebarOpen(true)}
                                 className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
                             >
-                                <span className="material-symbols-outlined text-lg">person_search</span>
+                                <UserSearch className="w-4.5 h-4.5" />
                             </button>
                             <button
                                 onClick={() => setIsRightSidebarOpen(true)}
                                 className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
                             >
-                                <span className="material-symbols-outlined text-lg">list</span>
+                                <List className="w-4.5 h-4.5" />
                             </button>
                         </div>
                     </div>
@@ -831,18 +850,16 @@ export default function ExamCorrectionPage() {
                                             : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
                                     )}
                                 >
-                                    <span className="material-symbols-outlined text-[14px] text-primary">filter_list</span>
+                                    <Filter className="w-3.5 h-3.5 text-primary" />
                                     <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                                         {attemptFilter === 'all' && 'Semua Upaya'}
                                         {attemptFilter === 'latest' && 'Upaya Terbaru'}
                                         {attemptFilter !== 'all' && attemptFilter !== 'latest' && `Upaya ke-${attemptFilter}`}
                                     </span>
-                                    <span className={cn(
-                                        "material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200",
+                                    <ChevronDown className={cn(
+                                        "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
                                         isAttemptDropdownOpen ? "rotate-180" : ""
-                                    )}>
-                                        expand_more
-                                    </span>
+                                    )} />
                                 </button>
                                 <AnimatePresence>
                                     {isAttemptDropdownOpen && (
@@ -867,7 +884,7 @@ export default function ExamCorrectionPage() {
                                                     )}
                                                 >
                                                     Semua Upaya
-                                                    {attemptFilter === 'all' && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                    {attemptFilter === 'all' && <Check className="w-3.5 h-3.5" />}
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -882,7 +899,7 @@ export default function ExamCorrectionPage() {
                                                     )}
                                                 >
                                                     Upaya Terbaru
-                                                    {attemptFilter === 'latest' && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                    {attemptFilter === 'latest' && <Check className="w-3.5 h-3.5" />}
                                                 </button>
                                                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                                                 {uniqueAttempts.map(num => (
@@ -900,7 +917,7 @@ export default function ExamCorrectionPage() {
                                                         )}
                                                     >
                                                         Upaya ke-{num}
-                                                        {attemptFilter === num!.toString() && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                                        {attemptFilter === num!.toString() && <Check className="size-3.5" />}
                                                     </button>
                                                 ))}
                                             </div>
@@ -993,7 +1010,7 @@ export default function ExamCorrectionPage() {
                                 onClick={() => handleBulkAction('full')}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-base sm:text-lg">check_circle</span>
+                                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                 <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Correct</span>
                             </button>
                             {!EXCLUDED_PARTIAL_TYPES.includes(masterQuestions[selectedQuestionIndex]?.question_type) && (
@@ -1005,7 +1022,7 @@ export default function ExamCorrectionPage() {
                                     }}
                                     className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                                 >
-                                    <span className="material-symbols-outlined text-base sm:text-lg">adjust</span>
+                                    <MinusCircle className="w-5 h-5" />
                                     <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Partial</span>
                                 </button>
                             )}
@@ -1017,21 +1034,21 @@ export default function ExamCorrectionPage() {
                                 )}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-base sm:text-lg">verified</span>
+                                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
                                 <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Finalize</span>
                             </button>
                             <button
                                 onClick={() => handleBulkAction('no')}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-base sm:text-lg">cancel</span>
+                                <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                                 <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider">Wrong</span>
                             </button>
                             <button
                                 onClick={() => setSelectedAnswerIds([])}
                                 className="p-2 text-slate-400 hover:text-white transition-colors"
                             >
-                                <span className="material-symbols-outlined text-base sm:text-lg">close</span>
+                                <X className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                         </div>
                     </div>
@@ -1051,7 +1068,7 @@ export default function ExamCorrectionPage() {
                             <div className="p-8">
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="size-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
-                                        <span className="material-symbols-outlined">adjust</span>
+                                        <MinusCircle className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Partial Score</h3>
@@ -1139,7 +1156,7 @@ export default function ExamCorrectionPage() {
                             <div className="p-8">
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="size-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
-                                        <span className="material-symbols-outlined">adjust</span>
+                                        <MinusCircle className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Bulk Partial Score</h3>
@@ -1226,7 +1243,7 @@ export default function ExamCorrectionPage() {
                         >
                             <div className="flex flex-col items-center text-center mb-6">
                                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                                    <span className="material-symbols-outlined text-4xl text-primary">filter_list</span>
+                                    <Filter className="w-8 h-8 text-primary" />
                                 </div>
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2">Pilih Upaya Ujian</h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1246,7 +1263,7 @@ export default function ExamCorrectionPage() {
                                         <div className="font-bold text-slate-900 dark:text-white mb-0.5">Upaya Terbaru</div>
                                         <div className="text-[10px] text-slate-500">Hanya munculkan upaya paling akhir tiap siswa</div>
                                     </div>
-                                    {attemptFilter === 'latest' && <span className="material-symbols-outlined text-primary">check_circle</span>}
+                                    {attemptFilter === 'latest' && <CheckCircle2 className="w-5 h-5 text-primary" />}
                                 </button>
                                 <button
                                     onClick={() => setAttemptFilter('all')}
@@ -1259,7 +1276,7 @@ export default function ExamCorrectionPage() {
                                         <div className="font-bold text-slate-900 dark:text-white mb-0.5">Semua Upaya</div>
                                         <div className="text-[10px] text-slate-500">Tampilkan semua rekaman pengerjaan</div>
                                     </div>
-                                    {attemptFilter === 'all' && <span className="material-symbols-outlined text-primary">check_circle</span>}
+                                    {attemptFilter === 'all' && <CheckCircle2 className="w-5 h-5 text-primary" />}
                                 </button>
                             </div>
 

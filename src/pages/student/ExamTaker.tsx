@@ -22,7 +22,8 @@ import {
     HelpCircle,
     Rocket,
     X,
-    WifiOff
+    WifiOff,
+    Puzzle
 } from 'lucide-react';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
@@ -212,7 +213,7 @@ export default function ExamTaker() {
 
     // Real-time synchronization & extra time via Echo
     useEffect(() => {
-        if (!id || !user || !exam || exam.timer_type !== 'strict') return;
+        if (!id || !user || !exam || exam.timer_type !== 'strict' || !echo) return;
 
         const channel = echo.channel(`exam.${id}.user.${user.id}`);
 
@@ -772,7 +773,7 @@ export default function ExamTaker() {
             default:
                 return (
                     <div className="p-8 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-400">
-                        <span className="material-icons text-4xl mb-2">extension</span>
+                        <Puzzle className="size-10 mb-2 mx-auto" />
                         <p>Question type <b>{type}</b> is not yet supported in this view.</p>
                     </div>
                 );

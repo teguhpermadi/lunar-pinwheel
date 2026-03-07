@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Modal from '@/components/ui/modal';
 import MathKeyboard from '@/components/ui/MathKeyboard';
+import { CheckCircle2 } from 'lucide-react';
 
 interface MathDialogProps {
     isOpen: boolean;
@@ -116,7 +117,7 @@ export default function MathDialog({ isOpen, onClose, initialValue = '', onConfi
                         onClick={handleConfirm}
                         className="flex-[2] py-3 px-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all"
                     >
-                        <span className="material-symbols-outlined">check_circle</span>
+                        <CheckCircle2 className="size-5" />
                         Insert Formula
                     </button>
                 </div>

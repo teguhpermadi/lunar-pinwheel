@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import 'katex/dist/katex.min.css'
+import 'material-symbols';
 import App from './App.tsx'
 
 const queryClient = new QueryClient({

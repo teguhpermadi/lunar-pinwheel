@@ -1,6 +1,7 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
+import { MoveRight, AlertCircle } from 'lucide-react';
 
 interface MatchingCorrectionProps {
     options: QuestionOption[];
@@ -61,12 +62,11 @@ export default function MatchingCorrection({ options, studentAnswer = {}, keyAns
 
                             {/* Connection Indicator */}
                             <div className="flex flex-col items-center gap-1">
-                                <span className={cn(
-                                    "material-symbols-outlined text-xl font-bold",
-                                    isCorrect ? "text-emerald-500" : "text-rose-500"
-                                )}>
-                                    {isCorrect ? 'trending_flat' : 'sync_problem'}
-                                </span>
+                                {isCorrect ? (
+                                    <MoveRight className="size-5 text-emerald-500 font-bold" />
+                                ) : (
+                                    <AlertCircle className="size-5 text-rose-500 font-bold" />
+                                )}
                             </div>
 
                             {/* Right Side (Student Choice) */}

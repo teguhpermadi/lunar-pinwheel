@@ -5,6 +5,22 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { EXCLUDED_PARTIAL_TYPES, NEEDS_DOUBLE_CORRECTION_TYPES } from '../ExamCorrectionPage';
+import {
+    AlertTriangle,
+    ChevronUp,
+    ChevronDown,
+    SquareMinus,
+    SquareCheck,
+    ChevronLeft,
+    ChevronRight,
+    Check,
+    Star,
+    CheckCircle2,
+    MinusCircle,
+    XCircle,
+    ShieldCheck,
+    UserX
+} from 'lucide-react';
 
 interface CorrectionByQuestionProps {
     selectedQuestionIndex: number;
@@ -70,7 +86,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                             </div>
                             {currentQuestionType && NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestionType) && (
                                 <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest rounded-md border border-amber-200 dark:border-amber-500/20 flex items-center justify-center gap-1">
-                                    <span className="material-symbols-outlined text-[11px]">warning</span>
+                                    <AlertTriangle className="w-2.5 h-2.5" />
                                     Needs Review
                                 </span>
                             )}
@@ -95,9 +111,11 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                     className="text-[10px] text-primary hover:text-primary/80 font-bold self-start mt-1 flex items-center gap-0.5"
                                 >
                                     {isExpanded ? 'Tutup' : 'Lihat Selengkapnya'}
-                                    <span className="material-symbols-outlined text-[14px]">
-                                        {isExpanded ? 'expand_less' : 'expand_more'}
-                                    </span>
+                                    {isExpanded ? (
+                                        <ChevronUp className="w-3.5 h-3.5" />
+                                    ) : (
+                                        <ChevronDown className="w-3.5 h-3.5" />
+                                    )}
                                 </button>
                             )}
                         </div>
@@ -112,9 +130,11 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                     : "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-primary/50"
                             )}
                         >
-                            <span className="material-symbols-outlined text-sm">
-                                {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'deselect' : 'select_all'}
-                            </span>
+                            {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? (
+                                <SquareMinus className="w-3.5 h-3.5" />
+                            ) : (
+                                <SquareCheck className="w-3.5 h-3.5" />
+                            )}
                             {selectedAnswerIds.length === bulkAnswers.length && bulkAnswers.length > 0 ? 'Deselect All' : 'Select All'}
                         </button>
                         <div className="h-6 w-px bg-slate-100 dark:bg-slate-800 mx-1" />
@@ -123,14 +143,14 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                             disabled={selectedQuestionIndex === 0}
                             className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
                         >
-                            <span className="material-symbols-outlined">chevron_left</span>
+                            <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setSelectedQuestionIndex(Math.min(masterQuestions.length - 1, selectedQuestionIndex + 1))}
                             disabled={selectedQuestionIndex === masterQuestions.length - 1}
                             className="p-2 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-xl hover:bg-slate-50 disabled:opacity-30"
                         >
-                            <span className="material-symbols-outlined">chevron_right</span>
+                            <ChevronRight className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
@@ -162,7 +182,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                 : "border-slate-200 dark:border-slate-800 hover:border-primary/50"
                                         )}
                                     >
-                                        {selectedAnswerIds.includes(answer.id) && <span className="material-symbols-outlined text-[14px]">check</span>}
+                                        {selectedAnswerIds.includes(answer.id) && <Check className="w-3.5 h-3.5" />}
                                     </div>
                                     <div className="size-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold border border-indigo-100 dark:border-indigo-500/20">
                                         {answer.session?.student?.name?.charAt(0) || '?'}
@@ -184,7 +204,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                 answer.score_earned === answer.max_score ? "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/20" :
                                                     answer.score_earned > 0 ? "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-500/20" : "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/20"
                                             )}>
-                                                <span className="material-symbols-outlined text-[12px]">stars</span>
+                                                <Star className="w-3 h-3" />
                                                 {answer.score_earned} / {answer.max_score}
                                             </div>
                                             {answer.session?.is_corrected && (
@@ -211,7 +231,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                 : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200"
                                         )}
                                     >
-                                        <span className="material-symbols-outlined text-sm">check_circle</span>
+                                        <CheckCircle2 className="w-4 h-4" />
                                         <span className="text-[9px] font-black uppercase">Full</span>
                                     </button>
                                     {!EXCLUDED_PARTIAL_TYPES.includes(answer.exam_question?.question_type || answer.question_type) && (
@@ -233,7 +253,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                     : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200"
                                             )}
                                         >
-                                            <span className="material-symbols-outlined text-sm">adjust</span>
+                                            <MinusCircle className="w-4 h-4" />
                                             <span className="text-[9px] font-black uppercase">Partial</span>
                                         </button>
                                     )}
@@ -246,13 +266,15 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                                 : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-rose-200"
                                         )}
                                     >
-                                        <span className="material-symbols-outlined text-sm">cancel</span>
+                                        <XCircle className="w-4 h-4" />
                                         <span className="text-[9px] font-black uppercase">No</span>
                                     </button>
                                     {answer.session?.is_corrected && (
                                         <>
                                             <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-1" />
-                                            <span className="material-symbols-outlined text-emerald-500" title="Corrected">verified</span>
+                                            <span title="Corrected">
+                                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                            </span>
                                         </>
                                     )}
                                 </div>
@@ -277,7 +299,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                 </div>
             ) : (
                 <div className="py-10 text-center bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                    <span className="material-symbols-outlined text-5xl text-slate-200 mb-4 block">person_off</span>
+                    <UserX className="w-10 h-10 text-slate-200 mb-4 mx-auto" />
                     <p className="text-slate-400 font-medium">No student responses found for this question.</p>
                 </div>
             )}

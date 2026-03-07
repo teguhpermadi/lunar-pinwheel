@@ -68,7 +68,7 @@ export default function AdminDashboard() {
                         {format(new Date(), 'MMMM yyyy')}
                     </button>
                     {/* <button className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">add</span>
+                        <Plus className="w-5 h-5" />
                         New Course
                     </button> */}
                 </div>

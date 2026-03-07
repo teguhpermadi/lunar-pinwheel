@@ -2,6 +2,7 @@ import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { generateUUID } from '@/lib/utils';
+import { GripVertical, Trash2, PlusCircle } from 'lucide-react';
 
 interface SequenceItem {
     id?: string;
@@ -61,7 +62,7 @@ export default function SequenceInput({ items, onChange }: SequenceInputProps) {
                     <Reorder.Item key={item.uuid} value={item} className="cursor-grab active:cursor-grabbing">
                         <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
                             <div className="text-slate-300">
-                                <span className="material-symbols-outlined">drag_indicator</span>
+                                <GripVertical className="size-5" />
                             </div>
 
                             <div className="size-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-xs font-bold text-slate-500">
@@ -82,7 +83,7 @@ export default function SequenceInput({ items, onChange }: SequenceInputProps) {
                                 onClick={() => handleRemoveStep(item.uuid)}
                                 className="p-2 text-slate-300 hover:text-red-500 transition-colors"
                             >
-                                <span className="material-symbols-outlined">delete</span>
+                                <Trash2 className="size-5" />
                             </button>
                         </div>
                     </Reorder.Item>
@@ -93,7 +94,7 @@ export default function SequenceInput({ items, onChange }: SequenceInputProps) {
                 onClick={handleAddStep}
                 className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-slate-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 mb-12"
             >
-                <span className="material-symbols-outlined">add_circle</span>
+                <PlusCircle className="size-5" />
                 Add Sequence Step
             </button>
         </section>

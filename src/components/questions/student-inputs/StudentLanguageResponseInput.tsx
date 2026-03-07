@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import ArabicKeyboard from '@/components/ui/ArabicKeyboard';
 import JavaneseKeyboard from '@/components/ui/JavaneseKeyboard';
+import { Info } from 'lucide-react';
 
 interface StudentLanguageResponseInputProps {
     selectedAnswer: string | null;
@@ -129,7 +130,7 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
             </div>
 
             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl flex gap-3">
-                <span className="material-icons text-blue-500 text-sm">info</span>
+                <Info className="size-4 text-blue-500" />
                 <p className="text-[10px] text-blue-700 dark:text-blue-400 leading-relaxed uppercase tracking-wider font-bold">
                     {language === 'arabic' ? 'Arabic Keyboard Active' : 'Javanese Keyboard Active'}
                     <span className="block font-medium normal-case mt-1 opacity-70">
