@@ -31,6 +31,7 @@ import StudentExamsPage from "@/pages/student/StudentExamsPage"
 import StudentExamHistoryPage from "@/pages/student/StudentExamHistoryPage"
 import ExamTaker from "@/pages/student/ExamTaker"
 import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
+import ReadingMaterialFormPage from "@/pages/admin/reading-materials/ReadingMaterialFormPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -144,6 +145,8 @@ function App() {
             <Route path="admin/question-banks/:id/preview" element={<PreviewQuestionBank />} />
             <Route path="admin/question-banks/:bankId/questions/create" element={<QuestionFormPage />} />
             <Route path="admin/questions/:questionId/edit" element={<QuestionFormPage />} />
+            <Route path="admin/question-banks/:bankId/reading-materials/create" element={<ReadingMaterialFormPage />} />
+            <Route path="admin/question-banks/:bankId/reading-materials/:materialId/edit" element={<ReadingMaterialFormPage />} />
             <Route path="admin/exams/:id/correction" element={<ExamCorrectionPage />} />
             <Route path="admin/exams/:id/sessions/:sessionId/detail" element={<StudentResultDetailPage />} />
             <Route path="exams/history/:id/:sessionId" element={<StudentResultDetailPage />} />

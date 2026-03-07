@@ -989,6 +989,24 @@ export const readingMaterialApi = {
     deleteMedia: async (id: string, mediaId: string) => {
         const response = await api.delete(`/reading-materials/${id}/media/${mediaId}`);
         return response.data;
+    },
+    uploadMedia: async (id: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/reading-materials/${id}/media`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
+        return response.data;
+    },
+    replaceMedia: async (id: string, mediaId: string, file: File, collection?: string) => {
+        const formData = new FormData();
+        formData.append('media', file);
+        if (collection) formData.append('collection', collection);
+        const response = await api.post(`/reading-materials/${id}/media/${mediaId}`, formData, {
+            headers: { 'Content-Type': undefined },
+        });
+        return response.data;
     }
 };
 

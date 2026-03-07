@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { questionBankApi, questionApi, QuestionBank, Question } from '@/lib/api';
+import { questionBankApi, questionApi, readingMaterialApi, QuestionBank, Question, ReadingMaterial } from '@/lib/api';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,9 +14,10 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 import WordImportModal from '@/components/admin/question-banks/WordImportModal';
 import MediaModal from '@/components/questions/MediaModal';
+import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import {
-    ArrowLeft, Settings, FileText, HelpCircle, Sparkles, Pencil,
-    Trash2, BarChart3, PlusSquare, PlusCircle, Plus
+    ArrowLeft, Settings, FileText, HelpCircle, Pencil,
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, Eye
 } from 'lucide-react';
 
 export default function EditQuestionBank() {
@@ -31,6 +32,9 @@ export default function EditQuestionBank() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const [readingMaterials, setReadingMaterials] = useState<ReadingMaterial[]>([]);
+    const [selectedPreviewMaterial, setSelectedPreviewMaterial] = useState<ReadingMaterial | null>(null);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -58,8 +62,20 @@ export default function EditQuestionBank() {
         }
     };
 
+    const fetchMaterials = async () => {
+        try {
+            const response = await readingMaterialApi.getMaterials({ per_page: 50 });
+            if (response.success) {
+                setReadingMaterials(response.data.data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch materials", error);
+        }
+    };
+
     useEffect(() => {
         fetchBank();
+        fetchMaterials();
     }, [id]);
 
     // Scroll to highlighted question if passed in state
@@ -397,8 +413,74 @@ export default function EditQuestionBank() {
                     </div>
                 </main>
 
-                {/* Right Sidebar - Question Navigator */}
+                {/* Right Sidebar - Reading Materials & Question Navigator */}
                 <aside className="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col h-full z-10 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] shrink-0 hidden lg:flex">
+                    {/* Reading Materials Section */}
+                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Reading Materials</h4>
+                            <button
+                                onClick={() => navigate(`/admin/question-banks/${id}/reading-materials/create`)}
+                                className="p-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-all"
+                                title="Add Reading Material"
+                            >
+                                <Plus className="size-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                            {readingMaterials.length > 0 ? (
+                                readingMaterials.map((material) => (
+                                    <div key={material.id} className="group/item flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-transparent hover:border-primary/30 transition-all cursor-pointer">
+                                        <div
+                                            className="flex-1 truncate pr-2"
+                                            onClick={() => {
+                                                setSelectedPreviewMaterial(material);
+                                                setIsPreviewModalOpen(true);
+                                            }}
+                                        >
+                                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block truncate">{material.title}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => navigate(`/admin/question-banks/${id}/reading-materials/${material.id}/edit`)}
+                                                className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-primary transition-all"
+                                                title="Edit Material"
+                                            >
+                                                <Pencil className="size-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    const result = await Swal.fire({
+                                                        title: 'Delete Material?',
+                                                        text: "This component will be permanently removed.",
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: '#ef4444',
+                                                        confirmButtonText: 'Delete'
+                                                    });
+                                                    if (result.isConfirmed) {
+                                                        await readingMaterialApi.deleteMaterial(material.id);
+                                                        fetchMaterials();
+                                                    }
+                                                }}
+                                                className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all"
+                                                title="Delete Material"
+                                            >
+                                                <Trash2 className="size-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-4 text-center">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider italic">No materials added</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="p-6 border-b border-slate-100 dark:border-slate-800">
                         <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Question Navigator</h4>
                         <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
@@ -453,6 +535,15 @@ export default function EditQuestionBank() {
                 onClose={() => setPreviewImageUrl(null)}
                 imageUrl={previewImageUrl}
                 readOnly={true}
+            />
+            <ReadingMaterialPreviewModal
+                isOpen={isPreviewModalOpen}
+                onClose={() => setIsPreviewModalOpen(false)}
+                material={selectedPreviewMaterial}
+                onEdit={(materialId) => {
+                    setIsPreviewModalOpen(false);
+                    navigate(`/admin/question-banks/${id}/reading-materials/${materialId}/edit`);
+                }}
             />
         </div >
     );

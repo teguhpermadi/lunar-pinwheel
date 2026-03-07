@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
 import { MathExtension } from '@/lib/tiptap/MathExtension';
 import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
 import { JavaneseExtension } from '@/lib/tiptap/JavaneseExtension';
@@ -89,6 +90,12 @@ export default function RichTextEditor({
             Underline,
             Placeholder.configure({
                 placeholder,
+            }),
+            Image.configure({
+                allowBase64: true,
+                HTMLAttributes: {
+                    class: 'rounded-2xl border border-slate-200 dark:border-slate-800 max-w-full h-auto my-4 mx-auto block shadow-sm',
+                },
             }),
             MathExtension,
             ArabicExtension,
