@@ -10,6 +10,7 @@ import MathInputCorrection from './MathInputCorrection';
 import MatchingCorrection from './MatchingCorrection';
 import CategorizationResponseCorrection from './CategorizationResponseCorrection';
 import SequenceCorrection from './SequenceCorrection';
+import ArrangeWordsCorrection from './ArrangeWordsCorrection';
 
 interface CorrectionDisplayProps {
     type: string;
@@ -45,6 +46,8 @@ export default function CorrectionDisplay({ type, studentAnswer, options, keyAns
                 return <SequenceCorrection options={options} studentAnswer={studentAnswer as string[]} keyAnswer={keyAnswer} />;
             case 'categorization':
                 return <CategorizationResponseCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
+            case 'arrange_words':
+                return <ArrangeWordsCorrection options={options} studentAnswer={studentAnswer} keyAnswer={keyAnswer} />;
             default:
                 return (
                     <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400">
