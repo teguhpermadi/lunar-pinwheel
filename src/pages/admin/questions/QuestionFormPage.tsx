@@ -24,6 +24,7 @@ export default function QuestionFormPage() {
     const [score, setScore] = useState(1);
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
+    const [readingMaterialId, setReadingMaterialId] = useState<string | null>(null);
     const [questionMedia, setQuestionMedia] = useState<any>(null);
     const [pendingQuestionImage, setPendingQuestionImage] = useState<File | null>(null);
     const [questionPreviewUrl, setQuestionPreviewUrl] = useState<string | null>(null);
@@ -133,6 +134,7 @@ export default function QuestionFormPage() {
                 setScore(q.score);
                 setContent(q.content);
                 setHint(q.hint || '');
+                setReadingMaterialId(q.reading_material_id || null);
                 setQuestionMedia(q.media?.content?.[0] || null);
                 if (q.question_bank_id) setCurrentBankId(q.question_bank_id);
 
@@ -342,6 +344,12 @@ export default function QuestionFormPage() {
             formData.append('content', content);
             formData.append('hint', hint);
 
+            if (readingMaterialId) {
+                formData.append('reading_material_id', readingMaterialId);
+            } else {
+                formData.append('reading_material_id', '');
+            }
+
             if (pendingQuestionImage) {
                 formData.append('question_image', pendingQuestionImage);
             }
@@ -476,6 +484,8 @@ export default function QuestionFormPage() {
             setScore={setScore}
             hint={hint}
             setHint={setHint}
+            readingMaterialId={readingMaterialId}
+            setReadingMaterialId={setReadingMaterialId}
             onSave={handleSave}
             isSaving={isSaving}
             isEditing={isEditing}

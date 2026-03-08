@@ -10,6 +10,7 @@ import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector'
 import QuestionTypeSelector from '@/components/questions/QuestionTypeSelector';
 import QuestionOptionDisplay from '@/components/questions/displays/QuestionOptionDisplay';
 import QuestionTagInput from '@/components/questions/QuestionTagInput';
+import ReadingMaterialSelector from '@/components/questions/ReadingMaterialSelector';
 import MathRenderer from '@/components/ui/MathRenderer';
 import QuestionBankSettingsModal from '@/components/admin/question-banks/QuestionBankSettingsModal';
 import WordImportModal from '@/components/admin/question-banks/WordImportModal';
@@ -17,7 +18,7 @@ import MediaModal from '@/components/questions/MediaModal';
 import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import {
     ArrowLeft, Settings, FileText, HelpCircle, Pencil,
-    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, Eye
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus
 } from 'lucide-react';
 
 export default function EditQuestionBank() {
@@ -338,6 +339,15 @@ export default function EditQuestionBank() {
                                                     setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, score: newScore } : q));
                                                 }}
                                             />
+                                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+                                            <ReadingMaterialSelector
+                                                questionId={question.id}
+                                                initialMaterialId={question.reading_material_id}
+                                                availableMaterials={readingMaterials}
+                                                onMaterialChange={(newId) => {
+                                                    setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, reading_material_id: newId } : q));
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="p-6 rounded-b-2xl">
@@ -430,49 +440,76 @@ export default function EditQuestionBank() {
 
                         <div className="space-y-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                             {readingMaterials.length > 0 ? (
-                                readingMaterials.map((material) => (
-                                    <div key={material.id} className="group/item flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-transparent hover:border-primary/30 transition-all cursor-pointer">
-                                        <div
-                                            className="flex-1 truncate pr-2"
-                                            onClick={() => {
-                                                setSelectedPreviewMaterial(material);
-                                                setIsPreviewModalOpen(true);
-                                            }}
-                                        >
-                                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block truncate">{material.title}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => navigate(`/admin/question-banks/${id}/reading-materials/${material.id}/edit`)}
-                                                className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-primary transition-all"
-                                                title="Edit Material"
-                                            >
-                                                <Pencil className="size-3.5" />
-                                            </button>
-                                            <button
-                                                onClick={async (e) => {
-                                                    e.stopPropagation();
-                                                    const result = await Swal.fire({
-                                                        title: 'Delete Material?',
-                                                        text: "This component will be permanently removed.",
-                                                        icon: 'warning',
-                                                        showCancelButton: true,
-                                                        confirmButtonColor: '#ef4444',
-                                                        confirmButtonText: 'Delete'
-                                                    });
-                                                    if (result.isConfirmed) {
-                                                        await readingMaterialApi.deleteMaterial(material.id);
-                                                        fetchMaterials();
-                                                    }
-                                                }}
-                                                className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all"
-                                                title="Delete Material"
-                                            >
-                                                <Trash2 className="size-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                (() => {
+                                    const materialColors = [
+                                        'bg-indigo-500', 'bg-rose-500', 'bg-emerald-500',
+                                        'bg-amber-500', 'bg-sky-500', 'bg-violet-500',
+                                        'bg-orange-500', 'bg-teal-500', 'bg-fuchsia-500',
+                                        'bg-blue-500', 'bg-red-500', 'bg-green-500',
+                                        'bg-yellow-500', 'bg-cyan-500', 'bg-pink-500',
+                                        'bg-purple-500'
+                                    ];
+                                    return readingMaterials.map((material, idx) => {
+                                        const colorClass = materialColors[idx % materialColors.length];
+
+                                        return (
+                                            <div key={material.id} className="group/item flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-transparent hover:border-primary/30 transition-all cursor-pointer">
+                                                <div
+                                                    className="flex-1 truncate pr-2 flex items-center gap-2"
+                                                    onClick={() => {
+                                                        setSelectedPreviewMaterial(material);
+                                                        setIsPreviewModalOpen(true);
+                                                    }}
+                                                >
+                                                    <div className={`size-1.5 rounded-full shrink-0 ${colorClass}`} />
+                                                    <div className="flex flex-col truncate">
+                                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block truncate">{material.title}</span>
+                                                        {(() => {
+                                                            const count = questions.filter(q => q.reading_material_id === material.id).length;
+                                                            return count > 0 ? (
+                                                                <span className="text-[10px] text-slate-400 font-medium">
+                                                                    {count} {count === 1 ? 'Question' : 'Questions'}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[10px] text-slate-400 font-medium italic">No questions</span>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => navigate(`/admin/question-banks/${id}/reading-materials/${material.id}/edit`)}
+                                                        className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-primary transition-all"
+                                                        title="Edit Material"
+                                                    >
+                                                        <Pencil className="size-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            const result = await Swal.fire({
+                                                                title: 'Delete Material?',
+                                                                text: "This component will be permanently removed.",
+                                                                icon: 'warning',
+                                                                showCancelButton: true,
+                                                                confirmButtonColor: '#ef4444',
+                                                                confirmButtonText: 'Delete'
+                                                            });
+                                                            if (result.isConfirmed) {
+                                                                await readingMaterialApi.deleteMaterial(material.id);
+                                                                fetchMaterials();
+                                                            }
+                                                        }}
+                                                        className="opacity-0 group-hover/item:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all"
+                                                        title="Delete Material"
+                                                    >
+                                                        <Trash2 className="size-3.5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                                })()
                             ) : (
                                 <div className="py-4 text-center">
                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider italic">No materials added</p>
@@ -490,24 +527,53 @@ export default function EditQuestionBank() {
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
                         <div className="grid grid-cols-4 gap-3">
-                            {Array.from({ length: totalQuestions }).map((_, i) => {
-                                const isLoaded = i < questions.length;
-                                return (
-                                    <button
-                                        key={i}
-                                        onClick={() => scrollToQuestion(i)}
-                                        className={`size-12 rounded-xl font-bold text-sm border border-transparent transition-all ${isLoaded
-                                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary'
-                                            : 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 cursor-not-allowed' // Visual cue
-                                            }`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                );
-                            })}
+                            {(() => {
+                                // Define a set of consistent colors for materials once
+                                const materialColors = [
+                                    'bg-indigo-500', 'bg-rose-500', 'bg-emerald-500',
+                                    'bg-amber-500', 'bg-sky-500', 'bg-violet-500',
+                                    'bg-orange-500', 'bg-teal-500', 'bg-fuchsia-500',
+                                    'bg-blue-500', 'bg-red-500', 'bg-green-500',
+                                    'bg-yellow-500', 'bg-cyan-500', 'bg-pink-500',
+                                    'bg-purple-500'
+                                ];
+
+                                // Helper to get a stable color index based on material ID once
+                                const getMaterialColorClass = (id: string | null | undefined) => {
+                                    if (!id) return '';
+                                    const index = readingMaterials.findIndex(m => m.id === id);
+                                    return index !== -1 ? materialColors[index % materialColors.length] : '';
+                                };
+
+                                return Array.from({ length: totalQuestions }).map((_, i) => {
+                                    const question = questions[i];
+                                    const isLoaded = i < questions.length;
+                                    const materialId = question?.reading_material_id;
+
+                                    const colorClass = materialId ? getMaterialColorClass(materialId) : '';
+
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => scrollToQuestion(i)}
+                                            className={`size-12 rounded-xl font-bold text-sm border border-transparent transition-all relative overflow-hidden flex items-center justify-center ${isLoaded
+                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                                                }`}
+                                            title={materialId ? `Reading Material: ${readingMaterials.find(m => m.id === materialId)?.title}` : `Question ${i + 1}`}
+                                        >
+                                            {/* Color indicator for shared reading material - Corner Icon */}
+                                            {materialId && (
+                                                <div className={`absolute top-1.5 right-1.5 size-2 rounded-full ring-2 ring-white dark:ring-slate-800 ${colorClass}`} />
+                                            )}
+                                            {i + 1}
+                                        </button>
+                                    );
+                                });
+                            })()}
                             <button
                                 onClick={() => navigate(`/admin/question-banks/${id}/questions/create`)}
-                                className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all"
+                                className="size-12 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all self-center"
                             >
                                 <Plus className="size-5" />
                             </button>
@@ -545,6 +611,6 @@ export default function EditQuestionBank() {
                     navigate(`/admin/question-banks/${id}/reading-materials/${materialId}/edit`);
                 }}
             />
-        </div >
+        </div>
     );
 }

@@ -1,11 +1,14 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuestionDifficultySelector from './QuestionDifficultySelector';
 import QuestionTimerSelector from './QuestionTimerSelector';
 import QuestionScoreSelector from './QuestionScoreSelector';
 import QuestionTypeSelector from './QuestionTypeSelector';
 import QuestionToolbar from './QuestionToolbar';
-import { ArrowLeft, Loader2, Save, Lightbulb, X, Info } from 'lucide-react';
+import ReadingMaterialSelector from './ReadingMaterialSelector';
+import ReadingMaterialSlideOver from './ReadingMaterialSlideOver';
+import { readingMaterialApi, ReadingMaterial } from '@/lib/api';
+import { ArrowLeft, Loader2, Save, Lightbulb, X, Info, Eye } from 'lucide-react';
 
 interface QuestionFormLayoutProps {
     children: ReactNode;
@@ -20,6 +23,8 @@ interface QuestionFormLayoutProps {
     setTimer: (timer: number) => void;
     score: number;
     setScore: (score: number) => void;
+    readingMaterialId?: string | null;
+    setReadingMaterialId?: (id: string | null) => void;
 
     // Hint
     hint: string;
@@ -44,12 +49,45 @@ export default function QuestionFormLayout({
     setScore,
     hint,
     setHint,
+    readingMaterialId,
+    setReadingMaterialId,
     onSave,
     isSaving,
     isEditing: _isEditing = false
 }: QuestionFormLayoutProps) {
     const navigate = useNavigate();
     const [isHintOpen, setIsHintOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [availableMaterials, setAvailableMaterials] = useState<ReadingMaterial[]>([]);
+    const [selectedMaterial, setSelectedMaterial] = useState<ReadingMaterial | null>(null);
+
+    // Fetch materials for the selector and preview
+    useEffect(() => {
+        const fetchMaterials = async () => {
+            try {
+                const response = await readingMaterialApi.getMaterials({ per_page: 100 });
+                if (response.success) {
+                    setAvailableMaterials(Array.isArray(response.data?.data) ? response.data.data : []);
+                }
+            } catch (error) {
+                console.error("Failed to fetch materials", error);
+            }
+        };
+        fetchMaterials();
+    }, []);
+
+    // Update selected material when ID changes
+    useEffect(() => {
+        if (readingMaterialId && Array.isArray(availableMaterials)) {
+            const material = availableMaterials.find(m => m.id === readingMaterialId);
+            if (material) {
+                setSelectedMaterial(material);
+            }
+        } else {
+            setSelectedMaterial(null);
+            setIsPreviewOpen(false);
+        }
+    }, [readingMaterialId, availableMaterials]);
 
     return (
         <div className="flex flex-col h-screen relative bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display overflow-hidden">
@@ -78,6 +116,32 @@ export default function QuestionFormLayout({
                 </div>
 
                 <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 mr-2 border-r border-slate-200 dark:border-slate-800 pr-6">
+                        <ReadingMaterialSelector
+                            initialMaterialId={readingMaterialId}
+                            onMaterialChange={(id) => {
+                                if (setReadingMaterialId) setReadingMaterialId(id);
+                            }}
+                            availableMaterials={availableMaterials}
+                            manual={true}
+                        />
+
+                        {readingMaterialId && (
+                            <button
+                                onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+                                className={`
+                                    p-2 rounded-xl border transition-all flex items-center gap-2
+                                    ${isPreviewOpen
+                                        ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}
+                                `}
+                                title="Preview Material"
+                            >
+                                <Eye className="size-4" />
+                            </button>
+                        )}
+                    </div>
+
                     <QuestionDifficultySelector
                         initialDifficulty={difficulty}
                         onDifficultyChange={setDifficulty}
@@ -172,7 +236,7 @@ export default function QuestionFormLayout({
                             placeholder="Type hint here..."
                         />
                         <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <Info className="size-3" />
+                            <ConfirmInfo className="size-3" />
                             Optional Feature
                         </div>
                     </div>
@@ -185,7 +249,15 @@ export default function QuestionFormLayout({
                         onClick={() => setIsHintOpen(false)}
                     />
                 )}
+
+                <ReadingMaterialSlideOver
+                    isOpen={isPreviewOpen}
+                    onClose={() => setIsPreviewOpen(false)}
+                    material={selectedMaterial}
+                />
             </div>
         </div>
     );
 }
+
+const ConfirmInfo = Info;

@@ -649,6 +649,7 @@ export interface Question {
     timer: number;
     score: number;
     hint?: string;
+    reading_material_id?: string | null;
     tags?: any[] | string[];
     media?: {
         content?: MediaItem[];
@@ -944,7 +945,7 @@ export interface ReadingMaterial {
     title: string;
     content: string;
     user_id: string;
-    media?: { reading_materials?: string };
+    media?: { reading_materials?: MediaItem[] };
     created_at: string;
     updated_at: string;
 }
