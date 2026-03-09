@@ -79,7 +79,8 @@ export default function ReadingMaterialFormPage() {
                 setIsSaving(true);
                 const response = await readingMaterialApi.createMaterial({
                     title,
-                    content: ''
+                    content: '',
+                    question_bank_id: bankId
                 });
 
                 if (response.success) {
@@ -131,6 +132,7 @@ export default function ReadingMaterialFormPage() {
             const payload = {
                 title,
                 content: mode === 'text' ? content : '',
+                question_bank_id: bankId,
             };
 
             let response;

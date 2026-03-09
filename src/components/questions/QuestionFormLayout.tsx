@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import QuestionDifficultySelector from './QuestionDifficultySelector';
 import QuestionTimerSelector from './QuestionTimerSelector';
 import QuestionScoreSelector from './QuestionScoreSelector';
@@ -25,6 +25,7 @@ interface QuestionFormLayoutProps {
     setScore: (score: number) => void;
     readingMaterialId?: string | null;
     setReadingMaterialId?: (id: string | null) => void;
+    bankId?: string;
 
     // Hint
     hint: string;
@@ -51,41 +52,73 @@ export default function QuestionFormLayout({
     setHint,
     readingMaterialId,
     setReadingMaterialId,
+    bankId: propBankId,
     onSave,
     isSaving,
     isEditing: _isEditing = false
 }: QuestionFormLayoutProps) {
     const navigate = useNavigate();
+    const { bankId: paramsBankId } = useParams();
+    const bankId = propBankId || paramsBankId;
     const [isHintOpen, setIsHintOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [availableMaterials, setAvailableMaterials] = useState<ReadingMaterial[]>([]);
     const [selectedMaterial, setSelectedMaterial] = useState<ReadingMaterial | null>(null);
+    const [isMaterialLoading, setIsMaterialLoading] = useState(false);
 
     // Fetch materials for the selector and preview
     useEffect(() => {
+        if (!bankId) {
+            setAvailableMaterials([]);
+            return;
+        }
+
         const fetchMaterials = async () => {
             try {
-                const response = await readingMaterialApi.getMaterials({ per_page: 100 });
+                const response = await readingMaterialApi.getMaterials({
+                    per_page: 100,
+                    question_bank_id: bankId
+                });
                 if (response.success) {
-                    setAvailableMaterials(Array.isArray(response.data?.data) ? response.data.data : []);
+                    // Support both paginated response.data.data and direct response.data
+                    const data = response.data?.data || response.data;
+                    setAvailableMaterials(Array.isArray(data) ? data : []);
                 }
             } catch (error) {
                 console.error("Failed to fetch materials", error);
             }
         };
         fetchMaterials();
-    }, []);
+    }, [bankId]);
 
     // Update selected material when ID changes
     useEffect(() => {
-        if (readingMaterialId && Array.isArray(availableMaterials)) {
+        if (readingMaterialId) {
             const material = availableMaterials.find(m => m.id === readingMaterialId);
             if (material) {
                 setSelectedMaterial(material);
+                setIsMaterialLoading(false);
+            } else {
+                // Fetch individually if not in list
+                const fetchIndividualMaterial = async () => {
+                    setIsMaterialLoading(true);
+                    try {
+                        const response = await readingMaterialApi.getMaterial(readingMaterialId);
+                        if (response.success) {
+                            setSelectedMaterial(response.data);
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch individual material", error);
+                    } finally {
+                        setIsMaterialLoading(false);
+                    }
+                };
+                fetchIndividualMaterial();
             }
         } else {
             setSelectedMaterial(null);
             setIsPreviewOpen(false);
+            setIsMaterialLoading(false);
         }
     }, [readingMaterialId, availableMaterials]);
 
@@ -124,6 +157,7 @@ export default function QuestionFormLayout({
                             }}
                             availableMaterials={availableMaterials}
                             manual={true}
+                            questionBankId={bankId}
                         />
 
                         {readingMaterialId && (
@@ -254,6 +288,8 @@ export default function QuestionFormLayout({
                     isOpen={isPreviewOpen}
                     onClose={() => setIsPreviewOpen(false)}
                     material={selectedMaterial}
+                    bankId={bankId}
+                    isLoading={isMaterialLoading}
                 />
             </div>
         </div>

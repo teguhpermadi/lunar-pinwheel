@@ -489,6 +489,7 @@ export default function QuestionFormPage() {
             onSave={handleSave}
             isSaving={isSaving}
             isEditing={isEditing}
+            bankId={currentBankId}
         >
             <section className="flex-1 space-y-4 w-full">
                 <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest">Question Text</label>

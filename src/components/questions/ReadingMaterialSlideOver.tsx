@@ -1,18 +1,23 @@
 import React from 'react';
-import { X, FileText, ExternalLink } from 'lucide-react';
+import { X, FileText, ExternalLink, Edit, Loader2 } from 'lucide-react';
 import { ReadingMaterial } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface ReadingMaterialSlideOverProps {
     isOpen: boolean;
     onClose: () => void;
     material: ReadingMaterial | null;
+    bankId?: string;
+    isLoading?: boolean;
 }
 
 const ReadingMaterialSlideOver: React.FC<ReadingMaterialSlideOverProps> = ({
     isOpen,
     onClose,
-    material
+    material,
+    bankId,
+    isLoading = false
 }) => {
     const pdfMedia = material?.media?.reading_materials?.[0];
 
@@ -53,17 +58,34 @@ const ReadingMaterialSlideOver: React.FC<ReadingMaterialSlideOverProps> = ({
                                 </div>
                             </div>
 
-                            <button
-                                onClick={onClose}
-                                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-white transition-all shadow-sm"
-                            >
-                                <X className="size-5" />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                {bankId && material && (
+                                    <Link
+                                        to={`/admin/question-banks/${bankId}/reading-materials/${material.id}/edit`}
+                                        className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
+                                    >
+                                        <Edit className="size-3.5" />
+                                        <span>Edit Material</span>
+                                    </Link>
+                                )}
+
+                                <button
+                                    onClick={onClose}
+                                    className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-white transition-all shadow-sm"
+                                >
+                                    <X className="size-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Content Area */}
                         <div className="flex-1 overflow-y-auto p-10 custom-scrollbar bg-slate-50/30 dark:bg-transparent">
-                            {!material ? (
+                            {isLoading ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                                    <Loader2 className="size-12 text-primary animate-spin" />
+                                    <p className="font-bold uppercase tracking-widest text-xs text-slate-500">Loading material data...</p>
+                                </div>
+                            ) : !material ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
                                     <FileText className="size-16" />
                                     <p className="font-bold uppercase tracking-widest text-xs">No material selected</p>

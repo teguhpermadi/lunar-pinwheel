@@ -10,6 +10,7 @@ interface ReadingMaterialSelectorProps {
     onMaterialChange?: (newMaterialId: string | null) => void;
     availableMaterials?: ReadingMaterial[];
     disabled?: boolean;
+    questionBankId?: string;
 }
 
 export default function ReadingMaterialSelector({
@@ -18,7 +19,8 @@ export default function ReadingMaterialSelector({
     onMaterialChange,
     availableMaterials = [],
     disabled = false,
-    manual = false
+    manual = false,
+    questionBankId
 }: ReadingMaterialSelectorProps & { manual?: boolean }) {
     const [selectedId, setSelectedId] = useState<string | null>(initialMaterialId || null);
     const [isOpen, setIsOpen] = useState(false);
@@ -29,19 +31,31 @@ export default function ReadingMaterialSelector({
     // Fetch materials if not provided and not disabled
     useEffect(() => {
         if ((!availableMaterials || availableMaterials.length === 0) && !disabled) {
+            if (!questionBankId) {
+                setFetchedMaterials([]);
+                return;
+            }
             const fetchMaterials = async () => {
+                setIsLoading(true);
                 try {
-                    const response = await readingMaterialApi.getMaterials({ per_page: 100 });
+                    const response = await readingMaterialApi.getMaterials({
+                        per_page: 100,
+                        question_bank_id: questionBankId
+                    });
                     if (response.success) {
-                        setFetchedMaterials(Array.isArray(response.data?.data) ? response.data.data : []);
+                        // Support both paginated response.data.data and direct response.data
+                        const data = response.data?.data || response.data;
+                        setFetchedMaterials(Array.isArray(data) ? data : []);
                     }
                 } catch (error) {
                     console.error("Failed to fetch materials in selector", error);
+                } finally {
+                    setIsLoading(false);
                 }
             };
             fetchMaterials();
         }
-    }, [availableMaterials?.length, disabled]);
+    }, [availableMaterials?.length, disabled, questionBankId]);
 
     // Close on click outside
     useEffect(() => {

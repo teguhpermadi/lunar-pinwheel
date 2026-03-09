@@ -65,7 +65,10 @@ export default function EditQuestionBank() {
 
     const fetchMaterials = async () => {
         try {
-            const response = await readingMaterialApi.getMaterials({ per_page: 50 });
+            const response = await readingMaterialApi.getMaterials({
+                per_page: 50,
+                question_bank_id: id
+            });
             if (response.success) {
                 setReadingMaterials(response.data.data || []);
             }
