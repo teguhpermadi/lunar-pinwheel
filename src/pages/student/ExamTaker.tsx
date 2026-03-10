@@ -23,7 +23,10 @@ import {
     Rocket,
     X,
     WifiOff,
-    Puzzle
+    Puzzle,
+    BookOpen,
+    ChevronUp,
+    ChevronDown
 } from 'lucide-react';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
@@ -63,6 +66,7 @@ export default function ExamTaker() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [gracePeriodSeconds, setGracePeriodSeconds] = useState<number | null>(null);
     const [isWaitingOfflineSubmit, setIsWaitingOfflineSubmit] = useState(false);
+    const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
 
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
@@ -906,6 +910,87 @@ export default function ExamTaker() {
                             </button>
                         </div>
 
+                        {/* Reading Material Display */}
+                        {currentQuestion?.exam_question?.exam_reading_material && (
+                            <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <div
+                                    className="p-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between cursor-pointer group"
+                                    onClick={() => setIsMaterialExpanded(!isMaterialExpanded)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                            <BookOpen className="size-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <h3 className="font-bold text-sm uppercase tracking-tight line-clamp-1">
+                                                {currentQuestion.exam_question.exam_reading_material.title}
+                                            </h3>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">
+                                                Reading Material / Bahan Bacaan
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {!isMaterialExpanded && (
+                                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse hidden sm:block">
+                                                Click to read
+                                            </span>
+                                        )}
+                                        <button className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                            {isMaterialExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <AnimatePresence>
+                                    {isMaterialExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="p-6 md:p-8">
+                                                {currentQuestion.exam_question.exam_reading_material.media_path?.toLowerCase().endsWith('.pdf') ? (
+                                                    <div className="flex flex-col gap-4">
+                                                        <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 shadow-inner">
+                                                            <iframe
+                                                                src={`${currentQuestion.exam_question.exam_reading_material.media_path}#toolbar=0`}
+                                                                className="absolute inset-0 w-full h-full border-0"
+                                                                title={currentQuestion.exam_question.exam_reading_material.title}
+                                                            />
+                                                            {/* Overlay to allow scrolling on parent if needed, but usually iframe handles it */}
+                                                        </div>
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <a
+                                                                href={currentQuestion.exam_question.exam_reading_material.media_path}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-2 py-2.5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+                                                            >
+                                                                <Maximize className="size-4" />
+                                                                <span>Open Fullscreen</span>
+                                                            </a>
+                                                            <p className="text-xs text-gray-400 font-medium italic">
+                                                                *TIPS: Gunakan mode Fullscreen untuk membaca lebih nyaman di smartphone.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <MathRenderer
+                                                        className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none 
+                                                            prose-headings:font-black prose-p:text-lg prose-img:rounded-2xl"
+                                                        content={currentQuestion.exam_question.exam_reading_material.content || ''}
+                                                    />
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )
+                        }
+
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] md:min-h-[400px] transition-all duration-300"
                             style={{ fontSize: `${fontSize}px` }}
@@ -1042,6 +1127,7 @@ export default function ExamTaker() {
                     </div>
                 </section>
 
+
                 {/* Sidebar */}
                 <AnimatePresence>
                     <motion.aside
@@ -1152,46 +1238,48 @@ export default function ExamTaker() {
                             </p>
                         </div>
                     </motion.aside>
-                </AnimatePresence>
-            </main>
+                </AnimatePresence >
+            </main >
 
             {/* Image Zoom Modal */}
             <AnimatePresence>
-                {zoomImageUrl && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
-                        onClick={() => setZoomImageUrl(null)}
-                    >
-                        <motion.button
-                            initial={{ scale: 0, rotate: -90 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors z-[110]"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setZoomImageUrl(null);
-                            }}
-                        >
-                            <X className="size-6" />
-                        </motion.button>
-
+                {
+                    zoomImageUrl && (
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative max-w-full max-h-full flex items-center justify-center"
-                            onClick={(e) => e.stopPropagation()}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+                            onClick={() => setZoomImageUrl(null)}
                         >
-                            <img
-                                src={zoomImageUrl || undefined}
-                                alt="Zoomed"
-                                className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
-                            />
+                            <motion.button
+                                initial={{ scale: 0, rotate: -90 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors z-[110]"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setZoomImageUrl(null);
+                                }}
+                            >
+                                <X className="size-6" />
+                            </motion.button>
+
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="relative max-w-full max-h-full flex items-center justify-center"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <img
+                                    src={zoomImageUrl || undefined}
+                                    alt="Zoomed"
+                                    className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+                                />
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
+                    )
+                }
             </AnimatePresence>
             {/* Loading Overlay */}
             {
