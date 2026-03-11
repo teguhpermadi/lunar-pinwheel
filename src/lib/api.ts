@@ -780,6 +780,24 @@ export const questionApi = {
     }
 };
 
+export interface ExamQuestion {
+    id: string;
+    exam_id: string;
+    question_id?: string;
+    exam_reading_material_id?: string;
+    question_number: number;
+    content: string;
+    options: any;
+    key_answer: any;
+    score_value: number;
+    question_type: string;
+    difficulty_level: string;
+    media_path?: string;
+    hint?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Exam {
     id: string;
     title: string;
@@ -913,6 +931,33 @@ export const examApi = {
         const response = await api.get(`/exams/${examId}/item-analysis`);
         return response.data;
     },
+    deleteSession: async (examId: string, sessionId: string) => {
+        const response = await api.delete(`/exams/${examId}/sessions/${sessionId}`);
+        return response.data;
+    },
+};
+
+export const examQuestionApi = {
+    getExamQuestions: async (params?: any) => {
+        const response = await api.get('/exam-questions', { params });
+        return response.data;
+    },
+    getExamQuestion: async (id: string) => {
+        const response = await api.get(`/exam-questions/${id}`);
+        return response.data;
+    },
+    updateExamQuestion: async (id: string, data: any) => {
+        const response = await api.put(`/exam-questions/${id}`, data);
+        return response.data;
+    },
+    bulkUpdateExamQuestions: async (data: any) => {
+        const response = await api.post('/exam-questions/bulk-update', data);
+        return response.data;
+    },
+    bulkDeleteExamQuestions: async (ids: string[]) => {
+        const response = await api.post('/exam-questions/bulk-delete', { ids });
+        return response.data;
+    }
 };
 
 export const questionSuggestionApi = {

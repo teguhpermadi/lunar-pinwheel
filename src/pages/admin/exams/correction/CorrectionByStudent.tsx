@@ -51,7 +51,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
         setIsExpanded(false);
     }, [selectedQuestionIndex, selectedSessionId]);
 
-    const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.content || '';
+    const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content || (currentQuestion as any)?.content || '';
     const isLongContent = contentRaw.replace(/<[^>]+>/g, '').length > 100 || /<img|<table|<iframe|<audio|<video/i.test(contentRaw);
 
     return (
@@ -94,9 +94,9 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         Question {(selectedQuestionIndex + 1).toString().padStart(2, '0')}
                                     </span>
                                     <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-slate-200 dark:border-slate-700">
-                                        {(currentQuestion.question_type || '').replace(/_/g, ' ')}
+                                        {(currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type || '').replace(/_/g, ' ')}
                                     </span>
-                                    {NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestion.question_type) && (
+                                    {NEEDS_DOUBLE_CORRECTION_TYPES.includes(currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type) && (
                                         <span className="px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-200 dark:border-amber-500/20 flex items-center gap-1.5">
                                             <AlertTriangle className="w-3.5 h-3.5" />
                                             Needs Review
@@ -134,20 +134,20 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                             </div>
                             <div className={cn(
                                 "px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase flex items-center gap-2 shadow-sm border shrink-0",
-                                currentQuestion.score_earned === currentQuestion.max_score ? "bg-emerald-500 text-white border-emerald-400" :
+                                currentQuestion.score_earned === (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value) ? "bg-emerald-500 text-white border-emerald-400" :
                                     currentQuestion.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
                             )}>
                                 <Star className="w-4.5 h-4.5" />
-                                {currentQuestion.score_earned} / {currentQuestion.max_score}
+                                {currentQuestion.score_earned} / {(currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value)}
                             </div>
                         </div>
 
                         <CorrectionDisplay
-                            type={currentQuestion.question_type}
+                            type={currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type}
                             studentAnswer={currentQuestion.student_answer}
-                            options={currentQuestion.options || []}
-                            keyAnswer={currentQuestion.key_answer}
-                            maxScore={currentQuestion.max_score}
+                            options={currentQuestion.options || (currentQuestion as any)?.exam_question?.options || []}
+                            keyAnswer={currentQuestion.key_answer || (currentQuestion as any)?.exam_question?.key_answer}
+                            maxScore={currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value}
                             scoreEarned={currentQuestion.score_earned}
                         />
                     </div>
@@ -157,16 +157,16 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluate Response</h4>
                             <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Max Score:</span>
-                                <span className="text-sm font-black text-primary tabular-nums">{currentQuestion.max_score}</span>
+                                <span className="text-sm font-black text-primary tabular-nums">{(currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value)}</span>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             <button
-                                onClick={() => handleUpdateCorrection(currentQuestion.max_score, true)}
+                                onClick={() => handleUpdateCorrection((currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value), true)}
                                 className={cn(
                                     "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                    currentQuestion.is_correct === true && currentQuestion.score_earned === currentQuestion.max_score
+                                    currentQuestion.is_correct === true && currentQuestion.score_earned === (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value)
                                         ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
                                         : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-200 hover:bg-emerald-50/50"
                                 )}
@@ -174,11 +174,11 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                 <CheckCircle2 className="w-6 h-6" />
                                 <span className="font-bold text-[10px] uppercase tracking-wider">Full Marks</span>
                             </button>
-                            {!EXCLUDED_PARTIAL_TYPES.includes(currentQuestion.question_type) && (
+                            {!EXCLUDED_PARTIAL_TYPES.includes(currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type) && (
                                 <button
                                     onClick={() => {
                                         setPartialScoreData({
-                                            maxScore: currentQuestion.max_score,
+                                            maxScore: (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value),
                                             currentScore: currentQuestion.score_earned || 0,
                                             studentName: currentSession?.student.name
                                         });
@@ -186,7 +186,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     }}
                                     className={cn(
                                         "flex flex-col items-center justify-center gap-3 py-5 px-4 rounded-2xl border-2 transition-all group",
-                                        (currentQuestion.is_correct === true && currentQuestion.score_earned < currentQuestion.max_score && currentQuestion.score_earned > 0)
+                                        (currentQuestion.is_correct === true && currentQuestion.score_earned < (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value) && currentQuestion.score_earned > 0)
                                             ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
                                             : "border-slate-100 dark:border-slate-800 text-slate-400 hover:border-amber-200 hover:bg-amber-50/50"
                                     )}

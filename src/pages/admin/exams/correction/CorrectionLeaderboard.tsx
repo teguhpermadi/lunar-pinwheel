@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StudentSession } from '../ExamCorrectionPage';
 import { examApi } from '@/lib/api';
-import { RefreshCw, Calculator, Search, User } from 'lucide-react';
+import { RefreshCw, Calculator, Search, User, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface CorrectionLeaderboardProps {
@@ -18,10 +18,49 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
     const navigate = useNavigate();
     const [isRecalculating, setIsRecalculating] = useState<string | null>(null);
     const [isRecalculatingAll, setIsRecalculatingAll] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [localSearch, setLocalSearch] = useState('');
+
+    const effectiveSearchQuery = localSearch || searchQuery;
 
     const filteredSessions = sessions
-        .filter(s => s.student.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .filter(s => s.student.name.toLowerCase().includes(effectiveSearchQuery.toLowerCase()))
         .sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
+
+    const handleDeleteSession = async (sessionId: string, studentName: string) => {
+        const result = await Swal.fire({
+            title: 'Delete Session?',
+            text: `Are you sure you want to delete the exam session for ${studentName}? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#ef4444',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsDeleting(sessionId);
+        try {
+            const response = await examApi.deleteSession(id, sessionId);
+            if (response.success) {
+                Swal.fire({
+                    title: 'Deleted',
+                    text: 'Session has been deleted.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+                onRefresh();
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to delete session', 'error');
+        } finally {
+            setIsDeleting(null);
+        }
+    };
 
     const handleRecalculate = async (sessionId: string) => {
         setIsRecalculating(sessionId);
@@ -119,32 +158,44 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
         >
             <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div className="p-8 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Exam Leaderboard</h3>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Ranking by Final Score</p>
                         </div>
-                        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl items-center gap-2">
-                            <span className="px-4 py-1.5 text-[10px] font-black uppercase text-slate-400 border-r border-slate-200 dark:border-slate-700">
-                                {filteredSessions.length} Students Shown
-                            </span>
-                            <button
-                                onClick={handleRecalculateAll}
-                                disabled={isRecalculatingAll}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
-                                    isRecalculatingAll
-                                        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                                        : "bg-white dark:bg-slate-900 shadow-sm text-primary hover:bg-primary hover:text-white"
-                                )}
-                            >
-                                {isRecalculatingAll ? (
-                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                    <Calculator className="w-3.5 h-3.5" />
-                                )}
-                                {isRecalculatingAll ? 'Recalculating...' : 'Recalculate All'}
-                            </button>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    placeholder="Search student..."
+                                    value={localSearch}
+                                    onChange={(e) => setLocalSearch(e.target.value)}
+                                    className="w-full sm:w-48 pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl outline-none focus:border-primary transition-colors focus:ring-2 focus:ring-primary/20 shadow-sm"
+                                />
+                            </div>
+                            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl items-center gap-2">
+                                <span className="px-4 py-1.5 text-[10px] font-black uppercase text-slate-400 border-r border-slate-200 dark:border-slate-700 hidden sm:inline-block">
+                                    {filteredSessions.length} Students Shown
+                                </span>
+                                <button
+                                    onClick={handleRecalculateAll}
+                                    disabled={isRecalculatingAll}
+                                    className={cn(
+                                        "flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                        isRecalculatingAll
+                                            ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                            : "bg-white dark:bg-slate-900 shadow-sm text-primary hover:bg-primary hover:text-white"
+                                    )}
+                                >
+                                    {isRecalculatingAll ? (
+                                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <Calculator className="w-3.5 h-3.5" />
+                                    )}
+                                    {isRecalculatingAll ? 'Recalculating...' : 'Recalculate All'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -235,26 +286,48 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                         </span>
                                     </td>
                                     <td className="px-8 py-5 text-right">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRecalculate(session.id);
-                                            }}
-                                            disabled={isRecalculating === session.id}
-                                            className={cn(
-                                                "p-2 rounded-xl border transition-all active:scale-95 group/btn",
-                                                isRecalculating === session.id
-                                                    ? "bg-slate-50 border-slate-100 animate-pulse cursor-not-allowed"
-                                                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
-                                            )}
-                                            title="Recalculate Score"
-                                        >
-                                            {isRecalculating === session.id ? (
-                                                <RefreshCw className="w-4.5 h-4.5 animate-spin" />
-                                            ) : (
-                                                <Calculator className="w-4.5 h-4.5" />
-                                            )}
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRecalculate(session.id);
+                                                }}
+                                                disabled={isRecalculating === session.id}
+                                                className={cn(
+                                                    "p-2 rounded-xl border transition-all active:scale-95 group/btn",
+                                                    isRecalculating === session.id
+                                                        ? "bg-slate-50 border-slate-100 animate-pulse cursor-not-allowed"
+                                                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
+                                                )}
+                                                title="Recalculate Score"
+                                            >
+                                                {isRecalculating === session.id ? (
+                                                    <RefreshCw className="w-4.5 h-4.5 animate-spin" />
+                                                ) : (
+                                                    <Calculator className="w-4.5 h-4.5" />
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteSession(session.id, session.student.name);
+                                                }}
+                                                disabled={isDeleting === session.id}
+                                                className={cn(
+                                                    "p-2 rounded-xl border transition-all active:scale-95 group/btn",
+                                                    isDeleting === session.id
+                                                        ? "bg-slate-50 border-slate-100 animate-pulse cursor-not-allowed"
+                                                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-red-500 hover:border-red-500/30 hover:shadow-lg hover:shadow-red-500/10"
+                                                )}
+                                                title="Delete Session"
+                                            >
+                                                {isDeleting === session.id ? (
+                                                    <RefreshCw className="w-4.5 h-4.5 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4.5 h-4.5" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

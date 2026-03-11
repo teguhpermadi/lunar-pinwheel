@@ -24,6 +24,7 @@ import CorrectionByStudent from './correction/CorrectionByStudent';
 import CorrectionByQuestion from './correction/CorrectionByQuestion';
 import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
 import ItemAnalysisTab from './correction/ItemAnalysisTab';
+import ExamQuestionManagement from './correction/ExamQuestionManagement';
 
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
 export const NEEDS_DOUBLE_CORRECTION_TYPES = ['short_answer', 'essay', 'math_input', 'arabic_input', 'javanese_input'];
@@ -100,7 +101,7 @@ export default function ExamCorrectionPage() {
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
-    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis'>('leaderboard');
+    const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis' | 'manage-questions'>('leaderboard');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
@@ -750,7 +751,7 @@ export default function ExamCorrectionPage() {
         : masterQuestions[selectedQuestionIndex];
 
     const currentQuestionContent = viewMode === 'by-student'
-        ? currentQuestion?.question_content
+        ? currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content
         : currentQuestion?.content || currentQuestion?.question_content || '';
 
     return (
@@ -771,20 +772,24 @@ export default function ExamCorrectionPage() {
                             </p>
                         </div>
                         {/* Mobile sidebar triggers */}
-                        <div className="flex lg:hidden gap-1">
-                            <button
-                                onClick={() => setIsLeftSidebarOpen(true)}
-                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
-                            >
-                                <UserSearch className="w-4.5 h-4.5" />
-                            </button>
-                            <button
-                                onClick={() => setIsRightSidebarOpen(true)}
-                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
-                            >
-                                <List className="w-4.5 h-4.5" />
-                            </button>
-                        </div>
+                        {(viewMode === 'by-student' || viewMode === 'by-question' || viewMode === 'item-analysis') && (
+                            <div className="flex lg:hidden gap-1">
+                                <button
+                                    onClick={() => setIsLeftSidebarOpen(true)}
+                                    className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
+                                >
+                                    {viewMode === 'by-student' ? <UserSearch className="w-4.5 h-4.5" /> : <List className="w-4.5 h-4.5" />}
+                                </button>
+                                {(viewMode === 'by-student' || viewMode === 'by-question') && (
+                                    <button
+                                        onClick={() => setIsRightSidebarOpen(true)}
+                                        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600"
+                                    >
+                                        {viewMode === 'by-student' ? <List className="w-4.5 h-4.5" /> : <UserSearch className="w-4.5 h-4.5" />}
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-col items-center gap-2">
@@ -835,8 +840,19 @@ export default function ExamCorrectionPage() {
                                     viewMode === 'item-analysis' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
                                 )}
                             >
-                                <span className="hidden sm:inline">Telaah Soal</span>
-                                <span className="sm:hidden">Telaah</span>
+                                Analysis
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode('manage-questions');
+                                    setSelectedQuestionIndex(0);
+                                }}
+                                className={cn(
+                                    "px-2 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all",
+                                    viewMode === 'manage-questions' ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-400"
+                                )}
+                            >
+                                Manage
                             </button>
                         </div>
                         {uniqueAttempts.length > 0 && (
@@ -937,32 +953,42 @@ export default function ExamCorrectionPage() {
                 </div>
             </header>
 
-            <main className="flex-grow flex overflow-hidden">
-                {viewMode !== 'leaderboard' && renderSidebarLeft()}
+            <div className="flex-1 flex overflow-hidden relative">
+                {(viewMode === 'by-student' || viewMode === 'by-question' || viewMode === 'item-analysis') && renderSidebarLeft()}
 
                 <section className={cn(
-                    "flex-grow bg-slate-50 dark:bg-background-dark/30 overflow-y-auto custom-scrollbar p-4 md:p-8 transition-all duration-300",
-                    (viewMode === 'leaderboard' || viewMode === 'item-analysis') && "max-w-[1600px] mx-auto w-full px-4 md:px-12"
+                    "flex-grow bg-slate-50 dark:bg-background-dark/30 custom-scrollbar p-4 md:p-8 transition-all duration-300",
+                    viewMode === 'manage-questions' ? "overflow-hidden h-full p-0 md:p-0 max-w-none" : "overflow-y-auto",
+                    (viewMode === 'leaderboard' || viewMode === 'item-analysis') && "max-w-[1600px] mx-auto w-full px-4 md:px-12",
                 )}>
                     <div className={cn(
-                        "mx-auto w-full space-y-6",
-                        (viewMode === 'leaderboard' || viewMode === 'item-analysis') ? "max-w-none" : "max-w-4xl"
+                        "mx-auto w-full",
+                        viewMode === 'manage-questions' ? "h-full space-y-0" : "space-y-6",
+                        (viewMode === 'leaderboard' || viewMode === 'item-analysis' || viewMode === 'manage-questions') ? "max-w-none" : "max-w-4xl"
                     )}>
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
-                                <CorrectionByStudent
-                                    currentQuestion={currentQuestion}
-                                    isDetailLoading={isDetailLoading}
-                                    selectedQuestionIndex={selectedQuestionIndex}
-                                    setSelectedQuestionIndex={setSelectedQuestionIndex}
-                                    handleUpdateCorrection={handleUpdateCorrection}
-                                    setPartialScoreData={setPartialScoreData}
-                                    setIsPartialModalOpen={setIsPartialModalOpen}
-                                    questions={questions}
-                                    sessions={sessions}
-                                    selectedSessionId={selectedSessionId}
-                                    setQuestions={setQuestions}
-                                />
+                                <motion.div
+                                    key="by-student"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="space-y-6"
+                                >
+                                    <CorrectionByStudent
+                                        currentQuestion={currentQuestion}
+                                        isDetailLoading={isDetailLoading}
+                                        selectedQuestionIndex={selectedQuestionIndex}
+                                        setSelectedQuestionIndex={setSelectedQuestionIndex}
+                                        handleUpdateCorrection={handleUpdateCorrection}
+                                        setPartialScoreData={setPartialScoreData}
+                                        setIsPartialModalOpen={setIsPartialModalOpen}
+                                        questions={questions}
+                                        sessions={sessions}
+                                        selectedSessionId={selectedSessionId}
+                                        setQuestions={setQuestions}
+                                    />
+                                </motion.div>
                             ) : viewMode === 'by-question' ? (
                                 <CorrectionByQuestion
                                     selectedQuestionIndex={selectedQuestionIndex}
@@ -981,6 +1007,12 @@ export default function ExamCorrectionPage() {
                                 />
                             ) : viewMode === 'item-analysis' ? (
                                 <ItemAnalysisTab examId={id!} />
+                            ) : viewMode === 'manage-questions' ? (
+                                <ExamQuestionManagement
+                                    examId={id!}
+                                    questions={masterQuestions}
+                                    onUpdate={fetchSessions}
+                                />
                             ) : (
                                 <CorrectionLeaderboard
                                     sessions={filteredSessions}
@@ -993,8 +1025,8 @@ export default function ExamCorrectionPage() {
                     </div>
                 </section>
 
-                {viewMode !== 'leaderboard' && renderSidebarRight()}
-            </main>
+                {(viewMode === 'by-student' || viewMode === 'by-question') && renderSidebarRight()}
+            </div>
 
             {/* Bulk Action Bar */}
             {selectedAnswerIds.length > 0 && (
