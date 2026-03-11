@@ -697,36 +697,53 @@ export default function ExamCorrectionPage() {
                             ) : (
                                 filteredSessions
                                     .filter(s => s.student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                                    .map((session) => (
-                                        <button
-                                            key={session.id}
-                                            onClick={() => scrollToAnswer(session.id)}
-                                            className={cn(
-                                                "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-3 text-left flex-1 overflow-hidden">
-                                                <div className={cn(
-                                                    "w-2 h-2 rounded-full shrink-0",
-                                                    session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
-                                                )}></div>
-                                                <div className="flex-1 overflow-hidden">
-                                                    <p className="text-xs font-medium text-slate-500 truncate">{session.student.name}</p>
-                                                    {(session.total_attempts || 1) > 1 && (
-                                                        <span className="text-[9px] font-bold text-slate-400 mt-0.5 block">Upaya {session.attempt_number}</span>
-                                                    )}
-                                                </div>
-                                                {session.is_finished && (
-                                                    <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
-                                                        {session.final_score}
-                                                    </span>
+                                    .map((session) => {
+                                        const answerForQuestion = viewMode === 'by-question'
+                                            ? bulkAnswers.find(a => a.exam_session_id === session.id)
+                                            : null;
+
+                                        return (
+                                            <button
+                                                key={session.id}
+                                                onClick={() => scrollToAnswer(session.id)}
+                                                className={cn(
+                                                    "w-full p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 text-left transition-all hover:bg-slate-50"
                                                 )}
-                                            </div>
-                                            {session.is_corrected && (
-                                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />
-                                            )}
-                                        </button>
-                                    ))
+                                            >
+                                                <div className="flex items-center gap-3 text-left flex-1 overflow-hidden">
+                                                    <div className={cn(
+                                                        "w-2 h-2 rounded-full shrink-0",
+                                                        session.is_corrected ? "bg-emerald-500" : "bg-slate-200"
+                                                    )}></div>
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <p className="text-xs font-medium text-slate-500 truncate">{session.student.name}</p>
+                                                        {(session.total_attempts || 1) > 1 && (
+                                                            <span className="text-[9px] font-bold text-slate-400 mt-0.5 block">Upaya {session.attempt_number}</span>
+                                                        )}
+                                                    </div>
+                                                    {viewMode === 'by-question' && answerForQuestion ? (
+                                                        <span className={cn(
+                                                            "shrink-0 px-2 flex items-center gap-1 py-0.5 text-[10px] font-black rounded-md border tabular-nums",
+                                                            answerForQuestion.score_earned === answerForQuestion.max_score
+                                                                ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                                                                : answerForQuestion.score_earned > 0
+                                                                    ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
+                                                                    : "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
+                                                        )}>
+                                                            {answerForQuestion.score_earned} / {answerForQuestion.max_score}
+                                                        </span>
+                                                    ) : session.is_finished ? (
+                                                        <span className="shrink-0 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-md border border-indigo-100 dark:border-indigo-500/20 tabular-nums">
+                                                            {session.final_score}
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                                {session.is_corrected && (
+                                                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />
+                                                )}
+                                            </button>
+                                        );
+                                    })
                             )}
                         </div>
                     </>
