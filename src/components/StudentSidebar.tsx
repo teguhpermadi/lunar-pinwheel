@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import {
     LayoutDashboard,
-    BookOpen,
     History,
     GraduationCap,
     X,

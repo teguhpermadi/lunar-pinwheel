@@ -91,7 +91,7 @@ export default function ExamLiveScorePage() {
     useEffect(() => {
         fetchLiveScore();
 
-        if (!id) return;
+        if (!id || !echo) return;
 
         const channel = echo.channel(`exam.${id}.live-score`);
 
