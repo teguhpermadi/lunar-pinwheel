@@ -7,15 +7,17 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionDetail, StudentSession, EXCLUDED_PARTIAL_TYPES, NEEDS_DOUBLE_CORRECTION_TYPES } from '../ExamCorrectionPage';
 import {
     AlertTriangle,
-    ChevronUp,
-    ChevronDown,
     Star,
     CheckCircle2,
     MinusCircle,
     XCircle,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    BookOpen,
+    X,
+    Maximize
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 
 interface CorrectionByStudentProps {
     currentQuestion: QuestionDetail | null;
@@ -45,14 +47,14 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     setQuestions
 }) => {
     const currentSession = sessions.find(s => s.id === selectedSessionId);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
     useEffect(() => {
-        setIsExpanded(false);
+        setIsPreviewModalOpen(false);
     }, [selectedQuestionIndex, selectedSessionId]);
 
     const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content || (currentQuestion as any)?.content || '';
-    const isLongContent = contentRaw.replace(/<[^>]+>/g, '').length > 100 || /<img|<table|<iframe|<audio|<video/i.test(contentRaw);
+    const readingMaterial = (currentQuestion as any)?.exam_reading_material || (currentQuestion as any)?.exam_question?.exam_reading_material;
 
     return (
         <motion.div
@@ -104,32 +106,20 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     )}
                                 </div>
                                 <div className="flex flex-col">
-                                    <div
-                                        className="cursor-pointer transition-all duration-200"
-                                        onClick={() => setIsExpanded(!isExpanded)}
-                                    >
+                                    <div className="line-clamp-2">
                                         <MathRenderer
                                             key={`math-${currentQuestion.id || selectedQuestionIndex}`}
-                                            className={cn(
-                                                "text-lg font-bold text-slate-900 dark:text-white leading-relaxed",
-                                                !isExpanded && "line-clamp-2"
-                                            )}
+                                            className="text-lg font-bold text-slate-900 dark:text-white leading-relaxed"
                                             content={contentRaw}
                                         />
                                     </div>
-                                    {isLongContent && (
-                                        <button
-                                            onClick={() => setIsExpanded(!isExpanded)}
-                                            className="text-xs text-primary hover:text-primary/80 font-bold self-start mt-2 flex items-center gap-1"
-                                        >
-                                            {isExpanded ? 'Tutup' : 'Lihat Selengkapnya'}
-                                            {isExpanded ? (
-                                                <ChevronUp className="w-4 h-4" />
-                                            ) : (
-                                                <ChevronDown className="w-4 h-4" />
-                                            )}
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setIsPreviewModalOpen(true)}
+                                        className="text-xs text-primary hover:text-primary/80 font-bold self-start mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+                                    >
+                                        <BookOpen className="w-4 h-4" />
+                                        Preview Soal
+                                    </button>
                                 </div>
                             </div>
                             <div className={cn(
@@ -250,6 +240,86 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                     </div>
                 </>
             )}
+
+            <AnimatePresence>
+                {isPreviewModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm"
+                        onClick={() => setIsPreviewModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-800/20">
+                                <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                    <BookOpen className="w-5 h-5 text-primary" />
+                                    Preview Soal
+                                </h3>
+                                <button
+                                    onClick={() => setIsPreviewModalOpen(false)}
+                                    className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-500 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-slate-900 space-y-8">
+                                {readingMaterial && (
+                                    <div className="mb-8" style={{ fontSize: '16px' }}>
+                                        <div className="px-4 py-2 border-b-2 border-primary inline-block mb-4">
+                                            <h4 className="font-bold text-lg text-slate-900 dark:text-white">
+                                                {readingMaterial.title}
+                                            </h4>
+                                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                                Reading Material
+                                            </span>
+                                        </div>
+                                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-inner">
+                                            {readingMaterial.media_path?.toLowerCase().endsWith('.pdf') ? (
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">
+                                                        <iframe
+                                                            src={`${readingMaterial.media_path}#toolbar=0`}
+                                                            className="absolute inset-0 w-full h-full border-0"
+                                                            title={readingMaterial.title}
+                                                        />
+                                                    </div>
+                                                    <a
+                                                        href={readingMaterial.media_path}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center self-start gap-2 py-2 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg"
+                                                    >
+                                                        <Maximize className="w-4 h-4" />
+                                                        <span>Buka PDF Penuh</span>
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                <MathRenderer
+                                                    className="font-medium leading-relaxed text-slate-900 dark:text-white prose dark:prose-invert max-w-none prose-img:rounded-2xl"
+                                                    content={readingMaterial.content || ''}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                <div style={{ fontSize: '18px' }} className="zoom-container">
+                                    <MathRenderer
+                                        className="font-medium leading-relaxed text-slate-900 dark:text-white"
+                                        content={contentRaw}
+                                    />
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };
