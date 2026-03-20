@@ -14,8 +14,11 @@ import {
     ChevronLeft,
     ChevronRight,
     BookOpen,
+    ShieldCheck,
+    Check,
     X,
-    Maximize
+    Maximize,
+    RotateCw
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
@@ -24,13 +27,15 @@ interface CorrectionByStudentProps {
     isDetailLoading: boolean;
     selectedQuestionIndex: number;
     setSelectedQuestionIndex: (index: number) => void;
-    handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string) => void;
+    handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => void;
     setPartialScoreData: (data: any) => void;
     setIsPartialModalOpen: (open: boolean) => void;
     questions: QuestionDetail[];
     sessions: StudentSession[];
     selectedSessionId: string | null;
     setQuestions: (questions: QuestionDetail[]) => void;
+    onAiCorrect?: (sessionId: string, questionId: string) => void;
+    onRefresh?: () => void;
 }
 
 const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
@@ -44,7 +49,9 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     questions,
     sessions,
     selectedSessionId,
-    setQuestions
+    setQuestions,
+    onAiCorrect,
+    onRefresh
 }) => {
     const currentSession = sessions.find(s => s.id === selectedSessionId);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
@@ -122,13 +129,44 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     </button>
                                 </div>
                             </div>
-                            <div className={cn(
-                                "px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase flex items-center gap-2 shadow-sm border shrink-0",
-                                currentQuestion.score_earned === (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value) ? "bg-emerald-500 text-white border-emerald-400" :
-                                    currentQuestion.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
-                            )}>
-                                <Star className="w-4.5 h-4.5" />
-                                {currentQuestion.score_earned} / {(currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value)}
+                            <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex flex-col gap-2 items-end">
+                                    <div className="flex items-center gap-2">
+                                        {onRefresh && (
+                                            <button
+                                                onClick={onRefresh}
+                                                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-500 transition-all active:scale-95"
+                                                title="Refresh Data"
+                                            >
+                                                <RotateCw className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        {onAiCorrect && (currentQuestion.question_type === 'essay' || (currentQuestion as any)?.exam_question?.question_type === 'essay') && (
+                                            <button
+                                                onClick={() => onAiCorrect(selectedSessionId!, currentQuestion.id)}
+                                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-[10px] font-black uppercase shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
+                                            >
+                                                <ShieldCheck className="w-4 h-4" />
+                                                AI Correct
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={cn(
+                                    "px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase flex flex-col items-center gap-1 shadow-sm border",
+                                    currentQuestion.score_earned === (currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value) ? "bg-emerald-500 text-white border-emerald-400" :
+                                        currentQuestion.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
+                                )}>
+                                    <div className="flex items-center gap-2">
+                                        <Star className="w-4.5 h-4.5" />
+                                        {currentQuestion.score_earned} / {(currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value)}
+                                    </div>
+                                    {currentQuestion.correction_notes && (
+                                        <div className="text-[7px] font-black tracking-widest text-white/80 bg-white/10 px-1.5 py-0.5 rounded-full mt-0.5">
+                                            AI Evaluated
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -211,7 +249,16 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         setQuestions(newQuestions);
                                     }}
                                 ></textarea>
-                                <label className="absolute top-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Teacher's Comment</label>
+                                <div className="absolute top-3 left-4 right-4 flex items-center justify-between pointer-events-none">
+                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Teacher's Comment</label>
+                                    <button
+                                        onClick={() => handleUpdateCorrection(currentQuestion.score_earned || 0, currentQuestion.is_correct || false, undefined, undefined, currentQuestion.correction_notes || undefined)}
+                                        className="pointer-events-auto text-[8px] font-bold text-primary hover:text-primary-dark uppercase px-2 py-1 bg-primary/5 rounded-lg border border-primary/10 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm"
+                                    >
+                                        <Check className="w-3 h-3" />
+                                        Save Comments
+                                    </button>
+                                </div>
                             </div>
                             <div className="flex justify-between items-center">
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">

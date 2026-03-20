@@ -281,8 +281,51 @@ export default function ExamCorrectionPage() {
         }
     }, [id, selectedSessionId, selectedQuestionIndex, viewMode, masterQuestions, fetchDetail, fetchByQuestion]);
 
+    useEffect(() => {
+        if (!id || !(window as any).Echo) return;
 
-    const handleUpdateCorrection = async (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string) => {
+        const channel = (window as any).Echo.channel(`exam.${id}.ai-correction`);
+        channel.listen('.AiScoreUpdated', (e: any) => {
+            console.log('AI Score Updated:', e);
+            // Refresh data based on current view mode
+            fetchSessions();
+            if (viewMode === 'by-student' && selectedSessionId) {
+                fetchDetail(selectedSessionId);
+            } else if (viewMode === 'by-question' && masterQuestions.length > 0) {
+                const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                if (currentQuestionId) {
+                    fetchByQuestion(currentQuestionId);
+                }
+            }
+        });
+
+        return () => {
+            (window as any).Echo.leave(`exam.${id}.ai-correction`);
+        };
+    }, [id, viewMode, selectedSessionId, selectedQuestionIndex, masterQuestions, fetchSessions, fetchDetail, fetchByQuestion]);
+
+    const handleAiCorrect = async (params: { exam_question_id?: string, exam_session_id?: string }) => {
+        if (!id) return;
+        try {
+            const response = await examApi.aiCorrect(id, { ...params, provider: 'openrouter' });
+            if (response.success) {
+                Swal.fire({
+                    title: 'Started',
+                    text: response.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to trigger AI correction', 'error');
+        }
+    };
+
+
+    const handleUpdateCorrection = async (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => {
         const targetSessionId = sessionIdOverride || selectedSessionId;
         const currentQuestion = viewMode === 'by-student' ? questions[selectedQuestionIndex] : null;
         const targetDetailId = detailIdOverride || currentQuestion?.id;
@@ -298,12 +341,22 @@ export default function ExamCorrectionPage() {
         if (score === maxScore) markingStatus = 'full';
         else if (score === 0 && !isCorrect) markingStatus = 'no';
 
+        // Use passed notes or existing notes from state
+        let finalNotes = notes;
+        if (finalNotes === undefined) {
+            if (viewMode === 'by-student') {
+                finalNotes = currentQuestion?.correction_notes || '';
+            } else {
+                finalNotes = bulkAnswers.find(a => a.id === targetDetailId)?.correction_notes || '';
+            }
+        }
+
         try {
             const response = await examApi.updateCorrection(targetSessionId, targetDetailId, {
                 marking_status: markingStatus,
                 score_earned: markingStatus === 'partial' ? score : undefined,
                 is_correct: isCorrect,
-                correction_notes: ''
+                correction_notes: finalNotes
             });
 
             if (response.success) {
@@ -312,7 +365,12 @@ export default function ExamCorrectionPage() {
                     const newQuestions = [...questions];
                     const idx = newQuestions.findIndex(q => q.id === targetDetailId);
                     if (idx !== -1) {
-                        newQuestions[idx] = { ...newQuestions[idx], score_earned: response.data.score_earned, is_correct: response.data.is_correct };
+                        newQuestions[idx] = { 
+                            ...newQuestions[idx], 
+                            score_earned: response.data.score_earned, 
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
+                        };
                         setQuestions(newQuestions);
                     }
                 } else {
@@ -323,7 +381,8 @@ export default function ExamCorrectionPage() {
                         newBulkAnswers[idx] = {
                             ...newBulkAnswers[idx],
                             score_earned: response.data.score_earned,
-                            is_correct: response.data.is_correct
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
                         };
                         setBulkAnswers(newBulkAnswers);
                     }
@@ -962,6 +1021,13 @@ export default function ExamCorrectionPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => handleAiCorrect({})}
+                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
+                        >
+                            <ShieldCheck className="w-4 h-4" />
+                            AI Correct All
+                        </button>
                         <div className="text-right hidden sm:block">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
                             <p className="text-xs font-bold text-emerald-500 uppercase">Live Correction</p>
@@ -1004,6 +1070,11 @@ export default function ExamCorrectionPage() {
                                         sessions={sessions}
                                         selectedSessionId={selectedSessionId}
                                         setQuestions={setQuestions}
+                                        onAiCorrect={(sessionId, questionId) => handleAiCorrect({ exam_session_id: sessionId, exam_question_id: questionId })}
+                                        onRefresh={() => {
+                                            fetchSessions();
+                                            if (selectedSessionId) fetchDetail(selectedSessionId);
+                                        }}
                                     />
                                 </motion.div>
                             ) : viewMode === 'by-question' ? (
@@ -1021,6 +1092,13 @@ export default function ExamCorrectionPage() {
                                     handleUpdateCorrection={handleUpdateCorrection}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
+                                    onAiCorrect={(questionId) => handleAiCorrect({ exam_question_id: questionId })}
+                                    setBulkAnswers={setBulkAnswers}
+                                    onRefresh={() => {
+                                        fetchSessions();
+                                        const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                                        if (currentQuestionId) fetchByQuestion(currentQuestionId);
+                                    }}
                                 />
                             ) : viewMode === 'item-analysis' ? (
                                 <ItemAnalysisTab examId={id!} />

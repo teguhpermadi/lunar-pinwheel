@@ -20,7 +20,8 @@ import {
     UserX,
     BookOpen,
     X,
-    Maximize
+    Maximize,
+    RotateCw
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
@@ -35,9 +36,12 @@ interface CorrectionByQuestionProps {
     setSelectedQuestionIndex: (index: number) => void;
     isBulkLoading: boolean;
     toggleAnswerSelection: (id: string) => void;
-    handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string) => void;
+    handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => void;
     setPartialScoreData: (data: any) => void;
     setIsPartialModalOpen: (open: boolean) => void;
+    onAiCorrect?: (questionId: string) => void;
+    setBulkAnswers: (answers: any[]) => void;
+    onRefresh?: () => void;
 }
 
 const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
@@ -53,7 +57,10 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     toggleAnswerSelection,
     handleUpdateCorrection,
     setPartialScoreData,
-    setIsPartialModalOpen
+    setIsPartialModalOpen,
+    onAiCorrect,
+    setBulkAnswers,
+    onRefresh
 }) => {
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
@@ -113,7 +120,25 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                             </button>
                         </div>
                     </div>
-                    <div className="flex gap-2 items-start mt-1 shrink-0">
+                    <div className="flex gap-2 items-center mt-1 shrink-0">
+                        {onRefresh && (
+                            <button
+                                onClick={onRefresh}
+                                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-500 transition-all active:scale-95"
+                                title="Refresh Data"
+                            >
+                                <RotateCw className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                        {currentQuestionType === 'essay' && onAiCorrect && (
+                            <button
+                                onClick={() => onAiCorrect(currentMasterQuestion?.id)}
+                                className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-[10px] font-black uppercase shadow-lg shadow-indigo-200 dark:shadow-none active:scale-95"
+                            >
+                                <ShieldCheck className="w-4 h-4" />
+                                AI Correct
+                            </button>
+                        )}
                         <button
                             onClick={handleToggleSelectAll}
                             className={cn(
@@ -282,9 +307,44 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 scoreEarned={answer.score_earned}
                             />
 
-                            <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
-                                <div className="text-[10px] font-bold text-slate-400 uppercase">
-                                    Score: <span className="text-primary tabular-nums">{answer.score_earned}</span>/{answer.max_score}
+                            <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase">
+                                        Score: <span className="text-primary tabular-nums">{answer.score_earned}</span>/{answer.max_score}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[9px] font-black uppercase tracking-wider text-slate-400">Evaluation Notes</label>
+                                            <button
+                                                onClick={() => handleUpdateCorrection(answer.score_earned || 0, answer.is_correct || false, answer.id, answer.session.id, answer.correction_notes)}
+                                                className="text-[8px] font-bold text-primary hover:text-primary-dark uppercase px-1.5 py-0.5 bg-primary/5 rounded border border-primary/10 transition-all active:scale-95 flex items-center gap-1"
+                                            >
+                                                <Check className="w-2.5 h-2.5" />
+                                                Save
+                                            </button>
+                                        </div>
+                                        {answer.correction_notes && (
+                                            <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-md text-[7px] font-black uppercase tracking-widest">
+                                                <ShieldCheck className="w-2.5 h-2.5" />
+                                                AI Evaluated
+                                            </div>
+                                        )}
+                                    </div>
+                                    <textarea
+                                        className="w-full text-[11px] border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:ring-primary focus:border-primary placeholder-slate-300 min-h-[60px] p-3 italic leading-relaxed"
+                                        placeholder="AI Evaluation or teacher notes..."
+                                        value={answer.correction_notes || ''}
+                                        onChange={(e) => {
+                                            const newAnswers = [...bulkAnswers];
+                                            const idx = newAnswers.findIndex(a => a.id === answer.id);
+                                            if (idx !== -1) {
+                                                newAnswers[idx].correction_notes = e.target.value;
+                                                setBulkAnswers(newAnswers);
+                                            }
+                                        }}
+                                    ></textarea>
                                 </div>
                             </div>
                         </div>
