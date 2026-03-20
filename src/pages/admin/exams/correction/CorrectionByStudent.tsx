@@ -143,7 +143,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                         )}
                                         {onAiCorrect && (currentQuestion.question_type === 'essay' || (currentQuestion as any)?.exam_question?.question_type === 'essay') && (
                                             <button
-                                                onClick={() => onAiCorrect(selectedSessionId!, currentQuestion.id)}
+                                                onClick={() => onAiCorrect(selectedSessionId!, currentQuestion.exam_question_id)}
                                                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-[10px] font-black uppercase shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
                                             >
                                                 <ShieldCheck className="w-4 h-4" />

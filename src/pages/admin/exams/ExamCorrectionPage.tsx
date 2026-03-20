@@ -52,6 +52,8 @@ export interface StudentSession {
 
 export interface QuestionDetail {
     id: string; // Detail ID
+    exam_session_id: string;
+    exam_question_id: string;
     question_type: string;
     question_content: string;
     student_answer: any;
