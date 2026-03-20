@@ -271,15 +271,19 @@ export default function ExamCorrectionPage() {
     }, [id]); // Only refetch if ID changes
 
     useEffect(() => {
-        if (viewMode === 'by-student' && selectedSessionId) {
+        if (selectedSessionId) {
             fetchDetail(selectedSessionId);
-        } else if (viewMode === 'by-question' && masterQuestions.length > 0) {
+        }
+    }, [id, selectedSessionId, fetchDetail]);
+
+    useEffect(() => {
+        if (viewMode === 'by-question' && masterQuestions.length > 0) {
             const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
             if (currentQuestionId) {
                 fetchByQuestion(currentQuestionId);
             }
         }
-    }, [id, selectedSessionId, selectedQuestionIndex, viewMode, masterQuestions, fetchDetail, fetchByQuestion]);
+    }, [id, selectedQuestionIndex, viewMode, masterQuestions, fetchByQuestion]);
 
     useEffect(() => {
         if (!id || !(window as any).Echo) return;
@@ -626,8 +630,16 @@ export default function ExamCorrectionPage() {
                                     )}
                                 >
                                     <span className={cn(
-                                        "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                        selectedQuestionIndex === index ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
+                                        "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center transition-colors",
+                                        (() => {
+                                            const detail = questions.find(qd => (qd as any).exam_question_id === q.id || (qd as any).exam_question?.id === q.id);
+                                            if (selectedQuestionIndex === index) return "bg-primary text-white";
+                                            if (!detail) return "bg-slate-100 text-slate-400";
+                                            if (detail.is_correct === true && detail.score_earned === detail.max_score) return "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400";
+                                            if (detail.is_correct === true && detail.score_earned > 0) return "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400";
+                                            if (detail.is_correct === false) return "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400";
+                                            return "bg-slate-100 text-slate-400";
+                                        })()
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
@@ -703,9 +715,10 @@ export default function ExamCorrectionPage() {
                                 >
                                     <span className={cn(
                                         "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center",
-                                        q.is_correct === true ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
-                                            q.is_correct === false ? "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400" :
-                                                "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
+                                        q.is_correct === true && q.score_earned === q.max_score ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                            q.is_correct === true && q.score_earned > 0 ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" :
+                                                q.is_correct === false ? "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400" :
+                                                    "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
