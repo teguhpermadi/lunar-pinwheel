@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
     X,
     Search,
-    AlertTriangle,
     CheckCircle2,
     ArrowLeft,
     UserSearch,
@@ -17,7 +16,10 @@ import {
     Check,
     ShieldCheck,
     XCircle,
-    MinusCircle
+    MinusCircle,
+    RefreshCw,
+    Circle,
+    AlertCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
@@ -67,6 +69,16 @@ export interface QuestionDetail {
     tags?: string[];
 }
 
+export interface QuestionCorrectionStatus {
+    id: string;
+    exam_id: string;
+    exam_question_id: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    total_to_correct: number;
+    corrected_count: number;
+    last_error: string | null;
+}
+
 export default function ExamCorrectionPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -105,6 +117,7 @@ export default function ExamCorrectionPage() {
 
     const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis' | 'manage-questions'>('leaderboard');
     const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
+    const [correctionStatuses, setCorrectionStatuses] = useState<QuestionCorrectionStatus[]>([]);
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
 
@@ -221,6 +234,9 @@ export default function ExamCorrectionPage() {
                 if (response.data.questions) {
                     setMasterQuestions(response.data.questions);
                 }
+                if (response.data.correction_statuses) {
+                    setCorrectionStatuses(response.data.correction_statuses);
+                }
 
                 // Auto select first session based on current filter later, but for now just fallback
                 if (!selectedSessionId && processedSessions.length > 0) {
@@ -293,7 +309,7 @@ export default function ExamCorrectionPage() {
         const channel = (window as any).Echo.channel(`exam.${id}.ai-correction`);
         channel.listen('.AiScoreUpdated', (e: any) => {
             console.log('AI Score Updated:', e);
-            // Refresh data based on current view mode
+            // Refresh sessions to get updated correction_statuses and session scores
             fetchSessions();
             if (viewMode === 'by-student' && selectedSessionId) {
                 fetchDetail(selectedSessionId);
@@ -315,6 +331,9 @@ export default function ExamCorrectionPage() {
         try {
             const response = await examApi.aiCorrect(id, { ...params, provider: 'openrouter' });
             if (response.success) {
+                if (response.data.correction_statuses) {
+                    setCorrectionStatuses(response.data.correction_statuses);
+                }
                 Swal.fire({
                     title: 'Started',
                     text: response.message,
@@ -611,7 +630,28 @@ export default function ExamCorrectionPage() {
                     <>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                             <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exam Questions</h2>
-                            <span className="text-[9px] font-black text-slate-400 uppercase block mt-1 tracking-widest">Fixed List</span>
+                            
+                            {/* Correction Status Legend */}
+                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 flex items-center justify-center">
+                                        <CheckCircle2 className="w-2.5 h-2.5" />
+                                    </div>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase">Done</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 animate-pulse flex items-center justify-center">
+                                        <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                                    </div>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase">AI Progress</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100 flex items-center justify-center">
+                                        <AlertCircle className="w-2.5 h-2.5" />
+                                    </div>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase">Partial</span>
+                                </div>
+                            </div>
                         </div>
                         <div className="flex-grow overflow-y-auto custom-scrollbar">
                             {masterQuestions.map((q, index) => (
@@ -646,22 +686,63 @@ export default function ExamCorrectionPage() {
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
                                     <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
-                                        <p
-                                            className={cn(
-                                                "text-xs truncate w-full",
-                                                selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
-                                            )}
-                                            dangerouslySetInnerHTML={{ __html: (q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
-                                        />
+                                        <div className="flex items-center gap-2 w-full overflow-hidden">
+                                            <p
+                                                className={cn(
+                                                    "text-xs truncate flex-1",
+                                                    selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                                )}
+                                                dangerouslySetInnerHTML={{ __html: (q.content || q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
+                                            />
+                                            {(() => {
+                                                const status = correctionStatuses.find(s => s.exam_question_id === q.id);
+                                                if (status?.status === 'processing') return (
+                                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 rounded-full border border-blue-200 dark:border-blue-800 animate-pulse shrink-0">
+                                                        <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                                                        <span className="text-[8px] font-black uppercase">AI</span>
+                                                    </div>
+                                                );
+                                                if (status?.status === 'completed' || (status && status.total_to_correct > 0 && status.corrected_count >= status.total_to_correct)) return (
+                                                    <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800 shrink-0">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        <span className="text-[8px] font-black uppercase">Done</span>
+                                                    </div>
+                                                );
+                                                if (NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type)) {
+                                                    const isPartiallyCorrectedCount = (status?.corrected_count ?? 0);
+                                                    const totalToCorrect = (status?.total_to_correct ?? 0);
+                                                    return isPartiallyCorrectedCount > 0 
+                                                        ? (
+                                                            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800 shrink-0" title={`${isPartiallyCorrectedCount}/${totalToCorrect} Corrected`}>
+                                                                <AlertCircle className="w-3 h-3" />
+                                                                <span className="text-[8px] font-black uppercase">Partial</span>
+                                                            </div>
+                                                        )
+                                                        : (
+                                                            <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-400 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
+                                                                <Circle className="w-2.5 h-2.5" />
+                                                                <span className="text-[8px] font-black uppercase">Pending</span>
+                                                            </div>
+                                                        );
+                                                }
+                                                return null;
+                                            })()}
+                                        </div>
                                         <div className="flex items-center gap-1.5">
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
                                                 Type: {(q.question_type || '').replace('_', ' ')}
                                             </p>
-                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
-                                                <span title="Needs Review">
-                                                    <AlertTriangle className="w-2.5 h-2.5 text-amber-500" />
-                                                </span>
-                                            )}
+                                            {(() => {
+                                                const status = correctionStatuses.find(s => s.exam_question_id === q.id);
+                                                if (status && status.total_to_correct > 0) {
+                                                    return (
+                                                        <span className="text-[9px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 rounded">
+                                                            {status.corrected_count}/{status.total_to_correct}
+                                                        </span>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                         </div>
                                     </div>
                                 </button>
@@ -724,25 +805,49 @@ export default function ExamCorrectionPage() {
                                     )}>
                                         {(index + 1).toString().padStart(2, '0')}
                                     </span>
-                                    <div className="flex-grow overflow-hidden text-left flex flex-col items-start gap-0.5">
-                                        <p
-                                            className={cn(
-                                                "text-xs truncate w-full",
-                                                selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
-                                            )}
-                                            dangerouslySetInnerHTML={{ __html: (q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
-                                        />
-                                        <div className="flex items-center gap-1.5 w-full">
+                                        <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
+                                            <p
+                                                className={cn(
+                                                    "text-xs truncate flex-1",
+                                                    selectedQuestionIndex === index ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-500"
+                                                )}
+                                                dangerouslySetInnerHTML={{ __html: (q.question_content || '').replace(/<[^>]*>/g, '') || `Question ${index + 1}` }}
+                                            />
+                                            {(() => {
+                                                const status = correctionStatuses.find(s => s.exam_question_id === q.id);
+                                                if (status?.status === 'processing') return (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 rounded-lg border border-blue-100 shrink-0 animate-pulse">
+                                                        <RefreshCw className="w-2 h-2 animate-spin" />
+                                                    </div>
+                                                );
+                                                if (status?.status === 'completed' || (status && status.total_to_correct > 0 && status.corrected_count >= status.total_to_correct)) return (
+                                                    <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                                                );
+                                                if (NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type)) {
+                                                    const isPartiallyCorrectedCount = (status?.corrected_count ?? 0);
+                                                    return isPartiallyCorrectedCount > 0 
+                                                        ? <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                                                        : <div className="w-2 h-2 rounded-full bg-slate-200 shrink-0" />;
+                                                }
+                                                return null;
+                                            })()}
+                                        </div>
+                                        <div className="flex items-center justify-between w-full">
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
                                                 Type: {(q.question_type || '').replace(/_/g, ' ')}
                                             </p>
-                                            {NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type) && (
-                                                <span title="Needs Review">
-                                                    <AlertTriangle className="w-2.5 h-2.5 text-amber-500" />
-                                                </span>
-                                            )}
+                                            {(() => {
+                                                const status = correctionStatuses.find(s => s.exam_question_id === q.id);
+                                                if (status && status.total_to_correct > 0) {
+                                                    return (
+                                                        <span className="text-[9px] font-black text-slate-400 bg-slate-50 dark:bg-slate-800 px-1 rounded tabular-nums border border-slate-100 dark:border-slate-800">
+                                                            {status.corrected_count}/{status.total_to_correct}
+                                                        </span>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                         </div>
-                                    </div>
                                 </button>
                             ))}
                         </div>
