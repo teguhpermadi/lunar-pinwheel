@@ -100,57 +100,59 @@ export default function QuestionToolbar() {
         : '';
 
     return (
-        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 shadow-sm">
-            <ToolbarButton
-                onClick={toggleBold}
-                active={activeEditor.isActive('bold')}
-                icon={Bold}
-                tooltip="Bold"
-            />
-            <ToolbarButton
-                onClick={toggleItalic}
-                active={activeEditor.isActive('italic')}
-                icon={Italic}
-                tooltip="Italic"
-            />
-            <ToolbarButton
-                onClick={toggleUnderline}
-                active={activeEditor.isActive('underline')}
-                icon={Underline}
-                tooltip="Underline"
-            />
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <ToolbarButton
-                onClick={toggleBulletList}
-                active={activeEditor.isActive('bulletList')}
-                icon={List}
-                tooltip="Bullet List"
-            />
-            <ToolbarButton
-                onClick={toggleOrderedList}
-                active={activeEditor.isActive('orderedList')}
-                icon={ListOrdered}
-                tooltip="Numbered List"
-            />
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <ToolbarButton
-                onClick={openMathDialog}
-                active={activeEditor.isActive('math')}
-                icon={Sigma}
-                tooltip="Math Formula"
-            />
-            <ToolbarButton
-                onClick={openArabicDialog}
-                active={activeEditor.isActive('arabic')}
-                icon={Languages}
-                tooltip="Arabic Text"
-            />
-            <ToolbarButton
-                onClick={openJavaneseDialog}
-                active={activeEditor.isActive('javanese')}
-                icon={GraduationCap}
-                tooltip="Javanese Script"
-            />
+        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 shadow-sm overflow-x-auto no-scrollbar scroll-smooth">
+            <div className="flex items-center gap-1 min-w-max px-0.5">
+                <ToolbarButton
+                    onClick={toggleBold}
+                    active={activeEditor.isActive('bold')}
+                    icon={Bold}
+                    tooltip="Bold"
+                />
+                <ToolbarButton
+                    onClick={toggleItalic}
+                    active={activeEditor.isActive('italic')}
+                    icon={Italic}
+                    tooltip="Italic"
+                />
+                <ToolbarButton
+                    onClick={toggleUnderline}
+                    active={activeEditor.isActive('underline')}
+                    icon={Underline}
+                    tooltip="Underline"
+                />
+                <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                <ToolbarButton
+                    onClick={toggleBulletList}
+                    active={activeEditor.isActive('bulletList')}
+                    icon={List}
+                    tooltip="Bullet List"
+                />
+                <ToolbarButton
+                    onClick={toggleOrderedList}
+                    active={activeEditor.isActive('orderedList')}
+                    icon={ListOrdered}
+                    tooltip="Numbered List"
+                />
+                <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                <ToolbarButton
+                    onClick={openMathDialog}
+                    active={activeEditor.isActive('math')}
+                    icon={Sigma}
+                    tooltip="Math Formula"
+                />
+                <ToolbarButton
+                    onClick={openArabicDialog}
+                    active={activeEditor.isActive('arabic')}
+                    icon={Languages}
+                    tooltip="Arabic Text"
+                />
+                <ToolbarButton
+                    onClick={openJavaneseDialog}
+                    active={activeEditor.isActive('javanese')}
+                    icon={GraduationCap}
+                    tooltip="Javanese Script"
+                />
+            </div>
 
             <MathDialog
                 isOpen={isMathDialogOpen}
