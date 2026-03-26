@@ -34,6 +34,7 @@ interface CorrectionByStudentProps {
     sessions: StudentSession[];
     selectedSessionId: string | null;
     setQuestions: (questions: QuestionDetail[]) => void;
+    isAdmin?: boolean;
     onAiCorrect?: (sessionId: string, questionId: string) => void;
     onRefresh?: () => void;
 }
@@ -50,6 +51,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     sessions,
     selectedSessionId,
     setQuestions,
+    isAdmin,
     onAiCorrect,
     onRefresh
 }) => {
@@ -141,7 +143,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                                 <RotateCw className="w-4 h-4" />
                                             </button>
                                         )}
-                                        {onAiCorrect && (currentQuestion.question_type === 'essay' || (currentQuestion as any)?.exam_question?.question_type === 'essay') && (
+                                        {isAdmin && onAiCorrect && (currentQuestion.question_type === 'essay' || (currentQuestion as any)?.exam_question?.question_type === 'essay') && (
                                             <button
                                                 onClick={() => onAiCorrect(selectedSessionId!, currentQuestion.exam_question_id)}
                                                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-[10px] font-black uppercase shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"

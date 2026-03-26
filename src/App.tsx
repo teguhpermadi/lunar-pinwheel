@@ -138,7 +138,9 @@ function App() {
                 <Route path="exams/history" element={<StudentExamHistoryPage />} />
               </Route>
               
-              <Route path="admin/queue-monitor" element={<QueueMonitorPage />} />
+              <Route element={<RequireRole role="admin" />}>
+                <Route path="admin/queue-monitor" element={<QueueMonitorPage />} />
+              </Route>
             </Route>
 
             {/* Standalone Routes (No Sidebar) */}

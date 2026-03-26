@@ -23,18 +23,20 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose }: AdminSidebarProps) {
     const location = useLocation();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-        { icon: GraduationCap, label: 'Teachers', path: '/admin/teachers' },
-        { icon: Users, label: 'Students', path: '/admin/students' },
-        { icon: Calendar, label: 'Academic Years', path: '/admin/academic-years' },
+        ...(user?.role === 'admin' ? [
+            { icon: GraduationCap, label: 'Teachers', path: '/admin/teachers' as const },
+            { icon: Users, label: 'Students', path: '/admin/students' as const },
+            { icon: Calendar, label: 'Academic Years', path: '/admin/academic-years' as const },
+            { icon: BookOpen, label: 'Classrooms', path: '/admin/classrooms' as const },
+        ] : []),
         { icon: Book, label: 'Subjects', path: '/admin/subjects' },
-        { icon: BookOpen, label: 'Classrooms', path: '/admin/classrooms' },
         { icon: Library, label: 'Question Bank', path: '/admin/question-banks' },
         { icon: FileText, label: 'Exams', path: '/admin/exams' },
-        { icon: Activity, label: 'Queue Monitor', path: '/admin/queue-monitor' },
+        ...(user?.role === 'admin' ? [{ icon: Activity, label: 'Queue Monitor', path: '/admin/queue-monitor' as const }] : []),
     ];
 
     return (

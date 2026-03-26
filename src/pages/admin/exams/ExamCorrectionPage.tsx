@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -82,6 +83,7 @@ export interface QuestionCorrectionStatus {
 export default function ExamCorrectionPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [exam, setExam] = useState<Exam | null>(null);
     const [sessions, setSessions] = useState<StudentSession[]>([]);
@@ -1141,13 +1143,15 @@ export default function ExamCorrectionPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => handleAiCorrect({})}
-                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
-                        >
-                            <ShieldCheck className="w-4 h-4" />
-                            AI Correct All
-                        </button>
+                        {user?.role === 'admin' && (
+                            <button
+                                onClick={() => handleAiCorrect({})}
+                                className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
+                            >
+                                <ShieldCheck className="w-4 h-4" />
+                                AI Correct All
+                            </button>
+                        )}
                         <div className="text-right hidden sm:block">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
                             <p className="text-xs font-bold text-emerald-500 uppercase">Live Correction</p>
@@ -1190,6 +1194,7 @@ export default function ExamCorrectionPage() {
                                         sessions={sessions}
                                         selectedSessionId={selectedSessionId}
                                         setQuestions={setQuestions}
+                                        isAdmin={user?.role === 'admin'}
                                         onAiCorrect={(sessionId, questionId) => handleAiCorrect({ exam_session_id: sessionId, exam_question_id: questionId })}
                                         onRefresh={() => {
                                             fetchSessions();
@@ -1212,6 +1217,7 @@ export default function ExamCorrectionPage() {
                                     handleUpdateCorrection={handleUpdateCorrection}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
+                                    isAdmin={user?.role === 'admin'}
                                     onAiCorrect={(questionId) => handleAiCorrect({ exam_question_id: questionId })}
                                     setBulkAnswers={setBulkAnswers}
                                     onRefresh={() => {
