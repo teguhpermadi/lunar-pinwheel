@@ -103,7 +103,7 @@ export default function StudentExamHistoryPage() {
     const groupedResults = groupResults();
 
     return (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden p-4 md:p-6 gap-6 md:gap-8 h-full bg-background-light dark:bg-background-dark/50 relative">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-auto p-4 md:p-6 gap-6 md:gap-8 min-h-0 bg-background-light dark:bg-background-dark/50 relative">
             {/* Left side: Results List */}
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between mb-6 px-2">
@@ -116,7 +116,7 @@ export default function StudentExamHistoryPage() {
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 relative timeline-line">
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-4 relative timeline-line">
                     <div className="absolute left-[27px] top-0 bottom-0 w-[2px] bg-slate-200 dark:bg-slate-800 z-0"></div>
 
                     {isLoading ? (
@@ -191,13 +191,13 @@ export default function StudentExamHistoryPage() {
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className={cn(
-                    "flex flex-col h-full overflow-hidden",
-                    "fixed inset-0 z-[60] lg:relative lg:inset-auto lg:z-auto",
+                    "flex flex-col overflow-hidden",
+                    "absolute inset-0 z-[60] lg:relative lg:inset-auto lg:z-auto lg:h-full",
                     "bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-sm lg:backdrop-blur-none",
                     !(selectedResult || isLoading) && "pointer-events-none lg:pointer-events-auto"
                 )}
             >
-                <div className="w-full lg:w-[450px] flex flex-col h-full ml-auto">
+                <div className="w-full lg:w-[450px] flex flex-col lg:h-full max-h-[calc(100dvh-2rem)] lg:max-h-none ml-auto">
                     <div className="px-2 mb-4 flex justify-between items-center">
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Result Detail</h3>
                         <button
@@ -215,7 +215,7 @@ export default function StudentExamHistoryPage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="flex-1 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 space-y-6"
+                                className="flex-1 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 space-y-6 min-h-0"
                             >
                                 <div className="space-y-4">
                                     <Skeleton className="size-14 rounded-2xl" />
@@ -236,7 +236,7 @@ export default function StudentExamHistoryPage() {
                                 exit={{ opacity: 0, x: -20 }}
                                 className="flex-1 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col"
                             >
-                                <div className="overflow-y-auto custom-scrollbar flex flex-col h-full">
+                                <div className="overflow-y-auto custom-scrollbar flex flex-col min-h-0">
                                     <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                                         <div className="flex items-start justify-between mb-6">
                                             <div className={`size-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${selectedResult.is_passed ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-500 shadow-rose-500/30'}`}>
