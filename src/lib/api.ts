@@ -1111,3 +1111,55 @@ export const dashboardApi = {
         return response.data;
     }
 };
+
+export interface QueueMonitor {
+    id: number;
+    job_id: string;
+    job_uuid: string;
+    name: string;
+    queue: string;
+    status: number; // typically 0 = running, 1 = succeeded, 2 = failed
+    attempt: number;
+    progress: number | null;
+    exception_message: string | null;
+    exception_class: string | null;
+    queued_at: string | null;
+    started_at: string | null;
+    finished_at: string | null;
+    time_elapsed: number;
+    failed: boolean;
+    retried: boolean;
+    data: any;
+}
+
+export const queueMonitorApi = {
+    getMonitors: async (params?: {
+        per_page?: number;
+        page?: number;
+        search?: string;
+        status?: 'running' | 'succeeded' | 'failed' | '';
+    }) => {
+        const response = await api.get('/queue-monitor', { params });
+        return response.data;
+    },
+    getMonitor: async (id: string | number) => {
+        const response = await api.get(`/queue-monitor/${id}`);
+        return response.data;
+    },
+    retryMonitor: async (id: string | number) => {
+        const response = await api.post(`/queue-monitor/${id}/retry`);
+        return response.data;
+    },
+    cancelMonitor: async (id: string | number) => {
+        const response = await api.post(`/queue-monitor/${id}/cancel`);
+        return response.data;
+    },
+    deleteMonitor: async (id: string | number) => {
+        const response = await api.delete(`/queue-monitor/${id}`);
+        return response.data;
+    },
+    purgeMonitors: async () => {
+        const response = await api.post('/queue-monitor/purge');
+        return response.data;
+    }
+};

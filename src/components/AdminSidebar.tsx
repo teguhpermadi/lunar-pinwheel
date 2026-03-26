@@ -10,6 +10,7 @@ import {
     BookOpen,
     Library,
     FileText,
+    Activity,
     X,
     LogOut
 } from 'lucide-react';
@@ -33,6 +34,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
         { icon: BookOpen, label: 'Classrooms', path: '/admin/classrooms' },
         { icon: Library, label: 'Question Bank', path: '/admin/question-banks' },
         { icon: FileText, label: 'Exams', path: '/admin/exams' },
+        { icon: Activity, label: 'Queue Monitor', path: '/admin/queue-monitor' },
     ];
 
     return (

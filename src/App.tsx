@@ -32,6 +32,7 @@ import StudentExamHistoryPage from "@/pages/student/StudentExamHistoryPage"
 import ExamTaker from "@/pages/student/ExamTaker"
 import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
 import ReadingMaterialFormPage from "@/pages/admin/reading-materials/ReadingMaterialFormPage"
+import QueueMonitorPage from "@/pages/admin/QueueMonitorPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -136,6 +137,8 @@ function App() {
                 <Route path="exams" element={<StudentExamsPage />} />
                 <Route path="exams/history" element={<StudentExamHistoryPage />} />
               </Route>
+              
+              <Route path="admin/queue-monitor" element={<QueueMonitorPage />} />
             </Route>
 
             {/* Standalone Routes (No Sidebar) */}
