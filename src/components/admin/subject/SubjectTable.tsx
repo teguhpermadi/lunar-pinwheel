@@ -8,7 +8,8 @@ import {
     Book,
     Pencil,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    FolderOpen
 } from 'lucide-react';
 
 interface SubjectTableProps {
@@ -16,6 +17,7 @@ interface SubjectTableProps {
     isLoading: boolean;
     onEdit: (subject: Subject) => void;
     onDelete: (id: string) => void;
+    onViewUnits?: (subject: Subject) => void;
     pagination?: {
         currentPage: number;
         lastPage: number;
@@ -28,7 +30,7 @@ interface SubjectTableProps {
     onSearch: (query: string) => void;
 }
 
-export default function SubjectTable({ subjects, isLoading, onEdit, onDelete, pagination, onPageChange, onBulkDelete, onSearch }: SubjectTableProps) {
+export default function SubjectTable({ subjects, isLoading, onEdit, onDelete, onViewUnits, pagination, onPageChange, onBulkDelete, onSearch }: SubjectTableProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -219,6 +221,15 @@ export default function SubjectTable({ subjects, isLoading, onEdit, onDelete, pa
                                             </td>
                                             <td className="px-8 py-5 text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    {onViewUnits && (
+                                                        <button
+                                                            onClick={() => onViewUnits(subject)}
+                                                            className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-all"
+                                                            title="View Units"
+                                                        >
+                                                            <FolderOpen className="size-5" />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => onEdit(subject)}
                                                         className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"

@@ -94,6 +94,10 @@ export default function SubjectManagement() {
         navigate(`/admin/subjects/${subject.id}`);
     };
 
+    const handleViewUnits = (subject: Subject) => {
+        navigate(`/admin/subjects/${subject.id}/units`);
+    };
+
     const handleDelete = async (id: string) => {
         const result = await MySwal.fire({
             title: 'Are you sure?',
@@ -183,6 +187,7 @@ export default function SubjectManagement() {
                 isLoading={isLoading}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onViewUnits={handleViewUnits}
                 pagination={pagination}
                 onPageChange={handlePageChange}
                 onBulkDelete={handleBulkDelete}

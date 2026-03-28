@@ -33,6 +33,7 @@ import ExamTaker from "@/pages/student/ExamTaker"
 import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
 import ReadingMaterialFormPage from "@/pages/admin/reading-materials/ReadingMaterialFormPage"
 import QueueMonitorPage from "@/pages/admin/QueueMonitorPage"
+import SubjectUnitManagement from "@/pages/admin/SubjectUnitManagement"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -120,6 +121,7 @@ function App() {
               <Route path="admin/subjects" element={<SubjectManagement />} />
               <Route path="admin/subjects/create" element={<SubjectForm />} />
               <Route path="admin/subjects/:id" element={<SubjectForm />} />
+              <Route path="admin/subjects/:subjectId/units" element={<SubjectUnitManagement />} />
               <Route path="admin/academic-years" element={<AcademicYearManagement />} />
               <Route path="admin/classrooms" element={<ClassroomManagement />} />
               <Route path="admin/classrooms/create" element={<ClassroomForm />} />
