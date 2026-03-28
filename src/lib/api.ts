@@ -1163,3 +1163,136 @@ export const queueMonitorApi = {
         return response.data;
     }
 };
+
+export interface LearningPath {
+    id: string;
+    subject_id: string;
+    classroom_id: string;
+    user_id: string;
+    title: string;
+    description: string | null;
+    order: number;
+    is_published: number;
+    subject?: Subject;
+    classroom?: Classroom;
+    user?: User;
+    units?: LearningUnit[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface LearningUnit {
+    id: string;
+    learning_path_id: string;
+    title: string;
+    order: number;
+    xp_reward: number;
+    is_published: number;
+    learning_path?: LearningPath;
+    lessons?: LearningLesson[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface LearningLesson {
+    id: string;
+    learning_unit_id: string;
+    question_bank_id: string | null;
+    title: string;
+    content_type: string;
+    content_data: string[] | null;
+    order: number;
+    xp_reward: number;
+    is_published: number;
+    unit?: LearningUnit;
+    question_bank?: QuestionBank;
+    created_at: string;
+    updated_at: string;
+}
+
+export const learningPathApi = {
+    getBySubject: async (subjectId: string, params?: any) => {
+        const response = await api.get('/learning-paths', { 
+            params: { 
+                ...params, 
+                subject_id: subjectId,
+                sort_by: params?.sort_by || 'order',
+                order: params?.order || 'asc',
+                per_page: params?.per_page || 100
+            } 
+        });
+        return response.data;
+    },
+    getLearningPath: async (id: string) => {
+        const response = await api.get(`/learning-paths/${id}`);
+        return response.data;
+    },
+    createLearningPath: async (data: { subject_id: string; classroom_id: string; title: string; description?: string; is_published?: number }) => {
+        const response = await api.post('/learning-paths', data);
+        return response.data;
+    },
+    updateLearningPath: async (id: string, data: { title?: string; description?: string; is_published?: number }) => {
+        console.log('API updateLearningPath:', { id, data });
+        const response = await api.put(`/learning-paths/${id}`, data);
+        console.log('API updateLearningPath response:', response.data);
+        return response.data;
+    },
+    deleteLearningPath: async (id: string) => {
+        const response = await api.delete(`/learning-paths/${id}`);
+        return response.data;
+    },
+    reorderLearningPaths: async (items: { id: string; order: number }[]) => {
+        const response = await api.post('/learning-paths/reorder', { items });
+        return response.data;
+    }
+};
+
+export const learningUnitApi = {
+    createLearningUnit: async (data: { learning_path_id: string; title: string; xp_reward?: number }) => {
+        const response = await api.post('/learning-units', data);
+        return response.data;
+    },
+    updateLearningUnit: async (id: string, data: { title?: string; xp_reward?: number; is_published?: number }) => {
+        console.log('API updateLearningUnit:', { id, data });
+        const response = await api.put(`/learning-units/${id}`, data);
+        console.log('API updateLearningUnit response:', response.data);
+        return response.data;
+    },
+    deleteLearningUnit: async (id: string) => {
+        const response = await api.delete(`/learning-units/${id}`);
+        return response.data;
+    },
+    reorderLearningUnits: async (items: { id: string; order: number }[]) => {
+        const response = await api.post('/learning-units/reorder', { items });
+        return response.data;
+    }
+};
+
+export const learningLessonApi = {
+    getByUnit: async (unitId: string, params?: any) => {
+        const response = await api.get('/learning-lessons', { params: { ...params, learning_unit_id: unitId } });
+        return response.data;
+    },
+    getLearningLesson: async (id: string) => {
+        const response = await api.get(`/learning-lessons/${id}`);
+        return response.data;
+    },
+    createLearningLesson: async (data: { learning_unit_id: string; title: string; content_type: string; question_bank_id?: string; content_data?: string[]; xp_reward?: number }) => {
+        const response = await api.post('/learning-lessons', data);
+        return response.data;
+    },
+    updateLearningLesson: async (id: string, data: { title?: string; content_type?: string; question_bank_id?: string; content_data?: string[]; xp_reward?: number; is_published?: number }) => {
+        console.log('API updateLearningLesson:', { id, data });
+        const response = await api.put(`/learning-lessons/${id}`, data);
+        console.log('API updateLearningLesson response:', response.data);
+        return response.data;
+    },
+    deleteLearningLesson: async (id: string) => {
+        const response = await api.delete(`/learning-lessons/${id}`);
+        return response.data;
+    },
+    reorderLearningLessons: async (items: { id: string; order: number }[]) => {
+        const response = await api.post('/learning-lessons/reorder', { items });
+        return response.data;
+    }
+};
