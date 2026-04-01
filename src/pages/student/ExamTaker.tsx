@@ -531,7 +531,13 @@ export default function ExamTaker() {
     const isQuestionAnswered = (q: any) => {
         if (q.student_answer === null || q.student_answer === undefined) return false;
         if (Array.isArray(q.student_answer)) return q.student_answer.length > 0;
-        if (typeof q.student_answer === 'object') return Object.keys(q.student_answer).length > 0;
+        if (typeof q.student_answer === 'object') {
+            const qt = q.exam_question?.question_type || q.exam_question?.type;
+            if (qt === 'true_false') {
+                return !!(q.student_answer as any)?.option_key;
+            }
+            return Object.keys(q.student_answer).length > 0;
+        }
         return q.student_answer !== '';
     };
 
@@ -685,13 +691,23 @@ export default function ExamTaker() {
     const isAllAnswered = () => {
         if (questions.length === 0) return false;
         return questions.every(q => {
+            const qt = q.exam_question?.question_type || q.exam_question?.type;
+            
             if (Array.isArray(q.student_answer)) return q.student_answer.length > 0;
             if (typeof q.student_answer === 'object' && q.student_answer !== null) {
-                if (q.exam_question?.question_type === 'categorization') {
-                    // All options must be assigned to some category
+                if (qt === 'categorization') {
                     return Object.keys(q.student_answer).length === q.exam_question?.options?.length;
                 }
-                return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: any) => o.metadata?.side === 'left').length;
+                if (qt === 'matching') {
+                    return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: any) => o.metadata?.side === 'left').length;
+                }
+                if (qt === 'true_false') {
+                    return !!(q.student_answer as any)?.option_key;
+                }
+                return Object.keys(q.student_answer).length > 0;
+            }
+            if (qt === 'true_false') {
+                return q.student_answer === 'T' || q.student_answer === 'F';
             }
             return q.student_answer !== null && q.student_answer !== undefined && q.student_answer !== '';
         });

@@ -1,34 +1,53 @@
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare } from 'lucide-react';
 
 interface TrueFalseCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // string (id/key)
-    keyAnswer?: any;    // { answer: string }
+    studentAnswer: any;
+    keyAnswer?: any;
+}
+
+interface StudentAnswerFormat {
+    option_key?: string;
+    reason?: string | null;
 }
 
 export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer }: TrueFalseCorrectionProps) {
-    const isSelected = (opt: QuestionOption) => {
-        if (!studentAnswer) return false;
+    const extractOptionKey = (answer: any): string | null => {
+        if (!answer) return null;
+        if (typeof answer === 'string') return answer;
+        if (typeof answer === 'object' && answer !== null) {
+            return answer.option_key || null;
+        }
+        return null;
+    };
 
-        const optionId = String(opt.id);
-        const optionKey = String(opt.option_key).toUpperCase();
-
-        const normalize = (val: any): string => {
-            if (typeof val === 'object' && val !== null) {
-                return String(val.id || val.option_id || val.option_key || val).toUpperCase();
+    const extractReason = (answer: any): string | null => {
+        if (!answer) return null;
+        if (typeof answer === 'object' && answer !== null) {
+            const reason = answer.reason;
+            if (reason && typeof reason === 'string' && reason.trim()) {
+                return reason.trim();
             }
-            return String(val).toUpperCase();
-        };
+        }
+        return null;
+    };
 
-        const normalizedStudentAnswer = normalize(studentAnswer);
-        return normalizedStudentAnswer === optionId.toUpperCase() || normalizedStudentAnswer === optionKey;
+    const selectedOptionKey = extractOptionKey(studentAnswer);
+    const studentAnswerReason = extractReason(studentAnswer);
+
+    const isSelected = (opt: QuestionOption) => {
+        if (!selectedOptionKey) return false;
+
+        const optionKey = String(opt.option_key).toUpperCase();
+        const normalizedAnswer = String(selectedOptionKey).toUpperCase();
+
+        return normalizedAnswer === optionKey;
     };
 
     const isCorrect = (opt: QuestionOption) => {
-        const optionId = String(opt.id);
         const optionKey = String(opt.option_key).toUpperCase();
 
         if (keyAnswer) {
@@ -43,7 +62,7 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
             };
 
             const targetValues = extractValues(keyAnswer);
-            if (targetValues.includes(optionId.toUpperCase()) || targetValues.includes(optionKey)) {
+            if (targetValues.includes(optionKey)) {
                 return true;
             }
         }
@@ -117,6 +136,18 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
                     );
                 })}
             </div>
+
+            {studentAnswerReason && (
+                <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 mb-2">
+                        <MessageSquare className="size-4 text-primary" />
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Alasan Siswa</span>
+                    </div>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                        "{studentAnswerReason}"
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
