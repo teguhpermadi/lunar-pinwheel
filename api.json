@@ -19249,7 +19249,7 @@
                         "type": "integer"
                     },
                     "user_id": {
-                        "type": "integer"
+                        "type": "string"
                     },
                     "question_bank_id": {
                         "type": [
@@ -19903,7 +19903,7 @@
                         "format": "uri"
                     },
                     "user_id": {
-                        "type": "integer"
+                        "type": "string"
                     },
                     "color": {
                         "type": [
@@ -20416,7 +20416,7 @@
                         "type": "integer"
                     },
                     "user_id": {
-                        "type": "integer"
+                        "type": "string"
                     },
                     "question_bank_id": {
                         "type": [
@@ -21024,7 +21024,7 @@
                         "format": "uri"
                     },
                     "user_id": {
-                        "type": "integer"
+                        "type": "string"
                     },
                     "color": {
                         "type": [

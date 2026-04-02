@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { examApi, Exam } from '@/lib/api';
+import { examApi, Exam, teacherApi, User } from '@/lib/api';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +14,8 @@ import {
     Pencil,
     Trash2,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -40,6 +41,9 @@ export default function ExamManagementPage() {
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [teachers, setTeachers] = useState<User[]>([]);
+    const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+    const [savingTeacherId, setSavingTeacherId] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
         lastPage: 1,
@@ -103,6 +107,58 @@ export default function ExamManagementPage() {
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
+
+    useEffect(() => {
+        if (isAdmin) {
+            fetchTeachers();
+        }
+    }, [isAdmin]);
+
+    const fetchTeachers = async () => {
+        setIsLoadingTeachers(true);
+        try {
+            const res = await teacherApi.getTeachers({ per_page: 100 });
+            if (res.success && res.data) {
+                const teacherData = res.data.data || res.data;
+                setTeachers(Array.isArray(teacherData) ? teacherData : []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch teachers:', error);
+        } finally {
+            setIsLoadingTeachers(false);
+        }
+    };
+
+    const handleTeacherChange = async (examId: string, userId: string) => {
+        setSavingTeacherId(examId);
+        try {
+            const response = await examApi.updateExam(examId, { user_id: userId || null });
+            if (response.success) {
+                setExams(prev => prev.map(exam => 
+                    exam.id === examId 
+                        ? { ...exam, teacher: userId ? teachers.find(t => t.id === userId) : undefined, user_id: userId }
+                        : exam
+                ));
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Teacher updated successfully'
+                });
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: response.message || 'Failed to update teacher'
+                });
+            }
+        } catch (error) {
+            console.error('Failed to update teacher:', error);
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed to update teacher'
+            });
+        } finally {
+            setSavingTeacherId(null);
+        }
+    };
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.lastPage) {
@@ -267,10 +323,25 @@ export default function ExamManagementPage() {
                                             </span>
                                         </td>
                                         {isAdmin && (
-                                            <td className="px-4 py-5">
-                                                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                                                    {exam.teacher?.name || 'No Teacher'}
-                                                </span>
+                                            <td className="px-4 py-5" onClick={(e) => e.stopPropagation()}>
+                                                {savingTeacherId === exam.id ? (
+                                                    <div className="flex items-center justify-center">
+                                                        <Loader2 className="size-4 animate-spin text-primary" />
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        value={exam.user_id || ''}
+                                                        onChange={(e) => handleTeacherChange(exam.id, e.target.value)}
+                                                        className="w-full px-2 py-1.5 text-sm bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
+                                                    >
+                                                        <option value="">No Teacher</option>
+                                                        {teachers.map((teacher) => (
+                                                            <option key={teacher.id} value={teacher.id}>
+                                                                {teacher.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
                                             </td>
                                         )}
                                         <td className="px-4 py-5">
