@@ -426,6 +426,26 @@ export default function ExamCorrectionPage() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!id) return;
+        
+        const checkProgress = async () => {
+            try {
+                const response = await examApi.getCorrectionProgress(id);
+                if (response.success && response.data) {
+                    setCorrectionProgress(response.data);
+                    if (response.data.latest_correction?.status === 'processing') {
+                        startPolling();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch correction progress on mount:', error);
+            }
+        };
+
+        checkProgress();
+    }, [id, startPolling]);
+
     const formatRemainingTime = (seconds: number | null): string => {
         if (seconds === null || seconds === 0) return 'Sedang dihitung...';
         if (seconds < 60) return `${Math.floor(seconds)} detik`;
