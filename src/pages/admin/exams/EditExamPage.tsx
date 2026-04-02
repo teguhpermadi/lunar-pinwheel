@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { examApi, Exam, Classroom, classroomApi } from '@/lib/api';
+import { examApi, Exam, Classroom, classroomApi, teacherApi, Teacher } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
@@ -70,11 +71,16 @@ const Toggle = ({ label, hint, description, checked, onChange, icon: Icon }: Tog
 export default function EditExamPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { user: authUser } = useAuth();
     const [activeTab, setActiveTab] = useState<Tab>('general');
     const [exam, setExam] = useState<Exam | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [availableClassrooms, setAvailableClassrooms] = useState<Classroom[]>([]);
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+
+    const isAdmin = authUser?.role === 'admin' || authUser?.user_type === 'admin';
 
     useEffect(() => {
         const fetchExam = async () => {
@@ -119,6 +125,26 @@ export default function EditExamPage() {
             fetchAvailableClassrooms();
         }
     }, [exam?.academic_year?.id]);
+
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            if (!isAdmin) return;
+            setIsLoadingTeachers(true);
+            try {
+                const response = await teacherApi.getTeachers({ per_page: 100 });
+                if (response.success) {
+                    const data = response.data;
+                    setTeachers(Array.isArray(data) ? data : (data.data || []));
+                }
+            } catch (error) {
+                console.error('Error fetching teachers:', error);
+            } finally {
+                setIsLoadingTeachers(false);
+            }
+        };
+
+        fetchTeachers();
+    }, [isAdmin]);
 
     const handleSave = async () => {
         if (!id || !exam) return;
@@ -315,6 +341,44 @@ export default function EditExamPage() {
                                                     />
                                                 </div>
                                             </div>
+                                            {isAdmin && (
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Teacher</label>
+                                                    {isLoadingTeachers ? (
+                                                        <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400">
+                                                            Loading teachers...
+                                                        </div>
+                                                    ) : (
+                                                        <select
+                                                            className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
+                                                            value={exam.user_id || ''}
+                                                            onChange={(e) => setExam(prev => prev ? { ...prev, user_id: e.target.value } : null)}
+                                                        >
+                                                            <option value="">Select Teacher</option>
+                                                            {teachers.map((teacher) => (
+                                                                <option key={teacher.id} value={teacher.id}>
+                                                                    {teacher.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {!isAdmin && exam.user && (
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Teacher</label>
+                                                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                                                        <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                            <span className="text-xs font-bold text-primary">
+                                                                {exam.user.name?.charAt(0).toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                                            {exam.user.name}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
 

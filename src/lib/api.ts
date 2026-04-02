@@ -821,6 +821,7 @@ export interface Exam {
     classrooms?: Classroom[];
     classroom_ids?: string[];
     user?: User;
+    user_id?: string;
     created_at: string;
     updated_at: string;
 }
