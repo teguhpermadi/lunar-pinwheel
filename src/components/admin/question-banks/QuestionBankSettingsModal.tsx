@@ -93,10 +93,15 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
 
     const onSubmit = async (data: SettingsFormData) => {
         try {
-            const payload = {
-                ...data,
-                ...(data.user_id === '' && isAdmin ? {} : { user_id: data.user_id || null }),
+            const payload: any = {
+                name: data.name,
+                subject_id: data.subject_id,
             };
+            
+            if (isAdmin && data.user_id !== undefined) {
+                payload.user_id = data.user_id || null;
+            }
+            
             const response = await questionBankApi.updateQuestionBank(bank.id, payload);
             if (response.success) {
                 onSaved(response.data);

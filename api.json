@@ -4623,7 +4623,7 @@
                                 "type": "object",
                                 "properties": {
                                     "user_id": {
-                                        "type": "integer"
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -4701,7 +4701,7 @@
                                 "type": "object",
                                 "properties": {
                                     "user_id": {
-                                        "type": "integer"
+                                        "type": "string"
                                     },
                                     "minutes": {
                                         "type": "integer",
@@ -20658,6 +20658,12 @@
                     },
                     "subject_id": {
                         "type": "integer"
+                    },
+                    "user_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 },
                 "title": "UpdateQuestionBankRequest"
