@@ -2,14 +2,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Modal from '@/components/ui/modal';
-import { QuestionBank, Subject, subjectApi, questionBankApi } from '@/lib/api';
+import { QuestionBank, Subject, subjectApi, questionBankApi, User } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { teacherApi } from '@/lib/api';
 
 const settingsSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
     subject_id: z.string().min(1, 'Subject is required'),
+    user_id: z.string().optional(),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -23,8 +26,12 @@ interface QuestionBankSettingsModalProps {
 
 export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSaved }: QuestionBankSettingsModalProps) {
     const { selectedYearId } = useAcademicYear();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+    const [teachers, setTeachers] = useState<User[]>([]);
+    const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
 
     const {
         register,
@@ -43,12 +50,16 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
     useEffect(() => {
         if (isOpen) {
             fetchSubjects();
+            if (isAdmin) {
+                fetchTeachers();
+            }
             reset({
                 name: bank.name,
                 subject_id: bank.subject_id,
+                user_id: bank.user_id || '',
             });
         }
-    }, [isOpen, bank, reset]);
+    }, [isOpen, bank, reset, isAdmin]);
 
     const fetchSubjects = async () => {
         setIsLoadingSubjects(true);
@@ -65,9 +76,28 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
         }
     };
 
+    const fetchTeachers = async () => {
+        setIsLoadingTeachers(true);
+        try {
+            const res = await teacherApi.getTeachers({ per_page: 100 });
+            if (res.success && res.data) {
+                const teacherData = res.data.data || res.data;
+                setTeachers(Array.isArray(teacherData) ? teacherData : []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch teachers:', error);
+        } finally {
+            setIsLoadingTeachers(false);
+        }
+    };
+
     const onSubmit = async (data: SettingsFormData) => {
         try {
-            const response = await questionBankApi.updateQuestionBank(bank.id, data);
+            const payload = {
+                ...data,
+                ...(data.user_id === '' && isAdmin ? {} : { user_id: data.user_id || null }),
+            };
+            const response = await questionBankApi.updateQuestionBank(bank.id, payload);
             if (response.success) {
                 onSaved(response.data);
                 onClose();
@@ -143,6 +173,26 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
                     </select>
                     {errors.subject_id && <p className="text-red-500 text-xs mt-1">{errors.subject_id.message}</p>}
                 </div>
+
+                {isAdmin && (
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Teacher
+                        </label>
+                        <select
+                            {...register('user_id')}
+                            disabled={isLoadingTeachers}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm disabled:opacity-50"
+                        >
+                            <option value="">Select Teacher</option>
+                            {teachers.map((teacher) => (
+                                <option key={teacher.id} value={teacher.id}>
+                                    {teacher.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 {isLoadingSubjects && (
                     <div className="text-sm text-slate-400 text-center flex items-center justify-center gap-2">
