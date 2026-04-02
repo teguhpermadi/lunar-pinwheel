@@ -84,7 +84,7 @@ export interface CorrectionProgress {
     exam_id: number;
     exam_title: string;
     latest_correction: {
-        id: number;
+        id: string;
         provider: string;
         batch_id: string;
         total_jobs: number;
@@ -97,6 +97,16 @@ export interface CorrectionProgress {
         started_at: string;
         finished_at: string | null;
     } | null;
+    question_progress: {
+        exam_question_id: number;
+        question_number: number;
+        question_content: string;
+        score_value: number;
+        total_to_correct: number;
+        corrected_count: number;
+        status: 'pending' | 'processing' | 'completed' | 'failed';
+        progress_percentage: number;
+    }[];
     all_corrections: any[];
 }
 
@@ -818,23 +828,6 @@ export default function ExamCorrectionPage() {
                                                         <span className="text-[8px] font-black uppercase">Done</span>
                                                     </div>
                                                 );
-                                                if (NEEDS_DOUBLE_CORRECTION_TYPES.includes(q.question_type)) {
-                                                    const isPartiallyCorrectedCount = (status?.corrected_count ?? 0);
-                                                    const totalToCorrect = (status?.total_to_correct ?? 0);
-                                                    return isPartiallyCorrectedCount > 0 
-                                                        ? (
-                                                            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800 shrink-0" title={`${isPartiallyCorrectedCount}/${totalToCorrect} Corrected`}>
-                                                                <AlertCircle className="w-3 h-3" />
-                                                                <span className="text-[8px] font-black uppercase">Partial</span>
-                                                            </div>
-                                                        )
-                                                        : (
-                                                            <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-400 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
-                                                                <Circle className="w-2.5 h-2.5" />
-                                                                <span className="text-[8px] font-black uppercase">Pending</span>
-                                                            </div>
-                                                        );
-                                                }
                                                 return null;
                                             })()}
                                         </div>
@@ -858,6 +851,81 @@ export default function ExamCorrectionPage() {
                                 </button>
                             ))}
                         </div>
+
+                        {/* AI Correction Progress by Question */}
+                        {correctionProgress?.question_progress && correctionProgress.question_progress.length > 0 && (
+                            <div className="border-t border-slate-200 dark:border-slate-800">
+                                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-slate-200 dark:border-slate-800">
+                                    <div className="flex items-center gap-2">
+                                        <RefreshCw className="w-3.5 h-3.5 text-indigo-500" />
+                                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">AI Correction Progress</h2>
+                                    </div>
+                                    {correctionProgress.latest_correction && (
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                                                    style={{ width: `${correctionProgress.latest_correction.progress_percentage}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">
+                                                {correctionProgress.latest_correction.progress_percentage}%
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                                    {correctionProgress.question_progress.map((qp) => (
+                                        <button
+                                            key={qp.exam_question_id}
+                                            onClick={() => {
+                                                const qIndex = masterQuestions.findIndex(mq => mq.id === qp.exam_question_id.toString());
+                                                if (qIndex !== -1) {
+                                                    setSelectedQuestionIndex(qIndex);
+                                                    setViewMode('by-question');
+                                                }
+                                            }}
+                                            className="w-full p-3 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                        >
+                                            <div className={cn(
+                                                "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold",
+                                                qp.status === 'completed' ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                                qp.status === 'processing' ? "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" :
+                                                qp.status === 'failed' ? "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400" :
+                                                "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
+                                            )}>
+                                                {qp.status === 'completed' ? <Check className="w-3 h-3" /> :
+                                                 qp.status === 'processing' ? <RefreshCw className="w-3 h-3 animate-spin" /> :
+                                                 qp.status === 'failed' ? <X className="w-3 h-3" /> :
+                                                 qp.question_number}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[10px] font-medium text-slate-700 dark:text-slate-300 truncate">
+                                                    Q{qp.question_number} ({qp.score_value}pt)
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className={cn(
+                                                                "h-full rounded-full transition-all duration-300",
+                                                                qp.status === 'completed' ? "bg-emerald-500" :
+                                                                qp.status === 'processing' ? "bg-blue-500" :
+                                                                qp.status === 'failed' ? "bg-red-500" :
+                                                                "bg-slate-300"
+                                                            )}
+                                                            style={{ width: `${qp.progress_percentage}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-[8px] font-bold text-slate-400 shrink-0">
+                                                        {qp.corrected_count}/{qp.total_to_correct}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
             </aside>
