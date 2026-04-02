@@ -1143,7 +1143,7 @@ export default function ExamCorrectionPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {user?.role === 'admin' && (
+                        {(user?.role === 'admin' || user?.role === 'teacher') && (
                             <button
                                 onClick={() => handleAiCorrect({})}
                                 className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
