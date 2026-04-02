@@ -331,7 +331,7 @@ export default function ExamCorrectionPage() {
     const handleAiCorrect = async (params: { exam_question_id?: string, exam_session_id?: string }) => {
         if (!id) return;
         try {
-            const response = await examApi.aiCorrect(id, { ...params, provider: 'openrouter' });
+            const response = await examApi.aiCorrect(id, params);
             if (response.success) {
                 if (response.data.correction_statuses) {
                     setCorrectionStatuses(response.data.correction_statuses);

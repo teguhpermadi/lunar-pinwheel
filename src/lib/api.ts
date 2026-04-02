@@ -936,8 +936,11 @@ export const examApi = {
         const response = await api.delete(`/exams/${examId}/sessions/${sessionId}`);
         return response.data;
     },
-    async aiCorrect(examId: string, params: { provider?: string, exam_question_id?: string, exam_session_id?: string } = { provider: 'openrouter' }) {
-        const response = await api.post(`/exams/${examId}/ai-correct`, params);
+    async aiCorrect(examId: string, params: { provider?: string, exam_question_id?: string, exam_session_id?: string } = {}) {
+        const response = await api.post(`/exams/${examId}/ai-correct`, {
+            ...params,
+            provider: params.provider || import.meta.env.VITE_AI_PROVIDER || 'lmstudio'
+        });
         return response.data;
     },
 };
