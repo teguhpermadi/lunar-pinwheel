@@ -9,11 +9,6 @@ interface TrueFalseCorrectionProps {
     keyAnswer?: any;
 }
 
-interface StudentAnswerFormat {
-    option_key?: string;
-    reason?: string | null;
-}
-
 export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer }: TrueFalseCorrectionProps) {
     const extractOptionKey = (answer: any): string | null => {
         if (!answer) return null;
