@@ -1194,7 +1194,7 @@ export default function ExamCorrectionPage() {
                                         sessions={sessions}
                                         selectedSessionId={selectedSessionId}
                                         setQuestions={setQuestions}
-                                        isAdmin={user?.role === 'admin'}
+                                        isAdmin={user?.role === 'admin' || user?.role === 'teacher'}
                                         onAiCorrect={(sessionId, questionId) => handleAiCorrect({ exam_session_id: sessionId, exam_question_id: questionId })}
                                         onRefresh={() => {
                                             fetchSessions();
@@ -1217,7 +1217,7 @@ export default function ExamCorrectionPage() {
                                     handleUpdateCorrection={handleUpdateCorrection}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
-                                    isAdmin={user?.role === 'admin'}
+                                    isAdmin={user?.role === 'admin' || user?.role === 'teacher'}
                                     onAiCorrect={(questionId) => handleAiCorrect({ exam_question_id: questionId })}
                                     setBulkAnswers={setBulkAnswers}
                                     onRefresh={() => {
