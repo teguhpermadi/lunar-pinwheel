@@ -269,7 +269,7 @@ export default function ExamManagementPage() {
                                         {isAdmin && (
                                             <td className="px-4 py-5">
                                                 <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                                                    {exam.user?.name || 'No Teacher'}
+                                                    {exam.teacher?.name || 'No Teacher'}
                                                 </span>
                                             </td>
                                         )}

@@ -823,6 +823,7 @@ export interface Exam {
     classroom_ids?: string[];
     user?: User;
     user_id?: string;
+    teacher?: User;
     created_at: string;
     updated_at: string;
 }
