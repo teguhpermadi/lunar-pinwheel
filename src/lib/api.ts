@@ -945,6 +945,10 @@ export const examApi = {
         });
         return response.data;
     },
+    async getCorrectionProgress(examId: string) {
+        const response = await api.get(`/exams/${examId}/correction-progress`);
+        return response.data;
+    },
 };
 
 export const examQuestionApi = {

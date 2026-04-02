@@ -80,6 +80,26 @@ export interface QuestionCorrectionStatus {
     last_error: string | null;
 }
 
+export interface CorrectionProgress {
+    exam_id: number;
+    exam_title: string;
+    latest_correction: {
+        id: number;
+        provider: string;
+        batch_id: string;
+        total_jobs: number;
+        completed_jobs: number;
+        failed_jobs: number;
+        avg_time_per_job: number;
+        status: 'processing' | 'completed' | 'failed';
+        progress_percentage: number;
+        estimated_remaining_seconds: number | null;
+        started_at: string;
+        finished_at: string | null;
+    } | null;
+    all_corrections: any[];
+}
+
 export default function ExamCorrectionPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -135,6 +155,10 @@ export default function ExamCorrectionPage() {
 
     const [isBulkPartialModalOpen, setIsBulkPartialModalOpen] = useState(false);
     const [bulkPartialScore, setBulkPartialScore] = useState(0);
+
+    // AI Correction Progress State
+    const [correctionProgress, setCorrectionProgress] = useState<CorrectionProgress | null>(null);
+    const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const filteredSessions = useMemo(() => {
         if (attemptFilter === 'all') return sessions;
@@ -336,6 +360,10 @@ export default function ExamCorrectionPage() {
                 if (response.data.correction_statuses) {
                     setCorrectionStatuses(response.data.correction_statuses);
                 }
+                if (response.data.stats_id) {
+                    fetchCorrectionProgress();
+                    startPolling();
+                }
                 Swal.fire({
                     title: 'Started',
                     text: response.message,
@@ -349,6 +377,66 @@ export default function ExamCorrectionPage() {
         } catch (error: any) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to trigger AI correction', 'error');
         }
+    };
+
+    const fetchCorrectionProgress = useCallback(async () => {
+        if (!id) return;
+        try {
+            const response = await examApi.getCorrectionProgress(id);
+            if (response.success && response.data) {
+                setCorrectionProgress(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch correction progress:', error);
+        }
+    }, [id]);
+
+    const startPolling = useCallback(() => {
+        if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+        }
+        pollingRef.current = setInterval(() => {
+            fetchCorrectionProgress();
+        }, 3000);
+    }, [fetchCorrectionProgress]);
+
+    const stopPolling = useCallback(() => {
+        if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => {
+        if (correctionProgress?.latest_correction) {
+            if (correctionProgress.latest_correction.status !== 'processing') {
+                stopPolling();
+                if (correctionProgress.latest_correction.status === 'completed') {
+                    fetchSessions();
+                }
+            }
+        }
+    }, [correctionProgress, stopPolling, fetchSessions]);
+
+    useEffect(() => {
+        return () => {
+            if (pollingRef.current) {
+                clearInterval(pollingRef.current);
+            }
+        };
+    }, []);
+
+    const formatRemainingTime = (seconds: number | null): string => {
+        if (seconds === null || seconds === 0) return 'Sedang dihitung...';
+        if (seconds < 60) return `${Math.floor(seconds)} detik`;
+        if (seconds < 3600) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return secs > 0 ? `${mins} menit ${secs} detik` : `${mins} menit`;
+        }
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        return mins > 0 ? `${hours} jam ${mins} menit` : `${hours} jam`;
     };
 
 
@@ -1151,6 +1239,35 @@ export default function ExamCorrectionPage() {
                                 <ShieldCheck className="w-4 h-4" />
                                 AI Correct All
                             </button>
+                        )}
+                        {correctionProgress?.latest_correction && (
+                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                {correctionProgress.latest_correction.status === 'processing' && (
+                                    <>
+                                        <div className="size-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                                                {correctionProgress.latest_correction.completed_jobs}/{correctionProgress.latest_correction.total_jobs} ({correctionProgress.latest_correction.progress_percentage}%)
+                                            </span>
+                                            <span className="text-[9px] text-slate-400">
+                                                {formatRemainingTime(correctionProgress.latest_correction.estimated_remaining_seconds)}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                                {correctionProgress.latest_correction.status === 'completed' && (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
+                                    </>
+                                )}
+                                {correctionProgress.latest_correction.status === 'failed' && (
+                                    <>
+                                        <XCircle className="w-4 h-4 text-red-500" />
+                                        <span className="text-[10px] font-bold text-red-600 dark:text-red-400">Gagal</span>
+                                    </>
+                                )}
+                            </div>
                         )}
                         <div className="text-right hidden sm:block">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
