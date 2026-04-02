@@ -42,7 +42,6 @@ export default function ExamManagementPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [teachers, setTeachers] = useState<User[]>([]);
-    const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
     const [savingTeacherId, setSavingTeacherId] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -115,7 +114,6 @@ export default function ExamManagementPage() {
     }, [isAdmin]);
 
     const fetchTeachers = async () => {
-        setIsLoadingTeachers(true);
         try {
             const res = await teacherApi.getTeachers({ per_page: 100 });
             if (res.success && res.data) {
@@ -124,8 +122,6 @@ export default function ExamManagementPage() {
             }
         } catch (error) {
             console.error('Failed to fetch teachers:', error);
-        } finally {
-            setIsLoadingTeachers(false);
         }
     };
 
