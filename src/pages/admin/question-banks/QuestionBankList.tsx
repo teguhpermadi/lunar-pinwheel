@@ -39,7 +39,8 @@ function timeAgo(dateString: string) {
 
 export default function QuestionBankList() {
     // call hook for possible side-effects; user not used here
-    useAuth();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const { selectedYearId } = useAcademicYear();
     const navigate = useNavigate();
 
@@ -161,6 +162,7 @@ export default function QuestionBankList() {
                                 <th className="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Bank Details</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject</th>
+                                {isAdmin && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>
                                 <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
@@ -184,6 +186,7 @@ export default function QuestionBankList() {
                                         <td className="px-4 py-5">
                                             <Skeleton className="h-6 w-24 rounded-full" />
                                         </td>
+                                        {isAdmin && <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>}
                                         <td className="px-4 py-5 text-center">
                                             <Skeleton className="size-8 rounded-full mx-auto" />
                                         </td>
@@ -197,7 +200,7 @@ export default function QuestionBankList() {
                                 ))
                             ) : questionBanks.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="text-center py-12 text-slate-500">
+                                    <td colSpan={isAdmin ? 6 : 5} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Library className="size-10 text-slate-300" />
                                             <p>No question banks found.</p>
@@ -231,6 +234,13 @@ export default function QuestionBankList() {
                                             {(bank as any).subject?.name || 'Unknown Subject'}
                                         </span>
                                     </td>
+                                    {isAdmin && (
+                                        <td className="px-4 py-5">
+                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                                                {(bank as any).user?.name || 'No Teacher'}
+                                            </span>
+                                        </td>
+                                    )}
                                     <td className="px-4 py-5 text-center">
                                         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
                                             {bank.questions_count || 0}

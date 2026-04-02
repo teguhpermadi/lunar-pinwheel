@@ -568,6 +568,7 @@ export interface QuestionBank {
     subject_id: string;
     user_id: string;
     subject?: Subject;
+    user?: User;
     questions_count?: number;
     questions?: Question[];
     created_at: string;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -33,6 +34,8 @@ const Toast = MySwal.mixin({
 
 export default function ExamManagementPage() {
     const { selectedYearId } = useAcademicYear();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -211,6 +214,7 @@ export default function ExamManagementPage() {
                                 <th className="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Exam Title</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject Name</th>
+                                {isAdmin && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Target Classrooms</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Exam Status</th>
                                 <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
@@ -230,7 +234,7 @@ export default function ExamManagementPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-5"><Skeleton className="h-4 w-24" /></td>
+                                        {isAdmin && <td className="px-4 py-5"><Skeleton className="h-4 w-24" /></td>}
                                         <td className="px-4 py-5"><Skeleton className="h-5 w-16 rounded-full" /></td>
                                         <td className="px-4 py-5"><Skeleton className="h-5 w-20 rounded-full mx-auto" /></td>
                                         <td className="px-8 py-5"><Skeleton className="h-8 w-32 ml-auto" /></td>
@@ -262,6 +266,13 @@ export default function ExamManagementPage() {
                                                 {exam.subject?.name || 'No Subject'}
                                             </span>
                                         </td>
+                                        {isAdmin && (
+                                            <td className="px-4 py-5">
+                                                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                                                    {exam.user?.name || 'No Teacher'}
+                                                </span>
+                                            </td>
+                                        )}
                                         <td className="px-4 py-5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[200px]">
                                                 {exam.classrooms && exam.classrooms.length > 0 ? (
@@ -326,7 +337,7 @@ export default function ExamManagementPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-8 py-12 text-center text-slate-400">
+                                    <td colSpan={isAdmin ? 7 : 6} className="px-8 py-12 text-center text-slate-400">
                                         No exams found.
                                     </td>
                                 </tr>
