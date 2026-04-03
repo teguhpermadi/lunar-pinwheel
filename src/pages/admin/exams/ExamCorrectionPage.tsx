@@ -19,7 +19,6 @@ import {
     XCircle,
     MinusCircle,
     RefreshCw,
-    Circle,
     AlertCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -339,29 +338,6 @@ export default function ExamCorrectionPage() {
         }
     }, [id, selectedQuestionIndex, viewMode, masterQuestions, fetchByQuestion]);
 
-    useEffect(() => {
-        if (!id || !(window as any).Echo) return;
-
-        const channel = (window as any).Echo.channel(`exam.${id}.ai-correction`);
-        channel.listen('.AiScoreUpdated', (e: any) => {
-            console.log('AI Score Updated:', e);
-            // Refresh sessions to get updated correction_statuses and session scores
-            fetchSessions();
-            if (viewMode === 'by-student' && selectedSessionId) {
-                fetchDetail(selectedSessionId);
-            } else if (viewMode === 'by-question' && masterQuestions.length > 0) {
-                const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
-                if (currentQuestionId) {
-                    fetchByQuestion(currentQuestionId);
-                }
-            }
-        });
-
-        return () => {
-            (window as any).Echo.leave(`exam.${id}.ai-correction`);
-        };
-    }, [id, viewMode, selectedSessionId, selectedQuestionIndex, masterQuestions, fetchSessions, fetchDetail, fetchByQuestion]);
-
     const handleAiCorrect = async (params: { exam_question_id?: string, exam_session_id?: string }) => {
         if (!id) return;
         try {
@@ -435,6 +411,31 @@ export default function ExamCorrectionPage() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!id || !(window as any).Echo) return;
+
+        const finishedChannel = (window as any).Echo.channel(`exam.${id}.correction-finished`);
+        finishedChannel.listen('.AiCorrectionFinished', (e: any) => {
+            console.log('AI Correction Finished:', e);
+            stopPolling();
+            fetchCorrectionProgress();
+            fetchSessions();
+            Swal.fire({
+                title: 'Selesai',
+                text: e.message || 'Koreksi AI telah selesai diproses.',
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        });
+
+        return () => {
+            (window as any).Echo.leave(`exam.${id}.correction-finished`);
+        };
+    }, [id, stopPolling, fetchCorrectionProgress, fetchSessions]);
 
     useEffect(() => {
         if (!id) return;
