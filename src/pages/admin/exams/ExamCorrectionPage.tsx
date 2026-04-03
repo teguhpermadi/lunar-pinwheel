@@ -79,36 +79,6 @@ export interface QuestionCorrectionStatus {
     last_error: string | null;
 }
 
-export interface CorrectionProgress {
-    exam_id: number;
-    exam_title: string;
-    latest_correction: {
-        id: string;
-        provider: string;
-        batch_id: string;
-        total_jobs: number;
-        completed_jobs: number;
-        failed_jobs: number;
-        avg_time_per_job: number;
-        status: 'processing' | 'completed' | 'failed';
-        progress_percentage: number;
-        estimated_remaining_seconds: number | null;
-        started_at: string;
-        finished_at: string | null;
-    } | null;
-    question_progress: {
-        exam_question_id: number;
-        question_number: number;
-        question_content: string;
-        score_value: number;
-        total_to_correct: number;
-        corrected_count: number;
-        status: 'pending' | 'processing' | 'completed' | 'failed';
-        progress_percentage: number;
-    }[];
-    all_corrections: any[];
-}
-
 export default function ExamCorrectionPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -164,10 +134,6 @@ export default function ExamCorrectionPage() {
 
     const [isBulkPartialModalOpen, setIsBulkPartialModalOpen] = useState(false);
     const [bulkPartialScore, setBulkPartialScore] = useState(0);
-
-    // AI Correction Progress State
-    const [correctionProgress, setCorrectionProgress] = useState<CorrectionProgress | null>(null);
-    const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const filteredSessions = useMemo(() => {
         if (attemptFilter === 'all') return sessions;
@@ -337,139 +303,6 @@ export default function ExamCorrectionPage() {
             }
         }
     }, [id, selectedQuestionIndex, viewMode, masterQuestions, fetchByQuestion]);
-
-    const handleAiCorrect = async (params: { exam_question_id?: string, exam_session_id?: string }) => {
-        if (!id) return;
-        try {
-            const response = await examApi.aiCorrect(id, params);
-            if (response.success) {
-                if (response.data.correction_statuses) {
-                    setCorrectionStatuses(response.data.correction_statuses);
-                }
-                if (response.data.stats_id) {
-                    fetchCorrectionProgress();
-                    startPolling();
-                }
-                Swal.fire({
-                    title: 'Started',
-                    text: response.message,
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-            }
-        } catch (error: any) {
-            Swal.fire('Error', error.response?.data?.message || 'Failed to trigger AI correction', 'error');
-        }
-    };
-
-    const fetchCorrectionProgress = useCallback(async () => {
-        if (!id) return;
-        try {
-            const response = await examApi.getCorrectionProgress(id);
-            if (response.success && response.data) {
-                setCorrectionProgress(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch correction progress:', error);
-        }
-    }, [id]);
-
-    const startPolling = useCallback(() => {
-        if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-        }
-        pollingRef.current = setInterval(() => {
-            fetchCorrectionProgress();
-        }, 3000);
-    }, [fetchCorrectionProgress]);
-
-    const stopPolling = useCallback(() => {
-        if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-            pollingRef.current = null;
-        }
-    }, []);
-
-    useEffect(() => {
-        if (correctionProgress?.latest_correction) {
-            if (correctionProgress.latest_correction.status !== 'processing') {
-                stopPolling();
-                if (correctionProgress.latest_correction.status === 'completed') {
-                    fetchSessions();
-                }
-            }
-        }
-    }, [correctionProgress, stopPolling, fetchSessions]);
-
-    useEffect(() => {
-        return () => {
-            if (pollingRef.current) {
-                clearInterval(pollingRef.current);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!id || !(window as any).Echo) return;
-
-        const finishedChannel = (window as any).Echo.channel(`exam.${id}.correction-finished`);
-        finishedChannel.listen('.AiCorrectionFinished', (e: any) => {
-            console.log('AI Correction Finished:', e);
-            stopPolling();
-            fetchCorrectionProgress();
-            fetchSessions();
-            Swal.fire({
-                title: 'Selesai',
-                text: e.message || 'Koreksi AI telah selesai diproses.',
-                icon: 'success',
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        });
-
-        return () => {
-            (window as any).Echo.leave(`exam.${id}.correction-finished`);
-        };
-    }, [id, stopPolling, fetchCorrectionProgress, fetchSessions]);
-
-    useEffect(() => {
-        if (!id) return;
-        
-        const checkProgress = async () => {
-            try {
-                const response = await examApi.getCorrectionProgress(id);
-                if (response.success && response.data) {
-                    setCorrectionProgress(response.data);
-                    if (response.data.latest_correction?.status === 'processing') {
-                        startPolling();
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to fetch correction progress on mount:', error);
-            }
-        };
-
-        checkProgress();
-    }, [id, startPolling]);
-
-    const formatRemainingTime = (seconds: number | null): string => {
-        if (seconds === null || seconds === 0) return 'Sedang dihitung...';
-        if (seconds < 60) return `${Math.floor(seconds)} detik`;
-        if (seconds < 3600) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return secs > 0 ? `${mins} menit ${secs} detik` : `${mins} menit`;
-        }
-        const hours = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        return mins > 0 ? `${hours} jam ${mins} menit` : `${hours} jam`;
-    };
-
 
     const handleUpdateCorrection = async (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => {
         const targetSessionId = sessionIdOverride || selectedSessionId;
@@ -852,81 +685,6 @@ export default function ExamCorrectionPage() {
                                 </button>
                             ))}
                         </div>
-
-                        {/* AI Correction Progress by Question */}
-                        {correctionProgress?.question_progress && correctionProgress.question_progress.length > 0 && (
-                            <div className="border-t border-slate-200 dark:border-slate-800">
-                                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-slate-200 dark:border-slate-800">
-                                    <div className="flex items-center gap-2">
-                                        <RefreshCw className="w-3.5 h-3.5 text-indigo-500" />
-                                        <h2 className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">AI Correction Progress</h2>
-                                    </div>
-                                    {correctionProgress.latest_correction && (
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="h-full bg-indigo-500 rounded-full transition-all duration-300"
-                                                    style={{ width: `${correctionProgress.latest_correction.progress_percentage}%` }}
-                                                />
-                                            </div>
-                                            <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">
-                                                {correctionProgress.latest_correction.progress_percentage}%
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
-                                    {correctionProgress.question_progress.map((qp) => (
-                                        <button
-                                            key={qp.exam_question_id}
-                                            onClick={() => {
-                                                const qIndex = masterQuestions.findIndex(mq => mq.id === qp.exam_question_id.toString());
-                                                if (qIndex !== -1) {
-                                                    setSelectedQuestionIndex(qIndex);
-                                                    setViewMode('by-question');
-                                                }
-                                            }}
-                                            className="w-full p-3 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                        >
-                                            <div className={cn(
-                                                "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold",
-                                                qp.status === 'completed' ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
-                                                qp.status === 'processing' ? "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" :
-                                                qp.status === 'failed' ? "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400" :
-                                                "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
-                                            )}>
-                                                {qp.status === 'completed' ? <Check className="w-3 h-3" /> :
-                                                 qp.status === 'processing' ? <RefreshCw className="w-3 h-3 animate-spin" /> :
-                                                 qp.status === 'failed' ? <X className="w-3 h-3" /> :
-                                                 qp.question_number}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-medium text-slate-700 dark:text-slate-300 truncate">
-                                                    Q{qp.question_number} ({qp.score_value}pt)
-                                                </p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className={cn(
-                                                                "h-full rounded-full transition-all duration-300",
-                                                                qp.status === 'completed' ? "bg-emerald-500" :
-                                                                qp.status === 'processing' ? "bg-blue-500" :
-                                                                qp.status === 'failed' ? "bg-red-500" :
-                                                                "bg-slate-300"
-                                                            )}
-                                                            style={{ width: `${qp.progress_percentage}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-[8px] font-bold text-slate-400 shrink-0">
-                                                        {qp.corrected_count}/{qp.total_to_correct}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </>
                 )}
             </aside>
@@ -1319,49 +1077,9 @@ export default function ExamCorrectionPage() {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {(user?.role === 'admin' || user?.role === 'teacher') && (
-                            <button
-                                onClick={() => handleAiCorrect({})}
-                                className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-indigo-100 dark:shadow-none active:scale-95"
-                            >
-                                <ShieldCheck className="w-4 h-4" />
-                                AI Correct All
-                            </button>
-                        )}
-                        {correctionProgress?.latest_correction && (
-                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                                {correctionProgress.latest_correction.status === 'processing' && (
-                                    <>
-                                        <div className="size-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                                                {correctionProgress.latest_correction.completed_jobs}/{correctionProgress.latest_correction.total_jobs} ({correctionProgress.latest_correction.progress_percentage}%)
-                                            </span>
-                                            <span className="text-[9px] text-slate-400">
-                                                {formatRemainingTime(correctionProgress.latest_correction.estimated_remaining_seconds)}
-                                            </span>
-                                        </div>
-                                    </>
-                                )}
-                                {correctionProgress.latest_correction.status === 'completed' && (
-                                    <>
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
-                                    </>
-                                )}
-                                {correctionProgress.latest_correction.status === 'failed' && (
-                                    <>
-                                        <XCircle className="w-4 h-4 text-red-500" />
-                                        <span className="text-[10px] font-bold text-red-600 dark:text-red-400">Gagal</span>
-                                    </>
-                                )}
-                            </div>
-                        )}
-                        <div className="text-right hidden sm:block">
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
-                            <p className="text-xs font-bold text-emerald-500 uppercase">Live Correction</p>
-                        </div>
+                    <div className="text-right hidden sm:block">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
+                        <p className="text-xs font-bold text-emerald-500 uppercase">Live Correction</p>
                     </div>
                 </div>
             </header>
@@ -1401,7 +1119,6 @@ export default function ExamCorrectionPage() {
                                         selectedSessionId={selectedSessionId}
                                         setQuestions={setQuestions}
                                         isAdmin={user?.role === 'admin' || user?.role === 'teacher'}
-                                        onAiCorrect={(sessionId, questionId) => handleAiCorrect({ exam_session_id: sessionId, exam_question_id: questionId })}
                                         onRefresh={() => {
                                             fetchSessions();
                                             if (selectedSessionId) fetchDetail(selectedSessionId);
@@ -1424,7 +1141,6 @@ export default function ExamCorrectionPage() {
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                     isAdmin={user?.role === 'admin' || user?.role === 'teacher'}
-                                    onAiCorrect={(questionId) => handleAiCorrect({ exam_question_id: questionId })}
                                     setBulkAnswers={setBulkAnswers}
                                     onRefresh={() => {
                                         fetchSessions();

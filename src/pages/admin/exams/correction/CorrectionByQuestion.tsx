@@ -40,7 +40,6 @@ interface CorrectionByQuestionProps {
     setPartialScoreData: (data: any) => void;
     setIsPartialModalOpen: (open: boolean) => void;
     isAdmin?: boolean;
-    onAiCorrect?: (questionId: string) => void;
     setBulkAnswers: (answers: any[]) => void;
     onRefresh?: () => void;
 }
@@ -60,7 +59,6 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     setPartialScoreData,
     setIsPartialModalOpen,
     isAdmin,
-    onAiCorrect,
     setBulkAnswers,
     onRefresh
 }) => {
@@ -130,15 +128,6 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 title="Refresh Data"
                             >
                                 <RotateCw className="w-3.5 h-3.5" />
-                            </button>
-                        )}
-                        {isAdmin && currentQuestionType === 'essay' && onAiCorrect && (
-                            <button
-                                onClick={() => onAiCorrect(currentMasterQuestion?.id)}
-                                className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-[10px] font-black uppercase shadow-lg shadow-indigo-200 dark:shadow-none active:scale-95"
-                            >
-                                <ShieldCheck className="w-4 h-4" />
-                                AI Correct
                             </button>
                         )}
                         <button
