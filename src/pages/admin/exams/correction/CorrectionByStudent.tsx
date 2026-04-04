@@ -49,7 +49,6 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     sessions,
     selectedSessionId,
     setQuestions,
-    isAdmin,
     onRefresh
 }) => {
     const currentSession = sessions.find(s => s.id === selectedSessionId);

@@ -58,7 +58,6 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     handleUpdateCorrection,
     setPartialScoreData,
     setIsPartialModalOpen,
-    isAdmin,
     setBulkAnswers,
     onRefresh
 }) => {

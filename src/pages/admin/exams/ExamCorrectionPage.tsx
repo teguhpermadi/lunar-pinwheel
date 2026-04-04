@@ -19,7 +19,9 @@ import {
     XCircle,
     MinusCircle,
     RefreshCw,
-    AlertCircle
+    AlertCircle,
+    Sparkles,
+    Bot
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
@@ -134,6 +136,10 @@ export default function ExamCorrectionPage() {
 
     const [isBulkPartialModalOpen, setIsBulkPartialModalOpen] = useState(false);
     const [bulkPartialScore, setBulkPartialScore] = useState(0);
+
+    const [isAICorrecting, setIsAICorrecting] = useState(false);
+    const [isAIScopeModalOpen, setIsAIScopeModalOpen] = useState(false);
+    const [aiScope, setAiScope] = useState<'all' | 'question'>('all');
 
     const filteredSessions = useMemo(() => {
         if (attemptFilter === 'all') return sessions;
@@ -482,6 +488,81 @@ export default function ExamCorrectionPage() {
             } catch (error: any) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to finalize correction', 'error');
             }
+        }
+    };
+
+    const getUncorrectedAnswersCount = useCallback((answers: any[]) => {
+        return answers.filter(a => a.is_correct === null || a.is_correct === undefined).length;
+    }, []);
+
+    const getTotalAnswersCount = useCallback((answers: any[]) => {
+        return answers.length;
+    }, []);
+
+    const handleAICorrection = async () => {
+        if (!id) return;
+
+        const questionId = aiScope === 'question' ? masterQuestions[selectedQuestionIndex]?.id : undefined;
+        
+        let answersToCount: any[] = [];
+        if (aiScope === 'question') {
+            answersToCount = filteredBulkAnswers;
+        } else {
+            answersToCount = questions;
+        }
+
+        const uncorrectedCount = getUncorrectedAnswersCount(answersToCount);
+        const totalCount = getTotalAnswersCount(answersToCount);
+        const alreadyCorrected = totalCount - uncorrectedCount;
+
+        const scopeLabel = aiScope === 'all' ? 'semua soal' : `soal Q${(selectedQuestionIndex + 1).toString().padStart(2, '0')}`;
+
+        const result = await Swal.fire({
+            title: 'AI Correction',
+            html: `
+                <div class="text-left">
+                    <p class="mb-2">Akan dikoreksi: <strong class="text-indigo-600">${uncorrectedCount}</strong> jawaban</p>
+                    <p class="text-slate-500 text-sm">${alreadyCorrected > 0 ? `${alreadyCorrected} sudah dikoreksi (akan dilewati)` : 'Semua belum dikoreksi'}</p>
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: isAICorrecting ? 'Memproses...' : `Koreksi ${scopeLabel}`,
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#6366f1',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsAICorrecting(true);
+        setIsAIScopeModalOpen(false);
+
+        try {
+            const response = await examApi.aiCorrect(id, {
+                exam_question_id: questionId,
+                only_uncorrected: true
+            });
+
+            Swal.fire({
+                title: 'Berhasil',
+                text: response.message || 'AI correction completed successfully',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+
+            fetchSessions();
+            if (questionId) {
+                fetchByQuestion(questionId);
+            } else if (selectedSessionId) {
+                fetchDetail(selectedSessionId);
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to run AI correction', 'error');
+        } finally {
+            setIsAICorrecting(false);
         }
     };
 
@@ -1077,6 +1158,27 @@ export default function ExamCorrectionPage() {
                         )}
                     </div>
 
+                    <button
+                        onClick={() => {
+                            setAiScope('all');
+                            setIsAIScopeModalOpen(true);
+                        }}
+                        disabled={isAICorrecting || questions.length === 0}
+                        className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-[10px] font-black uppercase tracking-wider shadow-sm",
+                            isAICorrecting
+                                ? "bg-indigo-400 text-white cursor-not-allowed"
+                                : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 active:scale-95"
+                        )}
+                    >
+                        {isAICorrecting ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                            <Sparkles className="w-3.5 h-3.5" />
+                        )}
+                        AI Correct
+                    </button>
+
                     <div className="text-right hidden sm:block">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
                         <p className="text-xs font-bold text-emerald-500 uppercase">Live Correction</p>
@@ -1400,6 +1502,109 @@ export default function ExamCorrectionPage() {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* AI Correction Scope Modal */}
+            <AnimatePresence>
+                {isAIScopeModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800"
+                        >
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-4">
+                                    <Sparkles className="w-8 h-8 text-indigo-500" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2">AI Correction</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Pilih scope koreksi AI. Hanya jawaban yang belum dikoreksi yang akan diproses.
+                                </p>
+                            </div>
+
+                            <div className="space-y-3 mb-6">
+                                <button
+                                    onClick={() => {
+                                        setAiScope('all');
+                                        handleAICorrection();
+                                    }}
+                                    disabled={isAICorrecting}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between disabled:opacity-50",
+                                        aiScope === 'all' ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                                            <Bot className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-white mb-0.5">Semua Soal</div>
+                                            <div className="text-[10px] text-slate-500">
+                                                {getUncorrectedAnswersCount(questions)} / {getTotalAnswersCount(questions)} belum dikoreksi
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {aiScope === 'all' && <CheckCircle2 className="w-5 h-5 text-indigo-500" />}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setAiScope('question');
+                                        handleAICorrection();
+                                    }}
+                                    disabled={isAICorrecting || masterQuestions.length === 0}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between disabled:opacity-50",
+                                        aiScope === 'question' ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                                            <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-white mb-0.5">
+                                                Soal Q{(selectedQuestionIndex + 1).toString().padStart(2, '0')} Saja
+                                            </div>
+                                            <div className="text-[10px] text-slate-500">
+                                                {getUncorrectedAnswersCount(filteredBulkAnswers)} / {getTotalAnswersCount(filteredBulkAnswers)} belum dikoreksi
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {aiScope === 'question' && <CheckCircle2 className="w-5 h-5 text-indigo-500" />}
+                                </button>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsAIScopeModalOpen(false)}
+                                    className="flex-1 py-3.5 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleAICorrection}
+                                    disabled={isAICorrecting}
+                                    className="flex-1 py-3.5 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-400 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {isAICorrecting ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4 animate-spin" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4" />
+                                            Koreksi Sekarang
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </motion.div>
                     </div>
