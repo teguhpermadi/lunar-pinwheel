@@ -26,7 +26,8 @@ import {
     Rocket,
     Shield,
     Lock,
-    LucideIcon
+    LucideIcon,
+    X
 } from 'lucide-react';
 
 type Tab = 'general' | 'behavior' | 'scheduling';
@@ -79,6 +80,7 @@ export default function EditExamPage() {
     const [availableClassrooms, setAvailableClassrooms] = useState<Classroom[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     const isAdmin = authUser?.role === 'admin' || authUser?.user_type === 'admin';
 
@@ -206,20 +208,20 @@ export default function EditExamPage() {
     if (isLoading) {
         return (
             <div className="flex flex-col h-screen bg-slate-50 dark:bg-background-dark/30 animate-pulse">
-                <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between shrink-0">
+                <header className="h-16 md:h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-4 flex-1">
                         <Skeleton className="size-10 rounded-full" />
                         <div className="space-y-2">
-                            <Skeleton className="h-6 w-64" />
-                            <Skeleton className="h-3 w-48" />
+                            <Skeleton className="h-6 w-48 md:w-64" />
+                            <Skeleton className="h-3 w-32 md:w-48" />
                         </div>
                     </div>
                 </header>
                 <div className="flex flex-1 overflow-hidden">
-                    <main className="flex-1 p-8">
+                    <main className="flex-1 p-4 md:p-8">
                         <Skeleton className="h-full w-full rounded-2xl" />
                     </main>
-                    <aside className="w-80 p-8 border-l border-slate-200 dark:border-slate-800">
+                    <aside className="hidden md:block w-80 p-8 border-l border-slate-200 dark:border-slate-800">
                         <Skeleton className="h-full w-full rounded-2xl" />
                     </aside>
                 </div>
@@ -231,41 +233,48 @@ export default function EditExamPage() {
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-background-light dark:bg-background-dark">
-            <header className="h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
-                <div className="flex items-center gap-4 flex-1">
+            <header className="h-16 md:h-20 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-3 md:px-6 flex items-center justify-between z-20 shrink-0">
+                <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                     <button
                         onClick={() => navigate('/admin/exams')}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400 shrink-0"
                     >
                         <ArrowLeft className="size-5" />
                     </button>
-                    <div className="flex-1 max-w-xl">
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-base md:text-xl font-bold text-slate-900 dark:text-white truncate">
                             {exam.title}
                         </h1>
-                        <p className="text-xs text-slate-400 font-medium tracking-wide">
+                        <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wide hidden sm:block">
                             {exam.subject?.name} • {exam.academic_year?.year} • Configuration Hub
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3 shrink-0">
                     <button
                         onClick={handleLiveScore}
-                        className="px-5 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all flex items-center gap-2 group/live"
+                        className="px-3 md:px-5 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs md:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 md:gap-2 group/live"
                     >
-                        <LayoutList className="size-4.5 animate-pulse" />
-                        Live Score
+                        <LayoutList className="size-4 md:size-4.5 animate-pulse" />
+                        <span className="hidden sm:inline">Live Score</span>
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving || !exam.classroom_ids || exam.classroom_ids.length === 0}
-                        className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 md:px-6 py-2 bg-primary text-white rounded-xl text-xs md:text-sm font-bold hover:shadow-lg hover:shadow-primary/30 active:scale-95 transition-all flex items-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSaving ? <RefreshCw className="size-4.5 animate-spin" /> : <Save className="size-4.5" />}
-                        {isSaving ? 'Saving...' : (!exam.classroom_ids || exam.classroom_ids.length === 0) ? 'Select a Classroom' : 'Save Configuration'}
+                        {isSaving ? <RefreshCw className="size-4 md:size-4.5 animate-spin" /> : <Save className="size-4 md:size-4.5" />}
+                        <span className="hidden md:inline">{isSaving ? 'Saving...' : (!exam.classroom_ids || exam.classroom_ids.length === 0) ? 'Select a Classroom' : 'Save Configuration'}</span>
+                        <span className="md:hidden text-[10px]">{isSaving ? '...' : 'Save'}</span>
                     </button>
-                    <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
-                    <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
+                    <div className="hidden md:block h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+                    <button
+                        onClick={() => setIsMobileSidebarOpen(true)}
+                        className="md:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400"
+                    >
+                        <Eye className="size-5" />
+                    </button>
+                    <div className="hidden md:block size-10 rounded-full border-2 border-primary/20 p-0.5 shrink-0">
                         <img
                             alt="Admin"
                             className="rounded-full size-full object-cover"
@@ -277,22 +286,22 @@ export default function EditExamPage() {
 
             <div className="flex flex-1 overflow-hidden">
                 <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/30 relative scrollbar-hide">
-                    <div className="max-w-3xl mx-auto p-8 space-y-8">
-                        <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-8">
+                    <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6 md:space-y-8">
+                        <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                             {[
-                                { id: 'general', icon: Settings, label: 'General Settings' },
-                                { id: 'behavior', icon: Brain, label: 'Question Behavior' },
-                                { id: 'scheduling', icon: Calendar, label: 'Scheduling & Security' }
+                                { id: 'general', icon: Settings, label: 'General' },
+                                { id: 'behavior', icon: Brain, label: 'Behavior' },
+                                { id: 'scheduling', icon: Calendar, label: 'Schedule' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as Tab)}
                                     className={cn(
-                                        "pb-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2 transition-all",
+                                        "pb-3 md:pb-4 px-3 md:px-1 border-b-2 font-bold text-xs md:text-sm flex items-center gap-2 transition-all whitespace-nowrap",
                                         activeTab === tab.id ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
-                                    <tab.icon className="size-4.5" />
+                                    <tab.icon className="size-4 md:size-4.5" />
                                     {tab.label}
                                 </button>
                             ))}
@@ -301,7 +310,7 @@ export default function EditExamPage() {
                         <div className="space-y-6">
                             {activeTab === 'general' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Info className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Identity & Purpose</h3>
@@ -317,7 +326,7 @@ export default function EditExamPage() {
                                                     onChange={(e) => setExam(prev => prev ? { ...prev, title: e.target.value } : null)}
                                                 />
                                             </div>
-                                            <div className="grid grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Exam Type</label>
                                                     <select
@@ -382,12 +391,12 @@ export default function EditExamPage() {
                                         </div>
                                     </section>
 
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Users className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Classrooms</h3>
                                         </div>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                             {availableClassrooms.map(classroom => {
                                                 const isSelected = exam.classroom_ids?.includes(classroom.id);
                                                 return (
@@ -437,12 +446,12 @@ export default function EditExamPage() {
 
                             {activeTab === 'behavior' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Shuffle className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Logic & Randomization</h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Toggle
                                                 label="Randomize Questions"
                                                 description="Shuffle question order for each student"
@@ -478,12 +487,12 @@ export default function EditExamPage() {
 
                             {activeTab === 'scheduling' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Calendar className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Execution Hub</h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Duration (Minutes)</label>
@@ -567,12 +576,12 @@ export default function EditExamPage() {
                                         </div>
                                     </section>
 
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Calendar className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Access Window</h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Starts At</label>
                                                 <input
@@ -616,12 +625,12 @@ export default function EditExamPage() {
                                         </div>
                                     </section>
 
-                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                    <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
                                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
                                             <Shield className="size-4.5 text-slate-400" />
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Security & Publication</h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <Toggle
                                                 label="Show Token"
                                                 description="Display access token to students"
@@ -644,15 +653,15 @@ export default function EditExamPage() {
                     </div>
                 </main>
 
-                <aside className="w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 no-print overflow-hidden">
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                <aside className="hidden md:flex w-80 bg-white dark:bg-background-dark border-l border-slate-200 dark:border-slate-800 flex-col shrink-0 no-print overflow-hidden">
+                    <div className="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800">
                         <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
                             <Eye className="size-5 text-primary" />
                             Overview
                         </h2>
                         <p className="text-[10px] text-slate-400 font-bold mt-1">REAL-TIME SETUP SUMMARY</p>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 scrollbar-hide">
                         <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
                             <div className="flex items-center gap-2 mb-2">
                                 <Lock className="size-4 text-primary" />
@@ -707,6 +716,82 @@ export default function EditExamPage() {
                     </div>
                 </aside>
             </div>
+
+            {isMobileSidebarOpen && (
+                <div className="fixed inset-0 z-50 md:hidden">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)}></div>
+                    <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white dark:bg-background-dark shadow-2xl animate-in slide-in-from-right duration-300">
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-widest">
+                                <Eye className="size-5 text-primary" />
+                                Overview
+                            </h2>
+                            <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <X className="size-5 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Lock className="size-4 text-primary" />
+                                    <label className="text-[10px] font-bold text-primary uppercase">Security Token</label>
+                                </div>
+                                <p className="text-2xl font-mono font-black text-primary text-center">
+                                    {exam.token || 'AUTOGEN'}
+                                </p>
+                                {exam.is_published && (
+                                    <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
+                                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Live & Published
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Primary Info</label>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-500">Type</span>
+                                        <span className="font-bold uppercase">{exam.type}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-500">Duration</span>
+                                        <span className="font-bold">{exam.duration} Mins</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-500">Passing Score</span>
+                                        <span className="font-bold text-primary">{exam.passing_score}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Behavior</label>
+                                <div className="space-y-2">
+                                    {[
+                                        { label: 'Randomize Quest.', val: exam.is_randomized_question },
+                                        { label: 'Randomize Opt.', val: exam.is_randomized_answer },
+                                        { label: 'Show Results', val: exam.is_show_result },
+                                        { label: 'Strict Timer', val: exam.timer_type === 'strict' }
+                                    ].map((item) => (
+                                        <div key={item.label} className="flex justify-between items-center text-[11px]">
+                                            <span className="text-slate-500">{item.label}</span>
+                                            {item.val ? <CheckCircle2 className="size-4 text-emerald-500" /> : <Shield className="size-4 text-slate-300" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving || !exam.classroom_ids || exam.classroom_ids.length === 0}
+                                className="w-full py-3 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
