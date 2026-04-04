@@ -21,7 +21,8 @@ import {
     RefreshCw,
     AlertCircle,
     Sparkles,
-    Bot
+    Bot,
+    RotateCw
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
@@ -140,6 +141,9 @@ export default function ExamCorrectionPage() {
     const [isAICorrecting, setIsAICorrecting] = useState(false);
     const [isAIScopeModalOpen, setIsAIScopeModalOpen] = useState(false);
     const [aiScope, setAiScope] = useState<'all' | 'question'>('all');
+
+    const [isResetCorrecting, setIsResetCorrecting] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
     const filteredSessions = useMemo(() => {
         if (attemptFilter === 'all') return sessions;
@@ -563,6 +567,56 @@ export default function ExamCorrectionPage() {
             Swal.fire('Error', error.response?.data?.message || 'Failed to run AI correction', 'error');
         } finally {
             setIsAICorrecting(false);
+        }
+    };
+
+    const handleResetObjectiveCorrection = async () => {
+        if (!id) return;
+
+        const result = await Swal.fire({
+            title: 'Reset Objective Correction?',
+            html: `
+                <div class="text-left">
+                    <p>Semua jawaban <strong>objective</strong> (MC, TF, MS, Matching, Sequence) akan di-reset dan dikoreksi ulang.</p>
+                    <p class="text-sm text-slate-500 mt-3"><strong>Tidak</strong> akan terpengaruh:</p>
+                    <ul class="text-sm text-slate-500 ml-4 mt-1">
+                        <li>• Essay</li>
+                        <li>• Short Answer</li>
+                        <li>• Math Input</li>
+                        <li>• Arabic Input</li>
+                        <li>• Javanese Input</li>
+                    </ul>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Reset',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#f59e0b',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsResetCorrecting(true);
+        setIsResetModalOpen(false);
+
+        try {
+            const response = await examApi.resetObjectiveCorrection(id);
+            Swal.fire({
+                title: 'Berhasil',
+                text: `Reset correction completed for ${response.data?.corrected_count || 0} objective answers.`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+            fetchSessions();
+            if (selectedSessionId) fetchDetail(selectedSessionId);
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to reset correction', 'error');
+        } finally {
+            setIsResetCorrecting(false);
         }
     };
 
@@ -1158,26 +1212,46 @@ export default function ExamCorrectionPage() {
                         )}
                     </div>
 
-                    <button
-                        onClick={() => {
-                            setAiScope('all');
-                            setIsAIScopeModalOpen(true);
-                        }}
-                        disabled={isAICorrecting || questions.length === 0}
-                        className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-[10px] font-black uppercase tracking-wider shadow-sm",
-                            isAICorrecting
-                                ? "bg-indigo-400 text-white cursor-not-allowed"
-                                : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 active:scale-95"
-                        )}
-                    >
-                        {isAICorrecting ? (
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                            <Sparkles className="w-3.5 h-3.5" />
-                        )}
-                        AI Correct
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIsResetModalOpen(true)}
+                            disabled={isResetCorrecting || isAICorrecting || questions.length === 0}
+                            className={cn(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-[10px] font-black uppercase tracking-wider shadow-sm",
+                                isResetCorrecting
+                                    ? "bg-amber-400 text-white cursor-not-allowed"
+                                    : "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 active:scale-95"
+                            )}
+                        >
+                            {isResetCorrecting ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                                <RotateCw className="w-3.5 h-3.5" />
+                            )}
+                            Reset
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setAiScope('all');
+                                setIsAIScopeModalOpen(true);
+                            }}
+                            disabled={isAICorrecting || questions.length === 0 || isResetCorrecting}
+                            className={cn(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-[10px] font-black uppercase tracking-wider shadow-sm",
+                                isAICorrecting
+                                    ? "bg-indigo-400 text-white cursor-not-allowed"
+                                    : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 active:scale-95"
+                            )}
+                        >
+                            {isAICorrecting ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                                <Sparkles className="w-3.5 h-3.5" />
+                            )}
+                            AI Correct
+                        </button>
+                    </div>
 
                     <div className="text-right hidden sm:block">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status</p>
@@ -1602,6 +1676,69 @@ export default function ExamCorrectionPage() {
                                         <>
                                             <Sparkles className="w-4 h-4" />
                                             Koreksi Sekarang
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Reset Objective Correction Modal */}
+            <AnimatePresence>
+                {isResetModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800"
+                        >
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-4">
+                                    <RotateCw className="w-8 h-8 text-amber-500" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2">
+                                    Reset Objective Correction
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Akan me-reset dan mengoreksi ulang semua jawaban objective 
+                                    (MC, TF, MS, Matching, Sequence).
+                                </p>
+                                <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/20">
+                                    <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">Tidak akan terpengaruh:</p>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {['Essay', 'Short Answer', 'Math Input', 'Arabic', 'Javanese'].map(type => (
+                                            <span key={type} className="px-2 py-1 bg-white dark:bg-slate-800 rounded-md text-[9px] font-bold text-slate-500">
+                                                {type}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsResetModalOpen(false)}
+                                    className="flex-1 py-3.5 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleResetObjectiveCorrection}
+                                    disabled={isResetCorrecting}
+                                    className="flex-1 py-3.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-400 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {isResetCorrecting ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4 animate-spin" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <RotateCw className="w-4 h-4" />
+                                            Ya, Reset
                                         </>
                                     )}
                                 </button>
