@@ -11,6 +11,7 @@ import { StudentSession, QuestionDetail } from '@/pages/admin/exams/ExamCorrecti
 import {
     ArrowLeft,
     ChevronRight,
+    ChevronUp,
     Trophy,
     CheckCircle2,
     XCircle,
@@ -33,7 +34,7 @@ const StudentResultDetailPage: React.FC = () => {
     const [exam, setExam] = useState<Exam | null>(null);
     const [questions, setQuestions] = useState<QuestionDetail[]>([]);
     const [sessionInfo, setSessionInfo] = useState<StudentSession | null>(null);
-    const [filter, setFilter] = useState<'all' | 'incorrect' | 'flagged'>('all');
+    const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect' | 'flagged'>('all');
 
     // Collapsible states
     const [expandedSections, setExpandedSections] = useState({
@@ -45,6 +46,15 @@ const StudentResultDetailPage: React.FC = () => {
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [userRank, setUserRank] = useState<number | null>(null);
     const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 400);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const toggleSection = (section: keyof typeof expandedSections) => {
         setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -117,8 +127,9 @@ const StudentResultDetailPage: React.FC = () => {
     };
 
     const filteredQuestions = questions.filter(q => {
+        if (filter === 'correct') return q.is_correct === true;
         if (filter === 'incorrect') return q.is_correct === false;
-        if (filter === 'flagged') return false; // Flagging not implemented yet in this component
+        if (filter === 'flagged') return false;
         return true;
     });
 
@@ -222,7 +233,7 @@ const StudentResultDetailPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
                         {/* Main Content (Left) */}
-                        <div className="lg:col-span-8 space-y-6 sm:space-y-8">
+                        <div className="lg:col-span-9 space-y-6 sm:space-y-8">
                             {/* Score Card - Moved to Top */}
                             <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-card overflow-hidden group">
                                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
@@ -263,6 +274,100 @@ const StudentResultDetailPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Leaderboard Section - Mobile: show before Score by Tags */}
+                            {(leaderboard.length > 0 || isLeaderboardLoading) && (
+                                <div className="lg:hidden bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-200 dark:border-amber-500/20">
+                                                <Trophy className="w-5 h-5 text-amber-500" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
+                                                <p className="text-[10px] text-slate-400 font-medium mt-0.5">Exam Excellence</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="px-6 py-4">
+                                        {isLeaderboardLoading ? (
+                                            <div className="space-y-4">
+                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                    <div key={i} className="flex items-center gap-3 animate-pulse">
+                                                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                                                            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-1/3" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {leaderboard.map((leader, index) => (
+                                                    <div key={leader.id} className={cn(
+                                                        "flex items-center justify-between p-3 rounded-2xl border transition-all duration-300",
+                                                        leader.user?.id === sessionInfo?.student.id
+                                                            ? "bg-primary/5 border-primary/20 shadow-[0_0_15px_-3px_rgba(var(--primary-rgb),0.1)]"
+                                                            : "bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-100 dark:hover:border-slate-800"
+                                                    )}>
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <div className="relative shrink-0">
+                                                                <div className={cn(
+                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
+                                                                    index === 0 ? "bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-500/30 text-white" :
+                                                                        index === 1 ? "bg-gradient-to-br from-slate-300 to-slate-400 shadow-md shadow-slate-400/30 text-white" :
+                                                                            index === 2 ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-md shadow-orange-500/30 text-white" :
+                                                                                "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                                                )}>
+                                                                    {leader.user?.avatar ? (
+                                                                        <img src={leader.user.avatar} className="w-full h-full object-cover" alt="" />
+                                                                    ) : (
+                                                                        <User className="w-3.5 h-3.5" />
+                                                                    )}
+                                                                </div>
+                                                                <div className={cn(
+                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border border-white dark:border-slate-900 z-20",
+                                                                    index === 0 ? "bg-yellow-400 text-yellow-900" :
+                                                                        index === 1 ? "bg-slate-300 text-slate-800" :
+                                                                            index === 2 ? "bg-orange-400 text-orange-900" :
+                                                                                "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                                                )}>
+                                                                    {index + 1}
+                                                                </div>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                                                    {leader.user?.name || 'Unknown'}
+                                                                </p>
+                                                                {leader.user?.id === sessionInfo?.student.id && (
+                                                                    <p className="text-[9px] font-black uppercase tracking-wider text-primary">This Student</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-sm font-black text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{leader.total_score} pts</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {userRank !== null && userRank > 0 && !isLeaderboardLoading && (
+                                        <div className="bg-primary text-white p-4 text-center border-t border-primary/20">
+                                            <p className="text-xs font-bold flex items-center justify-center gap-2">
+                                                <Medal className="w-4 h-4" />
+                                                {userRank <= 5
+                                                    ? `Awesome! Ranked #${userRank} overall.`
+                                                    : `Currently ranked #${userRank} out of all participants.`}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Score by Tag Breakdown */}
                             {tagScoresList.length > 0 && (
@@ -315,6 +420,15 @@ const StudentResultDetailPage: React.FC = () => {
                                     )}
                                 >
                                     All ({questions.length})
+                                </button>
+                                <button
+                                    onClick={() => setFilter('correct')}
+                                    className={cn(
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
+                                        filter === 'correct' ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                    )}
+                                >
+                                    Correct ({questions.filter(q => q.is_correct === true).length})
                                 </button>
                                 <button
                                     onClick={() => setFilter('incorrect')}
@@ -439,7 +553,7 @@ const StudentResultDetailPage: React.FC = () => {
                         </div>
 
                         {/* Sidebar (Right) */}
-                        <aside className="lg:col-span-4 space-y-6">
+                        <aside className="lg:col-span-3 space-y-6">
                             {/* Candidate & Exam Intelligence Section */}
                             <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
                                 {/* Segment 1: Candidate Detail */}
@@ -600,9 +714,9 @@ const StudentResultDetailPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Leaderboard Section */}
+                            {/* Leaderboard Section - Desktop only (mobile version above) */}
                             {(leaderboard.length > 0 || isLeaderboardLoading) && (
-                                <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                                <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
                                     <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-200 dark:border-amber-500/20">
@@ -697,6 +811,16 @@ const StudentResultDetailPage: React.FC = () => {
 
                         </aside>
                     </div>
+
+                    {/* Floating Scroll to Top Button */}
+                    {showScrollTop && (
+                        <button
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 p-3 sm:p-4 bg-primary text-white rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-110 transition-all border border-white/20"
+                        >
+                            <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </button>
+                    )}
                 </main>
             </div>
         </div>
