@@ -11,6 +11,7 @@ import {
     Library,
     FileText,
     Activity,
+    HardDrive,
     X,
     LogOut
 } from 'lucide-react';
@@ -37,6 +38,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
         { icon: Library, label: 'Question Bank', path: '/admin/question-banks' },
         { icon: FileText, label: 'Exams', path: '/admin/exams' },
         ...(user?.role === 'admin' ? [{ icon: Activity, label: 'Queue Monitor', path: '/admin/queue-monitor' as const }] : []),
+        ...(user?.role === 'admin' ? [{ icon: HardDrive, label: 'Backup & Restore', path: '/admin/backup' as const }] : []),
     ];
 
     return (

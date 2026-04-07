@@ -33,6 +33,7 @@ import ExamTaker from "@/pages/student/ExamTaker"
 import StudentResultDetailPage from "@/pages/admin/exams/correction/StudentResultDetailPage"
 import ReadingMaterialFormPage from "@/pages/admin/reading-materials/ReadingMaterialFormPage"
 import QueueMonitorPage from "@/pages/admin/QueueMonitorPage"
+import BackupManagementPage from "@/pages/admin/BackupManagementPage"
 import SubjectUnitManagement from "@/pages/admin/SubjectUnitManagement"
 
 // Guard for protected routes
@@ -142,6 +143,7 @@ function App() {
               
               <Route element={<RequireRole role="admin" />}>
                 <Route path="admin/queue-monitor" element={<QueueMonitorPage />} />
+                <Route path="admin/backup" element={<BackupManagementPage />} />
               </Route>
             </Route>
 

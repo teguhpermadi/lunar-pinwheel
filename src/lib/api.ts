@@ -1310,3 +1310,20 @@ export const learningLessonApi = {
         return response.data;
     }
 };
+
+export const backupAssetsApi = {
+    backupAssets: async () => {
+        const response = await api.get('/assets/backup', {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+    restoreAssets: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/assets/restore', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    }
+};
