@@ -1325,5 +1325,13 @@ export const backupAssetsApi = {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
         return response.data;
+    },
+    restoreExamAnswers: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/admin/backup/exam-answers/restore', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
     }
 };
