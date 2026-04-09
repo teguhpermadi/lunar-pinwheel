@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { studentApi, Exam } from '@/lib/api';
@@ -26,7 +26,8 @@ import {
     Puzzle,
     BookOpen,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    Download
 } from 'lucide-react';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
@@ -75,6 +76,10 @@ export default function ExamTaker() {
     });
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [isSyncing, setIsSyncing] = useState(false);
+
+    // Debounce refs for answer API calls
+    const answerDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const pendingAnswerQueueRef = useRef<Map<string, any>>(new Map());
 
     // Track online/offline status
     useEffect(() => {
@@ -137,7 +142,7 @@ export default function ExamTaker() {
         if (isOnline) {
             syncPendingAnswers();
             // Also retry periodically just in case the connection is flaky
-            syncTimer = setInterval(syncPendingAnswers, 15000);
+            syncTimer = setInterval(syncPendingAnswers, 30000);
 
             // Auto submit if we were waiting
             if (isWaitingOfflineSubmit) {
@@ -420,13 +425,12 @@ export default function ExamTaker() {
         }
     }, [isLoading]);
 
-    const handleAnswerChange = async (answer: any) => {
+    const handleAnswerChange = useCallback((answer: any) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         const currentQ = questions[currentQuestionIndex];
 
-        // Optimistic Update
-        // Immutable Update
+        // Optimistic Update - immediate UI update
         const newQuestions = questions.map((q, idx) =>
             idx === currentQuestionIndex ? { ...q, student_answer: answer } : q
         );
@@ -453,35 +457,61 @@ export default function ExamTaker() {
         };
 
         if (!isOnline) {
-            // Save to queue
+            // Save to queue immediately when offline
             setPendingAnswers((prev) => ({
                 ...prev,
-                [currentQ.id]: payload
+                [currentQ.id]: { ...payload, timestamp: Date.now() }
             }));
             return;
         }
 
-        try {
-            await studentApi.answerQuestion(id, payload);
-
-            // If it succeeds, verify it's removed from pending
-            setPendingAnswers((prev) => {
-                if (prev[currentQ.id]) {
-                    const cloned = { ...prev };
-                    delete cloned[currentQ.id];
-                    return cloned;
-                }
-                return prev;
-            });
-        } catch (error) {
-            console.error('Failed to save answer, putting in sync queue:', error);
-            // Put in offline queue
-            setPendingAnswers((prev) => ({
-                ...prev,
-                [currentQ.id]: payload
-            }));
+        // Debounce: Clear previous timer and set new one
+        if (answerDebounceTimerRef.current) {
+            clearTimeout(answerDebounceTimerRef.current);
         }
-    };
+
+        // Store in pending queue ref
+        pendingAnswerQueueRef.current.set(currentQ.id, payload);
+
+        // Set new debounce timer (2 seconds)
+        answerDebounceTimerRef.current = setTimeout(async () => {
+            // Process all pending answers in queue
+            const pendingQueue = new Map(pendingAnswerQueueRef.current);
+            pendingAnswerQueueRef.current.clear();
+
+            for (const [qId, queuedPayload] of pendingQueue) {
+                try {
+                    await studentApi.answerQuestion(id!, queuedPayload);
+
+                    // Remove from pending if successful
+                    setPendingAnswers((prev) => {
+                        if (prev[qId]) {
+                            const cloned = { ...prev };
+                            delete cloned[qId];
+                            return cloned;
+                        }
+                        return prev;
+                    });
+                } catch (error) {
+                    console.error(`Debounced save failed for answer ${qId}:`, error);
+                    // Keep in pending queue for retry
+                    setPendingAnswers((prev) => ({
+                        ...prev,
+                        [qId]: { ...queuedPayload, timestamp: Date.now() }
+                    }));
+                }
+            }
+        }, 2000); // 2 second debounce
+    }, [id, questions, currentQuestionIndex, isOnline]);
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (answerDebounceTimerRef.current) {
+                clearTimeout(answerDebounceTimerRef.current);
+            }
+        };
+    }, []);
 
     const handleAutoFinish = async () => {
         if (isInitialLoad || remainingSeconds === null || remainingSeconds > 5) return;
@@ -526,6 +556,80 @@ export default function ExamTaker() {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleEmergencyDownload = () => {
+        const exportData = {
+            exportedAt: new Date().toISOString(),
+            examId: exam?.id,
+            examTitle: exam?.title,
+            subject: exam?.subject?.name,
+            studentId: user?.id,
+            studentName: user?.name,
+            remainingSeconds: remainingSeconds,
+            gracePeriodSeconds: gracePeriodSeconds,
+            questions: questions.map((q, idx) => {
+                const questionType = q.exam_question?.question_type || q.exam_question?.type;
+                const questionContent = q.exam_question?.content || '';
+                const isPending = !!pendingAnswers[q.id];
+                
+                return {
+                    index: idx + 1,
+                    questionId: q.id,
+                    questionType: questionType,
+                    questionContent: questionContent.length > 200 
+                        ? questionContent.substring(0, 200) + '...' 
+                        : questionContent,
+                    studentAnswer: q.student_answer,
+                    isFlagged: q.is_flagged,
+                    syncStatus: isPending ? 'pending' : 'synced',
+                    answeredAt: isPending ? pendingAnswers[q.id]?.timestamp : null
+                };
+            }),
+            pendingCount: Object.keys(pendingAnswers).length,
+            answeredCount: questions.filter(isQuestionAnswered).length,
+            totalQuestions: questions.length,
+            isOnline: isOnline,
+            localStorageBackup: (() => {
+                try {
+                    return {
+                        examCache: localStorage.getItem(`exam_${id}_cache_data`) ? true : false,
+                        pendingAnswers: localStorage.getItem(`exam_${id}_pending_answers`) ? true : false,
+                        endTime: localStorage.getItem(`exam_${id}_end_time`)
+                    };
+                } catch {
+                    return null;
+                }
+            })()
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.href = url;
+        link.download = `exam-answers-${exam?.id || 'backup'}-${timestamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        MySwal.fire({
+            icon: 'success',
+            title: 'Download Berhasil!',
+            html: `
+                <div class="text-left">
+                    <p class="mb-3">File JSON sudah berhasil di-download.</p>
+                    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-sm">
+                        <p><strong>Total Soal:</strong> ${exportData.totalQuestions}</p>
+                        <p><strong>Sudah Dijawab:</strong> ${exportData.answeredCount}</p>
+                        <p><strong>Pending Sync:</strong> ${exportData.pendingCount}</p>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500">Simpan file ini sebagai cadangan. File ini bisa digunakan untuk restore jawaban di sisi server.</p>
+                </div>
+            `,
+            confirmButtonText: 'OK'
+        });
     };
 
     const isQuestionAnswered = (q: any) => {
@@ -897,8 +1001,16 @@ export default function ExamTaker() {
                     <button
                         onClick={() => document.documentElement.requestFullscreen()}
                         className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 sm:p-2"
+                        title="Fullscreen"
                     >
                         <Maximize className="size-5 sm:size-6" />
+                    </button>
+                    <button
+                        onClick={handleEmergencyDownload}
+                        className="p-1.5 sm:p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all duration-300 active:scale-95 border border-amber-200 dark:border-amber-700"
+                        title="Emergency: Download all answers as JSON backup"
+                    >
+                        <Download className="size-5 sm:size-6" />
                     </button>
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
