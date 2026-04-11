@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { backupAssetsApi } from '@/lib/api';
 import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-width';
+import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 

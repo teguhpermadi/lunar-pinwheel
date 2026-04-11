@@ -397,6 +397,57 @@ export default function ExamCorrectionPage() {
         }
     };
 
+    const handleUpdateStudentAnswer = async (detailId: string, sessionId: string, studentAnswer: string | string[] | number[]) => {
+        if (!id) return;
+        
+        try {
+            const response = await examApi.updateStudentAnswer(id, sessionId, detailId, studentAnswer);
+            
+            if (response.success) {
+                // Update local state
+                if (viewMode === 'by-student') {
+                    const newQuestions = [...questions];
+                    const idx = newQuestions.findIndex(q => q.id === detailId);
+                    if (idx !== -1) {
+                        newQuestions[idx] = { ...newQuestions[idx], student_answer: response.data.student_answer };
+                        setQuestions(newQuestions);
+                    }
+                } else {
+                    const newBulkAnswers = [...bulkAnswers];
+                    const idx = newBulkAnswers.findIndex(a => a.id === detailId);
+                    if (idx !== -1) {
+                        newBulkAnswers[idx] = { ...newBulkAnswers[idx], student_answer: response.data.student_answer };
+                        setBulkAnswers(newBulkAnswers);
+                    }
+                }
+
+                // Recalculate score
+                await examApi.recalculateScore(sessionId);
+
+                // Refresh data
+                fetchSessions();
+                if (viewMode === 'by-student' && selectedSessionId) {
+                    fetchDetail(selectedSessionId);
+                } else if (viewMode === 'by-question') {
+                    const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                    if (currentQuestionId) fetchByQuestion(currentQuestionId);
+                }
+
+                Swal.fire({
+                    title: 'Saved',
+                    text: 'Student answer updated and score recalculated',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to update student answer', 'error');
+        }
+    };
+
     const toggleAnswerSelection = (answerId: string) => {
         setSelectedAnswerIds(prev =>
             prev.includes(answerId)
@@ -1288,6 +1339,7 @@ export default function ExamCorrectionPage() {
                                         selectedQuestionIndex={selectedQuestionIndex}
                                         setSelectedQuestionIndex={setSelectedQuestionIndex}
                                         handleUpdateCorrection={handleUpdateCorrection}
+                                        handleUpdateStudentAnswer={handleUpdateStudentAnswer}
                                         setPartialScoreData={setPartialScoreData}
                                         setIsPartialModalOpen={setIsPartialModalOpen}
                                         questions={questions}
@@ -1314,6 +1366,7 @@ export default function ExamCorrectionPage() {
                                     isBulkLoading={isBulkLoading}
                                     toggleAnswerSelection={toggleAnswerSelection}
                                     handleUpdateCorrection={handleUpdateCorrection}
+                                    handleUpdateStudentAnswer={handleUpdateStudentAnswer}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                     isAdmin={user?.role === 'admin' || user?.role === 'teacher'}

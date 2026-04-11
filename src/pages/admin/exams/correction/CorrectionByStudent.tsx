@@ -17,7 +17,8 @@ import {
     Check,
     X,
     Maximize,
-    RotateCw
+    RotateCw,
+    Edit3
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
@@ -27,6 +28,7 @@ interface CorrectionByStudentProps {
     selectedQuestionIndex: number;
     setSelectedQuestionIndex: (index: number) => void;
     handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => void;
+    handleUpdateStudentAnswer: (detailId: string, sessionId: string, studentAnswer: string | string[] | number[]) => void;
     setPartialScoreData: (data: any) => void;
     setIsPartialModalOpen: (open: boolean) => void;
     questions: QuestionDetail[];
@@ -43,6 +45,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     selectedQuestionIndex,
     setSelectedQuestionIndex,
     handleUpdateCorrection,
+    handleUpdateStudentAnswer,
     setPartialScoreData,
     setIsPartialModalOpen,
     questions,
@@ -53,9 +56,14 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
 }) => {
     const currentSession = sessions.find(s => s.id === selectedSessionId);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [isEditingAnswer, setIsEditingAnswer] = useState(false);
+    const [editedAnswer, setEditedAnswer] = useState<any>(null);
+    const [isSavingAnswer, setIsSavingAnswer] = useState(false);
 
     useEffect(() => {
         setIsPreviewModalOpen(false);
+        setIsEditingAnswer(false);
+        setEditedAnswer(null);
     }, [selectedQuestionIndex, selectedSessionId]);
 
     const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content || (currentQuestion as any)?.content || '';
@@ -161,12 +169,139 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
 
                         <CorrectionDisplay
                             type={currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type}
-                            studentAnswer={currentQuestion.student_answer}
+                            studentAnswer={isEditingAnswer ? editedAnswer : currentQuestion.student_answer}
                             options={currentQuestion.options || (currentQuestion as any)?.exam_question?.options || []}
                             keyAnswer={currentQuestion.key_answer || (currentQuestion as any)?.exam_question?.key_answer}
                             maxScore={currentQuestion.max_score || (currentQuestion as any)?.exam_question?.score_value}
                             scoreEarned={currentQuestion.score_earned}
                         />
+                        
+                        {!isEditingAnswer ? (
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    onClick={() => {
+                                        setEditedAnswer(currentQuestion.student_answer);
+                                        setIsEditingAnswer(true);
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-500 hover:text-primary bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 rounded-lg transition-colors"
+                                >
+                                    <Edit3 className="w-4 h-4" />
+                                    Edit Student Answer
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-black uppercase tracking-wider text-slate-400">Edit Answer</span>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setIsEditingAnswer(false);
+                                                setEditedAnswer(null);
+                                            }}
+                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!selectedSessionId || !currentQuestion.id) return;
+                                                setIsSavingAnswer(true);
+                                                await handleUpdateStudentAnswer(currentQuestion.id, selectedSessionId, editedAnswer);
+                                                setIsSavingAnswer(false);
+                                                setIsEditingAnswer(false);
+                                                setEditedAnswer(null);
+                                            }}
+                                            disabled={isSavingAnswer}
+                                            className="px-3 py-1.5 text-xs font-bold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                                        >
+                                            {isSavingAnswer ? (
+                                                <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                                            ) : (
+                                                <Check className="w-3.5 h-3.5" />
+                                            )}
+                                            Save Answer
+                                        </button>
+                                    </div>
+                                </div>
+                                {(() => {
+                                    const qType = currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type;
+                                    const options = currentQuestion.options || (currentQuestion as any)?.exam_question?.options || [];
+                                    
+                                    if (qType === 'multiple_choice' || qType === 'true_false') {
+                                        return (
+                                            <div className="space-y-2">
+                                                {options.map((opt: any, idx: number) => (
+                                                    <label
+                                                        key={idx}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
+                                                            editedAnswer === opt.key || editedAnswer === idx + 1
+                                                                ? "border-primary bg-primary/5"
+                                                                : "border-slate-100 dark:border-slate-800 hover:border-primary/50"
+                                                        )}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="edit-answer"
+                                                            value={opt.key}
+                                                            checked={editedAnswer === opt.key || editedAnswer === idx + 1}
+                                                            onChange={(e) => setEditedAnswer(qType === 'multiple_choice' ? opt.key : e.target.value)}
+                                                            className="w-4 h-4 text-primary"
+                                                        />
+                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt.text}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        );
+                                    } else if (qType === 'multiple_selection') {
+                                        const selectedAnswers = Array.isArray(editedAnswer) ? editedAnswer : [];
+                                        return (
+                                            <div className="space-y-2">
+                                                {options.map((opt: any, idx: number) => (
+                                                    <label
+                                                        key={idx}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
+                                                            selectedAnswers.includes(opt.key) || selectedAnswers.includes(idx + 1)
+                                                                ? "border-primary bg-primary/5"
+                                                                : "border-slate-100 dark:border-slate-800 hover:border-primary/50"
+                                                        )}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedAnswers.includes(opt.key) || selectedAnswers.includes(idx + 1)}
+                                                            onChange={(e) => {
+                                                                const newAnswers = [...selectedAnswers];
+                                                                const val = opt.key;
+                                                                if (e.target.checked) {
+                                                                    newAnswers.push(val);
+                                                                } else {
+                                                                    const index = newAnswers.indexOf(val);
+                                                                    if (index > -1) newAnswers.splice(index, 1);
+                                                                }
+                                                                setEditedAnswer(newAnswers);
+                                                            }}
+                                                            className="w-4 h-4 text-primary rounded"
+                                                        />
+                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt.text}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        );
+                                    } else {
+                                        return (
+                                            <textarea
+                                                value={typeof editedAnswer === 'string' ? editedAnswer : JSON.stringify(editedAnswer)}
+                                                onChange={(e) => setEditedAnswer(e.target.value)}
+                                                className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:ring-primary focus:border-primary min-h-[80px] p-3"
+                                                placeholder="Enter student answer..."
+                                            />
+                                        );
+                                    }
+                                })()}
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">

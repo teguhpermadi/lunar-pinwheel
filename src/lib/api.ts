@@ -918,6 +918,10 @@ export const examApi = {
         const response = await api.put(`/sessions/${sessionId}/details/${detailId}`, data);
         return response.data;
     },
+    async updateStudentAnswer(examId: string, sessionId: string, detailId: string, studentAnswer: string | string[] | number[]) {
+        const response = await api.put(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/answer`, { student_answer: studentAnswer });
+        return response.data;
+    },
     finishCorrection: async (sessionId: string) => {
         const response = await api.post(`/sessions/${sessionId}/finish-correction`);
         return response.data;
