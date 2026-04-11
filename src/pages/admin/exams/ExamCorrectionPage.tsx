@@ -448,6 +448,77 @@ export default function ExamCorrectionPage() {
         }
     };
 
+    const handleRestoreStudentAnswer = async (detailId: string, sessionId: string) => {
+        if (!id) return;
+        
+        const confirmResult = await Swal.fire({
+            title: 'Restore Answer?',
+            text: 'This will revert to the previous answer version and reset the score.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Restore',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!confirmResult.isConfirmed) return;
+        
+        try {
+            const response = await examApi.restoreStudentAnswer(id, sessionId, detailId);
+            
+            if (response.success) {
+                // Update local state
+                if (viewMode === 'by-student') {
+                    const newQuestions = [...questions];
+                    const idx = newQuestions.findIndex(q => q.id === detailId);
+                    if (idx !== -1) {
+                        newQuestions[idx] = { 
+                            ...newQuestions[idx], 
+                            student_answer: response.data.student_answer,
+                            score_earned: response.data.score_earned,
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
+                        };
+                        setQuestions(newQuestions);
+                    }
+                } else {
+                    const newBulkAnswers = [...bulkAnswers];
+                    const idx = newBulkAnswers.findIndex(a => a.id === detailId);
+                    if (idx !== -1) {
+                        newBulkAnswers[idx] = { 
+                            ...newBulkAnswers[idx], 
+                            student_answer: response.data.student_answer,
+                            score_earned: response.data.score_earned,
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
+                        };
+                        setBulkAnswers(newBulkAnswers);
+                    }
+                }
+
+                // Refresh data
+                fetchSessions();
+                if (viewMode === 'by-student' && selectedSessionId) {
+                    fetchDetail(selectedSessionId);
+                } else if (viewMode === 'by-question') {
+                    const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                    if (currentQuestionId) fetchByQuestion(currentQuestionId);
+                }
+
+                Swal.fire({
+                    title: 'Restored',
+                    text: 'Student answer restored and score reset',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to restore student answer', 'error');
+        }
+    };
+
     const toggleAnswerSelection = (answerId: string) => {
         setSelectedAnswerIds(prev =>
             prev.includes(answerId)
@@ -1340,6 +1411,7 @@ export default function ExamCorrectionPage() {
                                         setSelectedQuestionIndex={setSelectedQuestionIndex}
                                         handleUpdateCorrection={handleUpdateCorrection}
                                         handleUpdateStudentAnswer={handleUpdateStudentAnswer}
+                                        handleRestoreStudentAnswer={handleRestoreStudentAnswer}
                                         setPartialScoreData={setPartialScoreData}
                                         setIsPartialModalOpen={setIsPartialModalOpen}
                                         questions={questions}
@@ -1367,6 +1439,7 @@ export default function ExamCorrectionPage() {
                                     toggleAnswerSelection={toggleAnswerSelection}
                                     handleUpdateCorrection={handleUpdateCorrection}
                                     handleUpdateStudentAnswer={handleUpdateStudentAnswer}
+                                    handleRestoreStudentAnswer={handleRestoreStudentAnswer}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                     isAdmin={user?.role === 'admin' || user?.role === 'teacher'}

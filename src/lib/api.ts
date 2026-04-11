@@ -922,6 +922,10 @@ export const examApi = {
         const response = await api.put(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/answer`, { student_answer: studentAnswer });
         return response.data;
     },
+    async restoreStudentAnswer(examId: string, sessionId: string, detailId: string) {
+        const response = await api.post(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/restore`);
+        return response.data;
+    },
     finishCorrection: async (sessionId: string) => {
         const response = await api.post(`/sessions/${sessionId}/finish-correction`);
         return response.data;
