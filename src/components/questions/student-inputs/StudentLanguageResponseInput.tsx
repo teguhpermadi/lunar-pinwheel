@@ -125,6 +125,7 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
                         onKeyClick={handleKeyClick}
                         onBackspace={handleBackspace}
                         onSpace={handleSpace}
+                        isStudent={true}
                     />
                 )}
             </div>
