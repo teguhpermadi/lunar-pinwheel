@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Delete } from '@/components/ui/Icons';
 
@@ -7,6 +7,15 @@ interface JavaneseKeyProps {
     onClick: (char: string) => void;
     className?: string;
 }
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
 
 const JavaneseKey = ({ label, onClick, className = "" }: JavaneseKeyProps) => {
     return (
@@ -24,10 +33,22 @@ interface JavaneseKeyboardProps {
     onKeyClick: (char: string) => void;
     onBackspace: () => void;
     onSpace: () => void;
+    isStudent?: boolean;
 }
 
-export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace }: JavaneseKeyboardProps) {
+export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace, isStudent = false }: JavaneseKeyboardProps) {
     const [activeTab, setActiveTab] = useState<'aksara' | 'pasangan' | 'sandangan' | 'angka'>('aksara');
+    const [shuffledKeys, setShuffledKeys] = useState<Record<string, string[]>>({});
+
+    useEffect(() => {
+        if (isStudent) {
+            setShuffledKeys({
+                aksara: shuffleArray(keys.aksara),
+                pasangan: shuffleArray(keys.pasangan),
+                sandangan: shuffleArray(keys.sandangan),
+            });
+        }
+    }, [isStudent]);
 
     const tabs = [
         { id: 'aksara', label: 'Aksara' },
@@ -97,7 +118,7 @@ export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace }: J
                         className="w-full flex flex-col gap-1.5 sm:gap-2"
                     >
                         <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-10 gap-1.5 sm:gap-2 max-h-[160px] sm:max-h-[220px] md:max-h-none overflow-y-auto scrollbar-hide pr-1 pb-1">
-                            {keys[activeTab].map((char, idx) => (
+                            {(shuffledKeys[activeTab] || keys[activeTab]).map((char, idx) => (
                                 <JavaneseKey
                                     key={`${activeTab}-${idx}`}
                                     label={char}
