@@ -22,7 +22,11 @@ import {
     AlertCircle,
     Sparkles,
     Bot,
-    RotateCw
+    RotateCw,
+    Users,
+    Clock,
+    TrendingUp,
+    TrendingDown
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import CorrectionByStudent from './correction/CorrectionByStudent';
@@ -124,6 +128,7 @@ export default function ExamCorrectionPage() {
     const [correctionStatuses, setCorrectionStatuses] = useState<QuestionCorrectionStatus[]>([]);
     const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
+    const [passFailStats, setPassFailStats] = useState<{ total: number; passed: number; failed: number; not_yet_graded: number } | null>(null);
 
     // Partial Score Modal State
     const [isPartialModalOpen, setIsPartialModalOpen] = useState(false);
@@ -247,6 +252,9 @@ export default function ExamCorrectionPage() {
                 }
                 if (response.data.correction_statuses) {
                     setCorrectionStatuses(response.data.correction_statuses);
+                }
+                if (response.data.pass_fail_stats) {
+                    setPassFailStats(response.data.pass_fail_stats);
                 }
 
                 // Auto select first session based on current filter later, but for now just fallback
@@ -445,6 +453,77 @@ export default function ExamCorrectionPage() {
             }
         } catch (error: any) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to update student answer', 'error');
+        }
+    };
+
+    const handleRestoreStudentAnswer = async (detailId: string, sessionId: string) => {
+        if (!id) return;
+        
+        const confirmResult = await Swal.fire({
+            title: 'Restore Answer?',
+            text: 'This will revert to the previous answer version and reset the score.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Restore',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!confirmResult.isConfirmed) return;
+        
+        try {
+            const response = await examApi.restoreStudentAnswer(id, sessionId, detailId);
+            
+            if (response.success) {
+                // Update local state
+                if (viewMode === 'by-student') {
+                    const newQuestions = [...questions];
+                    const idx = newQuestions.findIndex(q => q.id === detailId);
+                    if (idx !== -1) {
+                        newQuestions[idx] = { 
+                            ...newQuestions[idx], 
+                            student_answer: response.data.student_answer,
+                            score_earned: response.data.score_earned,
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
+                        };
+                        setQuestions(newQuestions);
+                    }
+                } else {
+                    const newBulkAnswers = [...bulkAnswers];
+                    const idx = newBulkAnswers.findIndex(a => a.id === detailId);
+                    if (idx !== -1) {
+                        newBulkAnswers[idx] = { 
+                            ...newBulkAnswers[idx], 
+                            student_answer: response.data.student_answer,
+                            score_earned: response.data.score_earned,
+                            is_correct: response.data.is_correct,
+                            correction_notes: response.data.correction_notes
+                        };
+                        setBulkAnswers(newBulkAnswers);
+                    }
+                }
+
+                // Refresh data
+                fetchSessions();
+                if (viewMode === 'by-student' && selectedSessionId) {
+                    fetchDetail(selectedSessionId);
+                } else if (viewMode === 'by-question') {
+                    const currentQuestionId = masterQuestions[selectedQuestionIndex]?.id;
+                    if (currentQuestionId) fetchByQuestion(currentQuestionId);
+                }
+
+                Swal.fire({
+                    title: 'Restored',
+                    text: 'Student answer restored and score reset',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Failed to restore student answer', 'error');
         }
     };
 
@@ -1324,6 +1403,39 @@ export default function ExamCorrectionPage() {
                         viewMode === 'manage-questions' ? "h-full space-y-0" : "space-y-6",
                         (viewMode === 'leaderboard' || viewMode === 'item-analysis' || viewMode === 'manage-questions') ? "max-w-none" : "max-w-4xl"
                     )}>
+                        {/* Pass/Fail Stats Card - Modern Design */}
+                        {passFailStats && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+                                    <div className="absolute top-4 right-4 p-2 bg-slate-200/50 dark:bg-slate-700/50 rounded-xl">
+                                        <Users className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                    </div>
+                                    <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">{passFailStats.total}</p>
+                                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">Total Students</p>
+                                </div>
+                                <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-2xl border border-emerald-200 dark:border-emerald-800/30 p-5 shadow-sm">
+                                    <div className="absolute top-4 right-4 p-2 bg-emerald-200/50 dark:bg-emerald-800/50 rounded-xl">
+                                        <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{passFailStats.passed}</p>
+                                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mt-1">Lulus</p>
+                                </div>
+                                <div className="relative overflow-hidden bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/20 rounded-2xl border border-rose-200 dark:border-rose-800/30 p-5 shadow-sm">
+                                    <div className="absolute top-4 right-4 p-2 bg-rose-200/50 dark:bg-rose-800/50 rounded-xl">
+                                        <TrendingDown className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                                    </div>
+                                    <p className="text-2xl font-black text-rose-600 dark:text-rose-400 tabular-nums">{passFailStats.failed}</p>
+                                    <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mt-1">Gagal</p>
+                                </div>
+                                <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 rounded-2xl border border-amber-200 dark:border-amber-800/30 p-5 shadow-sm">
+                                    <div className="absolute top-4 right-4 p-2 bg-amber-200/50 dark:bg-amber-800/50 rounded-xl">
+                                        <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                    </div>
+                                    <p className="text-2xl font-black text-amber-600 dark:text-amber-400 tabular-nums">{passFailStats.not_yet_graded}</p>
+                                    <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1">Pending</p>
+                                </div>
+                            </div>
+                        )}
                         <AnimatePresence mode="wait">
                             {viewMode === 'by-student' ? (
                                 <motion.div
@@ -1340,6 +1452,7 @@ export default function ExamCorrectionPage() {
                                         setSelectedQuestionIndex={setSelectedQuestionIndex}
                                         handleUpdateCorrection={handleUpdateCorrection}
                                         handleUpdateStudentAnswer={handleUpdateStudentAnswer}
+                                        handleRestoreStudentAnswer={handleRestoreStudentAnswer}
                                         setPartialScoreData={setPartialScoreData}
                                         setIsPartialModalOpen={setIsPartialModalOpen}
                                         questions={questions}
@@ -1367,6 +1480,7 @@ export default function ExamCorrectionPage() {
                                     toggleAnswerSelection={toggleAnswerSelection}
                                     handleUpdateCorrection={handleUpdateCorrection}
                                     handleUpdateStudentAnswer={handleUpdateStudentAnswer}
+                                    handleRestoreStudentAnswer={handleRestoreStudentAnswer}
                                     setPartialScoreData={setPartialScoreData}
                                     setIsPartialModalOpen={setIsPartialModalOpen}
                                     isAdmin={user?.role === 'admin' || user?.role === 'teacher'}

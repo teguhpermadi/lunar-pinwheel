@@ -18,9 +18,22 @@ import {
     X,
     Maximize,
     RotateCw,
-    Edit3
+    Edit3,
+    Undo2
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+
+import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
+import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
+import StudentTrueFalseInput from '@/components/questions/student-inputs/StudentTrueFalseInput';
+import StudentEssayInput from '@/components/questions/student-inputs/StudentEssayInput';
+import StudentShortAnswerInput from '@/components/questions/student-inputs/StudentShortAnswerInput';
+import StudentMatchingInput from '@/components/questions/student-inputs/StudentMatchingInput';
+import StudentSequenceInput from '@/components/questions/student-inputs/StudentSequenceInput';
+import StudentLanguageResponseInput from '@/components/questions/student-inputs/StudentLanguageResponseInput';
+import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
+import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
+import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 
 interface CorrectionByStudentProps {
     currentQuestion: QuestionDetail | null;
@@ -29,6 +42,7 @@ interface CorrectionByStudentProps {
     setSelectedQuestionIndex: (index: number) => void;
     handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => void;
     handleUpdateStudentAnswer: (detailId: string, sessionId: string, studentAnswer: string | string[] | number[]) => void;
+    handleRestoreStudentAnswer: (detailId: string, sessionId: string) => void;
     setPartialScoreData: (data: any) => void;
     setIsPartialModalOpen: (open: boolean) => void;
     questions: QuestionDetail[];
@@ -46,6 +60,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     setSelectedQuestionIndex,
     handleUpdateCorrection,
     handleUpdateStudentAnswer,
+    handleRestoreStudentAnswer,
     setPartialScoreData,
     setIsPartialModalOpen,
     questions,
@@ -178,16 +193,27 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                         
                         {!isEditingAnswer ? (
                             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                <button
-                                    onClick={() => {
-                                        setEditedAnswer(currentQuestion.student_answer);
-                                        setIsEditingAnswer(true);
-                                    }}
-                                    className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-500 hover:text-primary bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 rounded-lg transition-colors"
-                                >
-                                    <Edit3 className="w-4 h-4" />
-                                    Edit Student Answer
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setEditedAnswer(currentQuestion.student_answer);
+                                            setIsEditingAnswer(true);
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-500 hover:text-primary bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 rounded-lg transition-colors"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                        Edit Student Answer
+                                    </button>
+                                    {selectedSessionId && currentQuestion.id && (
+                                        <button
+                                            onClick={() => handleRestoreStudentAnswer(currentQuestion.id, selectedSessionId)}
+                                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-500 hover:text-amber-600 bg-slate-50 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                                        >
+                                            <Undo2 className="w-4 h-4" />
+                                            Restore Previous
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
@@ -228,76 +254,102 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                     const qType = currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type;
                                     const options = currentQuestion.options || (currentQuestion as any)?.exam_question?.options || [];
                                     
-                                    if (qType === 'multiple_choice' || qType === 'true_false') {
-                                        return (
-                                            <div className="space-y-2">
-                                                {options.map((opt: any, idx: number) => (
-                                                    <label
-                                                        key={idx}
-                                                        className={cn(
-                                                            "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
-                                                            editedAnswer === opt.key || editedAnswer === idx + 1
-                                                                ? "border-primary bg-primary/5"
-                                                                : "border-slate-100 dark:border-slate-800 hover:border-primary/50"
-                                                        )}
-                                                    >
-                                                        <input
-                                                            type="radio"
-                                                            name="edit-answer"
-                                                            value={opt.key}
-                                                            checked={editedAnswer === opt.key || editedAnswer === idx + 1}
-                                                            onChange={(e) => setEditedAnswer(qType === 'multiple_choice' ? opt.key : e.target.value)}
-                                                            className="w-4 h-4 text-primary"
-                                                        />
-                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt.text}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        );
-                                    } else if (qType === 'multiple_selection') {
-                                        const selectedAnswers = Array.isArray(editedAnswer) ? editedAnswer : [];
-                                        return (
-                                            <div className="space-y-2">
-                                                {options.map((opt: any, idx: number) => (
-                                                    <label
-                                                        key={idx}
-                                                        className={cn(
-                                                            "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
-                                                            selectedAnswers.includes(opt.key) || selectedAnswers.includes(idx + 1)
-                                                                ? "border-primary bg-primary/5"
-                                                                : "border-slate-100 dark:border-slate-800 hover:border-primary/50"
-                                                        )}
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedAnswers.includes(opt.key) || selectedAnswers.includes(idx + 1)}
-                                                            onChange={(e) => {
-                                                                const newAnswers = [...selectedAnswers];
-                                                                const val = opt.key;
-                                                                if (e.target.checked) {
-                                                                    newAnswers.push(val);
-                                                                } else {
-                                                                    const index = newAnswers.indexOf(val);
-                                                                    if (index > -1) newAnswers.splice(index, 1);
-                                                                }
-                                                                setEditedAnswer(newAnswers);
-                                                            }}
-                                                            className="w-4 h-4 text-primary rounded"
-                                                        />
-                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt.text}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        );
-                                    } else {
-                                        return (
-                                            <textarea
-                                                value={typeof editedAnswer === 'string' ? editedAnswer : JSON.stringify(editedAnswer)}
-                                                onChange={(e) => setEditedAnswer(e.target.value)}
-                                                className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:ring-primary focus:border-primary min-h-[80px] p-3"
-                                                placeholder="Enter student answer..."
-                                            />
-                                        );
+                                    switch (qType) {
+                                        case 'multiple_choice':
+                                            return (
+                                                <StudentMultipleChoiceInput
+                                                    options={options}
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'multiple_selection':
+                                            return (
+                                                <StudentMultipleSelectionInput
+                                                    options={options}
+                                                    selectedAnswers={Array.isArray(editedAnswer) ? editedAnswer : []}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'true_false':
+                                            return (
+                                                <StudentTrueFalseInput
+                                                    options={options}
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'essay':
+                                            return (
+                                                <StudentEssayInput
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'short_answer':
+                                            return (
+                                                <StudentShortAnswerInput
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'matching':
+                                            return (
+                                                <StudentMatchingInput
+                                                    options={options}
+                                                    selectedAnswer={typeof editedAnswer === 'object' ? editedAnswer : {}}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'sequence':
+                                            return (
+                                                <StudentSequenceInput
+                                                    options={options}
+                                                    selectedAnswer={Array.isArray(editedAnswer) ? editedAnswer : []}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'arabic_response':
+                                        case 'javanese_response':
+                                            return (
+                                                <StudentLanguageResponseInput
+                                                    language={qType === 'arabic_response' ? 'arabic' : 'javanese'}
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'math_input':
+                                            return (
+                                                <StudentMathInput
+                                                    selectedAnswer={editedAnswer}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'categorization':
+                                            return (
+                                                <StudentCategorizationInput
+                                                    options={options}
+                                                    selectedAnswer={typeof editedAnswer === 'object' ? editedAnswer : {}}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        case 'arrange_words':
+                                            return (
+                                                <StudentArrangeWordsInput
+                                                    options={options}
+                                                    selectedAnswer={Array.isArray(editedAnswer) ? editedAnswer : []}
+                                                    onChange={(val) => setEditedAnswer(val)}
+                                                />
+                                            );
+                                        default:
+                                            return (
+                                                <textarea
+                                                    value={typeof editedAnswer === 'string' ? editedAnswer : JSON.stringify(editedAnswer)}
+                                                    onChange={(e) => setEditedAnswer(e.target.value)}
+                                                    className="w-full text-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:ring-primary focus:border-primary min-h-[80px] p-3"
+                                                    placeholder="Enter student answer..."
+                                                />
+                                            );
                                     }
                                 })()}
                             </div>
