@@ -17,7 +17,8 @@ import {
     BookOpen,
     History,
     LayoutGrid,
-    Eye
+    Eye,
+    Lock
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -302,7 +303,7 @@ export default function StudentExamHistoryPage() {
                                         </div>
                                     </div>
 
-                                    {selectedResult.exam.is_show_result && (
+                                    {selectedResult.exam.is_show_result ? (
                                         <div className="mt-auto p-8 pt-4">
                                             <Link
                                                 to={`/exams/history/${selectedResult.exam_id}/${selectedResult.exam_session_id}`}
@@ -311,6 +312,13 @@ export default function StudentExamHistoryPage() {
                                                 <Eye className="size-5" />
                                                 <span>View Detailed Submissions</span>
                                             </Link>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-auto p-8 pt-4">
+                                            <div className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl font-medium text-base flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700">
+                                                <Lock className="size-5" />
+                                                <span>The teacher has not released the detail result yet</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
