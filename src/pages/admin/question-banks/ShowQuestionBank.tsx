@@ -617,29 +617,44 @@ export default function ShowQuestionBank() {
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Starts At</label>
-                                            <input
-                                                type="datetime-local"
-                                                className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-800 dark:bg-slate-900 focus:ring-primary focus:border-primary px-3 py-2"
-                                                value={formData.start_time}
-                                                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                                            />
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="datetime-local"
+                                                    className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-800 dark:bg-slate-900 focus:ring-primary focus:border-primary px-3 py-2"
+                                                    value={formData.start_time}
+                                                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, start_time: new Date().toISOString().slice(0, 16) })}
+                                                    className="px-3 py-2 text-[10px] font-bold bg-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/25 transition-all"
+                                                >
+                                                    Now
+                                                </button>
+                                            </div>
                                         </div>
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase">Ends At</label>
                                                 <div className="flex gap-2">
                                                     {[
-                                                        { label: '1 Day', days: 1 },
-                                                        { label: '2 Days', days: 2 },
-                                                        { label: '1 Week', days: 7 }
+                                                        { label: '1D', days: 1 },
+                                                        { label: '2D', days: 2 },
+                                                        { label: '1W', days: 7 }
                                                     ].map((preset) => (
                                                         <button
                                                             key={preset.label}
                                                             type="button"
                                                             onClick={() => {
                                                                 const start = formData.start_time ? new Date(formData.start_time) : new Date();
-                                                                const end = new Date(start.getTime() + preset.days * 24 * 60 * 60 * 1000);
-                                                                setFormData({ ...formData, end_time: end.toISOString().slice(0, 16) });
+                                                                const adjustedStart = new Date(start.getTime() + start.getTimezoneOffset() * 60000);
+                                                                const end = new Date(adjustedStart.getTime() + preset.days * 24 * 60 * 60 * 1000);
+                                                                const year = end.getFullYear();
+                                                                const month = String(end.getMonth() + 1).padStart(2, '0');
+                                                                const day = String(end.getDate()).padStart(2, '0');
+                                                                const hours = String(end.getHours()).padStart(2, '0');
+                                                                const minutes = String(end.getMinutes()).padStart(2, '0');
+                                                                setFormData({ ...formData, end_time: `${year}-${month}-${day}T${hours}:${minutes}` });
                                                             }}
                                                             className="px-3 py-1.5 text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
                                                         >
