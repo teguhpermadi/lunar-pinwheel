@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam, Classroom, classroomApi, teacherApi, Teacher } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
+import { cn, toWIBDateTimeLocalString, parseWIBToDate, addWIBDays, convertToLocalWIB, convertFromLocalWIB } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import {
@@ -179,7 +179,12 @@ export default function EditExamPage() {
 
         setIsSaving(true);
         try {
-            const response = await examApi.updateExam(id, exam);
+            const examPayload = {
+                ...exam,
+                start_time: convertFromLocalWIB(exam.start_time),
+                end_time: convertFromLocalWIB(exam.end_time)
+            };
+            const response = await examApi.updateExam(id, examPayload);
             if (response.success) {
                 Swal.fire({
                     title: 'Success!',
@@ -584,12 +589,21 @@ export default function EditExamPage() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Starts At</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
-                                                    value={exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : ''}
-                                                    onChange={(e) => setExam(prev => prev ? { ...prev, start_time: e.target.value } : null)}
-                                                />
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="datetime-local"
+                                                        className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
+                                                        value={convertToLocalWIB(exam.start_time)}
+                                                        onChange={(e) => setExam(prev => prev ? { ...prev, start_time: e.target.value } : null)}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setExam(prev => prev ? { ...prev, start_time: toWIBDateTimeLocalString() } : null)}
+                                                        className="px-3 py-2 text-[10px] font-bold bg-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/25 transition-all"
+                                                    >
+                                                        Now
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center ml-1">
@@ -604,9 +618,8 @@ export default function EditExamPage() {
                                                                 key={preset.label}
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    const start = exam.start_time ? new Date(exam.start_time) : new Date();
-                                                                    const end = new Date(start.getTime() + preset.days * 24 * 60 * 60 * 1000);
-                                                                    setExam(prev => prev ? { ...prev, end_time: end.toISOString() } : null);
+                                                                    const start = exam.start_time || toWIBDateTimeLocalString();
+                                                                    setExam(prev => prev ? { ...prev, end_time: addWIBDays(start, preset.days) } : null);
                                                                 }}
                                                                 className="px-2 py-0.5 text-[8px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-md hover:bg-primary hover:text-white transition-all border border-slate-200 dark:border-slate-700"
                                                             >
@@ -618,7 +631,7 @@ export default function EditExamPage() {
                                                 <input
                                                     type="datetime-local"
                                                     className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
-                                                    value={exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : ''}
+                                                    value={convertToLocalWIB(exam.end_time)}
                                                     onChange={(e) => setExam(prev => prev ? { ...prev, end_time: e.target.value } : null)}
                                                 />
                                             </div>
