@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAcademicYear } from '@/contexts/AcademicYearContext';
 import { questionBankApi, QuestionBank } from '@/lib/api';
@@ -14,7 +14,9 @@ import {
     Trash2,
     ChevronLeft,
     ChevronRight,
-    FileEdit
+    FileEdit,
+    Users,
+    Eye
 } from 'lucide-react';
 import { PublishToggle } from '@/components/ui/PublishToggle';
 
@@ -43,7 +45,6 @@ export default function QuestionBankList() {
     const { user } = useAuth();
     const isAdmin = user?.role === 'admin';
     const { selectedYearId } = useAcademicYear();
-    const navigate = useNavigate();
 
     const [questionBanks, setQuestionBanks] = useState<QuestionBank[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +53,7 @@ export default function QuestionBankList() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'mine' | 'other'>('mine');
 
     const fetchQuestionBanks = async () => {
         setIsLoading(true);
@@ -63,7 +65,11 @@ export default function QuestionBankList() {
                 academic_year_id: selectedYearId
             };
 
-            const response = await questionBankApi.getQuestionBanks(params);
+            const apiMethod = activeTab === 'mine' 
+                ? questionBankApi.getMyQuestionBanks(params)
+                : questionBankApi.getPublicQuestionBanks(params);
+            
+            const response = await apiMethod;
             if (response.success) {
                 const result = response.data as any;
                 const items = Array.isArray(result) ? result : (result.data || []);
@@ -86,7 +92,7 @@ export default function QuestionBankList() {
         if (selectedYearId) {
             fetchQuestionBanks();
         }
-    }, [page, searchQuery, selectedYearId]);
+    }, [page, searchQuery, selectedYearId, activeTab]);
 
     const handleDelete = async (id: string) => {
         const result = await MySwal.fire({
@@ -151,16 +157,48 @@ export default function QuestionBankList() {
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Banks</h2>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your question banks and assessments.</p>
+                    <div className="flex items-center gap-1 mt-4">
+                        <button
+                            onClick={() => {
+                                setActiveTab('mine');
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                activeTab === 'mine'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                        >
+                            <Library className="size-4" />
+                            My Banks
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('other');
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                activeTab === 'other'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                        >
+                            <Users className="size-4" />
+                            Public Banks
+                        </button>
+                    </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <Link
-                        to="/admin/question-banks/create"
-                        className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
-                    >
-                        <Plus className="size-4.5" />
-                        New Question Bank
-                    </Link>
-                </div>
+                {activeTab === 'mine' && (
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            to="/admin/question-banks/create"
+                            className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
+                        >
+                            <Plus className="size-4.5" />
+                            New Question Bank
+                        </Link>
+                    </div>
+                )}
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
@@ -195,9 +233,11 @@ export default function QuestionBankList() {
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Bank Details</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject</th>
                                 {isAdmin && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
-                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>
-                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Public</th>
-                                <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                {activeTab === 'mine' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>}
+                                {activeTab === 'mine' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Public</th>}
+                                {activeTab === 'mine' && <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>}
+                                {activeTab === 'other' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>}
+                                {activeTab === 'other' && <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -219,35 +259,40 @@ export default function QuestionBankList() {
                                         <td className="px-4 py-5">
                                             <Skeleton className="h-6 w-24 rounded-full" />
                                         </td>
-                                        {isAdmin && <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>}
-                                        <td className="px-4 py-5 text-center">
+                                        {isAdmin && activeTab === 'mine' && <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>}
+                                        {activeTab === 'mine' && <td className="px-4 py-5 text-center">
                                             <Skeleton className="size-8 rounded-full mx-auto" />
-                                        </td>
-                                        <td className="px-4 py-5 text-center">
+                                        </td>}
+                                        {activeTab === 'mine' && <td className="px-4 py-5 text-center">
                                             <Skeleton className="h-6 w-10 rounded-full mx-auto" />
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
+                                        </td>}
+                                        {activeTab === 'other' && <td className="px-4 py-5 text-center">
+                                            <Skeleton className="size-8 rounded-full mx-auto" />
+                                        </td>}
+                                        {activeTab === 'mine' && <td className="px-8 py-5 text-right">
                                             <div className="flex items-center justify-end gap-3">
                                                 <Skeleton className="h-9 w-24 rounded-lg" />
                                                 <Skeleton className="size-9 rounded-lg" />
                                             </div>
-                                        </td>
+                                        </td>}
+                                        {activeTab === 'other' && <td className="px-8 py-5 text-right">
+                                            <Skeleton className="h-9 w-24 rounded-lg" />
+                                        </td>}
                                     </tr>
                                 ))
                             ) : questionBanks.length === 0 ? (
                                 <tr>
-                                    <td colSpan={isAdmin ? 7 : 6} className="text-center py-12 text-slate-500">
+                                    <td colSpan={activeTab === 'mine' ? (isAdmin ? 7 : 5) : (isAdmin ? 6 : 4)} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Library className="size-10 text-slate-300" />
-                                            <p>No question banks found.</p>
+                                            <p>{activeTab === 'mine' ? 'No question banks found.' : 'No public question banks available.'}</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : questionBanks.map((bank, index) => (
                                 <tr
                                     key={bank.id}
-                                    onClick={() => navigate(`/admin/question-banks/${bank.id}/show`)}
-                                    className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors cursor-pointer"
+                                    className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                                 >
                                     <td className="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">
                                         {(page - 1) * 10 + index + 1}
@@ -270,49 +315,74 @@ export default function QuestionBankList() {
                                             {(bank as any).subject?.name || 'Unknown Subject'}
                                         </span>
                                     </td>
-                                    {isAdmin && (
+                                    {isAdmin && activeTab === 'mine' && (
                                         <td className="px-4 py-5">
                                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                                                 {(bank as any).user?.name || 'No Teacher'}
                                             </span>
                                         </td>
                                     )}
-                                    <td className="px-4 py-5 text-center">
-                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
-                                            {bank.questions_count || 0}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-5 text-center">
-                                        <span onClick={(e) => e.stopPropagation()}>
-                                            <PublishToggle
-                                                checked={bank.is_public || false}
-                                                onChange={() => handleTogglePublic(bank.id, bank.is_public || false)}
-                                                loading={togglingId === bank.id}
-                                                size="sm"
-                                                activeColor="bg-green-500"
-                                                inactiveColor="bg-slate-300 dark:bg-slate-600"
-                                                title={bank.is_public ? 'Make private' : 'Make public'}
-                                            />
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                            <Link
-                                                to={`/admin/question-banks/${bank.id}`}
-                                                className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1"
-                                            >
-                                                <FileEdit className="size-3.5" />
-                                                Manage
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(bank.id)}
-                                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="size-4.5" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    {activeTab === 'mine' && (
+                                        <td className="px-4 py-5 text-center">
+                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
+                                                {bank.questions_count || 0}
+                                            </span>
+                                        </td>
+                                    )}
+                                    {activeTab === 'mine' && (
+                                        <td className="px-4 py-5 text-center">
+                                            <span onClick={(e) => e.stopPropagation()}>
+                                                <PublishToggle
+                                                    checked={bank.is_public || false}
+                                                    onChange={() => handleTogglePublic(bank.id, bank.is_public || false)}
+                                                    loading={togglingId === bank.id}
+                                                    size="sm"
+                                                    activeColor="bg-green-500"
+                                                    inactiveColor="bg-slate-300 dark:bg-slate-600"
+                                                    title={bank.is_public ? 'Make private' : 'Make public'}
+                                                />
+                                            </span>
+                                        </td>
+                                    )}
+                                    {activeTab === 'other' && (
+                                        <td className="px-4 py-5 text-center">
+                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
+                                                {bank.questions_count || 0}
+                                            </span>
+                                        </td>
+                                    )}
+                                    {activeTab === 'mine' ? (
+                                        <td className="px-8 py-5 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                                <Link
+                                                    to={`/admin/question-banks/${bank.id}`}
+                                                    className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1"
+                                                >
+                                                    <FileEdit className="size-3.5" />
+                                                    Manage
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(bank.id)}
+                                                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="size-4.5" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    ) : (
+                                        <td className="px-8 py-5 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                                <Link
+                                                    to={`/admin/question-banks/${bank.id}/preview`}
+                                                    className="px-3 py-1.5 bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1"
+                                                >
+                                                    <Eye className="size-3.5" />
+                                                    Review
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    )}
                                 </tr>
                             ))
                             }

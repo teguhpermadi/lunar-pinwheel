@@ -581,6 +581,14 @@ export const questionBankApi = {
         const response = await api.get('/question-banks', { params });
         return response.data;
     },
+    getMyQuestionBanks: async (params?: any) => {
+        const response = await api.get('/question-banks/mine', { params });
+        return response.data;
+    },
+    getPublicQuestionBanks: async (params?: any) => {
+        const response = await api.get('/question-banks/public', { params });
+        return response.data;
+    },
     getQuestionBank: async (id: string) => {
         const response = await api.get(`/question-banks/${id}`);
         return response.data;
