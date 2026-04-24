@@ -567,6 +567,7 @@ export interface QuestionBank {
     name: string;
     subject_id: string;
     user_id: string;
+    is_public?: boolean;
     subject?: Subject;
     user?: User;
     questions_count?: number;

@@ -16,6 +16,7 @@ import {
     ChevronRight,
     FileEdit
 } from 'lucide-react';
+import { PublishToggle } from '@/components/ui/PublishToggle';
 
 const MySwal = withReactContent(Swal);
 
@@ -50,6 +51,7 @@ export default function QuestionBankList() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
 
     const fetchQuestionBanks = async () => {
         setIsLoading(true);
@@ -109,6 +111,36 @@ export default function QuestionBankList() {
         }
     };
 
+    const handleTogglePublic = async (id: string, currentValue: boolean) => {
+        setTogglingId(id);
+        try {
+            await questionBankApi.updateQuestionBank(id, { is_public: !currentValue });
+            setQuestionBanks(prev => prev.map(bank => 
+                bank.id === id ? { ...bank, is_public: !currentValue } : bank
+            ));
+            MySwal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: `Question bank is now ${!currentValue ? 'public' : 'private'}.`,
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } catch (error) {
+            console.error('Failed to toggle is_public', error);
+            MySwal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Failed to update visibility.',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -164,6 +196,7 @@ export default function QuestionBankList() {
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject</th>
                                 {isAdmin && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Public</th>
                                 <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
@@ -190,6 +223,9 @@ export default function QuestionBankList() {
                                         <td className="px-4 py-5 text-center">
                                             <Skeleton className="size-8 rounded-full mx-auto" />
                                         </td>
+                                        <td className="px-4 py-5 text-center">
+                                            <Skeleton className="h-6 w-10 rounded-full mx-auto" />
+                                        </td>
                                         <td className="px-8 py-5 text-right">
                                             <div className="flex items-center justify-end gap-3">
                                                 <Skeleton className="h-9 w-24 rounded-lg" />
@@ -200,7 +236,7 @@ export default function QuestionBankList() {
                                 ))
                             ) : questionBanks.length === 0 ? (
                                 <tr>
-                                    <td colSpan={isAdmin ? 6 : 5} className="text-center py-12 text-slate-500">
+                                    <td colSpan={isAdmin ? 7 : 6} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Library className="size-10 text-slate-300" />
                                             <p>No question banks found.</p>
@@ -244,6 +280,19 @@ export default function QuestionBankList() {
                                     <td className="px-4 py-5 text-center">
                                         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
                                             {bank.questions_count || 0}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-5 text-center">
+                                        <span onClick={(e) => e.stopPropagation()}>
+                                            <PublishToggle
+                                                checked={bank.is_public || false}
+                                                onChange={() => handleTogglePublic(bank.id, bank.is_public || false)}
+                                                loading={togglingId === bank.id}
+                                                size="sm"
+                                                activeColor="bg-green-500"
+                                                inactiveColor="bg-slate-300 dark:bg-slate-600"
+                                                title={bank.is_public ? 'Make private' : 'Make public'}
+                                            />
                                         </span>
                                     </td>
                                     <td className="px-8 py-5 text-right">
