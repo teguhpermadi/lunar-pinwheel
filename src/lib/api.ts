@@ -567,6 +567,7 @@ export interface QuestionBank {
     name: string;
     subject_id: string;
     user_id: string;
+    is_public?: boolean;
     subject?: Subject;
     user?: User;
     questions_count?: number;
@@ -578,6 +579,14 @@ export interface QuestionBank {
 export const questionBankApi = {
     getQuestionBanks: async (params?: any) => {
         const response = await api.get('/question-banks', { params });
+        return response.data;
+    },
+    getMyQuestionBanks: async (params?: any) => {
+        const response = await api.get('/question-banks/mine', { params });
+        return response.data;
+    },
+    getPublicQuestionBanks: async (params?: any) => {
+        const response = await api.get('/question-banks/public', { params });
         return response.data;
     },
     getQuestionBank: async (id: string) => {
