@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam, Classroom, classroomApi, teacherApi, Teacher } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn, toWIBDateTimeLocalString, parseWIBToDate, addWIBDays, convertToLocalWIB, convertFromLocalWIB } from '@/lib/utils';
+import { cn, toWIBDateTimeLocalString, addWIBDays, convertToLocalWIB, convertFromLocalWIB } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import {
