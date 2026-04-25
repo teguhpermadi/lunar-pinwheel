@@ -21,7 +21,7 @@ import StudentCategorizationInput from '@/components/questions/student-inputs/St
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle, Rocket,
-    ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff
+    ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -166,20 +166,24 @@ export default function PreviewQuestionBank() {
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
                 />;
-            case 'essay':
+            case 'essay': {
+                const essayKeyAnswer = options.find((o: any) => o.is_correct)?.content;
                 return <StudentEssayInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={essayKeyAnswer ? { rubric: essayKeyAnswer } : undefined}
                 />;
-            case 'short_answer':
+            }
+            case 'short_answer': {
+                const shortAnswerKeys = options.filter((o: any) => o.is_correct).map((o: any) => o.content).filter(Boolean);
                 return <StudentShortAnswerInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={shortAnswerKeys.length > 0 ? { answers: shortAnswerKeys } : undefined}
                 />;
+            }
             case 'sequence':
                 return <StudentSequenceInput
                     options={options}
@@ -196,27 +200,35 @@ export default function PreviewQuestionBank() {
                     showAnswer={showAnswer}
                     keyAnswer={(q.exam_question as any).key_answer}
                 />;
-            case 'arabic_response':
+            case 'arabic_response': {
+                const arabicKeyAnswer = options.find((o: any) => o.is_correct)?.content;
                 return <StudentLanguageResponseInput
                     language="arabic"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={arabicKeyAnswer ? { answers: [arabicKeyAnswer] } : undefined}
                 />;
-            case 'javanese_response':
+            }
+            case 'javanese_response': {
+                const javaneseKeyAnswer = options.find((o: any) => o.is_correct)?.content;
                 return <StudentLanguageResponseInput
                     language="javanese"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={javaneseKeyAnswer ? { answers: [javaneseKeyAnswer] } : undefined}
                 />;
-            case 'math_input':
+            }
+            case 'math_input': {
+                const mathKeyAnswer = options.find((o: any) => o.is_correct)?.content;
                 return <StudentMathInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={mathKeyAnswer ? { answer: mathKeyAnswer } : undefined}
                 />;
+            }
             case 'categorization':
                 return <StudentCategorizationInput
                     options={options}
@@ -413,6 +425,14 @@ export default function PreviewQuestionBank() {
                                         </div>
                                     </div>
                                 )}
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                                        <Trophy className="size-4 text-amber-600 dark:text-amber-400" />
+                                        <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                                            {currentQuestion?.exam_question?.score || 0} pts
+                                        </span>
+                                    </div>
+                                </div>
                                 <MathRenderer
                                     className="font-medium leading-relaxed mb-8 text-gray-900 dark:text-white question-content"
                                     content={currentQuestion?.exam_question?.content || ''}

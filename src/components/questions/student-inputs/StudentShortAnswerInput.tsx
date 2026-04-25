@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PencilLine, CheckCircle2 } from 'lucide-react';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface StudentShortAnswerInputProps {
     selectedAnswer: string | null;
@@ -31,8 +32,28 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
         }
     };
 
+    const containsHtml = (str: string) => /<\/?[a-z][^>]*>/i.test(str);
+
     const correctAnswers = keyAnswer?.answers || [];
     const hasCorrectAnswer = correctAnswers.length > 0;
+
+    const renderAnswer = (answer: string, idx: number) => {
+        if (containsHtml(answer)) {
+            return (
+                <div key={idx} className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-lg">
+                    <MathRenderer content={answer} className="text-sm" />
+                </div>
+            );
+        }
+        return (
+            <span
+                key={idx}
+                className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-lg text-sm font-medium text-green-700 dark:text-green-300"
+            >
+                {answer}
+            </span>
+        );
+    };
 
     return (
         <div className="space-y-4">
@@ -43,14 +64,7 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
                         Jawaban Benar
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {correctAnswers.map((answer, idx) => (
-                            <span
-                                key={idx}
-                                className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-lg text-sm font-medium text-green-700 dark:text-green-300"
-                            >
-                                {answer}
-                            </span>
-                        ))}
+                        {correctAnswers.map((answer, idx) => renderAnswer(answer, idx))}
                     </div>
                 </div>
             )}

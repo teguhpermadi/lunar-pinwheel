@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import MathKeyboard from '@/components/ui/MathKeyboard';
-import { Info } from 'lucide-react';
+import MathRenderer from '@/components/ui/MathRenderer';
+import { Info, CheckCircle2 } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -13,9 +14,13 @@ declare global {
 interface StudentMathInputProps {
     selectedAnswer: string | null;
     onChange: (value: string) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        answer?: string;
+    };
 }
 
-export default function StudentMathInput({ selectedAnswer, onChange }: StudentMathInputProps) {
+export default function StudentMathInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentMathInputProps) {
     const mathFieldRef = useRef<HTMLSpanElement>(null);
     const mqRef = useRef<any>(null);
     const [internalValue, setInternalValue] = useState(selectedAnswer || '');
@@ -110,8 +115,26 @@ export default function StudentMathInput({ selectedAnswer, onChange }: StudentMa
         }
     };
 
+    const correctAnswer = keyAnswer?.answer;
+    const hasCorrectAnswer = !!correctAnswer;
+
     return (
         <div className="space-y-6">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Jawaban Benar
+                    </div>
+                    <div className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-800 rounded-lg border border-green-300 dark:border-green-600">
+                        <MathRenderer
+                            content={correctAnswer}
+                            className="text-2xl"
+                        />
+                    </div>
+                </div>
+            )}
+
             <div
                 className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-all flex flex-col cursor-text hover:border-primary/30"
                 onClick={focusInput}

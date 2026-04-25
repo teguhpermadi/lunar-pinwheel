@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import QuestionToolbar from '@/components/questions/QuestionToolbar';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 interface StudentEssayInputProps {
     selectedAnswer: string | null;
@@ -39,7 +40,15 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
     const wordCount = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
 
     const rubricContent = keyAnswer?.rubric;
-    const hasRubric = rubricContent && Object.keys(rubricContent).length > 0;
+    const hasRubric = rubricContent && (typeof rubricContent === 'string' ? rubricContent.length > 0 : true);
+    const containsHtml = (str: string) => /<\/?[a-z][^>]*>/i.test(str);
+
+    const renderRubric = (content: string) => {
+        if (containsHtml(content)) {
+            return <MathRenderer content={content} className="text-sm" />;
+        }
+        return typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+    };
 
     return (
         <div className="space-y-4">
@@ -49,7 +58,7 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
                         Rubrik / Kunci Jawaban
                     </div>
                     <div className="text-sm text-gray-700 dark:text-gray-200">
-                        {typeof rubricContent === 'string' ? rubricContent : JSON.stringify(rubricContent, null, 2)}
+                        {typeof rubricContent === 'string' ? renderRubric(rubricContent) : JSON.stringify(rubricContent, null, 2)}
                     </div>
                 </div>
             )}
