@@ -21,7 +21,7 @@ import StudentCategorizationInput from '@/components/questions/student-inputs/St
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle, Rocket,
-    ChevronLeft, ChevronRight, Puzzle
+    ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -43,6 +43,7 @@ export default function PreviewQuestionBank() {
         return saved ? parseInt(saved) : 16;
     });
     const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
+    const [showAnswer, setShowAnswer] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -149,52 +150,67 @@ export default function PreviewQuestionBank() {
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
                 />;
             case 'multiple_selection':
                 return <StudentMultipleSelectionInput
                     options={options}
                     selectedAnswers={q.student_answer || []}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
                 />;
             case 'true_false':
                 return <StudentTrueFalseInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
                 />;
             case 'essay':
                 return <StudentEssayInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'short_answer':
                 return <StudentShortAnswerInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
-                />;
-            case 'matching':
-                return <StudentMatchingInput
-                    options={options}
-                    selectedAnswer={q.student_answer}
-                    onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'sequence':
                 return <StudentSequenceInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
+                />;
+            case 'matching':
+                return <StudentMatchingInput
+                    options={options}
+                    selectedAnswer={q.student_answer}
+                    onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'arabic_response':
                 return <StudentLanguageResponseInput
                     language="arabic"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'javanese_response':
                 return <StudentLanguageResponseInput
                     language="javanese"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'math_input':
                 return <StudentMathInput
@@ -206,12 +222,16 @@ export default function PreviewQuestionBank() {
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'arrange_words':
                 return <StudentArrangeWordsInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    showAnswer={showAnswer}
+                    keyAnswer={(q.exam_question as any).key_answer}
                 />;
             default:
                 return (
@@ -433,6 +453,16 @@ export default function PreviewQuestionBank() {
                                 >
                                     <HelpCircle className="size-5 mr-2" />
                                     Doubtful
+                                </button>
+
+                                <button
+                                    onClick={() => setShowAnswer(!showAnswer)}
+                                    className={`w-full sm:w-auto px-6 py-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold ${showAnswer
+                                        ? 'bg-green-500 border-green-500 text-white'
+                                        : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                                >
+                                    {showAnswer ? <EyeOff className="size-5 mr-2" /> : <Eye className="size-5 mr-2" />}
+                                    {showAnswer ? 'Hide Answer' : 'Show Answer'}
                                 </button>
 
                                 <button

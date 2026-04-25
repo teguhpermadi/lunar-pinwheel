@@ -5,17 +5,20 @@ interface StudentMultipleChoiceInputProps {
     options: QuestionOption[];
     selectedAnswer: string | null;
     onChange: (optionKey: string) => void;
+    showAnswer?: boolean;
 }
 
-export default function StudentMultipleChoiceInput({ options, selectedAnswer, onChange }: StudentMultipleChoiceInputProps) {
+export default function StudentMultipleChoiceInput({ options, selectedAnswer, onChange, showAnswer }: StudentMultipleChoiceInputProps) {
     return (
         <div className="flex flex-col space-y-3">
             {options.map((option) => (
                 <label
                     key={option.id}
-                    className={`group flex items-center p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedAnswer === option.option_key
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-primary/5'
+                    className={`group flex items-center p-4 rounded-xl border cursor-pointer transition-all duration-200 ${showAnswer && option.is_correct
+                        ? 'border-green-500 bg-green-500/10 ring-2 ring-green-500/30'
+                        : selectedAnswer === option.option_key
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-primary/5'
                         }`}
                 >
                     <div className="relative flex items-center">
@@ -37,7 +40,7 @@ export default function StudentMultipleChoiceInput({ options, selectedAnswer, on
                         )}
 
                         <MathRenderer
-                            className={`text-lg transition-colors ${selectedAnswer === option.option_key ? 'text-primary' : 'text-gray-700 dark:text-gray-200'}`}
+                            className={`text-lg transition-colors ${showAnswer && option.is_correct ? 'text-green-700 dark:text-green-300 font-semibold' : selectedAnswer === option.option_key ? 'text-primary' : 'text-gray-700 dark:text-gray-200'}`}
                             content={option.content}
                         />
                     </div>

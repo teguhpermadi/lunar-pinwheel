@@ -2,15 +2,23 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
-import { Info, LayoutGrid, Archive, ArrowUp, ArrowDown } from 'lucide-react';
+import { Info, LayoutGrid, Archive, ArrowUp, ArrowDown, CheckCircle2 } from 'lucide-react';
 
 interface StudentCategorizationInputProps {
     options: QuestionOption[];
-    selectedAnswer: Record<string, string> | null; // { item_option_key: group_uuid }
+    selectedAnswer: Record<string, string> | null;
     onChange: (value: Record<string, string>) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        groups?: {
+            title: string;
+            items: string[];
+        }[];
+    };
 }
 
-export default function StudentCategorizationInput({ options, selectedAnswer, onChange }: StudentCategorizationInputProps) {
+export default function StudentCategorizationInput({ options, selectedAnswer, onChange, showAnswer, keyAnswer }: StudentCategorizationInputProps) {
+    const correctGroups = keyAnswer?.groups || [];
     // Determine unique categories from options metadata
     const categories = useMemo(() => {
         const uniqueGroups = new Map<string, string>();
@@ -145,8 +153,36 @@ export default function StudentCategorizationInput({ options, selectedAnswer, on
         };
     }, [draggedItemKey]);
 
+    const hasCorrectAnswer = correctGroups.length > 0;
+
     return (
         <div className="space-y-8">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Kategori Benar
+                    </div>
+                    <div className="space-y-2">
+                        {correctGroups.map((group, gIdx) => (
+                            <div key={gIdx} className="text-sm">
+                                <span className="font-semibold text-green-700 dark:text-green-300">{group.title}:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {group.items.map((itemKey, iIdx) => {
+                                        const opt = options.find(o => o.option_key === itemKey);
+                                        return (
+                                            <span key={iIdx} className="px-2 py-0.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded text-xs text-green-700 dark:text-green-300">
+                                                {opt?.content || itemKey}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Instructions */}
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 rounded-xl flex gap-3">
                 <Info className="size-5 text-blue-500" />

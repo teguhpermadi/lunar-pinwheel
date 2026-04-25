@@ -5,9 +5,10 @@ interface StudentMultipleSelectionInputProps {
     options: QuestionOption[];
     selectedAnswers: string[]; // comma separated or array? Backend expects string or array.
     onChange: (optionKeys: string[]) => void;
+    showAnswer?: boolean;
 }
 
-export default function StudentMultipleSelectionInput({ options, selectedAnswers = [], onChange }: StudentMultipleSelectionInputProps) {
+export default function StudentMultipleSelectionInput({ options, selectedAnswers = [], onChange, showAnswer }: StudentMultipleSelectionInputProps) {
     const handleToggle = (key: string) => {
         if (selectedAnswers.includes(key)) {
             onChange(selectedAnswers.filter(k => k !== key));
@@ -21,9 +22,11 @@ export default function StudentMultipleSelectionInput({ options, selectedAnswers
             {options.map((option) => (
                 <label
                     key={option.id}
-                    className={`group flex items-center p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedAnswers.includes(option.option_key)
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-primary/5'
+                    className={`group flex items-center p-4 rounded-xl border cursor-pointer transition-all duration-200 ${showAnswer && option.is_correct
+                        ? 'border-green-500 bg-green-500/10 ring-2 ring-green-500/30'
+                        : selectedAnswers.includes(option.option_key)
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-primary/5'
                         }`}
                 >
                     <div className="relative flex items-center">
@@ -44,7 +47,7 @@ export default function StudentMultipleSelectionInput({ options, selectedAnswers
                         )}
 
                         <MathRenderer
-                            className={`text-lg transition-colors ${selectedAnswers.includes(option.option_key) ? 'text-primary' : 'text-gray-700 dark:text-gray-200'}`}
+                            className={`text-lg transition-colors ${showAnswer && option.is_correct ? 'text-green-700 dark:text-green-300 font-semibold' : selectedAnswers.includes(option.option_key) ? 'text-primary' : 'text-gray-700 dark:text-gray-200'}`}
                             content={option.content}
                         />
                     </div>

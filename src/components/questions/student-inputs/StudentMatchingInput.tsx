@@ -2,17 +2,23 @@ import { useState, useEffect, useRef } from 'react';
 import { Reorder } from 'framer-motion';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
-import { MousePointer2, Link2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { MousePointer2, Link2, GripVertical, ChevronUp, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 interface StudentMatchingInputProps {
     options: QuestionOption[];
-    selectedAnswer: Record<string, string> | null; // e.g. { "A": "key_1", "B": "key_2" }
+    selectedAnswer: Record<string, string> | null;
     onChange: (value: Record<string, string>) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        pairs?: Record<string, string>;
+    };
 }
 
-export default function StudentMatchingInput({ options, selectedAnswer, onChange }: StudentMatchingInputProps) {
+export default function StudentMatchingInput({ options, selectedAnswer, onChange, showAnswer, keyAnswer }: StudentMatchingInputProps) {
     const leftOptions = options.filter(o => o.metadata?.side === 'left');
     const initialRightOptions = options.filter(o => o.metadata?.side === 'right');
+
+    const correctPairs = keyAnswer?.pairs || {};
 
     const [orderedRight, setOrderedRight] = useState<QuestionOption[]>([]);
     const [draggedRightKey, setDraggedRightKey] = useState<string | null>(null);
@@ -161,8 +167,32 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
         };
     }, [draggedRightKey, orderedRight]);
 
+    const hasCorrectAnswer = Object.keys(correctPairs).length > 0;
+
     return (
         <div className="space-y-8">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Pasangan Benar
+                    </div>
+                    <div className="space-y-1">
+                        {Object.entries(correctPairs).map(([leftKey, rightKey]) => {
+                            const leftOpt = leftOptions.find(o => o.option_key === leftKey);
+                            const rightOpt = initialRightOptions.find(o => o.option_key === rightKey);
+                            return (
+                                <div key={leftKey} className="flex items-center gap-2 text-sm">
+                                    <span className="text-green-600 dark:text-green-400 font-medium">{leftOpt?.content || leftKey}</span>
+                                    <span className="text-slate-400">→</span>
+                                    <span className="text-green-600 dark:text-green-400 font-medium">{rightOpt?.content || rightKey}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 rounded-xl flex gap-3">
                 <MousePointer2 className="size-5 text-blue-500" />
                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
@@ -185,6 +215,11 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                             key={left.id}
                             className="min-h-[100px] md:min-h-[120px] p-3 sm:p-4 md:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 sm:gap-4 transition-all"
                         >
+                            {showAnswer && hasCorrectAnswer && (
+                                <div className="size-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                                    <CheckCircle2 className="size-3 text-white" />
+                                </div>
+                            )}
                             <div
                                 className="flex-1 flex items-center"
                                 ref={(el) => { leftInnerRefs.current[index] = el; }}

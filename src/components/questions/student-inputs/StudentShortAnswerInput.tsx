@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { PencilLine } from 'lucide-react';
+import { PencilLine, CheckCircle2 } from 'lucide-react';
 
 interface StudentShortAnswerInputProps {
     selectedAnswer: string | null;
     onChange: (value: string) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        answers?: string[];
+    };
 }
 
-export default function StudentShortAnswerInput({ selectedAnswer, onChange }: StudentShortAnswerInputProps) {
+export default function StudentShortAnswerInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentShortAnswerInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
 
     useEffect(() => {
@@ -27,8 +31,30 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange }: St
         }
     };
 
+    const correctAnswers = keyAnswer?.answers || [];
+    const hasCorrectAnswer = correctAnswers.length > 0;
+
     return (
         <div className="space-y-4">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Jawaban Benar
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {correctAnswers.map((answer, idx) => (
+                            <span
+                                key={idx}
+                                className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-lg text-sm font-medium text-green-700 dark:text-green-300"
+                            >
+                                {answer}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className="relative group">
                 <input
                     type="text"

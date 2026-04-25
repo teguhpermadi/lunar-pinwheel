@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import ArabicKeyboard from '@/components/ui/ArabicKeyboard';
 import JavaneseKeyboard from '@/components/ui/JavaneseKeyboard';
-import { Info } from 'lucide-react';
+import { Info, CheckCircle2 } from 'lucide-react';
 
 interface StudentLanguageResponseInputProps {
     selectedAnswer: string | null;
     onChange: (value: string) => void;
     language: 'arabic' | 'javanese';
+    showAnswer?: boolean;
+    keyAnswer?: {
+        answers?: string[];
+    };
 }
 
-export default function StudentLanguageResponseInput({ selectedAnswer, onChange, language }: StudentLanguageResponseInputProps) {
+export default function StudentLanguageResponseInput({ selectedAnswer, onChange, language, showAnswer, keyAnswer }: StudentLanguageResponseInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMobile, setIsMobile] = useState(false);
@@ -100,8 +104,30 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
 
     const handleSpace = () => handleKeyClick(' ');
 
+    const correctAnswers = keyAnswer?.answers || [];
+    const hasCorrectAnswer = correctAnswers.length > 0;
+
     return (
         <div className="space-y-6">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Jawaban Benar
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {correctAnswers.map((answer, idx) => (
+                            <span
+                                key={idx}
+                                className={`px-4 py-2 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-xl text-xl font-medium text-green-700 dark:text-green-300 ${language === 'arabic' ? 'font-arabic' : 'font-javanese'}`}
+                            >
+                                {answer}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <textarea
                 ref={textareaRef}
                 value={value}

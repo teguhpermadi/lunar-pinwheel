@@ -7,12 +7,13 @@ export interface TrueFalseAnswer {
 }
 
 interface StudentTrueFalseInputProps {
-    options: { id: string; option_key: string; content: string | null }[];
+    options: { id: string; option_key: string; content: string | null; is_correct?: boolean }[];
     selectedAnswer: TrueFalseAnswer | string | null;
     onChange: (answer: TrueFalseAnswer) => void;
+    showAnswer?: boolean;
 }
 
-export default function StudentTrueFalseInput({ options, selectedAnswer, onChange }: StudentTrueFalseInputProps) {
+export default function StudentTrueFalseInput({ options, selectedAnswer, onChange, showAnswer }: StudentTrueFalseInputProps) {
     const [localReason, setLocalReason] = useState<string>('');
 
     const selectedOptionKey = typeof selectedAnswer === 'string' 
@@ -57,11 +58,13 @@ export default function StudentTrueFalseInput({ options, selectedAnswer, onChang
                             key={option.id}
                             onClick={() => handleOptionSelect(option.option_key)}
                             className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 ${
-                                isSelected
-                                    ? (isTrue
-                                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                        : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400')
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-primary grayscale-[0.5] hover:grayscale-0 bg-white dark:bg-gray-800'
+                                showAnswer && option.is_correct
+                                    ? 'border-green-500 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 ring-2 ring-green-500/30'
+                                    : isSelected
+                                        ? (isTrue
+                                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                            : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400')
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-primary grayscale-[0.5] hover:grayscale-0 bg-white dark:bg-gray-800'
                             }`}
                         >
                             {isTrue ? (

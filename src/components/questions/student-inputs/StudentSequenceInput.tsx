@@ -2,16 +2,22 @@ import { useState, useEffect } from 'react';
 import { QuestionOption } from '@/lib/api';
 import CollapsibleMathRenderer from '@/components/ui/CollapsibleMathRenderer';
 import { Reorder } from 'framer-motion';
-import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { GripVertical, ChevronUp, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 interface StudentSequenceInputProps {
     options: QuestionOption[];
-    selectedAnswer: string[] | null; // e.g. ["A", "C", "B"]
+    selectedAnswer: string[] | null;
     onChange: (value: string[]) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        order?: string[];
+    };
 }
 
-export default function StudentSequenceInput({ options, selectedAnswer, onChange }: StudentSequenceInputProps) {
+export default function StudentSequenceInput({ options, selectedAnswer, onChange, showAnswer, keyAnswer }: StudentSequenceInputProps) {
     const [items, setItems] = useState<QuestionOption[]>([]);
+
+    const correctOrder = keyAnswer?.order || [];
 
     useEffect(() => {
         if (selectedAnswer && selectedAnswer.length > 0) {
@@ -32,8 +38,37 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
         onChange(newItems.map(i => i.option_key));
     };
 
+    const getCorrectPosition = (item: QuestionOption): number => {
+        const correctIdx = correctOrder.indexOf(item.option_key);
+        return correctIdx >= 0 ? correctIdx + 1 : 0;
+    };
+
+    const hasCorrectAnswer = correctOrder.length > 0;
+
     return (
         <div className="space-y-4">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Urutan Benar
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                        {correctOrder.map((key, idx) => {
+                            const item = options.find(o => o.option_key === key);
+                            return (
+                                <span key={idx} className="inline-flex items-center gap-1 mr-3">
+                                    <span className="w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
+                                        {idx + 1}
+                                    </span>
+                                    <span className="truncate max-w-[100px]">{item?.content || key}</span>
+                                </span>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <GripVertical className="size-4" />
                 Drag and drop to reorder the sequence
@@ -54,9 +89,15 @@ export default function StudentSequenceInput({ options, selectedAnswer, onChange
                             <CollapsibleMathRenderer content={item.content} className="text-sm md:text-base lg:text-lg font-medium text-gray-700 dark:text-gray-200" maxLines={3} />
                         </div>
 
-                        <div className="size-8 bg-primary/5 text-primary text-[10px] font-black rounded-full flex items-center justify-center shrink-0 border border-primary/10">
-                            {items.indexOf(item) + 1}
-                        </div>
+                        {showAnswer && hasCorrectAnswer ? (
+                            <div className="size-8 bg-green-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shrink-0 border border-green-600 shadow-sm">
+                                {getCorrectPosition(item)}
+                            </div>
+                        ) : (
+                            <div className="size-8 bg-primary/5 text-primary text-[10px] font-black rounded-full flex items-center justify-center shrink-0 border border-primary/10">
+                                {items.indexOf(item) + 1}
+                            </div>
+                        )}
 
                         <div className="flex flex-col gap-1 ml-2">
                             <button

@@ -6,15 +6,21 @@ import { X, RotateCcw, Type, LayoutGrid, CheckCircle2 } from 'lucide-react';
 
 interface StudentArrangeWordsInputProps {
     options: QuestionOption[];
-    selectedAnswer: string[] | null; // e.g. ["Saya", "sedang", "belajar"]
+    selectedAnswer: string[] | null;
     onChange: (value: string[]) => void;
+    showAnswer?: boolean;
+    keyAnswer?: {
+        words?: string[];
+    };
 }
 
-export default function StudentArrangeWordsInput({ options, selectedAnswer, onChange }: StudentArrangeWordsInputProps) {
+export default function StudentArrangeWordsInput({ options, selectedAnswer, onChange, showAnswer, keyAnswer }: StudentArrangeWordsInputProps) {
     const option = options[0];
     const isArabic = !!option?.metadata?.is_arabic;
     const delimiter = option?.metadata?.delimiter || ' ';
     const shuffleMode = option?.metadata?.shuffle_mode || 'phrase';
+
+    const correctOrder = keyAnswer?.words || [];
 
     // Full list of words in correct order (from server content)
     const allWords = useMemo(() => {
@@ -77,8 +83,33 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
         onChange([]);
     };
 
+    const hasCorrectAnswer = correctOrder.length > 0;
+
     return (
         <div className="space-y-8">
+            {showAnswer && hasCorrectAnswer && (
+                <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-900/20 space-y-2">
+                    <div className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle2 className="size-4" />
+                        Urutan Jawaban Benar
+                    </div>
+                    <div className={cn("flex flex-wrap gap-2", isArabic && "flex-row-reverse")}>
+                        {correctOrder.map((word, idx) => (
+                            <span
+                                key={`correct-${idx}`}
+                                className={cn(
+                                    "px-3 py-1.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-600 rounded-lg text-sm font-bold text-green-700 dark:text-green-300",
+                                    shuffleMode === 'alphabet' && "px-2 min-w-[32px] justify-center",
+                                    isArabic && "font-arabic"
+                                )}
+                            >
+                                {word}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Answer Area */}
             <div className="space-y-3">
                 <div className="flex items-center justify-between">

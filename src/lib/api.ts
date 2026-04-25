@@ -665,6 +665,15 @@ export interface Question {
         content?: MediaItem[];
     };
     options?: QuestionOption[];
+    key_answer?: {
+        answer?: string;
+        answers?: string[];
+        pairs?: Record<string, string>;
+        order?: string[];
+        rubric?: any;
+        words?: string[];
+        groups?: any[];
+    };
     created_at: string;
     updated_at: string;
 }
