@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/modal';
 import { questionSuggestionApi } from '@/lib/api';
 import Swal from 'sweetalert2';
@@ -142,21 +142,21 @@ export default function QuestionSuggestionModal({
     };
 
     const hasOptionsChanges = (): boolean => {
-        const original = question?.exam_question?.options || [];
+        const original: any[] = question?.exam_question?.options || [];
         if (suggestedOptions.length !== original.length) return true;
         
         for (let i = 0; i < suggestedOptions.length; i++) {
-            const orig = original[i];
+            const orig: any = original[i];
             const sug = suggestedOptions[i];
-            if (orig.id !== sug.id) return true;
-            if (orig.content !== sug.content) return true;
-            if (orig.is_correct !== sug.is_correct) return true;
+            if (orig?.id !== sug.id) return true;
+            if (orig?.content !== sug.content) return true;
+            if (orig?.is_correct !== sug.is_correct) return true;
         }
         return false;
     };
 
     const generateOptionsDiff = () => {
-        const original = question?.exam_question?.options || [];
+        const original: any[] = question?.exam_question?.options || [];
         const originalMap = new Map(original.map((o: any) => [o.id, o]));
         const suggestedMap = new Map(suggestedOptions.filter(o => o.id).map(o => [o.id, o]));
 
@@ -166,8 +166,8 @@ export default function QuestionSuggestionModal({
 
         suggestedOptions.forEach(sug => {
             if (sug.id && originalMap.has(sug.id)) {
-                const orig = originalMap.get(sug.id);
-                if (orig.content !== sug.content || orig.is_correct !== sug.is_correct) {
+                const orig: any = originalMap.get(sug.id);
+                if (orig?.content !== sug.content || orig?.is_correct !== sug.is_correct) {
                     update.push({
                         id: sug.id,
                         content: sug.content,
