@@ -1004,6 +1004,30 @@ export const examQuestionApi = {
     }
 };
 
+export interface QuestionSuggestion {
+    id: string;
+    question_id: string;
+    user?: User;
+    data: Record<string, any> | null;
+    description: string | null;
+    state: 'pending' | 'approved' | 'rejected';
+    state_label: string;
+    state_color: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface StoreQuestionSuggestionRequest {
+    question_id: string;
+    description: string;
+    data?: Record<string, any>;
+}
+
+export interface UpdateQuestionSuggestionRequest {
+    description?: string;
+    data?: Record<string, any>;
+}
+
 export const questionSuggestionApi = {
     getSuggestions: async (params?: any) => {
         const response = await api.get('/question-suggestions', { params });
@@ -1015,6 +1039,18 @@ export const questionSuggestionApi = {
     },
     getSuggestion: async (id: string) => {
         const response = await api.get(`/question-suggestions/${id}`);
+        return response.data;
+    },
+    createSuggestion: async (data: StoreQuestionSuggestionRequest) => {
+        const response = await api.post('/question-suggestions', data);
+        return response.data;
+    },
+    updateSuggestion: async (id: string, data: UpdateQuestionSuggestionRequest) => {
+        const response = await api.put(`/question-suggestions/${id}`, data);
+        return response.data;
+    },
+    deleteSuggestion: async (id: string) => {
+        const response = await api.delete(`/question-suggestions/${id}`);
         return response.data;
     },
     approveSuggestion: async (id: string) => {
