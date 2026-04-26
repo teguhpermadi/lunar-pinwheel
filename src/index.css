@@ -175,4 +175,39 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Suggestion Mode Border Animation */
+  @keyframes suggestion-glow {
+    0%, 100% {
+      border-color: #fbbf24;
+      box-shadow: 0 0 5px rgba(251, 191, 36, 0.3), 0 0 10px rgba(251, 191, 36, 0.2), 0 0 15px rgba(251, 191, 36, 0.1);
+    }
+    50% {
+      border-color: #f59e0b;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2);
+    }
+  }
+
+  .animate-suggestion-border {
+    animation: suggestion-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes suggestion-glow-dark {
+    0%, 100% {
+      border-color: #f59e0b;
+      box-shadow: 0 0 5px rgba(245, 158, 11, 0.3), 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+    50% {
+      border-color: #d97706;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+  }
+
+  :root:not(.dark) .animate-suggestion-border {
+    animation: suggestion-glow 2s ease-in-out infinite;
+  }
+
+  :root.dark .animate-suggestion-border {
+    animation: suggestion-glow-dark 2s ease-in-out infinite;
+  }
 }

@@ -8,9 +8,21 @@ interface ModalProps {
     onClose: () => void;
     title?: string;
     children: React.ReactNode;
+    className?: string;
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    '2xl': 'max-w-5xl',
+    '3xl': 'max-w-6xl',
+    '4xl': 'max-w-7xl',
+};
+
+export default function Modal({ isOpen, onClose, title, children, className = '', size = 'md' }: ModalProps) {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -40,7 +52,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden pointer-events-auto border border-slate-200 dark:border-slate-800"
+                            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full ${sizeClasses[size]} overflow-hidden pointer-events-auto border border-slate-200 dark:border-slate-800 ${className}`}
                         >
                             {title && (
                                 <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
@@ -53,7 +65,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
                                     </button>
                                 </div>
                             )}
-                            <div className="p-6">
+                            <div className="p-6 max-h-[85vh] overflow-y-auto custom-scrollbar">
                                 {children}
                             </div>
                         </motion.div>

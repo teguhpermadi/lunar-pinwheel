@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { questionBankApi, QuestionBank } from '@/lib/api';
+import { questionBankApi, questionSuggestionApi, QuestionBank } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import MathRenderer from '@/components/ui/MathRenderer';
+import RichTextEditor from '@/components/ui/RichTextEditor';
+import QuestionToolbar from '@/components/questions/QuestionToolbar';
+import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
+import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
+import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -20,11 +25,29 @@ import StudentMathInput from '@/components/questions/student-inputs/StudentMathI
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 import {
-    X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle, Rocket,
-    ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy
+    X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle,
+    ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy, Lightbulb,
+    Send, CheckCircle
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
+
+interface SuggestionOption {
+    id?: string;
+    key: string;
+    content: string;
+    is_correct: boolean;
+    media?: any;
+    uuid: string;
+    pendingImage?: File | null;
+    previewUrl?: string | null;
+}
+
+const QUESTION_SUGGESTION_FIELDS = [
+    { value: 'content', label: 'Isi Soal' },
+    { value: 'score', label: 'Poin' },
+    { value: 'options', label: 'Pilihan' },
+];
 
 export default function PreviewQuestionBank() {
     const { id } = useParams<{ id: string }>();
@@ -44,6 +67,16 @@ export default function PreviewQuestionBank() {
     });
     const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
     const [showAnswer, setShowAnswer] = useState(false);
+
+    // Suggestion Mode State
+    const [isSuggestionMode, setIsSuggestionMode] = useState(false);
+    const [selectedFields, setSelectedFields] = useState<string[]>([]);
+    const [suggestedContent, setSuggestedContent] = useState('');
+    const [suggestedScore, setSuggestedScore] = useState<number | null>(null);
+    const [suggestedOptions, setSuggestedOptions] = useState<SuggestionOption[]>([]);
+    const [suggestionDescription, setSuggestionDescription] = useState('');
+    const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
+    const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
 
     useEffect(() => {
         if (id) {
@@ -133,6 +166,461 @@ export default function PreviewQuestionBank() {
             title: 'Preview Selesai',
             text: 'Ini adalah mode preview, tidak ada data yang disimpan.',
         }).then(() => navigate(`/admin/question-banks/${id}/show`));
+    };
+
+    // Suggestion Mode Functions
+    const enterSuggestionMode = async () => {
+        if (!currentQuestion?.exam_question) return;
+
+        const eq = currentQuestion.exam_question;
+        console.log('🔍 [Suggestion] Entering suggestion mode for question:', eq.id);
+        
+        // Fetch existing suggestions for this question
+        try {
+            console.log('📡 [Suggestion] Fetching existing suggestions...');
+            const response = await questionSuggestionApi.getMySuggestions({
+                question_id: eq.id
+            });
+            console.log('📥 [Suggestion] Response:', response);
+            
+            // Handle nested response structure (pagination format)
+            const suggestionsData = response.data?.data || response.data || [];
+            console.log('📊 [Suggestion] Parsed suggestions data:', suggestionsData);
+            
+            if (response.success && suggestionsData.length > 0) {
+                // Found existing suggestion
+                console.log('✅ [Suggestion] Found existing suggestion:', suggestionsData[0]);
+                const existing = suggestionsData[0];
+                setExistingSuggestion(existing);
+                
+                const data = existing.data || {};
+                console.log('📝 [Suggestion] Data from suggestion:', data);
+                
+                // Populate form with existing suggestion data
+                setSuggestedContent(data.content || eq.content || '');
+                setSuggestedScore(data.score ?? eq.score ?? null);
+                setSuggestionDescription(existing.description || '');
+                
+                // Handle options from suggestion
+                if (data.options) {
+                    console.log('📋 [Suggestion] Processing options from suggestion:', data.options);
+                    const optsFromSuggestion: SuggestionOption[] = [];
+                    
+                    // Add existing options with updated values
+                    if (data.options.update && data.options.update.length > 0) {
+                        data.options.update.forEach((upd: any) => {
+                            const origOpt = eq.options?.find((o: any) => o.id === upd.id);
+                            if (origOpt) {
+                                optsFromSuggestion.push({
+                                    id: upd.id,
+                                    key: origOpt.option_key || origOpt.key,
+                                    content: upd.content,
+                                    is_correct: upd.is_correct,
+                                    media: origOpt.media,
+                                    uuid: generateUUID(),
+                                    pendingImage: null,
+                                    previewUrl: null,
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Add new options
+                    if (data.options.create && data.options.create.length > 0) {
+                        data.options.create.forEach((c: any) => {
+                            optsFromSuggestion.push({
+                                id: undefined,
+                                key: String.fromCharCode(65 + optsFromSuggestion.length),
+                                content: c.content,
+                                is_correct: c.is_correct,
+                                media: undefined,
+                                uuid: generateUUID(),
+                                pendingImage: null,
+                                previewUrl: null,
+                            });
+                        });
+                    }
+                    
+                    // If optsFromSuggestion is empty, show original options
+                    if (optsFromSuggestion.length === 0 && eq.options && eq.options.length > 0) {
+                        optsFromSuggestion.push(...eq.options.map((opt: any, idx: number) => ({
+                            id: opt.id,
+                            key: opt.option_key || String.fromCharCode(65 + idx),
+                            content: opt.content,
+                            is_correct: opt.is_correct,
+                            media: opt.media,
+                            uuid: generateUUID(),
+                            pendingImage: null,
+                            previewUrl: null,
+                        })));
+                    }
+                    
+                    setSuggestedOptions(optsFromSuggestion);
+                } else {
+                    // No options in suggestion, show original
+                    if (eq.options && eq.options.length > 0) {
+                        setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
+                            id: opt.id,
+                            key: opt.option_key || String.fromCharCode(65 + idx),
+                            content: opt.content,
+                            is_correct: opt.is_correct,
+                            media: opt.media,
+                            uuid: generateUUID(),
+                            pendingImage: null,
+                            previewUrl: null,
+                        })));
+                    } else {
+                        setSuggestedOptions([]);
+                    }
+                }
+                
+                // Determine which fields were modified in existing suggestion
+                const fields: string[] = [];
+                if (data.content) fields.push('content');
+                if (data.score !== undefined) fields.push('score');
+                if (data.options) fields.push('options');
+                setSelectedFields(fields.length > 0 ? fields : ['content', 'options']);
+            } else {
+                console.log('📭 [Suggestion] No existing suggestion found, using defaults');
+                // No existing suggestion, use default values
+                setExistingSuggestion(null);
+                setSuggestedContent(eq.content || '');
+                setSuggestedScore(eq.score || null);
+                
+                if (eq.options && eq.options.length > 0) {
+                    setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
+                        id: opt.id,
+                        key: opt.option_key || String.fromCharCode(65 + idx),
+                        content: opt.content,
+                        is_correct: opt.is_correct,
+                        media: opt.media,
+                        uuid: generateUUID(),
+                        pendingImage: null,
+                        previewUrl: null,
+                    })));
+                } else {
+                    setSuggestedOptions([]);
+                }
+                
+                setSelectedFields(['content', 'options']);
+            }
+        } catch (error) {
+            console.error('❌ [Suggestion] Failed to fetch existing suggestion:', error);
+            // On error, use default values
+            setExistingSuggestion(null);
+            setSuggestedContent(eq.content || '');
+            setSuggestedScore(eq.score || null);
+            
+            if (eq.options && eq.options.length > 0) {
+                setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
+                    id: opt.id,
+                    key: opt.option_key || String.fromCharCode(65 + idx),
+                    content: opt.content,
+                    is_correct: opt.is_correct,
+                    media: opt.media,
+                    uuid: generateUUID(),
+                    pendingImage: null,
+                    previewUrl: null,
+                })));
+            } else {
+                setSuggestedOptions([]);
+            }
+            
+            setSelectedFields(['content', 'options']);
+        }
+        
+        setIsSuggestionMode(true);
+    };
+
+    const exitSuggestionMode = () => {
+        setIsSuggestionMode(false);
+        setSelectedFields([]);
+        setSuggestedContent('');
+        setSuggestedScore(null);
+        setSuggestedOptions([]);
+        setSuggestionDescription('');
+        setExistingSuggestion(null);
+    };
+
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+
+    const handleFieldToggle = (field: string) => {
+        setSelectedFields(prev => 
+            prev.includes(field) 
+                ? prev.filter(f => f !== field)
+                : [...prev, field]
+        );
+    };
+
+    const buildSuggestionData = () => {
+        const data: Record<string, any> = {};
+
+        if (selectedFields.includes('content') && suggestedContent.trim()) {
+            data.content = suggestedContent.trim();
+        }
+
+        if (selectedFields.includes('score') && suggestedScore !== null) {
+            data.score = suggestedScore;
+        }
+
+        if (selectedFields.includes('options') && suggestedOptions.length > 0) {
+            data.options = {
+                update: suggestedOptions.filter(o => o.id).map(o => ({
+                    id: o.id,
+                    content: o.content,
+                    is_correct: o.is_correct,
+                })),
+                create: suggestedOptions.filter(o => !o.id).map(o => ({
+                    content: o.content,
+                    is_correct: o.is_correct,
+                })),
+            };
+        }
+
+        return data;
+    };
+
+    const handleSubmitSuggestion = async () => {
+        if (selectedFields.length === 0) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Pilih Field',
+                text: 'Pilih minimal satu field yang ingin disaran.',
+            });
+            return;
+        }
+
+        const data = buildSuggestionData();
+        
+        if (Object.keys(data).length === 0) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Tidak Ada Perubahan',
+                text: 'Tidak ada perubahan yang ditemukan.',
+            });
+            return;
+        }
+
+        if (!suggestionDescription.trim()) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Deskripsi Required',
+                text: 'Harap isi deskripsi untuk saran Anda.',
+            });
+            return;
+        }
+
+        setIsSubmittingSuggestion(true);
+
+        try {
+            let response;
+            
+            if (existingSuggestion) {
+                // Update existing suggestion
+                response = await questionSuggestionApi.updateSuggestion(existingSuggestion.id, {
+                    description: suggestionDescription.trim(),
+                    data,
+                });
+                
+                if (response.success) {
+                    MySwal.fire({
+                        icon: 'success',
+                        title: 'Suggestion Updated',
+                        text: 'Saran Anda berhasil diperbarui!',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                    exitSuggestionMode();
+                } else {
+                    throw new Error(response.message || 'Failed to update suggestion');
+                }
+            } else {
+                // Create new suggestion
+                response = await questionSuggestionApi.createSuggestion({
+                    question_id: currentQuestion.exam_question?.id,
+                    description: suggestionDescription.trim(),
+                    data,
+                });
+
+                if (response.success) {
+                    MySwal.fire({
+                        icon: 'success',
+                        title: 'Suggestion Submitted',
+                        text: 'Terima kasih atas saran Anda!',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                    exitSuggestionMode();
+                } else {
+                    throw new Error(response.message || 'Failed to submit suggestion');
+                }
+            }
+        } catch (error: any) {
+            console.error('Failed to submit suggestion:', error);
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'Gagal mengirim suggestion. Silakan coba lagi.',
+            });
+        } finally {
+            setIsSubmittingSuggestion(false);
+        }
+    };
+
+    const renderSuggestionFields = () => {
+        return (
+            <div className="flex flex-wrap gap-2 mb-4">
+                {QUESTION_SUGGESTION_FIELDS.map((field) => {
+                    const isSelected = selectedFields.includes(field.value);
+                    
+                    return (
+                        <button
+                            key={field.value}
+                            type="button"
+                            onClick={() => handleFieldToggle(field.value)}
+                            className={cn(
+                                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
+                                isSelected
+                                    ? "bg-amber-100 dark:bg-amber-500/20 border-amber-400 dark:border-amber-500 text-amber-700 dark:text-amber-300"
+                                    : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 hover:border-amber-300"
+                            )}
+                        >
+                            {field.label}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    const renderSuggestionContent = () => {
+        if (!isSuggestionMode) return null;
+
+        return (
+            <div className="space-y-6 mt-6 pt-6 border-t border-amber-200 dark:border-amber-500/30">
+                <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <Lightbulb className="size-4" />
+                        Suggestion Mode
+                    </h4>
+                    {existingSuggestion && (
+                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-medium rounded-full">
+                            Edit Saran
+                        </span>
+                    )}
+                </div>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Pilih salah satu atau beberapa opsi di bawah ini untuk memberikan saran perbaikan
+                </p>
+                
+                {renderSuggestionFields()}
+                
+                {selectedFields.includes('score') && (
+                    <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Poin
+                        </label>
+                        <QuestionScoreSelector
+                            initialScore={suggestedScore ?? 1}
+                            onScoreChange={(score) => setSuggestedScore(score)}
+                        />
+                    </div>
+                )}
+
+                {selectedFields.includes('content') && (
+                    <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Isi Soal
+                        </label>
+                        <QuestionToolbar />
+                        <RichTextEditor
+                            value={suggestedContent}
+                            onChange={setSuggestedContent}
+                            placeholder="Masukkan soal yang disarankan..."
+                            minHeight="min-h-[150px]"
+                            className="bg-white dark:bg-slate-900 rounded-xl"
+                        />
+                    </div>
+                )}
+
+                {selectedFields.includes('options') && (
+                    <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Pilihan Jawaban
+                        </label>
+                        <div className="p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30">
+                            {currentQuestion?.exam_question?.type === 'multiple_selection' ? (
+                                <MultipleSelectionInput
+                                    options={suggestedOptions.map(o => ({ ...o, selection_type: 'checkbox' }))}
+                                    onChange={(opts) => setSuggestedOptions(opts.map(o => ({
+                                        id: o.id,
+                                        key: o.key,
+                                        content: o.content,
+                                        is_correct: o.is_correct,
+                                        media: o.media,
+                                        uuid: o.uuid,
+                                        pendingImage: o.pendingImage,
+                                        previewUrl: o.previewUrl,
+                                    })))}
+                                />
+                            ) : (
+                                <MultipleChoiceInput
+                                    options={suggestedOptions}
+                                    onChange={setSuggestedOptions}
+                                />
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Deskripsi Saran <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                        value={suggestionDescription}
+                        onChange={(e) => setSuggestionDescription(e.target.value)}
+                        placeholder="Jelaskan mengapa perubahan ini diperlukan..."
+                        rows={2}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-sm resize-none"
+                        required
+                    />
+                </div>
+                
+                <div className="flex justify-end gap-2">
+                    <button
+                        onClick={exitSuggestionMode}
+                        className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        onClick={handleSubmitSuggestion}
+                        disabled={isSubmittingSuggestion}
+                        className="px-4 py-1.5 text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                        {isSubmittingSuggestion ? (
+                            <>
+                                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                {existingSuggestion ? 'Memperbarui...' : 'Mengirim...'}
+                            </>
+                        ) : (
+                            <>
+                                <Send className="size-3.5" />
+                                {existingSuggestion ? 'Perbarui' : 'Kirim'}
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+        );
     };
 
 
@@ -377,7 +865,12 @@ export default function PreviewQuestionBank() {
                         </div>
 
                         <div
-                            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] md:min-h-[400px] transition-all duration-300"
+                            className={cn(
+                                "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] md:min-h-[400px] transition-all duration-300",
+                                isSuggestionMode 
+                                    ? "border-2 border-amber-400 dark:border-amber-500 animate-suggestion-border" 
+                                    : "border border-gray-100 dark:border-gray-700"
+                            )}
                             style={{ fontSize: `${fontSize}px` }}
                         >
                             {/* Question Container */}
@@ -448,8 +941,10 @@ export default function PreviewQuestionBank() {
                                         }
                                     }}
                                 >
-                                    {renderQuestionInput()}
+                                    {!isSuggestionMode && renderQuestionInput()}
                                 </div>
+
+                                {renderSuggestionContent()}
                             </div>
                         </div>
 
@@ -458,31 +953,48 @@ export default function PreviewQuestionBank() {
                             <button
                                 onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                                 disabled={currentQuestionIndex === 0}
-                                className="w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center order-2 sm:order-1"
+                                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm order-2 sm:order-1"
                             >
-                                <ChevronLeft className="size-5 mr-2" />
+                                <ChevronLeft className="size-4 mr-1.5" />
                                 Previous
                             </button>
 
-                            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full sm:w-auto order-1 sm:order-2">
+                            <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full sm:w-auto order-1 sm:order-2">
                                 <button
                                     onClick={handleToggleFlag}
-                                    className={`w-full sm:w-auto px-6 py-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center group font-semibold ${currentQuestion?.is_flagged
+                                    className={`w-full sm:w-auto px-4 py-2 rounded-lg border transition-all duration-200 flex items-center justify-center text-sm font-medium ${currentQuestion?.is_flagged
                                         ? 'bg-yellow-500 border-yellow-500 text-white'
                                         : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
                                 >
-                                    <HelpCircle className="size-5 mr-2" />
+                                    <HelpCircle className="size-4 mr-1.5" />
                                     Doubtful
                                 </button>
 
+                                {!isSuggestionMode ? (
+                                    <button
+                                        onClick={enterSuggestionMode}
+                                        className="w-full sm:w-auto px-4 py-2 rounded-lg border border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white transition-all duration-200 flex items-center justify-center text-sm font-medium"
+                                    >
+                                        <Lightbulb className="size-4 mr-1.5" />
+                                        Suggestion
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={exitSuggestionMode}
+                                        className="w-full sm:w-auto px-4 py-2 rounded-lg border bg-amber-100 dark:bg-amber-500/20 border-amber-400 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-all duration-200 flex items-center justify-center text-sm font-medium"
+                                    >
+                                       Exit
+                                    </button>
+                                )}
+
                                 <button
                                     onClick={() => setShowAnswer(!showAnswer)}
-                                    className={`w-full sm:w-auto px-6 py-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold ${showAnswer
+                                    className={`w-full sm:w-auto px-4 py-2 rounded-lg border transition-all duration-200 flex items-center justify-center text-sm font-medium ${showAnswer
                                         ? 'bg-green-500 border-green-500 text-white'
                                         : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'}`}
                                 >
-                                    {showAnswer ? <EyeOff className="size-5 mr-2" /> : <Eye className="size-5 mr-2" />}
-                                    {showAnswer ? 'Hide Answer' : 'Show Answer'}
+                                    {showAnswer ? <EyeOff className="size-4 mr-1.5" /> : <Eye className="size-4 mr-1.5" />}
+                                    {showAnswer ? 'Hide' : 'Show'}
                                 </button>
 
                                 <button
@@ -493,10 +1005,10 @@ export default function PreviewQuestionBank() {
                                             setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
                                         }
                                     }}
-                                    className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary text-white font-medium shadow-lg shadow-primary/30 hover:bg-primary/90 hover:shadow-xl transition-all flex items-center justify-center transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                    className="w-full sm:w-auto px-4 py-2 rounded-lg bg-primary text-white font-medium shadow-md hover:bg-primary/90 transition-all flex items-center justify-center text-sm"
                                 >
-                                    {currentQuestionIndex === questions.length - 1 ? 'Finish Preview' : 'Next Question'}
-                                    {currentQuestionIndex === questions.length - 1 ? <Rocket className="size-5 ml-2" /> : <ChevronRight className="size-5 ml-2" />}
+                                    {currentQuestionIndex === questions.length - 1 ? 'Finish' : 'Next'}
+                                    {currentQuestionIndex === questions.length - 1 ? null : <ChevronRight className="size-4 ml-1.5" />}
                                 </button>
                             </div>
                         </div>
@@ -600,7 +1112,7 @@ export default function PreviewQuestionBank() {
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
                                 <span>Finish Preview</span>
-                                <Rocket className="size-5 group-hover:translate-x-1 transition-transform" />
+                                <CheckCircle className="size-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
                                 Preview mode. Answers will not be saved.
