@@ -1079,38 +1079,68 @@ export default function ExamTaker() {
                                             className="overflow-hidden"
                                         >
                                             <div className="p-6 md:p-8">
-                                                {currentQuestion.exam_question.exam_reading_material.media_path?.toLowerCase().endsWith('.pdf') ? (
-                                                    <div className="flex flex-col gap-4">
-                                                        <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 shadow-inner">
-                                                            <iframe
-                                                                src={`${currentQuestion.exam_question.exam_reading_material.media_path}#toolbar=0`}
-                                                                className="absolute inset-0 w-full h-full border-0"
-                                                                title={currentQuestion.exam_question.exam_reading_material.title}
-                                                            />
-                                                            {/* Overlay to allow scrolling on parent if needed, but usually iframe handles it */}
-                                                        </div>
-                                                        <div className="flex flex-wrap items-center gap-3">
-                                                            <a
-                                                                href={currentQuestion.exam_question.exam_reading_material.media_path}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="flex items-center gap-2 py-2.5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
-                                                            >
-                                                                <Maximize className="size-4" />
-                                                                <span>Open Fullscreen</span>
-                                                            </a>
-                                                            <p className="text-xs text-gray-400 font-medium italic">
-                                                                *TIPS: Gunakan mode Fullscreen untuk membaca lebih nyaman di smartphone.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <MathRenderer
-                                                        className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none 
-                                                            prose-headings:font-black prose-p:text-lg prose-img:rounded-2xl"
-                                                        content={currentQuestion.exam_question.exam_reading_material.content || ''}
-                                                    />
-                                                )}
+                                                {(() => {
+                                                    const mediaPath = currentQuestion.exam_question.exam_reading_material.media_path;
+                                                    const isPdf = mediaPath?.toLowerCase().endsWith('.pdf');
+                                                    const isImage = mediaPath?.toLowerCase().match(/\.(jpeg|jpg|png|gif|webp|svg)$/);
+
+                                                    if (isPdf) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 shadow-inner">
+                                                                    <iframe
+                                                                        src={`${mediaPath}#toolbar=0`}
+                                                                        className="absolute inset-0 w-full h-full border-0"
+                                                                        title={currentQuestion.exam_question.exam_reading_material.title}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-wrap items-center gap-3">
+                                                                    <a
+                                                                        href={mediaPath}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-2 py-2.5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+                                                                    >
+                                                                        <Maximize className="size-4" />
+                                                                        <span>Open Fullscreen</span>
+                                                                    </a>
+                                                                    <p className="text-xs text-gray-400 font-medium italic">
+                                                                        *TIPS: Gunakan mode Fullscreen untuk membaca lebih nyaman di smartphone.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    if (isImage) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-2">
+                                                                    <img
+                                                                        src={mediaPath}
+                                                                        alt={currentQuestion.exam_question.exam_reading_material.title}
+                                                                        className="max-h-[500px] w-auto mx-auto object-contain cursor-zoom-in rounded-lg"
+                                                                        onClick={() => setZoomImageUrl(mediaPath)}
+                                                                    />
+                                                                </div>
+                                                                {currentQuestion.exam_question.exam_reading_material.content && (
+                                                                    <MathRenderer
+                                                                        className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none prose-img:rounded-2xl mt-4"
+                                                                        content={currentQuestion.exam_question.exam_reading_material.content}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <MathRenderer
+                                                            className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none 
+                                                                prose-headings:font-black prose-p:text-lg prose-img:rounded-2xl"
+                                                            content={currentQuestion.exam_question.exam_reading_material.content || ''}
+                                                        />
+                                                    );
+                                                })()}
                                             </div>
                                         </motion.div>
                                     )}

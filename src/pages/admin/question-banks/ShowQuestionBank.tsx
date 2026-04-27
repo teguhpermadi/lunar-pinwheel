@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { questionBankApi, examApi, classroomApi, QuestionBank, Question, Classroom } from '@/lib/api';
-import { toWIBDateTimeLocalString, addWIBDays, convertFromLocalWIB } from '@/lib/utils';
+import { formatDateToLocalInput, addDaysToDate } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -88,7 +88,7 @@ export default function ShowQuestionBank() {
         is_token_visible: true,
         is_show_result: true,
         is_visible_hint: false,
-        start_time: toWIBDateTimeLocalString(),
+        start_time: formatDateToLocalInput(),
         end_time: ''
     });
 
@@ -151,8 +151,8 @@ export default function ShowQuestionBank() {
                 is_token_visible: formData.is_token_visible,
                 is_show_result: formData.is_show_result,
                 is_visible_hint: formData.is_visible_hint,
-                start_time: convertFromLocalWIB(formData.start_time),
-                end_time: convertFromLocalWIB(formData.end_time),
+                start_time: formData.start_time ? new Date(formData.start_time).toISOString() : null,
+                end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
                 classroom_ids: selectedClassroomIds,
             };
 
@@ -627,7 +627,7 @@ export default function ShowQuestionBank() {
                                                 />
                                                 <button
                                                     type="button"
-                                                    onClick={() => setFormData({ ...formData, start_time: toWIBDateTimeLocalString() })}
+                                                    onClick={() => setFormData({ ...formData, start_time: formatDateToLocalInput() })}
                                                     className="px-3 py-2 text-[10px] font-bold bg-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/25 transition-all"
                                                 >
                                                     Now
@@ -647,8 +647,8 @@ export default function ShowQuestionBank() {
                                                             key={preset.label}
                                                             type="button"
                                                             onClick={() => {
-                                                                const start = formData.start_time || toWIBDateTimeLocalString();
-                                                                setFormData({ ...formData, end_time: addWIBDays(start, preset.days) });
+                                                                const start = formData.start_time || formatDateToLocalInput();
+                                                                setFormData({ ...formData, end_time: addDaysToDate(start, preset.days) });
                                                             }}
                                                             className="px-3 py-1.5 text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
                                                         >

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { questionBankApi, questionSuggestionApi, QuestionBank } from '@/lib/api';
+import { questionBankApi, questionSuggestionApi, questionBankReviewerApi, QuestionBank } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
@@ -9,8 +9,7 @@ import withReactContent from 'sweetalert2-react-content';
 import MathRenderer from '@/components/ui/MathRenderer';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import QuestionToolbar from '@/components/questions/QuestionToolbar';
-import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
-import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
+import QuestionInputs from '@/components/questions/QuestionInputs';
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
@@ -27,7 +26,7 @@ import StudentArrangeWordsInput from '@/components/questions/student-inputs/Stud
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle,
     ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy, Lightbulb,
-    Send, CheckCircle
+    Send, CheckCircle, Star, BookOpen, ChevronUp, ChevronDown
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -60,6 +59,7 @@ export default function PreviewQuestionBank() {
 
     // UI State
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const currentQuestion = questions[currentQuestionIndex];
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('exam_font_size');
@@ -74,9 +74,28 @@ export default function PreviewQuestionBank() {
     const [suggestedContent, setSuggestedContent] = useState('');
     const [suggestedScore, setSuggestedScore] = useState<number | null>(null);
     const [suggestedOptions, setSuggestedOptions] = useState<SuggestionOption[]>([]);
+    const [suggestedMatchingPairs, setSuggestedMatchingPairs] = useState<any[]>([]);
+    const [suggestedSequenceItems, setSuggestedSequenceItems] = useState<any[]>([]);
+    const [suggestedEssayKeywords, setSuggestedEssayKeywords] = useState('');
+    const [suggestedMathContent, setSuggestedMathContent] = useState('');
+    const [suggestedArabicContent, setSuggestedArabicContent] = useState('');
+    const [suggestedJavaneseContent, setSuggestedJavaneseContent] = useState('');
+    const [suggestedCategorizationGroups, setSuggestedCategorizationGroups] = useState<any[]>([]);
+    const [suggestedArrangeWordsSentence, setSuggestedArrangeWordsSentence] = useState('');
+    const [suggestedArrangeWordsDelimiter, setSuggestedArrangeWordsDelimiter] = useState(' ');
+    const [suggestedArrangeWordsIsArabic, setSuggestedArrangeWordsIsArabic] = useState(false);
+    const [suggestedArrangeWordsShuffleMode, setSuggestedArrangeWordsShuffleMode] = useState<'phrase' | 'alphabet'>('phrase');
+    
     const [suggestionDescription, setSuggestionDescription] = useState('');
     const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
     const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
+    const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
+
+    // Review Modal State
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviewRating, setReviewRating] = useState<number>(0);
+    const [reviewNotes, setReviewNotes] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -87,6 +106,12 @@ export default function PreviewQuestionBank() {
     useEffect(() => {
         localStorage.setItem('exam_font_size', fontSize.toString());
     }, [fontSize]);
+
+    useEffect(() => {
+        if (isSuggestionMode && currentQuestion?.exam_question) {
+            fetchSuggestionData();
+        }
+    }, [currentQuestionIndex, isSuggestionMode]);
 
     const fetchQuestionBank = async () => {
         if (!id) return;
@@ -161,174 +186,272 @@ export default function PreviewQuestionBank() {
     };
 
     const handleSubmitExam = async () => {
-        MySwal.fire({
-            icon: 'success',
-            title: 'Preview Selesai',
-            text: 'Ini adalah mode preview, tidak ada data yang disimpan.',
-        }).then(() => navigate(`/admin/question-banks/${id}/show`));
+        setIsReviewModalOpen(true);
+    };
+
+    const handleFinalizeReview = async () => {
+        if (reviewRating === 0) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Rating Required',
+                text: 'Please select a rating before finalizing.',
+            });
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const response = await questionBankReviewerApi.createQuestionBankReviewer({
+                question_bank_id: id!,
+                rating: reviewRating,
+                notes: reviewNotes.trim() || null,
+            });
+
+            if (response.success) {
+                MySwal.fire({
+                    icon: 'success',
+                    title: 'Review Submitted',
+                    text: 'Question bank has been reviewed successfully!',
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    navigate('/admin/question-banks');
+                });
+            } else {
+                throw new Error(response.message || 'Failed to submit review');
+            }
+        } catch (error: any) {
+            console.error('Failed to submit review:', error);
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'Failed to submit review. Please try again.',
+            });
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     // Suggestion Mode Functions
-    const enterSuggestionMode = async () => {
+    const initializeSuggestionStatesFromQuestion = (q: any) => {
+        const type = q.type;
+        const options = q.options || [];
+
+        // Reset all specific states
+        setSuggestedOptions([]);
+        setSuggestedMatchingPairs([]);
+        setSuggestedSequenceItems([]);
+        setSuggestedEssayKeywords('');
+        setSuggestedMathContent('');
+        setSuggestedArabicContent('');
+        setSuggestedJavaneseContent('');
+        setSuggestedCategorizationGroups([]);
+        setSuggestedArrangeWordsSentence('');
+
+        if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(type)) {
+            setSuggestedOptions(options.map((o: any, idx: number) => ({
+                id: o.id,
+                key: o.option_key || (type === 'short_answer' ? `SA${idx + 1}` : String.fromCharCode(65 + idx)),
+                content: o.content,
+                is_correct: o.is_correct,
+                media: o.media,
+                uuid: o.id || generateUUID(),
+                pendingImage: null,
+                previewUrl: null,
+            })));
+        } else if (type === 'matching') {
+            const pairsMap = new Map();
+            options.forEach((o: any) => {
+                const pairId = o.metadata?.pair_id;
+                if (!pairId) return;
+                if (!pairsMap.has(pairId)) {
+                    pairsMap.set(pairId, {
+                        uuid: generateUUID(),
+                        rightUuid: generateUUID(),
+                        pair_id: pairId,
+                        left: '',
+                        right: '',
+                        leftOptionId: null,
+                        rightOptionId: null
+                    });
+                }
+                const pair = pairsMap.get(pairId);
+                if (o.metadata?.side === 'left') {
+                    pair.left = o.content;
+                    pair.leftOptionId = o.id;
+                } else if (o.metadata?.side === 'right') {
+                    pair.right = o.content;
+                    pair.rightOptionId = o.id;
+                }
+            });
+            setSuggestedMatchingPairs(Array.from(pairsMap.values()));
+        } else if (type === 'sequence') {
+            setSuggestedSequenceItems(options
+                .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                .map((o: any) => ({
+                    id: o.id,
+                    uuid: o.id || generateUUID(),
+                    content: o.content,
+                    order: o.order
+                })));
+        } else if (type === 'essay') {
+            const essayOption = options.find((o: any) => o.option_key === 'ESSAY');
+            if (essayOption) setSuggestedEssayKeywords(essayOption.content);
+        } else if (type === 'math_input') {
+            const mathOption = options.find((o: any) => o.option_key === 'MATH');
+            if (mathOption) setSuggestedMathContent(mathOption.content);
+        } else if (type === 'arabic_response') {
+            const arabicOption = options.find((o: any) => o.option_key === 'ARABIC');
+            if (arabicOption) setSuggestedArabicContent(arabicOption.content);
+        } else if (type === 'javanese_response') {
+            const javaneseOption = options.find((o: any) => o.option_key === 'JAVANESE');
+            if (javaneseOption) setSuggestedJavaneseContent(javaneseOption.content);
+        } else if (type === 'categorization') {
+            const groupsMap = new Map();
+            options.forEach((o: any) => {
+                const title = o.metadata?.category_title || 'Uncategorized';
+                if (!groupsMap.has(title)) {
+                    groupsMap.set(title, {
+                        uuid: generateUUID(),
+                        title: title,
+                        items: []
+                    });
+                }
+                groupsMap.get(title).items.push({
+                    id: o.id,
+                    uuid: o.id || generateUUID(),
+                    content: o.content,
+                    media: o.media?.option_media?.[0] || null
+                });
+            });
+            setSuggestedCategorizationGroups(Array.from(groupsMap.values()));
+        } else if (type === 'arrange_words') {
+            const sentenceOption = options.find((o: any) => o.option_key === 'SENTENCE');
+            if (sentenceOption) {
+                setSuggestedArrangeWordsSentence(sentenceOption.content);
+                setSuggestedArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
+                setSuggestedArrangeWordsIsArabic(!!sentenceOption.metadata?.is_arabic);
+                setSuggestedArrangeWordsShuffleMode(sentenceOption.metadata?.shuffle_mode || 'phrase');
+            }
+        }
+    };
+
+    const applySuggestionDataToStates = (data: any, eq: any) => {
+        if (data.options) {
+            const optsFromSuggestion: SuggestionOption[] = [];
+            
+            if (data.options.update && data.options.update.length > 0) {
+                data.options.update.forEach((upd: any) => {
+                    const origOpt = eq.options?.find((o: any) => o.id === upd.id);
+                    if (origOpt) {
+                        optsFromSuggestion.push({
+                            id: upd.id,
+                            key: origOpt.option_key || origOpt.key,
+                            content: upd.content,
+                            is_correct: upd.is_correct,
+                            media: origOpt.media,
+                            uuid: generateUUID(),
+                            pendingImage: null,
+                            previewUrl: null,
+                        });
+                    }
+                });
+            }
+            
+            if (data.options.create && data.options.create.length > 0) {
+                data.options.create.forEach((c: any) => {
+                    optsFromSuggestion.push({
+                        id: undefined,
+                        key: String.fromCharCode(65 + optsFromSuggestion.length),
+                        content: c.content,
+                        is_correct: c.is_correct,
+                        media: undefined,
+                        uuid: generateUUID(),
+                        pendingImage: null,
+                        previewUrl: null,
+                    });
+                });
+            }
+            
+            if (optsFromSuggestion.length > 0) {
+                setSuggestedOptions(optsFromSuggestion);
+            }
+        }
+        
+        if (data.matching_pairs) setSuggestedMatchingPairs(data.matching_pairs);
+        if (data.sequence_items) setSuggestedSequenceItems(data.sequence_items);
+        if (data.keywords) setSuggestedEssayKeywords(data.keywords);
+        if (data.math_content) setSuggestedMathContent(data.math_content);
+        if (data.arabic_content) setSuggestedArabicContent(data.arabic_content);
+        if (data.javanese_content) setSuggestedJavaneseContent(data.javanese_content);
+        if (data.categorization_groups) setSuggestedCategorizationGroups(data.categorization_groups);
+        if (data.arrange_words_sentence) {
+            setSuggestedArrangeWordsSentence(data.arrange_words_sentence);
+            if (data.arrange_words_delimiter) setSuggestedArrangeWordsDelimiter(data.arrange_words_delimiter);
+            if (data.arrange_words_is_arabic !== undefined) setSuggestedArrangeWordsIsArabic(!!data.arrange_words_is_arabic);
+            if (data.arrange_words_shuffle_mode) setSuggestedArrangeWordsShuffleMode(data.arrange_words_shuffle_mode);
+        }
+    };
+
+    const fetchSuggestionData = async () => {
         if (!currentQuestion?.exam_question) return;
 
         const eq = currentQuestion.exam_question;
-        console.log('🔍 [Suggestion] Entering suggestion mode for question:', eq.id);
+        const type = eq.type;
+        console.log('🔍 [Suggestion] Fetching suggestion data for question:', eq.id, 'Type:', type);
         
-        // Fetch existing suggestions for this question
+        // Reset states first to show fresh data
+        setExistingSuggestion(null);
+        setSuggestedContent(eq.content || '');
+        setSuggestedScore(eq.score ?? null);
+        setSuggestionDescription('');
+        
+        // Initialize from current question data first
+        initializeSuggestionStatesFromQuestion(eq);
+        
         try {
-            console.log('📡 [Suggestion] Fetching existing suggestions...');
+            console.log('📡 [Suggestion] Calling API...');
             const response = await questionSuggestionApi.getMySuggestions({
                 question_id: eq.id
             });
             console.log('📥 [Suggestion] Response:', response);
             
-            // Handle nested response structure (pagination format)
             const suggestionsData = response.data?.data || response.data || [];
-            console.log('📊 [Suggestion] Parsed suggestions data:', suggestionsData);
             
             if (response.success && suggestionsData.length > 0) {
-                // Found existing suggestion
-                console.log('✅ [Suggestion] Found existing suggestion:', suggestionsData[0]);
                 const existing = suggestionsData[0];
                 setExistingSuggestion(existing);
                 
                 const data = existing.data || {};
-                console.log('📝 [Suggestion] Data from suggestion:', data);
-                
-                // Populate form with existing suggestion data
                 setSuggestedContent(data.content || eq.content || '');
                 setSuggestedScore(data.score ?? eq.score ?? null);
                 setSuggestionDescription(existing.description || '');
                 
-                // Handle options from suggestion
-                if (data.options) {
-                    console.log('📋 [Suggestion] Processing options from suggestion:', data.options);
-                    const optsFromSuggestion: SuggestionOption[] = [];
-                    
-                    // Add existing options with updated values
-                    if (data.options.update && data.options.update.length > 0) {
-                        data.options.update.forEach((upd: any) => {
-                            const origOpt = eq.options?.find((o: any) => o.id === upd.id);
-                            if (origOpt) {
-                                optsFromSuggestion.push({
-                                    id: upd.id,
-                                    key: origOpt.option_key || origOpt.key,
-                                    content: upd.content,
-                                    is_correct: upd.is_correct,
-                                    media: origOpt.media,
-                                    uuid: generateUUID(),
-                                    pendingImage: null,
-                                    previewUrl: null,
-                                });
-                            }
-                        });
-                    }
-                    
-                    // Add new options
-                    if (data.options.create && data.options.create.length > 0) {
-                        data.options.create.forEach((c: any) => {
-                            optsFromSuggestion.push({
-                                id: undefined,
-                                key: String.fromCharCode(65 + optsFromSuggestion.length),
-                                content: c.content,
-                                is_correct: c.is_correct,
-                                media: undefined,
-                                uuid: generateUUID(),
-                                pendingImage: null,
-                                previewUrl: null,
-                            });
-                        });
-                    }
-                    
-                    // If optsFromSuggestion is empty, show original options
-                    if (optsFromSuggestion.length === 0 && eq.options && eq.options.length > 0) {
-                        optsFromSuggestion.push(...eq.options.map((opt: any, idx: number) => ({
-                            id: opt.id,
-                            key: opt.option_key || String.fromCharCode(65 + idx),
-                            content: opt.content,
-                            is_correct: opt.is_correct,
-                            media: opt.media,
-                            uuid: generateUUID(),
-                            pendingImage: null,
-                            previewUrl: null,
-                        })));
-                    }
-                    
-                    setSuggestedOptions(optsFromSuggestion);
-                } else {
-                    // No options in suggestion, show original
-                    if (eq.options && eq.options.length > 0) {
-                        setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                            id: opt.id,
-                            key: opt.option_key || String.fromCharCode(65 + idx),
-                            content: opt.content,
-                            is_correct: opt.is_correct,
-                            media: opt.media,
-                            uuid: generateUUID(),
-                            pendingImage: null,
-                            previewUrl: null,
-                        })));
-                    } else {
-                        setSuggestedOptions([]);
-                    }
-                }
+                // Overwrite states with suggestion data
+                applySuggestionDataToStates(data, eq);
                 
-                // Determine which fields were modified in existing suggestion
                 const fields: string[] = [];
                 if (data.content) fields.push('content');
                 if (data.score !== undefined) fields.push('score');
-                if (data.options) fields.push('options');
-                setSelectedFields(fields.length > 0 ? fields : ['content', 'options']);
-            } else {
-                console.log('📭 [Suggestion] No existing suggestion found, using defaults');
-                // No existing suggestion, use default values
-                setExistingSuggestion(null);
-                setSuggestedContent(eq.content || '');
-                setSuggestedScore(eq.score || null);
                 
-                if (eq.options && eq.options.length > 0) {
-                    setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                        id: opt.id,
-                        key: opt.option_key || String.fromCharCode(65 + idx),
-                        content: opt.content,
-                        is_correct: opt.is_correct,
-                        media: opt.media,
-                        uuid: generateUUID(),
-                        pendingImage: null,
-                        previewUrl: null,
-                    })));
-                } else {
-                    setSuggestedOptions([]);
+                // Check if any specific field exists in data
+                if (data.options || data.matching_pairs || data.sequence_items || data.keywords || 
+                    data.math_content || data.arabic_content || data.javanese_content || 
+                    data.categorization_groups || data.arrange_words_sentence) {
+                    fields.push('options');
                 }
                 
+                setSelectedFields(fields.length > 0 ? fields : ['content', 'options']);
+            } else {
                 setSelectedFields(['content', 'options']);
             }
         } catch (error) {
             console.error('❌ [Suggestion] Failed to fetch existing suggestion:', error);
-            // On error, use default values
-            setExistingSuggestion(null);
-            setSuggestedContent(eq.content || '');
-            setSuggestedScore(eq.score || null);
-            
-            if (eq.options && eq.options.length > 0) {
-                setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                    id: opt.id,
-                    key: opt.option_key || String.fromCharCode(65 + idx),
-                    content: opt.content,
-                    is_correct: opt.is_correct,
-                    media: opt.media,
-                    uuid: generateUUID(),
-                    pendingImage: null,
-                    previewUrl: null,
-                })));
-            } else {
-                setSuggestedOptions([]);
-            }
-            
             setSelectedFields(['content', 'options']);
         }
-        
+    };
+
+    const enterSuggestionMode = () => {
         setIsSuggestionMode(true);
     };
 
@@ -360,6 +483,8 @@ export default function PreviewQuestionBank() {
 
     const buildSuggestionData = () => {
         const data: Record<string, any> = {};
+        const q = currentQuestion?.exam_question;
+        if (!q) return data;
 
         if (selectedFields.includes('content') && suggestedContent.trim()) {
             data.content = suggestedContent.trim();
@@ -369,18 +494,52 @@ export default function PreviewQuestionBank() {
             data.score = suggestedScore;
         }
 
-        if (selectedFields.includes('options') && suggestedOptions.length > 0) {
-            data.options = {
-                update: suggestedOptions.filter(o => o.id).map(o => ({
-                    id: o.id,
-                    content: o.content,
-                    is_correct: o.is_correct,
-                })),
-                create: suggestedOptions.filter(o => !o.id).map(o => ({
-                    content: o.content,
-                    is_correct: o.is_correct,
-                })),
-            };
+        if (selectedFields.includes('options')) {
+            switch (q.type) {
+                case 'multiple_choice':
+                case 'multiple_selection':
+                case 'true_false':
+                case 'short_answer':
+                    data.options = {
+                        update: suggestedOptions.filter(o => o.id).map(o => ({
+                            id: o.id,
+                            content: o.content,
+                            is_correct: o.is_correct,
+                        })),
+                        create: suggestedOptions.filter(o => !o.id).map(o => ({
+                            content: o.content,
+                            is_correct: o.is_correct,
+                        })),
+                    };
+                    break;
+                case 'matching':
+                    data.matching_pairs = suggestedMatchingPairs;
+                    break;
+                case 'sequence':
+                    data.sequence_items = suggestedSequenceItems;
+                    break;
+                case 'essay':
+                    data.keywords = suggestedEssayKeywords;
+                    break;
+                case 'math_input':
+                    data.math_content = suggestedMathContent;
+                    break;
+                case 'arabic_response':
+                    data.arabic_content = suggestedArabicContent;
+                    break;
+                case 'javanese_response':
+                    data.javanese_content = suggestedJavaneseContent;
+                    break;
+                case 'categorization':
+                    data.categorization_groups = suggestedCategorizationGroups;
+                    break;
+                case 'arrange_words':
+                    data.arrange_words_sentence = suggestedArrangeWordsSentence;
+                    data.arrange_words_delimiter = suggestedArrangeWordsDelimiter;
+                    data.arrange_words_is_arabic = suggestedArrangeWordsIsArabic;
+                    data.arrange_words_shuffle_mode = suggestedArrangeWordsShuffleMode;
+                    break;
+            }
         }
 
         return data;
@@ -556,26 +715,35 @@ export default function PreviewQuestionBank() {
                             Pilihan Jawaban
                         </label>
                         <div className="p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30">
-                            {currentQuestion?.exam_question?.type === 'multiple_selection' ? (
-                                <MultipleSelectionInput
-                                    options={suggestedOptions.map(o => ({ ...o, selection_type: 'checkbox' }))}
-                                    onChange={(opts) => setSuggestedOptions(opts.map(o => ({
-                                        id: o.id,
-                                        key: o.key,
-                                        content: o.content,
-                                        is_correct: o.is_correct,
-                                        media: o.media,
-                                        uuid: o.uuid,
-                                        pendingImage: o.pendingImage,
-                                        previewUrl: o.previewUrl,
-                                    })))}
-                                />
-                            ) : (
-                                <MultipleChoiceInput
-                                    options={suggestedOptions}
-                                    onChange={setSuggestedOptions}
-                                />
-                            )}
+                            <QuestionInputs
+                                type={currentQuestion?.exam_question?.type}
+                                options={suggestedOptions}
+                                setOptions={setSuggestedOptions}
+                                handleDeleteOptionMedia={() => {}} // Suggestion mode doesn't support direct media delete
+                                matchingPairs={suggestedMatchingPairs}
+                                setMatchingPairs={setSuggestedMatchingPairs}
+                                sequenceItems={suggestedSequenceItems}
+                                setSequenceItems={setSuggestedSequenceItems}
+                                essayKeywords={suggestedEssayKeywords}
+                                setEssayKeywords={setSuggestedEssayKeywords}
+                                mathContent={suggestedMathContent}
+                                setMathContent={setSuggestedMathContent}
+                                arabicContent={suggestedArabicContent}
+                                setArabicContent={setSuggestedArabicContent}
+                                javaneseContent={suggestedJavaneseContent}
+                                setJavaneseContent={setSuggestedJavaneseContent}
+                                categorizationGroups={suggestedCategorizationGroups}
+                                setCategorizationGroups={setSuggestedCategorizationGroups}
+                                arrangeWordsSentence={suggestedArrangeWordsSentence}
+                                setArrangeWordsSentence={setSuggestedArrangeWordsSentence}
+                                arrangeWordsDelimiter={suggestedArrangeWordsDelimiter}
+                                setArrangeWordsDelimiter={setSuggestedArrangeWordsDelimiter}
+                                arrangeWordsIsArabic={suggestedArrangeWordsIsArabic}
+                                setArrangeWordsIsArabic={setSuggestedArrangeWordsIsArabic}
+                                arrangeWordsShuffleMode={suggestedArrangeWordsShuffleMode}
+                                setArrangeWordsShuffleMode={setSuggestedArrangeWordsShuffleMode}
+                                isEditing={true}
+                            />
                         </div>
                     </div>
                 )}
@@ -786,7 +954,7 @@ export default function PreviewQuestionBank() {
 
     if (!bank) return null;
 
-    const currentQuestion = questions[currentQuestionIndex];
+
     const answeredCount = questions.filter(isQuestionAnswered).length;
     const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
@@ -863,6 +1031,114 @@ export default function PreviewQuestionBank() {
                                 <span className="text-sm font-medium">{currentQuestion?.is_flagged ? 'Flagged' : 'Flag for review'}</span>
                             </button>
                         </div>
+
+                        {/* Reading Material Display */}
+                        {currentQuestion?.exam_question?.reading_material && (
+                            <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <div
+                                    className="p-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between cursor-pointer group"
+                                    onClick={() => setIsMaterialExpanded(!isMaterialExpanded)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                            <BookOpen className="size-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <h3 className="font-bold text-sm uppercase tracking-tight line-clamp-1">
+                                                {currentQuestion.exam_question.reading_material.title}
+                                            </h3>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">
+                                                Reading Material / Bahan Bacaan
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {!isMaterialExpanded && (
+                                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse hidden sm:block">
+                                                Click to read
+                                            </span>
+                                        )}
+                                        <button className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                            {isMaterialExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <AnimatePresence>
+                                    {isMaterialExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="p-6 md:p-8">
+                                                {(() => {
+                                                    const rm = currentQuestion.exam_question.reading_material;
+                                                    // In QuestionResource, media is returned as collections
+                                                    const pdfMedia = rm.media?.reading_materials?.find((m: any) => m.mime_type === 'application/pdf');
+                                                    const imageMedia = rm.media?.reading_images?.[0];
+
+                                                    if (pdfMedia) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 shadow-inner">
+                                                                    <iframe
+                                                                        src={`${pdfMedia.url}#toolbar=0`}
+                                                                        className="absolute inset-0 w-full h-full border-0"
+                                                                        title={rm.title}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-wrap items-center gap-3">
+                                                                    <a
+                                                                        href={pdfMedia.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-2 py-2.5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+                                                                    >
+                                                                        <Maximize className="size-4" />
+                                                                        <span>Open Fullscreen</span>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    if (imageMedia) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-2">
+                                                                    <img
+                                                                        src={imageMedia.url}
+                                                                        alt={rm.title}
+                                                                        className="max-h-[500px] w-auto mx-auto object-contain cursor-zoom-in rounded-lg"
+                                                                        onClick={() => setZoomImageUrl(imageMedia.url)}
+                                                                    />
+                                                                </div>
+                                                                {rm.content && (
+                                                                    <MathRenderer
+                                                                        className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none prose-img:rounded-2xl mt-4"
+                                                                        content={rm.content}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <MathRenderer
+                                                            className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none 
+                                                                prose-headings:font-black prose-p:text-lg prose-img:rounded-2xl"
+                                                            content={rm.content || ''}
+                                                        />
+                                                    );
+                                                })()}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )}
 
                         <div
                             className={cn(
@@ -1111,11 +1387,11 @@ export default function PreviewQuestionBank() {
                                 className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden bg-gradient-to-r from-primary to-[#ec4899] text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 active:scale-95`}
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
-                                <span>Finish Preview</span>
+                                <span>Finalize Review</span>
                                 <CheckCircle className="size-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
-                                Preview mode. Answers will not be saved.
+                                Submit your review with rating and notes.
                             </p>
                         </div>
                     </motion.aside>
@@ -1156,6 +1432,109 @@ export default function PreviewQuestionBank() {
                                 alt="Zoomed"
                                 className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
                             />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Review Modal */}
+            <AnimatePresence>
+                {isReviewModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setIsReviewModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Review Question Bank</h3>
+                                <button
+                                    onClick={() => setIsReviewModalOpen(false)}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    <X className="size-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                        Rating <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setReviewRating(star)}
+                                                className="p-1 transition-transform hover:scale-110"
+                                            >
+                                                <Star
+                                                    className={`size-8 transition-colors ${
+                                                        star <= reviewRating
+                                                            ? 'fill-yellow-400 text-yellow-400'
+                                                            : 'text-gray-300 dark:text-gray-600'
+                                                    }`}
+                                                />
+                                            </button>
+                                        ))}
+                                        <span className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            {reviewRating > 0 ? `${reviewRating}/5` : 'Select rating'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                        Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        value={reviewNotes}
+                                        onChange={(e) => setReviewNotes(e.target.value)}
+                                        placeholder="Add your review notes or comments..."
+                                        rows={4}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => {
+                                            setIsReviewModalOpen(false);
+                                            setReviewRating(0);
+                                            setReviewNotes('');
+                                        }}
+                                        className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleFinalizeReview}
+                                        disabled={isSubmittingReview || reviewRating === 0}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isSubmittingReview ? (
+                                            <>
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="size-4" />
+                                                Submit Review
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

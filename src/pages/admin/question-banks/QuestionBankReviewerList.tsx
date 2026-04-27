@@ -1,0 +1,420 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAcademicYear } from '@/contexts/AcademicYearContext';
+import { questionBankReviewerApi, QuestionBankReviewer } from '@/lib/api';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
+import {
+    Search,
+    ChevronLeft,
+    ChevronRight,
+    Eye,
+    Trash2,
+    Check,
+    X,
+    Star,
+    User
+} from 'lucide-react';
+
+const MySwal = withReactContent(Swal);
+
+function timeAgo(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    return Math.floor(seconds) + " seconds ago";
+}
+
+function StarRating({ rating }: { rating: number | null }) {
+    if (!rating) return <span className="text-slate-300">-</span>;
+    return (
+        <div className="flex items-center gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                    key={i}
+                    className={`size-3.5 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`}
+                />
+            ))}
+        </div>
+    );
+}
+
+export default function QuestionBankReviewerList() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
+    const { selectedYearId } = useAcademicYear();
+    const navigate = useNavigate();
+
+    const [reviewers, setReviewers] = useState<QuestionBankReviewer[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [activeTab, setActiveTab] = useState<'mine' | 'all'>('mine');
+
+    const fetchReviewers = async () => {
+        if (!selectedYearId) return;
+        
+        setIsLoading(true);
+        try {
+            const params: any = {
+                page,
+                per_page: 10,
+                search: searchQuery,
+                academic_year_id: selectedYearId
+            };
+
+            const apiMethod = activeTab === 'mine'
+                ? questionBankReviewerApi.getMyQuestionBankReviewers(params)
+                : questionBankReviewerApi.getQuestionBankReviewers(params);
+
+            const response = await apiMethod;
+            if (response.success) {
+                const result = response.data as any;
+                const items = Array.isArray(result) ? result : (result.data || []);
+                setReviewers(items);
+
+                const meta = result.meta || (response as any).meta;
+                if (meta) {
+                    setTotalPages(meta.last_page);
+                    setTotalItems(meta.total);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch reviewers', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedYearId) {
+            fetchReviewers();
+        }
+    }, [page, searchQuery, selectedYearId, activeTab]);
+
+    const handleDelete = async (id: string) => {
+        const result = await MySwal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await questionBankReviewerApi.deleteQuestionBankReviewer(id);
+                MySwal.fire('Deleted!', 'Reviewer has been deleted.', 'success');
+                fetchReviewers();
+            } catch (error) {
+                console.error('Failed to delete', error);
+                MySwal.fire('Error!', 'Failed to delete reviewer.', 'error');
+            }
+        }
+    };
+
+    /**
+     * Approve a question bank reviewer.
+     * This will:
+     * 1. Update reviewer state to 'approved'
+     * 2. Allow the reviewer to manage suggestions for this question bank
+     * 3. Update suggested_questions_count based on approved suggestions
+     */
+    const handleApprove = async (id: string) => {
+        try {
+            await questionBankReviewerApi.approveQuestionBankReviewer(id);
+            MySwal.fire('Approved!', 'Reviewer has been approved.', 'success');
+            fetchReviewers();
+        } catch (error) {
+            console.error('Failed to approve', error);
+            MySwal.fire('Error!', 'Failed to approve reviewer.', 'error');
+        }
+    };
+
+    /**
+     * Reject a question bank reviewer.
+     * This will:
+     * 1. Update reviewer state to 'rejected'
+     * 2. Remove the reviewer's access to this question bank's suggestions
+     * 3. All suggestions from this reviewer remain but are no longer valid
+     */
+    const handleReject = async (id: string) => {
+        try {
+            await questionBankReviewerApi.rejectQuestionBankReviewer(id);
+            MySwal.fire('Rejected!', 'Reviewer has been rejected.', 'success');
+            fetchReviewers();
+        } catch (error) {
+            console.error('Failed to reject', error);
+            MySwal.fire('Error!', 'Failed to reject reviewer.', 'error');
+        }
+    };
+
+    const handleViewSuggestion = (reviewer: QuestionBankReviewer) => {
+        navigate(`/admin/question-banks/${reviewer.question_bank_id}/suggestions`);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-8 space-y-6 max-w-7xl mx-auto"
+        >
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Bank Reviewers</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">Manage question bank reviewer requests.</p>
+                    <div className="flex items-center gap-1 mt-4">
+                        <button
+                            onClick={() => {
+                                setActiveTab('mine');
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                activeTab === 'mine'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                        >
+                            <User className="size-4" />
+                            My Reviewers
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('all');
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                activeTab === 'all'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                        >
+                            All Reviewers
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Reviewers</span>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">
+                            {totalItems}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <Search className="size-5" />
+                            </span>
+                            <input
+                                type="text"
+                                placeholder="Search reviewers..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-64"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 dark:bg-slate-800/50">
+                            <tr>
+                                <th className="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Question Bank</th>
+                                {activeTab === 'all' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Reviewer</th>}
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">State</th>
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Rating</th>
+                                <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Suggested</th>
+                                <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <tr key={index}>
+                                        <td className="pl-8 pr-4 py-5 text-center">
+                                            <Skeleton className="h-4 w-8 mx-auto" />
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <div className="flex items-start gap-3">
+                                                <Skeleton className="size-10 rounded-xl" />
+                                                <div className="space-y-2">
+                                                    <Skeleton className="h-4 w-32" />
+                                                    <Skeleton className="h-3 w-20" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        {activeTab === 'all' && (
+                                            <td className="px-4 py-5">
+                                                <Skeleton className="h-6 w-24 rounded-full" />
+                                            </td>
+                                        )}
+                                        <td className="px-4 py-5">
+                                            <Skeleton className="h-6 w-20 rounded-full" />
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <Skeleton className="h-4 w-24" />
+                                        </td>
+                                        <td className="px-4 py-5 text-center">
+                                            <Skeleton className="size-8 rounded-full mx-auto" />
+                                        </td>
+                                        <td className="px-8 py-5 text-right">
+                                            <div className="flex items-center justify-end gap-3">
+                                                <Skeleton className="h-9 w-24 rounded-lg" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : reviewers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={activeTab === 'all' ? 7 : 6} className="text-center py-12 text-slate-500">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <User className="size-10 text-slate-300" />
+                                            <p>No reviewers found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : reviewers.map((reviewer, index) => (
+                                <tr
+                                    key={reviewer.id}
+                                    className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
+                                >
+                                    <td className="pl-8 pr-4 py-5 text-center text-slate-400 text-sm font-medium">
+                                        {(page - 1) * 10 + index + 1}
+                                    </td>
+                                    <td className="px-4 py-5 max-w-xs">
+                                        <div className="flex items-start gap-3">
+                                            <div className="mt-1 size-10 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                <User className="size-5" />
+                                            </div>
+                                            <div>
+                                                <span className="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
+                                                    {(reviewer as any).question_bank?.name || 'Unknown Bank'}
+                                                </span>
+                                                <span className="text-xs text-slate-400">
+                                                    Updated {timeAgo(reviewer.updated_at)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {activeTab === 'all' && (
+                                        <td className="px-4 py-5">
+                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                                                {(reviewer as any).user?.name || 'Unknown User'}
+                                            </span>
+                                        </td>
+                                    )}
+                                    <td className="px-4 py-5">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${reviewer.state_color || 'bg-slate-100 text-slate-700'}`}>
+                                            {reviewer.state_label || reviewer.state || 'Pending'}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <StarRating rating={reviewer.rating} />
+                                    </td>
+                                    <td className="px-4 py-5 text-center">
+                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
+                                            {reviewer.suggested_questions_count || 0}
+                                        </span>
+                                    </td>
+                                    <td className="px-8 py-5 text-right">
+                                        <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => handleViewSuggestion(reviewer)}
+                                                className="px-3 py-1.5 bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1"
+                                            >
+                                                <Eye className="size-3.5" />
+                                                View
+                                            </button>
+                                            {reviewer.state === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApprove(reviewer.id)}
+                                                        className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                                                        title="Approve"
+                                                    >
+                                                        <Check className="size-4.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(reviewer.id)}
+                                                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                        title="Reject"
+                                                    >
+                                                        <X className="size-4.5" />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => handleDelete(reviewer.id)}
+                                                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="size-4.5" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="px-8 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/10 flex items-center justify-between">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        Showing {((page - 1) * 10) + 1} to {Math.min(page * 10, totalItems)} of {totalItems} Reviewers
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                        >
+                            <ChevronLeft className="size-4.5" />
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className={`size-8 flex items-center justify-center rounded-lg text-xs font-bold ${page === p ? 'bg-primary text-white border border-primary' : 'border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-500'}`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                        >
+                            <ChevronRight className="size-4.5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+}

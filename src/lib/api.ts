@@ -704,9 +704,74 @@ export interface StoreQuestionRequest {
     order?: number;
     is_approved?: boolean;
     tags?: string[];
-    // For update too maybe? Or make separate UpdateQuestionRequest?
-    // Let's stick to Store for createQuestion
 }
+
+export interface QuestionBankReviewer {
+    id: string;
+    question_bank_id: string;
+    question_bank?: QuestionBank;
+    user?: User;
+    state: 'pending' | 'approved' | 'rejected' | null;
+    state_label: string;
+    state_color: string;
+    rating: number | null;
+    notes: string | null;
+    suggested_questions_count: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface StoreQuestionBankReviewerRequest {
+    question_bank_id: string;
+    rating?: number | null;
+    notes?: string | null;
+    suggested_questions_count?: number | null;
+}
+
+export interface UpdateQuestionBankReviewerRequest {
+    rating?: number | null;
+    notes?: string | null;
+    suggested_questions_count?: number | null;
+}
+
+export const questionBankReviewerApi = {
+    getQuestionBankReviewers: async (params?: any) => {
+        const response = await api.get('/question-bank-reviewers', { params });
+        return response.data;
+    },
+    getMyQuestionBankReviewers: async (params?: any) => {
+        const response = await api.get('/question-bank-reviewers/mine', { params });
+        return response.data;
+    },
+    getPublicQuestionBankReviewers: async (params?: any) => {
+        const response = await api.get('/question-bank-reviewers/public', { params });
+        return response.data;
+    },
+    getQuestionBankReviewer: async (id: string) => {
+        const response = await api.get(`/question-bank-reviewers/${id}`);
+        return response.data;
+    },
+    createQuestionBankReviewer: async (data: StoreQuestionBankReviewerRequest) => {
+        const response = await api.post('/question-bank-reviewers', data);
+        return response.data;
+    },
+    updateQuestionBankReviewer: async (id: string, data: UpdateQuestionBankReviewerRequest) => {
+        const response = await api.put(`/question-bank-reviewers/${id}`, data);
+        return response.data;
+    },
+    deleteQuestionBankReviewer: async (id: string) => {
+        const response = await api.delete(`/question-bank-reviewers/${id}`);
+        return response.data;
+    },
+    approveQuestionBankReviewer: async (id: string) => {
+        const response = await api.post(`/question-bank-reviewers/${id}/approve`);
+        return response.data;
+    },
+    rejectQuestionBankReviewer: async (id: string) => {
+        const response = await api.post(`/question-bank-reviewers/${id}/reject`);
+        return response.data;
+    },
+};
 
 export const questionApi = {
     getQuestions: async (params?: any) => {
@@ -1008,6 +1073,7 @@ export interface QuestionSuggestion {
     id: string;
     question_id: string;
     user?: User;
+    question?: Question;
     data: Record<string, any> | null;
     description: string | null;
     state: 'pending' | 'approved' | 'rejected';
@@ -1031,6 +1097,10 @@ export interface UpdateQuestionSuggestionRequest {
 export const questionSuggestionApi = {
     getSuggestions: async (params?: any) => {
         const response = await api.get('/question-suggestions', { params });
+        return response.data;
+    },
+    getSuggestionsByQuestionBank: async (questionBankId: string, params?: any) => {
+        const response = await api.get(`/question-banks/${questionBankId}/suggestions`, { params });
         return response.data;
     },
     getMySuggestions: async (params?: any) => {

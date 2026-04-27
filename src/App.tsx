@@ -18,6 +18,7 @@ import StudentDashboard from "@/pages/student/StudentDashboard"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
 import QuestionBankList from "@/pages/admin/question-banks/QuestionBankList"
+import QuestionBankReviewerList from "@/pages/admin/question-banks/QuestionBankReviewerList"
 import CreateQuestionBank from "@/pages/admin/question-banks/CreateQuestionBank"
 import EditQuestionBank from "@/pages/admin/question-banks/EditQuestionBank"
 import ShowQuestionBank from "@/pages/admin/question-banks/ShowQuestionBank"
@@ -35,6 +36,8 @@ import ReadingMaterialFormPage from "@/pages/admin/reading-materials/ReadingMate
 import QueueMonitorPage from "@/pages/admin/QueueMonitorPage"
 import BackupManagementPage from "@/pages/admin/BackupManagementPage"
 import SubjectUnitManagement from "@/pages/admin/SubjectUnitManagement"
+import QuestionSuggestionList from "@/pages/admin/question-banks/QuestionSuggestionList.tsx"
+import ReviewQuestionSuggestion from "@/pages/admin/question-banks/ReviewQuestionSuggestion"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -131,6 +134,9 @@ function App() {
               {/* Question Bank Routes */}
               <Route path="admin/question-banks" element={<QuestionBankList />} />
               <Route path="admin/question-banks/create" element={<CreateQuestionBank />} />
+              <Route path="admin/question-bank-reviewers" element={<QuestionBankReviewerList />} />
+              <Route path="admin/question-banks/:id/suggestions" element={<QuestionSuggestionList />} />
+              <Route path="admin/question-banks/:bankId/suggestions/:suggestionId/review" element={<ReviewQuestionSuggestion />} />
 
               <Route path="admin/exams" element={<ExamManagementPage />} />
               <Route path="admin/exams/:id/edit" element={<EditExamPage />} />

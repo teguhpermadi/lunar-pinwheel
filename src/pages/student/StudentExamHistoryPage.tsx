@@ -162,9 +162,9 @@ export default function StudentExamHistoryPage() {
                                                             <span className={`px-2 py-0.5 ${result.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'} text-[10px] font-bold rounded-full uppercase`}>
                                                                 {result.is_passed ? 'Passed' : 'Failed'} • {Math.round(result.score_percent)}%
                                                             </span>
-                                                            <span className="text-[10px] font-bold text-slate-400 uppercase truncate">{result.exam.subject?.name || 'General'}</span>
+                                                            <span className="text-[10px] font-bold text-slate-400 uppercase truncate">{result.exam?.subject?.name || 'General'}</span>
                                                         </div>
-                                                        <h4 className="font-bold text-slate-900 dark:text-white truncate">{result.exam.title}</h4>
+                                                        <h4 className="font-bold text-slate-900 dark:text-white truncate">{result.exam?.title}</h4>
                                                         <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
                                                             <span className="flex items-center gap-1"><Clock className="size-3" /> {time}</span>
                                                             <span className="flex items-center gap-1"><Medal className="size-3" /> Score: {result.final_score}</span>
@@ -247,10 +247,10 @@ export default function StudentExamHistoryPage() {
                                                 {selectedResult.is_passed ? 'PASSED' : 'FAILED'}
                                             </span>
                                         </div>
-                                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">{selectedResult.exam.title}</h4>
+                                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">{selectedResult.exam?.title}</h4>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-wide">
                                             <span className="flex items-center gap-1"><Clock className="size-3.5" /> {formatDate(selectedResult.finished_at).full}</span>
-                                            <span className="flex items-center gap-1"><Timer className="size-3.5" /> {selectedResult.exam.duration}m</span>
+                                            <span className="flex items-center gap-1"><Timer className="size-3.5" /> {selectedResult.exam?.duration}m</span>
                                         </div>
 
                                         <div className="mt-8 grid grid-cols-2 gap-4">
@@ -278,7 +278,7 @@ export default function StudentExamHistoryPage() {
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Subject</p>
-                                                        <p className="text-[11px] text-slate-500">{selectedResult.exam.subject?.name || 'General'}</p>
+                                                        <p className="text-[11px] text-slate-500">{selectedResult.exam?.subject?.name || 'General'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
@@ -296,14 +296,14 @@ export default function StudentExamHistoryPage() {
                                                     </div>
                                                     <div>
                                                         <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Exam Type</p>
-                                                        <p className="text-[11px] text-slate-500">{selectedResult.exam.type_label}</p>
+                                                        <p className="text-[11px] text-slate-500">{selectedResult.exam?.type_label}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {selectedResult.exam.is_show_result ? (
+                                    {selectedResult.exam?.is_show_result ? (
                                         <div className="mt-auto p-8 pt-4">
                                             <Link
                                                 to={`/exams/history/${selectedResult.exam_id}/${selectedResult.exam_session_id}`}

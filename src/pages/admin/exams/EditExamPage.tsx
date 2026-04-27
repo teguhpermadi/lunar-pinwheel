@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam, Classroom, classroomApi, teacherApi, Teacher } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn, toWIBDateTimeLocalString, addWIBDays, convertToLocalWIB, convertFromLocalWIB } from '@/lib/utils';
+import { cn, formatDateToLocalInput, addDaysToDate } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Swal from 'sweetalert2';
 import {
@@ -181,8 +181,8 @@ export default function EditExamPage() {
         try {
             const examPayload = {
                 ...exam,
-                start_time: convertFromLocalWIB(exam.start_time),
-                end_time: convertFromLocalWIB(exam.end_time)
+                start_time: exam.start_time ? new Date(exam.start_time).toISOString() : null,
+                end_time: exam.end_time ? new Date(exam.end_time).toISOString() : null
             };
             const response = await examApi.updateExam(id, examPayload);
             if (response.success) {
@@ -593,12 +593,12 @@ export default function EditExamPage() {
                                                     <input
                                                         type="datetime-local"
                                                         className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
-                                                        value={convertToLocalWIB(exam.start_time)}
+                                                        value={formatDateToLocalInput(exam.start_time)}
                                                         onChange={(e) => setExam(prev => prev ? { ...prev, start_time: e.target.value } : null)}
                                                     />
                                                     <button
                                                         type="button"
-                                                        onClick={() => setExam(prev => prev ? { ...prev, start_time: toWIBDateTimeLocalString() } : null)}
+                                                        onClick={() => setExam(prev => prev ? { ...prev, start_time: formatDateToLocalInput() } : null)}
                                                         className="px-3 py-2 text-[10px] font-bold bg-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/25 transition-all"
                                                     >
                                                         Now
@@ -618,8 +618,8 @@ export default function EditExamPage() {
                                                                 key={preset.label}
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    const start = exam.start_time || toWIBDateTimeLocalString();
-                                                                    setExam(prev => prev ? { ...prev, end_time: addWIBDays(start, preset.days) } : null);
+                                                                    const start = exam.start_time || formatDateToLocalInput();
+                                                                    setExam(prev => prev ? { ...prev, end_time: addDaysToDate(start, preset.days) } : null);
                                                                 }}
                                                                 className="px-2 py-0.5 text-[8px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-md hover:bg-primary hover:text-white transition-all border border-slate-200 dark:border-slate-700"
                                                             >
@@ -631,7 +631,7 @@ export default function EditExamPage() {
                                                 <input
                                                     type="datetime-local"
                                                     className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-all"
-                                                    value={convertToLocalWIB(exam.end_time)}
+                                                    value={formatDateToLocalInput(exam.end_time)}
                                                     onChange={(e) => setExam(prev => prev ? { ...prev, end_time: e.target.value } : null)}
                                                 />
                                             </div>
