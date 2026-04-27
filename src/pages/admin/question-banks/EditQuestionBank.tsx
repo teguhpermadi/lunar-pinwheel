@@ -18,7 +18,7 @@ import MediaModal from '@/components/questions/MediaModal';
 import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import {
     ArrowLeft, Settings, FileText, HelpCircle, Pencil,
-    Trash2, BarChart3, PlusSquare, PlusCircle, Plus
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, CheckSquare
 } from 'lucide-react';
 
 export default function EditQuestionBank() {
@@ -36,6 +36,8 @@ export default function EditQuestionBank() {
     const [readingMaterials, setReadingMaterials] = useState<ReadingMaterial[]>([]);
     const [selectedPreviewMaterial, setSelectedPreviewMaterial] = useState<ReadingMaterial | null>(null);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
 
     const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -150,6 +152,49 @@ export default function EditQuestionBank() {
         }
     };
 
+    const toggleQuestionSelection = (questionId: string) => {
+        setSelectedQuestions(prev =>
+            prev.includes(questionId)
+                ? prev.filter(id => id !== questionId)
+                : [...prev, questionId]
+        );
+    };
+
+    const selectAllQuestions = () => {
+        setSelectedQuestions(questions.map(q => q.id));
+    };
+
+    const deselectAllQuestions = () => {
+        setSelectedQuestions([]);
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedQuestions.length === 0) return;
+
+        const result = await Swal.fire({
+            title: `Delete ${selectedQuestions.length} Question(s)?`,
+            text: "This cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: `Yes, delete ${selectedQuestions.length} question(s)!`
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await Promise.all(selectedQuestions.map(id => questionApi.deleteQuestion(id)));
+                setQuestions(prev => prev.filter(q => !selectedQuestions.includes(q.id)));
+                setTotalQuestions(prev => prev - selectedQuestions.length);
+                setSelectedQuestions([]);
+                setIsSelectionMode(false);
+                Swal.fire('Deleted!', `${selectedQuestions.length} question(s) have been deleted.`, 'success');
+            } catch (error) {
+                console.error("Failed to delete questions", error);
+                Swal.fire('Error', 'Failed to delete questions', 'error');
+            }
+        }
+    };
+
     if (isLoadingBank && !bank) {
         return (
             <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex flex-col">
@@ -219,24 +264,63 @@ export default function EditQuestionBank() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setIsSettingsOpen(true)}
-                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
-                    >
-                        <Settings className="size-4" />
-                        Settings
-                    </button>
-                    <button
-                        onClick={() => setIsImportOpen(true)}
-                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
-                    >
-                        <FileText className="size-4" />
-                        Import Word
-                    </button>
-                    <Link to={`/admin/question-banks/${id}/show`} className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
-                        <HelpCircle className="size-4" />
-                        Exam
-                    </Link>
+                    {isSelectionMode ? (
+                        <>
+                            <button
+                                onClick={selectedQuestions.length === questions.length ? deselectAllQuestions : selectAllQuestions}
+                                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+                            >
+                                <CheckSquare className="size-4" />
+                                {selectedQuestions.length === questions.length ? 'Deselect All' : 'Select All'}
+                            </button>
+                            {selectedQuestions.length > 0 && (
+                                <button
+                                    onClick={handleBulkDelete}
+                                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
+                                >
+                                    <Trash2 className="size-4" />
+                                    Delete ({selectedQuestions.length})
+                                </button>
+                            )}
+                            <button
+                                onClick={() => {
+                                    setIsSelectionMode(false);
+                                    setSelectedQuestions([]);
+                                }}
+                                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+                            >
+                                <Settings className="size-4" />
+                                Settings
+                            </button>
+                            <button
+                                onClick={() => setIsImportOpen(true)}
+                                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
+                            >
+                                <FileText className="size-4" />
+                                Import Word
+                            </button>
+                            <button
+                                onClick={() => setIsSelectionMode(true)}
+                                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+                            >
+                                <CheckSquare className="size-4" />
+                                Select
+                            </button>
+                            <Link to={`/admin/question-banks/${id}/show`} className="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
+                                <HelpCircle className="size-4" />
+                                Exam
+                            </Link>
+                        </>
+                    )}
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
                     <div className="size-10 rounded-full border-2 border-primary/20 p-0.5">
                         <img
@@ -275,16 +359,25 @@ export default function EditQuestionBank() {
                         {/* Question List */}
                         <div className="space-y-6">
                             {questions.map((question, index) => {
+                                const isSelected = selectedQuestions.includes(question.id);
                                 return (
                                     <div
                                         key={question.id}
                                         ref={(el) => {
                                             questionRefs.current[question.id] = el;
                                         }}
-                                        className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 group"
+                                        className={`bg-white dark:bg-slate-900 rounded-2xl shadow-sm border group ${isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-slate-200 dark:border-slate-800'}`}
                                     >
                                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start rounded-t-2xl">
                                             <div className="flex gap-4 items-center">
+                                                {isSelectionMode && (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleQuestionSelection(question.id)}
+                                                        className="size-5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                                                    />
+                                                )}
                                                 <span className="size-8 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">
                                                     {index + 1}
                                                 </span>
@@ -294,22 +387,24 @@ export default function EditQuestionBank() {
                                                     disabled={true}
                                                 />
                                             </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/admin/questions/${question.id}/edit`)}
-                                                    className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
-                                                    title="Edit Question"
-                                                >
-                                                    <Pencil className="size-5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteQuestion(question.id)}
-                                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                                    title="Delete Question"
-                                                >
-                                                    <Trash2 className="size-5" />
-                                                </button>
-                                            </div>
+                                            {!isSelectionMode && (
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/admin/questions/${question.id}/edit`)}
+                                                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                                                        title="Edit Question"
+                                                    >
+                                                        <Pencil className="size-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteQuestion(question.id)}
+                                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                        title="Delete Question"
+                                                    >
+                                                        <Trash2 className="size-5" />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 items-center">
