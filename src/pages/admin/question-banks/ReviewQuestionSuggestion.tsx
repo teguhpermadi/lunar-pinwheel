@@ -17,7 +17,6 @@ import {
     User,
     Calendar,
     AlertCircle,
-    Info,
     Clock,
     Trash2,
     Zap,

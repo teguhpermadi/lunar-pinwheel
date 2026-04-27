@@ -53,7 +53,7 @@ export default function QuestionBankList() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [togglingId, setTogglingId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'mine' | 'other'>('mine');
+    const [activeTab, setActiveTab] = useState<'mine' | 'other' | 'all'>(isAdmin ? 'all' : 'mine');
 
     const fetchQuestionBanks = async () => {
         setIsLoading(true);
@@ -67,7 +67,9 @@ export default function QuestionBankList() {
 
             const apiMethod = activeTab === 'mine' 
                 ? questionBankApi.getMyQuestionBanks(params)
-                : questionBankApi.getPublicQuestionBanks(params);
+                : activeTab === 'all'
+                    ? questionBankApi.getQuestionBanks(params)
+                    : questionBankApi.getPublicQuestionBanks(params);
             
             const response = await apiMethod;
             if (response.success) {
@@ -172,6 +174,22 @@ export default function QuestionBankList() {
                             <Library className="size-4" />
                             My Banks
                         </button>
+                        {isAdmin && (
+                            <button
+                                onClick={() => {
+                                    setActiveTab('all');
+                                    setPage(1);
+                                }}
+                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                    activeTab === 'all'
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                }`}
+                            >
+                                <Library className="size-4" />
+                                All Banks
+                            </button>
+                        )}
                         <button
                             onClick={() => {
                                 setActiveTab('other');
@@ -232,10 +250,10 @@ export default function QuestionBankList() {
                                 <th className="pl-8 pr-4 py-4 w-12 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">#</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Bank Details</th>
                                 <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Subject</th>
-                                {isAdmin && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
-                                {activeTab === 'mine' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>}
-                                {activeTab === 'mine' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Public</th>}
-                                {activeTab === 'mine' && <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>}
+                                {isAdmin && (activeTab === 'mine' || activeTab === 'all') && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Teacher</th>}
+                                {(activeTab === 'mine' || activeTab === 'all') && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>}
+                                {(activeTab === 'mine' || activeTab === 'all') && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Public</th>}
+                                {(activeTab === 'mine' || activeTab === 'all') && <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>}
                                 {activeTab === 'other' && <th className="px-4 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Questions</th>}
                                 {activeTab === 'other' && <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>}
                             </tr>
@@ -259,17 +277,17 @@ export default function QuestionBankList() {
                                         <td className="px-4 py-5">
                                             <Skeleton className="h-6 w-24 rounded-full" />
                                         </td>
-                                        {isAdmin && activeTab === 'mine' && <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>}
-                                        {activeTab === 'mine' && <td className="px-4 py-5 text-center">
+                                        {isAdmin && (activeTab === 'mine' || activeTab === 'all') && <td className="px-4 py-5"><Skeleton className="h-6 w-24 rounded-full" /></td>}
+                                        {(activeTab === 'mine' || activeTab === 'all') && <td className="px-4 py-5 text-center">
                                             <Skeleton className="size-8 rounded-full mx-auto" />
                                         </td>}
-                                        {activeTab === 'mine' && <td className="px-4 py-5 text-center">
+                                        {(activeTab === 'mine' || activeTab === 'all') && <td className="px-4 py-5 text-center">
                                             <Skeleton className="h-6 w-10 rounded-full mx-auto" />
                                         </td>}
                                         {activeTab === 'other' && <td className="px-4 py-5 text-center">
                                             <Skeleton className="size-8 rounded-full mx-auto" />
                                         </td>}
-                                        {activeTab === 'mine' && <td className="px-8 py-5 text-right">
+                                        {(activeTab === 'mine' || activeTab === 'all') && <td className="px-8 py-5 text-right">
                                             <div className="flex items-center justify-end gap-3">
                                                 <Skeleton className="h-9 w-24 rounded-lg" />
                                                 <Skeleton className="size-9 rounded-lg" />
@@ -282,10 +300,10 @@ export default function QuestionBankList() {
                                 ))
                             ) : questionBanks.length === 0 ? (
                                 <tr>
-                                    <td colSpan={activeTab === 'mine' ? (isAdmin ? 7 : 5) : (isAdmin ? 6 : 4)} className="text-center py-12 text-slate-500">
+                                    <td colSpan={(activeTab === 'mine' || activeTab === 'all') ? (isAdmin ? 7 : 5) : (isAdmin ? 6 : 4)} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Library className="size-10 text-slate-300" />
-                                            <p>{activeTab === 'mine' ? 'No question banks found.' : 'No public question banks available.'}</p>
+                                            <p>{activeTab === 'mine' ? 'No question banks found.' : activeTab === 'all' ? 'No question banks found.' : 'No public question banks available.'}</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -315,21 +333,21 @@ export default function QuestionBankList() {
                                             {(bank as any).subject?.name || 'Unknown Subject'}
                                         </span>
                                     </td>
-                                    {isAdmin && activeTab === 'mine' && (
+                                    {(isAdmin && (activeTab === 'mine' || activeTab === 'all')) && (
                                         <td className="px-4 py-5">
                                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                                                 {(bank as any).user?.name || 'No Teacher'}
                                             </span>
                                         </td>
                                     )}
-                                    {activeTab === 'mine' && (
+                                    {(activeTab === 'mine' || activeTab === 'all') && (
                                         <td className="px-4 py-5 text-center">
                                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
                                                 {bank.questions_count || 0}
                                             </span>
                                         </td>
                                     )}
-                                    {activeTab === 'mine' && (
+                                    {(activeTab === 'mine' || activeTab === 'all') && (
                                         <td className="px-4 py-5 text-center">
                                             <span onClick={(e) => e.stopPropagation()}>
                                                 <PublishToggle
@@ -344,14 +362,7 @@ export default function QuestionBankList() {
                                             </span>
                                         </td>
                                     )}
-                                    {activeTab === 'other' && (
-                                        <td className="px-4 py-5 text-center">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-xs font-bold group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
-                                                {bank.questions_count || 0}
-                                            </span>
-                                        </td>
-                                    )}
-                                    {activeTab === 'mine' ? (
+                                    {(activeTab === 'mine' || activeTab === 'all') ? (
                                         <td className="px-8 py-5 text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                                 <Link
