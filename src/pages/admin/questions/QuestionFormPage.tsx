@@ -208,15 +208,16 @@ export default function QuestionFormPage() {
                 } else if (q.type === 'categorization') {
                     const groupsMap = new Map();
                     q.options.forEach((o: any) => {
-                        const title = o.metadata?.category_title || 'Uncategorized';
-                        if (!groupsMap.has(title)) {
-                            groupsMap.set(title, {
-                                uuid: generateUUID(),
-                                title: title,
+                        const groupUuid = o.metadata?.group_uuid;
+                        const groupTitle = o.metadata?.group_title || 'Uncategorized';
+                        if (!groupsMap.has(groupUuid)) {
+                            groupsMap.set(groupUuid, {
+                                uuid: groupUuid || generateUUID(),
+                                title: groupTitle,
                                 items: []
                             });
                         }
-                        groupsMap.get(title).items.push({
+                        groupsMap.get(groupUuid).items.push({
                             id: o.id,
                             uuid: o.id || generateUUID(),
                             content: o.content,
@@ -248,10 +249,9 @@ export default function QuestionFormPage() {
 
     const handleDeleteOptionMedia = async (optionUuid: string, mediaId?: string) => {
         const option = options.find((o: any) => o.uuid === optionUuid);
-        if (!option) return;
 
         try {
-            if (option.id && mediaId) {
+            if (option?.id && mediaId) {
                 await optionsApi.deleteMedia(option.id, mediaId);
                 Swal.fire({
                     toast: true,
@@ -409,8 +409,11 @@ export default function QuestionFormPage() {
                 case 'categorization':
                     categorizationGroups.forEach((group: any, gIdx: number) => {
                         formData.append(`categorization_groups[${gIdx}][title]`, group.title);
+                        formData.append(`categorization_groups[${gIdx}][group_uuid]`, group.uuid);
                         group.items.forEach((item: any, iIdx: number) => {
                             formData.append(`categorization_groups[${gIdx}][items][${iIdx}][content]`, item.content);
+                            formData.append(`categorization_groups[${gIdx}][items][${iIdx}][metadata][group_uuid]`, group.uuid);
+                            formData.append(`categorization_groups[${gIdx}][items][${iIdx}][metadata][group_title]`, group.title);
                             if (item.pendingImage) {
                                 formData.append(`categorization_groups[${gIdx}][items][${iIdx}][image]`, item.pendingImage);
                             }

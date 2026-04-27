@@ -23,6 +23,7 @@ import StudentLanguageResponseInput from '@/components/questions/student-inputs/
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
+import CategorizationDisplay from '@/components/questions/displays/CategorizationDisplay';
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle,
     ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy, Lightbulb,
@@ -126,6 +127,24 @@ export default function PreviewQuestionBank() {
 
                 const questionsData = rawQuestions.map((q: any) => {
                     const type = q.type;
+
+                    // Generate key_answer for categorization if missing
+                    if (type === 'categorization' && !q.key_answer) {
+                        const groupsMap = new Map();
+                        (q.options || []).forEach((opt: any) => {
+                            const groupUuid = opt.metadata?.group_uuid;
+                            const groupTitle = opt.metadata?.group_title || 'Uncategorized';
+                            
+                            if (!groupsMap.has(groupUuid)) {
+                                groupsMap.set(groupUuid, { title: groupTitle, items: [] });
+                            }
+                            // Store option_key to match StudentCategorizationInput's expectation
+                            groupsMap.get(groupUuid).items.push(opt.option_key);
+                        });
+                        
+                        // Attach the generated key_answer to the question object
+                        q.key_answer = { groups: Array.from(groupsMap.values()) };
+                    }
 
                     // Format matching ExamTaker expectations
                     const formattedQ = {
@@ -309,15 +328,16 @@ export default function PreviewQuestionBank() {
         } else if (type === 'categorization') {
             const groupsMap = new Map();
             options.forEach((o: any) => {
-                const title = o.metadata?.category_title || 'Uncategorized';
-                if (!groupsMap.has(title)) {
-                    groupsMap.set(title, {
-                        uuid: generateUUID(),
-                        title: title,
+                const groupUuid = o.metadata?.group_uuid;
+                const groupTitle = o.metadata?.group_title || 'Uncategorized';
+                if (!groupsMap.has(groupUuid)) {
+                    groupsMap.set(groupUuid, {
+                        uuid: groupUuid || generateUUID(),
+                        title: groupTitle,
                         items: []
                     });
                 }
-                groupsMap.get(title).items.push({
+                groupsMap.get(groupUuid).items.push({
                     id: o.id,
                     uuid: o.id || generateUUID(),
                     content: o.content,
@@ -886,11 +906,17 @@ export default function PreviewQuestionBank() {
                 />;
             }
             case 'categorization':
+                if (showAnswer) {
+                    return <CategorizationDisplay
+                        options={options}
+                        onMediaClick={(url) => setZoomImageUrl(url)}
+                    />;
+                }
                 return <StudentCategorizationInput
                     options={options}
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
-                    showAnswer={showAnswer}
+                    showAnswer={false}
                     keyAnswer={(q.exam_question as any).key_answer}
                 />;
             case 'arrange_words':
