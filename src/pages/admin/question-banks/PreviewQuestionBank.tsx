@@ -27,7 +27,7 @@ import StudentArrangeWordsInput from '@/components/questions/student-inputs/Stud
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle,
     ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy, Lightbulb,
-    Send, CheckCircle, Star
+    Send, CheckCircle, Star, BookOpen, ChevronUp, ChevronDown
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -78,6 +78,7 @@ export default function PreviewQuestionBank() {
     const [suggestionDescription, setSuggestionDescription] = useState('');
     const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
     const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
+    const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
 
     // Review Modal State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -895,6 +896,114 @@ export default function PreviewQuestionBank() {
                                 <span className="text-sm font-medium">{currentQuestion?.is_flagged ? 'Flagged' : 'Flag for review'}</span>
                             </button>
                         </div>
+
+                        {/* Reading Material Display */}
+                        {currentQuestion?.exam_question?.reading_material && (
+                            <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <div
+                                    className="p-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between cursor-pointer group"
+                                    onClick={() => setIsMaterialExpanded(!isMaterialExpanded)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                            <BookOpen className="size-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <h3 className="font-bold text-sm uppercase tracking-tight line-clamp-1">
+                                                {currentQuestion.exam_question.reading_material.title}
+                                            </h3>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">
+                                                Reading Material / Bahan Bacaan
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {!isMaterialExpanded && (
+                                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse hidden sm:block">
+                                                Click to read
+                                            </span>
+                                        )}
+                                        <button className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                            {isMaterialExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <AnimatePresence>
+                                    {isMaterialExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="p-6 md:p-8">
+                                                {(() => {
+                                                    const rm = currentQuestion.exam_question.reading_material;
+                                                    // In QuestionResource, media is returned as collections
+                                                    const pdfMedia = rm.media?.reading_materials?.find((m: any) => m.mime_type === 'application/pdf');
+                                                    const imageMedia = rm.media?.reading_images?.[0];
+
+                                                    if (pdfMedia) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 shadow-inner">
+                                                                    <iframe
+                                                                        src={`${pdfMedia.url}#toolbar=0`}
+                                                                        className="absolute inset-0 w-full h-full border-0"
+                                                                        title={rm.title}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-wrap items-center gap-3">
+                                                                    <a
+                                                                        href={pdfMedia.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-2 py-2.5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+                                                                    >
+                                                                        <Maximize className="size-4" />
+                                                                        <span>Open Fullscreen</span>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    if (imageMedia) {
+                                                        return (
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-2">
+                                                                    <img
+                                                                        src={imageMedia.url}
+                                                                        alt={rm.title}
+                                                                        className="max-h-[500px] w-auto mx-auto object-contain cursor-zoom-in rounded-lg"
+                                                                        onClick={() => setZoomImageUrl(imageMedia.url)}
+                                                                    />
+                                                                </div>
+                                                                {rm.content && (
+                                                                    <MathRenderer
+                                                                        className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none prose-img:rounded-2xl mt-4"
+                                                                        content={rm.content}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <MathRenderer
+                                                            className="font-medium leading-relaxed text-gray-900 dark:text-white prose dark:prose-invert max-w-none 
+                                                                prose-headings:font-black prose-p:text-lg prose-img:rounded-2xl"
+                                                            content={rm.content || ''}
+                                                        />
+                                                    );
+                                                })()}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )}
 
                         <div
                             className={cn(
