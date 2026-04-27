@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { questionBankApi, questionSuggestionApi, QuestionBank } from '@/lib/api';
+import { questionBankApi, questionSuggestionApi, questionBankReviewerApi, QuestionBank } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
@@ -27,7 +27,7 @@ import StudentArrangeWordsInput from '@/components/questions/student-inputs/Stud
 import {
     X, Timer, Maximize, Indent, Outdent, Flag, HelpCircle,
     ChevronLeft, ChevronRight, Puzzle, Eye, EyeOff, Trophy, Lightbulb,
-    Send, CheckCircle
+    Send, CheckCircle, Star
 } from 'lucide-react';
 
 const MySwal = withReactContent(Swal);
@@ -60,6 +60,7 @@ export default function PreviewQuestionBank() {
 
     // UI State
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const currentQuestion = questions[currentQuestionIndex];
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('exam_font_size');
@@ -78,6 +79,12 @@ export default function PreviewQuestionBank() {
     const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
     const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
 
+    // Review Modal State
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviewRating, setReviewRating] = useState<number>(0);
+    const [reviewNotes, setReviewNotes] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
     useEffect(() => {
         if (id) {
             fetchQuestionBank();
@@ -87,6 +94,12 @@ export default function PreviewQuestionBank() {
     useEffect(() => {
         localStorage.setItem('exam_font_size', fontSize.toString());
     }, [fontSize]);
+
+    useEffect(() => {
+        if (isSuggestionMode && currentQuestion?.exam_question) {
+            fetchSuggestionData();
+        }
+    }, [currentQuestionIndex, isSuggestionMode]);
 
     const fetchQuestionBank = async () => {
         if (!id) return;
@@ -161,52 +174,86 @@ export default function PreviewQuestionBank() {
     };
 
     const handleSubmitExam = async () => {
-        MySwal.fire({
-            icon: 'success',
-            title: 'Preview Selesai',
-            text: 'Ini adalah mode preview, tidak ada data yang disimpan.',
-        }).then(() => navigate(`/admin/question-banks/${id}/show`));
+        setIsReviewModalOpen(true);
+    };
+
+    const handleFinalizeReview = async () => {
+        if (reviewRating === 0) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Rating Required',
+                text: 'Please select a rating before finalizing.',
+            });
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const response = await questionBankReviewerApi.createQuestionBankReviewer({
+                question_bank_id: id!,
+                rating: reviewRating,
+                notes: reviewNotes.trim() || null,
+            });
+
+            if (response.success) {
+                MySwal.fire({
+                    icon: 'success',
+                    title: 'Review Submitted',
+                    text: 'Question bank has been reviewed successfully!',
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    navigate('/admin/question-banks');
+                });
+            } else {
+                throw new Error(response.message || 'Failed to submit review');
+            }
+        } catch (error: any) {
+            console.error('Failed to submit review:', error);
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'Failed to submit review. Please try again.',
+            });
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     // Suggestion Mode Functions
-    const enterSuggestionMode = async () => {
+    const fetchSuggestionData = async () => {
         if (!currentQuestion?.exam_question) return;
 
         const eq = currentQuestion.exam_question;
-        console.log('🔍 [Suggestion] Entering suggestion mode for question:', eq.id);
+        console.log('🔍 [Suggestion] Fetching suggestion data for question:', eq.id);
         
-        // Fetch existing suggestions for this question
+        // Reset states first to show fresh data
+        setExistingSuggestion(null);
+        setSuggestedContent(eq.content || '');
+        setSuggestedScore(eq.score ?? null);
+        setSuggestionDescription('');
+        
         try {
-            console.log('📡 [Suggestion] Fetching existing suggestions...');
+            console.log('📡 [Suggestion] Calling API...');
             const response = await questionSuggestionApi.getMySuggestions({
                 question_id: eq.id
             });
             console.log('📥 [Suggestion] Response:', response);
             
-            // Handle nested response structure (pagination format)
             const suggestionsData = response.data?.data || response.data || [];
-            console.log('📊 [Suggestion] Parsed suggestions data:', suggestionsData);
             
             if (response.success && suggestionsData.length > 0) {
-                // Found existing suggestion
-                console.log('✅ [Suggestion] Found existing suggestion:', suggestionsData[0]);
                 const existing = suggestionsData[0];
                 setExistingSuggestion(existing);
                 
                 const data = existing.data || {};
-                console.log('📝 [Suggestion] Data from suggestion:', data);
-                
-                // Populate form with existing suggestion data
                 setSuggestedContent(data.content || eq.content || '');
                 setSuggestedScore(data.score ?? eq.score ?? null);
                 setSuggestionDescription(existing.description || '');
                 
-                // Handle options from suggestion
                 if (data.options) {
-                    console.log('📋 [Suggestion] Processing options from suggestion:', data.options);
                     const optsFromSuggestion: SuggestionOption[] = [];
                     
-                    // Add existing options with updated values
                     if (data.options.update && data.options.update.length > 0) {
                         data.options.update.forEach((upd: any) => {
                             const origOpt = eq.options?.find((o: any) => o.id === upd.id);
@@ -225,7 +272,6 @@ export default function PreviewQuestionBank() {
                         });
                     }
                     
-                    // Add new options
                     if (data.options.create && data.options.create.length > 0) {
                         data.options.create.forEach((c: any) => {
                             optsFromSuggestion.push({
@@ -241,7 +287,6 @@ export default function PreviewQuestionBank() {
                         });
                     }
                     
-                    // If optsFromSuggestion is empty, show original options
                     if (optsFromSuggestion.length === 0 && eq.options && eq.options.length > 0) {
                         optsFromSuggestion.push(...eq.options.map((opt: any, idx: number) => ({
                             id: opt.id,
@@ -257,7 +302,6 @@ export default function PreviewQuestionBank() {
                     
                     setSuggestedOptions(optsFromSuggestion);
                 } else {
-                    // No options in suggestion, show original
                     if (eq.options && eq.options.length > 0) {
                         setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
                             id: opt.id,
@@ -274,19 +318,12 @@ export default function PreviewQuestionBank() {
                     }
                 }
                 
-                // Determine which fields were modified in existing suggestion
                 const fields: string[] = [];
                 if (data.content) fields.push('content');
                 if (data.score !== undefined) fields.push('score');
                 if (data.options) fields.push('options');
                 setSelectedFields(fields.length > 0 ? fields : ['content', 'options']);
             } else {
-                console.log('📭 [Suggestion] No existing suggestion found, using defaults');
-                // No existing suggestion, use default values
-                setExistingSuggestion(null);
-                setSuggestedContent(eq.content || '');
-                setSuggestedScore(eq.score || null);
-                
                 if (eq.options && eq.options.length > 0) {
                     setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
                         id: opt.id,
@@ -301,16 +338,10 @@ export default function PreviewQuestionBank() {
                 } else {
                     setSuggestedOptions([]);
                 }
-                
                 setSelectedFields(['content', 'options']);
             }
         } catch (error) {
             console.error('❌ [Suggestion] Failed to fetch existing suggestion:', error);
-            // On error, use default values
-            setExistingSuggestion(null);
-            setSuggestedContent(eq.content || '');
-            setSuggestedScore(eq.score || null);
-            
             if (eq.options && eq.options.length > 0) {
                 setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
                     id: opt.id,
@@ -325,10 +356,11 @@ export default function PreviewQuestionBank() {
             } else {
                 setSuggestedOptions([]);
             }
-            
             setSelectedFields(['content', 'options']);
         }
-        
+    };
+
+    const enterSuggestionMode = () => {
         setIsSuggestionMode(true);
     };
 
@@ -786,7 +818,7 @@ export default function PreviewQuestionBank() {
 
     if (!bank) return null;
 
-    const currentQuestion = questions[currentQuestionIndex];
+
     const answeredCount = questions.filter(isQuestionAnswered).length;
     const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
@@ -1111,11 +1143,11 @@ export default function PreviewQuestionBank() {
                                 className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden bg-gradient-to-r from-primary to-[#ec4899] text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 active:scale-95`}
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
-                                <span>Finish Preview</span>
+                                <span>Finalize Review</span>
                                 <CheckCircle className="size-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <p className="text-center text-[10px] text-gray-400 mt-3 font-medium">
-                                Preview mode. Answers will not be saved.
+                                Submit your review with rating and notes.
                             </p>
                         </div>
                     </motion.aside>
@@ -1156,6 +1188,109 @@ export default function PreviewQuestionBank() {
                                 alt="Zoomed"
                                 className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
                             />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Review Modal */}
+            <AnimatePresence>
+                {isReviewModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setIsReviewModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Review Question Bank</h3>
+                                <button
+                                    onClick={() => setIsReviewModalOpen(false)}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    <X className="size-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                        Rating <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setReviewRating(star)}
+                                                className="p-1 transition-transform hover:scale-110"
+                                            >
+                                                <Star
+                                                    className={`size-8 transition-colors ${
+                                                        star <= reviewRating
+                                                            ? 'fill-yellow-400 text-yellow-400'
+                                                            : 'text-gray-300 dark:text-gray-600'
+                                                    }`}
+                                                />
+                                            </button>
+                                        ))}
+                                        <span className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            {reviewRating > 0 ? `${reviewRating}/5` : 'Select rating'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                        Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        value={reviewNotes}
+                                        onChange={(e) => setReviewNotes(e.target.value)}
+                                        placeholder="Add your review notes or comments..."
+                                        rows={4}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => {
+                                            setIsReviewModalOpen(false);
+                                            setReviewRating(0);
+                                            setReviewNotes('');
+                                        }}
+                                        className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleFinalizeReview}
+                                        disabled={isSubmittingReview || reviewRating === 0}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isSubmittingReview ? (
+                                            <>
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="size-4" />
+                                                Submit Review
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

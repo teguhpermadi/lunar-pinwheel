@@ -13,7 +13,8 @@ import {
     Activity,
     HardDrive,
     X,
-    LogOut
+    LogOut,
+    UserCheck
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -36,6 +37,7 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onMobileClose 
         ] : []),
         { icon: Book, label: 'Subjects', path: '/admin/subjects' },
         { icon: Library, label: 'Question Bank', path: '/admin/question-banks' },
+        { icon: UserCheck, label: 'Reviewers', path: '/admin/question-bank-reviewers' },
         { icon: FileText, label: 'Exams', path: '/admin/exams' },
         ...(user?.role === 'admin' ? [{ icon: Activity, label: 'Queue Monitor', path: '/admin/queue-monitor' as const }] : []),
         ...(user?.role === 'admin' ? [{ icon: HardDrive, label: 'Backup & Restore', path: '/admin/backup' as const }] : []),
