@@ -9,8 +9,7 @@ import withReactContent from 'sweetalert2-react-content';
 import MathRenderer from '@/components/ui/MathRenderer';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import QuestionToolbar from '@/components/questions/QuestionToolbar';
-import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
-import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
+import QuestionInputs from '@/components/questions/QuestionInputs';
 import QuestionScoreSelector from '@/components/questions/QuestionScoreSelector';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
@@ -75,6 +74,18 @@ export default function PreviewQuestionBank() {
     const [suggestedContent, setSuggestedContent] = useState('');
     const [suggestedScore, setSuggestedScore] = useState<number | null>(null);
     const [suggestedOptions, setSuggestedOptions] = useState<SuggestionOption[]>([]);
+    const [suggestedMatchingPairs, setSuggestedMatchingPairs] = useState<any[]>([]);
+    const [suggestedSequenceItems, setSuggestedSequenceItems] = useState<any[]>([]);
+    const [suggestedEssayKeywords, setSuggestedEssayKeywords] = useState('');
+    const [suggestedMathContent, setSuggestedMathContent] = useState('');
+    const [suggestedArabicContent, setSuggestedArabicContent] = useState('');
+    const [suggestedJavaneseContent, setSuggestedJavaneseContent] = useState('');
+    const [suggestedCategorizationGroups, setSuggestedCategorizationGroups] = useState<any[]>([]);
+    const [suggestedArrangeWordsSentence, setSuggestedArrangeWordsSentence] = useState('');
+    const [suggestedArrangeWordsDelimiter, setSuggestedArrangeWordsDelimiter] = useState(' ');
+    const [suggestedArrangeWordsIsArabic, setSuggestedArrangeWordsIsArabic] = useState(false);
+    const [suggestedArrangeWordsShuffleMode, setSuggestedArrangeWordsShuffleMode] = useState<'phrase' | 'alphabet'>('phrase');
+    
     const [suggestionDescription, setSuggestionDescription] = useState('');
     const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
     const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
@@ -222,17 +233,181 @@ export default function PreviewQuestionBank() {
     };
 
     // Suggestion Mode Functions
+    const initializeSuggestionStatesFromQuestion = (q: any) => {
+        const type = q.type;
+        const options = q.options || [];
+
+        // Reset all specific states
+        setSuggestedOptions([]);
+        setSuggestedMatchingPairs([]);
+        setSuggestedSequenceItems([]);
+        setSuggestedEssayKeywords('');
+        setSuggestedMathContent('');
+        setSuggestedArabicContent('');
+        setSuggestedJavaneseContent('');
+        setSuggestedCategorizationGroups([]);
+        setSuggestedArrangeWordsSentence('');
+
+        if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(type)) {
+            setSuggestedOptions(options.map((o: any, idx: number) => ({
+                id: o.id,
+                key: o.option_key || (type === 'short_answer' ? `SA${idx + 1}` : String.fromCharCode(65 + idx)),
+                content: o.content,
+                is_correct: o.is_correct,
+                media: o.media,
+                uuid: o.id || generateUUID(),
+                pendingImage: null,
+                previewUrl: null,
+            })));
+        } else if (type === 'matching') {
+            const pairsMap = new Map();
+            options.forEach((o: any) => {
+                const pairId = o.metadata?.pair_id;
+                if (!pairId) return;
+                if (!pairsMap.has(pairId)) {
+                    pairsMap.set(pairId, {
+                        uuid: generateUUID(),
+                        rightUuid: generateUUID(),
+                        pair_id: pairId,
+                        left: '',
+                        right: '',
+                        leftOptionId: null,
+                        rightOptionId: null
+                    });
+                }
+                const pair = pairsMap.get(pairId);
+                if (o.metadata?.side === 'left') {
+                    pair.left = o.content;
+                    pair.leftOptionId = o.id;
+                } else if (o.metadata?.side === 'right') {
+                    pair.right = o.content;
+                    pair.rightOptionId = o.id;
+                }
+            });
+            setSuggestedMatchingPairs(Array.from(pairsMap.values()));
+        } else if (type === 'sequence') {
+            setSuggestedSequenceItems(options
+                .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                .map((o: any) => ({
+                    id: o.id,
+                    uuid: o.id || generateUUID(),
+                    content: o.content,
+                    order: o.order
+                })));
+        } else if (type === 'essay') {
+            const essayOption = options.find((o: any) => o.option_key === 'ESSAY');
+            if (essayOption) setSuggestedEssayKeywords(essayOption.content);
+        } else if (type === 'math_input') {
+            const mathOption = options.find((o: any) => o.option_key === 'MATH');
+            if (mathOption) setSuggestedMathContent(mathOption.content);
+        } else if (type === 'arabic_response') {
+            const arabicOption = options.find((o: any) => o.option_key === 'ARABIC');
+            if (arabicOption) setSuggestedArabicContent(arabicOption.content);
+        } else if (type === 'javanese_response') {
+            const javaneseOption = options.find((o: any) => o.option_key === 'JAVANESE');
+            if (javaneseOption) setSuggestedJavaneseContent(javaneseOption.content);
+        } else if (type === 'categorization') {
+            const groupsMap = new Map();
+            options.forEach((o: any) => {
+                const title = o.metadata?.category_title || 'Uncategorized';
+                if (!groupsMap.has(title)) {
+                    groupsMap.set(title, {
+                        uuid: generateUUID(),
+                        title: title,
+                        items: []
+                    });
+                }
+                groupsMap.get(title).items.push({
+                    id: o.id,
+                    uuid: o.id || generateUUID(),
+                    content: o.content,
+                    media: o.media?.option_media?.[0] || null
+                });
+            });
+            setSuggestedCategorizationGroups(Array.from(groupsMap.values()));
+        } else if (type === 'arrange_words') {
+            const sentenceOption = options.find((o: any) => o.option_key === 'SENTENCE');
+            if (sentenceOption) {
+                setSuggestedArrangeWordsSentence(sentenceOption.content);
+                setSuggestedArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
+                setSuggestedArrangeWordsIsArabic(!!sentenceOption.metadata?.is_arabic);
+                setSuggestedArrangeWordsShuffleMode(sentenceOption.metadata?.shuffle_mode || 'phrase');
+            }
+        }
+    };
+
+    const applySuggestionDataToStates = (data: any, eq: any) => {
+        if (data.options) {
+            const optsFromSuggestion: SuggestionOption[] = [];
+            
+            if (data.options.update && data.options.update.length > 0) {
+                data.options.update.forEach((upd: any) => {
+                    const origOpt = eq.options?.find((o: any) => o.id === upd.id);
+                    if (origOpt) {
+                        optsFromSuggestion.push({
+                            id: upd.id,
+                            key: origOpt.option_key || origOpt.key,
+                            content: upd.content,
+                            is_correct: upd.is_correct,
+                            media: origOpt.media,
+                            uuid: generateUUID(),
+                            pendingImage: null,
+                            previewUrl: null,
+                        });
+                    }
+                });
+            }
+            
+            if (data.options.create && data.options.create.length > 0) {
+                data.options.create.forEach((c: any) => {
+                    optsFromSuggestion.push({
+                        id: undefined,
+                        key: String.fromCharCode(65 + optsFromSuggestion.length),
+                        content: c.content,
+                        is_correct: c.is_correct,
+                        media: undefined,
+                        uuid: generateUUID(),
+                        pendingImage: null,
+                        previewUrl: null,
+                    });
+                });
+            }
+            
+            if (optsFromSuggestion.length > 0) {
+                setSuggestedOptions(optsFromSuggestion);
+            }
+        }
+        
+        if (data.matching_pairs) setSuggestedMatchingPairs(data.matching_pairs);
+        if (data.sequence_items) setSuggestedSequenceItems(data.sequence_items);
+        if (data.keywords) setSuggestedEssayKeywords(data.keywords);
+        if (data.math_content) setSuggestedMathContent(data.math_content);
+        if (data.arabic_content) setSuggestedArabicContent(data.arabic_content);
+        if (data.javanese_content) setSuggestedJavaneseContent(data.javanese_content);
+        if (data.categorization_groups) setSuggestedCategorizationGroups(data.categorization_groups);
+        if (data.arrange_words_sentence) {
+            setSuggestedArrangeWordsSentence(data.arrange_words_sentence);
+            if (data.arrange_words_delimiter) setSuggestedArrangeWordsDelimiter(data.arrange_words_delimiter);
+            if (data.arrange_words_is_arabic !== undefined) setSuggestedArrangeWordsIsArabic(!!data.arrange_words_is_arabic);
+            if (data.arrange_words_shuffle_mode) setSuggestedArrangeWordsShuffleMode(data.arrange_words_shuffle_mode);
+        }
+    };
+
     const fetchSuggestionData = async () => {
         if (!currentQuestion?.exam_question) return;
 
         const eq = currentQuestion.exam_question;
-        console.log('🔍 [Suggestion] Fetching suggestion data for question:', eq.id);
+        const type = eq.type;
+        console.log('🔍 [Suggestion] Fetching suggestion data for question:', eq.id, 'Type:', type);
         
         // Reset states first to show fresh data
         setExistingSuggestion(null);
         setSuggestedContent(eq.content || '');
         setSuggestedScore(eq.score ?? null);
         setSuggestionDescription('');
+        
+        // Initialize from current question data first
+        initializeSuggestionStatesFromQuestion(eq);
         
         try {
             console.log('📡 [Suggestion] Calling API...');
@@ -252,111 +427,26 @@ export default function PreviewQuestionBank() {
                 setSuggestedScore(data.score ?? eq.score ?? null);
                 setSuggestionDescription(existing.description || '');
                 
-                if (data.options) {
-                    const optsFromSuggestion: SuggestionOption[] = [];
-                    
-                    if (data.options.update && data.options.update.length > 0) {
-                        data.options.update.forEach((upd: any) => {
-                            const origOpt = eq.options?.find((o: any) => o.id === upd.id);
-                            if (origOpt) {
-                                optsFromSuggestion.push({
-                                    id: upd.id,
-                                    key: origOpt.option_key || origOpt.key,
-                                    content: upd.content,
-                                    is_correct: upd.is_correct,
-                                    media: origOpt.media,
-                                    uuid: generateUUID(),
-                                    pendingImage: null,
-                                    previewUrl: null,
-                                });
-                            }
-                        });
-                    }
-                    
-                    if (data.options.create && data.options.create.length > 0) {
-                        data.options.create.forEach((c: any) => {
-                            optsFromSuggestion.push({
-                                id: undefined,
-                                key: String.fromCharCode(65 + optsFromSuggestion.length),
-                                content: c.content,
-                                is_correct: c.is_correct,
-                                media: undefined,
-                                uuid: generateUUID(),
-                                pendingImage: null,
-                                previewUrl: null,
-                            });
-                        });
-                    }
-                    
-                    if (optsFromSuggestion.length === 0 && eq.options && eq.options.length > 0) {
-                        optsFromSuggestion.push(...eq.options.map((opt: any, idx: number) => ({
-                            id: opt.id,
-                            key: opt.option_key || String.fromCharCode(65 + idx),
-                            content: opt.content,
-                            is_correct: opt.is_correct,
-                            media: opt.media,
-                            uuid: generateUUID(),
-                            pendingImage: null,
-                            previewUrl: null,
-                        })));
-                    }
-                    
-                    setSuggestedOptions(optsFromSuggestion);
-                } else {
-                    if (eq.options && eq.options.length > 0) {
-                        setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                            id: opt.id,
-                            key: opt.option_key || String.fromCharCode(65 + idx),
-                            content: opt.content,
-                            is_correct: opt.is_correct,
-                            media: opt.media,
-                            uuid: generateUUID(),
-                            pendingImage: null,
-                            previewUrl: null,
-                        })));
-                    } else {
-                        setSuggestedOptions([]);
-                    }
-                }
+                // Overwrite states with suggestion data
+                applySuggestionDataToStates(data, eq);
                 
                 const fields: string[] = [];
                 if (data.content) fields.push('content');
                 if (data.score !== undefined) fields.push('score');
-                if (data.options) fields.push('options');
+                
+                // Check if any specific field exists in data
+                if (data.options || data.matching_pairs || data.sequence_items || data.keywords || 
+                    data.math_content || data.arabic_content || data.javanese_content || 
+                    data.categorization_groups || data.arrange_words_sentence) {
+                    fields.push('options');
+                }
+                
                 setSelectedFields(fields.length > 0 ? fields : ['content', 'options']);
             } else {
-                if (eq.options && eq.options.length > 0) {
-                    setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                        id: opt.id,
-                        key: opt.option_key || String.fromCharCode(65 + idx),
-                        content: opt.content,
-                        is_correct: opt.is_correct,
-                        media: opt.media,
-                        uuid: generateUUID(),
-                        pendingImage: null,
-                        previewUrl: null,
-                    })));
-                } else {
-                    setSuggestedOptions([]);
-                }
                 setSelectedFields(['content', 'options']);
             }
         } catch (error) {
             console.error('❌ [Suggestion] Failed to fetch existing suggestion:', error);
-            if (eq.options && eq.options.length > 0) {
-                setSuggestedOptions(eq.options.map((opt: any, idx: number) => ({
-                    id: opt.id,
-                    key: opt.option_key || String.fromCharCode(65 + idx),
-                    content: opt.content,
-                    is_correct: opt.is_correct,
-                    media: opt.media,
-                    uuid: generateUUID(),
-                    pendingImage: null,
-                    previewUrl: null,
-                })));
-            } else {
-                setSuggestedOptions([]);
-            }
             setSelectedFields(['content', 'options']);
         }
     };
@@ -393,6 +483,8 @@ export default function PreviewQuestionBank() {
 
     const buildSuggestionData = () => {
         const data: Record<string, any> = {};
+        const q = currentQuestion?.exam_question;
+        if (!q) return data;
 
         if (selectedFields.includes('content') && suggestedContent.trim()) {
             data.content = suggestedContent.trim();
@@ -402,18 +494,52 @@ export default function PreviewQuestionBank() {
             data.score = suggestedScore;
         }
 
-        if (selectedFields.includes('options') && suggestedOptions.length > 0) {
-            data.options = {
-                update: suggestedOptions.filter(o => o.id).map(o => ({
-                    id: o.id,
-                    content: o.content,
-                    is_correct: o.is_correct,
-                })),
-                create: suggestedOptions.filter(o => !o.id).map(o => ({
-                    content: o.content,
-                    is_correct: o.is_correct,
-                })),
-            };
+        if (selectedFields.includes('options')) {
+            switch (q.type) {
+                case 'multiple_choice':
+                case 'multiple_selection':
+                case 'true_false':
+                case 'short_answer':
+                    data.options = {
+                        update: suggestedOptions.filter(o => o.id).map(o => ({
+                            id: o.id,
+                            content: o.content,
+                            is_correct: o.is_correct,
+                        })),
+                        create: suggestedOptions.filter(o => !o.id).map(o => ({
+                            content: o.content,
+                            is_correct: o.is_correct,
+                        })),
+                    };
+                    break;
+                case 'matching':
+                    data.matching_pairs = suggestedMatchingPairs;
+                    break;
+                case 'sequence':
+                    data.sequence_items = suggestedSequenceItems;
+                    break;
+                case 'essay':
+                    data.keywords = suggestedEssayKeywords;
+                    break;
+                case 'math_input':
+                    data.math_content = suggestedMathContent;
+                    break;
+                case 'arabic_response':
+                    data.arabic_content = suggestedArabicContent;
+                    break;
+                case 'javanese_response':
+                    data.javanese_content = suggestedJavaneseContent;
+                    break;
+                case 'categorization':
+                    data.categorization_groups = suggestedCategorizationGroups;
+                    break;
+                case 'arrange_words':
+                    data.arrange_words_sentence = suggestedArrangeWordsSentence;
+                    data.arrange_words_delimiter = suggestedArrangeWordsDelimiter;
+                    data.arrange_words_is_arabic = suggestedArrangeWordsIsArabic;
+                    data.arrange_words_shuffle_mode = suggestedArrangeWordsShuffleMode;
+                    break;
+            }
         }
 
         return data;
@@ -589,26 +715,35 @@ export default function PreviewQuestionBank() {
                             Pilihan Jawaban
                         </label>
                         <div className="p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30">
-                            {currentQuestion?.exam_question?.type === 'multiple_selection' ? (
-                                <MultipleSelectionInput
-                                    options={suggestedOptions.map(o => ({ ...o, selection_type: 'checkbox' }))}
-                                    onChange={(opts) => setSuggestedOptions(opts.map(o => ({
-                                        id: o.id,
-                                        key: o.key,
-                                        content: o.content,
-                                        is_correct: o.is_correct,
-                                        media: o.media,
-                                        uuid: o.uuid,
-                                        pendingImage: o.pendingImage,
-                                        previewUrl: o.previewUrl,
-                                    })))}
-                                />
-                            ) : (
-                                <MultipleChoiceInput
-                                    options={suggestedOptions}
-                                    onChange={setSuggestedOptions}
-                                />
-                            )}
+                            <QuestionInputs
+                                type={currentQuestion?.exam_question?.type}
+                                options={suggestedOptions}
+                                setOptions={setSuggestedOptions}
+                                handleDeleteOptionMedia={() => {}} // Suggestion mode doesn't support direct media delete
+                                matchingPairs={suggestedMatchingPairs}
+                                setMatchingPairs={setSuggestedMatchingPairs}
+                                sequenceItems={suggestedSequenceItems}
+                                setSequenceItems={setSuggestedSequenceItems}
+                                essayKeywords={suggestedEssayKeywords}
+                                setEssayKeywords={setSuggestedEssayKeywords}
+                                mathContent={suggestedMathContent}
+                                setMathContent={setSuggestedMathContent}
+                                arabicContent={suggestedArabicContent}
+                                setArabicContent={setSuggestedArabicContent}
+                                javaneseContent={suggestedJavaneseContent}
+                                setJavaneseContent={setSuggestedJavaneseContent}
+                                categorizationGroups={suggestedCategorizationGroups}
+                                setCategorizationGroups={setSuggestedCategorizationGroups}
+                                arrangeWordsSentence={suggestedArrangeWordsSentence}
+                                setArrangeWordsSentence={setSuggestedArrangeWordsSentence}
+                                arrangeWordsDelimiter={suggestedArrangeWordsDelimiter}
+                                setArrangeWordsDelimiter={setSuggestedArrangeWordsDelimiter}
+                                arrangeWordsIsArabic={suggestedArrangeWordsIsArabic}
+                                setArrangeWordsIsArabic={setSuggestedArrangeWordsIsArabic}
+                                arrangeWordsShuffleMode={suggestedArrangeWordsShuffleMode}
+                                setArrangeWordsShuffleMode={setSuggestedArrangeWordsShuffleMode}
+                                isEditing={true}
+                            />
                         </div>
                     </div>
                 )}
