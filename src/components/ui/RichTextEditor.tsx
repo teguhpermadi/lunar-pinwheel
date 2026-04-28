@@ -8,6 +8,13 @@ import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
 import { JavaneseExtension } from '@/lib/tiptap/JavaneseExtension';
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
+import MathDialog from '@/components/questions/MathDialog';
+import ArabicDialog from '@/components/questions/ArabicDialog';
+import JavaneseDialog from '@/components/questions/JavaneseDialog';
+import { 
+    Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
+    Heading1, Heading2, Heading3, Link2, Quote, Sigma, Languages, GraduationCap
+} from 'lucide-react';
 
 interface RichTextEditorProps {
     value: string;
@@ -73,6 +80,229 @@ const toPersistenceHtml = (html: string) => {
 
     return doc.body.innerHTML;
 };
+
+interface MenuBarProps {
+    editor: any;
+}
+
+function MenuBar({ editor }: MenuBarProps) {
+    if (!editor) return null;
+
+    const { 
+        isMathDialogOpen, setIsMathDialogOpen,
+        isArabicDialogOpen, setIsArabicDialogOpen,
+        isJavaneseDialogOpen, setIsJavaneseDialogOpen
+    } = useEditorStore();
+
+    const addLink = () => {
+        const url = window.prompt('Masukkan URL:');
+        if (url) {
+            editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        }
+    };
+
+    const setHeading = (level: 1 | 2 | 3) => {
+        editor.chain().focus().toggleHeading({ level }).run();
+    };
+
+    const getCurrentMathLatex = () => {
+        if (editor.isActive('math')) {
+            return editor.getAttributes('math').latex || '';
+        }
+        return '';
+    };
+
+    const getCurrentArabicText = () => {
+        if (editor.isActive('arabic')) {
+            return editor.getAttributes('arabic').text || '';
+        }
+        return '';
+    };
+
+    const getCurrentJavaneseText = () => {
+        if (editor.isActive('javanese')) {
+            return editor.getAttributes('javanese').text || '';
+        }
+        return '';
+    };
+
+    const handleMathConfirm = (latex: string) => {
+        const { state } = editor;
+        const { from } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'math') {
+            editor.chain().focus().updateMath({ latex }).run();
+        } else {
+            editor.chain().focus().setMath({ latex }).run();
+        }
+    };
+
+    const handleArabicConfirm = (text: string) => {
+        const { state } = editor;
+        const { from } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'arabic') {
+            editor.chain().focus().updateArabic({ text }).run();
+        } else {
+            editor.chain().focus().setArabic({ text }).run();
+        }
+    };
+
+    const handleJavaneseConfirm = (text: string) => {
+        const { state } = editor;
+        const { from } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (node && node.type.name === 'javanese') {
+            editor.chain().focus().updateJavanese({ text }).run();
+        } else {
+            editor.chain().focus().setJavanese({ text }).run();
+        }
+    };
+
+    type ToolbarButton = { type: 'divider' } | { icon: typeof Bold; action: () => void; isActive: boolean; title: string };
+
+    const buttons: ToolbarButton[] = [
+        { 
+            icon: Bold, 
+            action: () => editor.chain().focus().toggleBold().run(), 
+            isActive: editor.isActive('bold'),
+            title: 'Bold'
+        },
+        { 
+            icon: Italic, 
+            action: () => editor.chain().focus().toggleItalic().run(), 
+            isActive: editor.isActive('italic'),
+            title: 'Italic'
+        },
+        { 
+            icon: UnderlineIcon, 
+            action: () => editor.chain().focus().toggleUnderline().run(), 
+            isActive: editor.isActive('underline'),
+            title: 'Underline'
+        },
+        { type: 'divider' },
+        { 
+            icon: Heading1, 
+            action: () => setHeading(1), 
+            isActive: editor.isActive('heading', { level: 1 }),
+            title: 'Heading 1'
+        },
+        { 
+            icon: Heading2, 
+            action: () => setHeading(2), 
+            isActive: editor.isActive('heading', { level: 2 }),
+            title: 'Heading 2'
+        },
+        { 
+            icon: Heading3, 
+            action: () => setHeading(3), 
+            isActive: editor.isActive('heading', { level: 3 }),
+            title: 'Heading 3'
+        },
+        { type: 'divider' },
+        { 
+            icon: List, 
+            action: () => editor.chain().focus().toggleBulletList().run(), 
+            isActive: editor.isActive('bulletList'),
+            title: 'Bullet List'
+        },
+        { 
+            icon: ListOrdered, 
+            action: () => editor.chain().focus().toggleOrderedList().run(), 
+            isActive: editor.isActive('orderedList'),
+            title: 'Numbered List'
+        },
+        { 
+            icon: Quote, 
+            action: () => editor.chain().focus().toggleBlockquote().run(), 
+            isActive: editor.isActive('blockquote'),
+            title: 'Quote'
+        },
+        { type: 'divider' },
+        { 
+            icon: Link2, 
+            action: addLink, 
+            isActive: editor.isActive('link'),
+            title: 'Link'
+        },
+        { type: 'divider' },
+        { 
+            icon: Sigma, 
+            action: () => setIsMathDialogOpen(true), 
+            isActive: editor.isActive('math'),
+            title: 'Math Formula'
+        },
+        { 
+            icon: Languages, 
+            action: () => setIsArabicDialogOpen(true), 
+            isActive: editor.isActive('arabic'),
+            title: 'Arabic Text'
+        },
+        { 
+            icon: GraduationCap, 
+            action: () => setIsJavaneseDialogOpen(true), 
+            isActive: editor.isActive('javanese'),
+            title: 'Javanese Script'
+        },
+    ];
+
+    return (
+        <>
+            <div className="flex flex-wrap gap-1 p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                {buttons.map((btn, i) => {
+                    if ('type' in btn && btn.type === 'divider') {
+                        return (
+                            <div 
+                                key={`divider-${i}`} 
+                                className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-1 self-center" 
+                            />
+                        );
+                    }
+                    const button = btn as { icon: typeof Bold; action: () => void; isActive: boolean; title: string };
+                    return (
+                        <button
+                            key={i}
+                            onClick={button.action}
+                            title={button.title}
+                            className={`
+                                p-1.5 md:p-2 rounded-lg transition-colors flex items-center justify-center
+                                ${button.isActive 
+                                    ? 'bg-primary text-white' 
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}
+                            `}
+                        >
+                            {button.icon && <button.icon className="w-4 h-4" />}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <MathDialog
+                isOpen={isMathDialogOpen}
+                onClose={() => setIsMathDialogOpen(false)}
+                initialValue={getCurrentMathLatex()}
+                onConfirm={handleMathConfirm}
+            />
+
+            <ArabicDialog
+                isOpen={isArabicDialogOpen}
+                onClose={() => setIsArabicDialogOpen(false)}
+                initialValue={getCurrentArabicText()}
+                onConfirm={handleArabicConfirm}
+            />
+
+            <JavaneseDialog
+                isOpen={isJavaneseDialogOpen}
+                onClose={() => setIsJavaneseDialogOpen(false)}
+                initialValue={getCurrentJavaneseText()}
+                onConfirm={handleJavaneseConfirm}
+            />
+        </>
+    );
+}
 
 export default function RichTextEditor({
     value,
@@ -143,9 +373,12 @@ export default function RichTextEditor({
     }
 
     return (
-        <EditorContent
-            editor={editor}
-            className="w-full"
-        />
+        <div className="w-full flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+            <MenuBar editor={editor} />
+            <EditorContent
+                editor={editor}
+                className="flex-1 w-full"
+            />
+        </div>
     );
 }

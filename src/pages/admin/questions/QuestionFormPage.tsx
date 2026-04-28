@@ -495,50 +495,48 @@ export default function QuestionFormPage() {
             bankId={currentBankId}
         >
             <section className="flex-1 space-y-4 w-full">
-                <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest">Question Text</label>
+                <label className="block text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">Question Text</label>
 
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 transition-all">
-                    <div className="flex flex-col md:flex-row min-h-[220px]">
-                        <div className="flex-1 p-8">
-                            <RichTextEditor
-                                value={content}
-                                onChange={setContent}
-                                placeholder="Tuliskan pertanyaan Anda di sini..."
-                                minHeight="min-h-[220px]"
-                                className="text-md leading-relaxed"
-                            />
+                <div className="flex flex-col md:flex-row min-h-[220px]">
+                    <div className="flex-1 p-4 md:p-8">
+                        <RichTextEditor
+                            value={content}
+                            onChange={setContent}
+                            placeholder="Tuliskan pertanyaan Anda di sini..."
+                            minHeight="min-h-[180px] md:min-h-[220px]"
+                            className="text-md leading-relaxed"
+                        />
+                    </div>
+
+                    <div className="md:w-72 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 p-4 md:p-6 bg-slate-50/50 dark:bg-slate-800/30 shrink-0 flex flex-col items-center justify-center">
+                        <div
+                            onClick={() => setIsMediaModalOpen(true)}
+                            className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-primary hover:bg-white dark:hover:bg-slate-800 transition-all overflow-hidden relative"
+                        >
+                            {questionPreviewUrl || questionMedia?.url ? (
+                                <>
+                                    <img
+                                        src={questionPreviewUrl || questionMedia?.url}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <span className="text-white text-xs font-bold uppercase tracking-wider">Change Image</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="size-10 md:size-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                                        <Image className="w-6 h-6 md:w-8 md:h-8" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors text-center px-2">Add Question Image</span>
+                                </>
+                            )}
                         </div>
 
-                        <div className="md:w-72 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 p-6 bg-slate-50/50 dark:bg-slate-800/30 shrink-0 flex flex-col items-center justify-center">
-                            <div
-                                onClick={() => setIsMediaModalOpen(true)}
-                                className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-primary hover:bg-white dark:hover:bg-slate-800 transition-all overflow-hidden relative"
-                            >
-                                {questionPreviewUrl || questionMedia?.url ? (
-                                    <>
-                                        <img
-                                            src={questionPreviewUrl || questionMedia?.url}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                            <span className="text-white text-xs font-bold uppercase tracking-wider">Change Image</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="size-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
-                                            <Image className="w-8 h-8" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">Add Question Image</span>
-                                    </>
-                                )}
-                            </div>
-
-                            <p className="mt-4 text-[10px] text-slate-400 text-center uppercase tracking-tighter">
-                                Image will appear next to the question
-                            </p>
-                        </div>
+                        <p className="mt-3 md:mt-4 text-[10px] text-slate-400 text-center uppercase tracking-tighter">
+                            Image will appear next to the question
+                        </p>
                     </div>
                 </div>
             </section>
