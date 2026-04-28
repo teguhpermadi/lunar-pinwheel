@@ -8,12 +8,9 @@ import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
 import { JavaneseExtension } from '@/lib/tiptap/JavaneseExtension';
 import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
-import MathDialog from '@/components/questions/MathDialog';
-import ArabicDialog from '@/components/questions/ArabicDialog';
-import JavaneseDialog from '@/components/questions/JavaneseDialog';
 import { 
     Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
-    Heading1, Heading2, Heading3, Link2, Quote, Sigma, Languages, GraduationCap
+    Heading1, Heading2, Heading3, Link2, Quote
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -88,12 +85,6 @@ interface MenuBarProps {
 function MenuBar({ editor }: MenuBarProps) {
     if (!editor) return null;
 
-    const { 
-        isMathDialogOpen, setIsMathDialogOpen,
-        isArabicDialogOpen, setIsArabicDialogOpen,
-        isJavaneseDialogOpen, setIsJavaneseDialogOpen
-    } = useEditorStore();
-
     const addLink = () => {
         const url = window.prompt('Masukkan URL:');
         if (url) {
@@ -103,63 +94,6 @@ function MenuBar({ editor }: MenuBarProps) {
 
     const setHeading = (level: 1 | 2 | 3) => {
         editor.chain().focus().toggleHeading({ level }).run();
-    };
-
-    const getCurrentMathLatex = () => {
-        if (editor.isActive('math')) {
-            return editor.getAttributes('math').latex || '';
-        }
-        return '';
-    };
-
-    const getCurrentArabicText = () => {
-        if (editor.isActive('arabic')) {
-            return editor.getAttributes('arabic').text || '';
-        }
-        return '';
-    };
-
-    const getCurrentJavaneseText = () => {
-        if (editor.isActive('javanese')) {
-            return editor.getAttributes('javanese').text || '';
-        }
-        return '';
-    };
-
-    const handleMathConfirm = (latex: string) => {
-        const { state } = editor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'math') {
-            editor.chain().focus().updateMath({ latex }).run();
-        } else {
-            editor.chain().focus().setMath({ latex }).run();
-        }
-    };
-
-    const handleArabicConfirm = (text: string) => {
-        const { state } = editor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'arabic') {
-            editor.chain().focus().updateArabic({ text }).run();
-        } else {
-            editor.chain().focus().setArabic({ text }).run();
-        }
-    };
-
-    const handleJavaneseConfirm = (text: string) => {
-        const { state } = editor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'javanese') {
-            editor.chain().focus().updateJavanese({ text }).run();
-        } else {
-            editor.chain().focus().setJavanese({ text }).run();
-        }
     };
 
     type ToolbarButton = { type: 'divider' } | { icon: typeof Bold; action: () => void; isActive: boolean; title: string };
@@ -228,79 +162,37 @@ function MenuBar({ editor }: MenuBarProps) {
             isActive: editor.isActive('link'),
             title: 'Link'
         },
-        { type: 'divider' },
-        { 
-            icon: Sigma, 
-            action: () => setIsMathDialogOpen(true), 
-            isActive: editor.isActive('math'),
-            title: 'Math Formula'
-        },
-        { 
-            icon: Languages, 
-            action: () => setIsArabicDialogOpen(true), 
-            isActive: editor.isActive('arabic'),
-            title: 'Arabic Text'
-        },
-        { 
-            icon: GraduationCap, 
-            action: () => setIsJavaneseDialogOpen(true), 
-            isActive: editor.isActive('javanese'),
-            title: 'Javanese Script'
-        },
     ];
 
     return (
-        <>
-            <div className="flex flex-wrap gap-1 p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                {buttons.map((btn, i) => {
-                    if ('type' in btn && btn.type === 'divider') {
-                        return (
-                            <div 
-                                key={`divider-${i}`} 
-                                className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-1 self-center" 
-                            />
-                        );
-                    }
-                    const button = btn as { icon: typeof Bold; action: () => void; isActive: boolean; title: string };
+        <div className="flex flex-wrap gap-1 p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            {buttons.map((btn, i) => {
+                if ('type' in btn && btn.type === 'divider') {
                     return (
-                        <button
-                            key={i}
-                            onClick={button.action}
-                            title={button.title}
-                            className={`
-                                p-1.5 md:p-2 rounded-lg transition-colors flex items-center justify-center
-                                ${button.isActive 
-                                    ? 'bg-primary text-white' 
-                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}
-                            `}
-                        >
-                            {button.icon && <button.icon className="w-4 h-4" />}
-                        </button>
+                        <div 
+                            key={`divider-${i}`} 
+                            className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-1 self-center" 
+                        />
                     );
-                })}
-            </div>
-
-            <MathDialog
-                isOpen={isMathDialogOpen}
-                onClose={() => setIsMathDialogOpen(false)}
-                initialValue={getCurrentMathLatex()}
-                onConfirm={handleMathConfirm}
-            />
-
-            <ArabicDialog
-                isOpen={isArabicDialogOpen}
-                onClose={() => setIsArabicDialogOpen(false)}
-                initialValue={getCurrentArabicText()}
-                onConfirm={handleArabicConfirm}
-            />
-
-            <JavaneseDialog
-                isOpen={isJavaneseDialogOpen}
-                onClose={() => setIsJavaneseDialogOpen(false)}
-                initialValue={getCurrentJavaneseText()}
-                onConfirm={handleJavaneseConfirm}
-            />
-        </>
+                }
+                const button = btn as { icon: typeof Bold; action: () => void; isActive: boolean; title: string };
+                return (
+                    <button
+                        key={i}
+                        onClick={button.action}
+                        title={button.title}
+                        className={`
+                            p-1.5 md:p-2 rounded-lg transition-colors flex items-center justify-center
+                            ${button.isActive 
+                                ? 'bg-primary text-white' 
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}
+                        `}
+                    >
+                        {button.icon && <button.icon className="w-4 h-4" />}
+                    </button>
+                );
+            })}
+        </div>
     );
 }
 
@@ -377,7 +269,7 @@ export default function RichTextEditor({
             <MenuBar editor={editor} />
             <EditorContent
                 editor={editor}
-                className="flex-1 w-full"
+                className="flex-1 w-full p-4"
             />
         </div>
     );

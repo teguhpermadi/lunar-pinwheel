@@ -4,6 +4,7 @@ import QuestionDifficultySelector from './QuestionDifficultySelector';
 import QuestionTimerSelector from './QuestionTimerSelector';
 import QuestionScoreSelector from './QuestionScoreSelector';
 import QuestionTypeSelector from './QuestionTypeSelector';
+import QuestionToolbar from './QuestionToolbar';
 import ReadingMaterialSelector from './ReadingMaterialSelector';
 import ReadingMaterialSlideOver from './ReadingMaterialSlideOver';
 import { readingMaterialApi, ReadingMaterial } from '@/lib/api';
@@ -144,7 +145,10 @@ export default function QuestionFormLayout({
                     </div>
                 </div>
 
-                
+                {/* Desktop Toolbar */}
+                <div className="hidden lg:flex-1 lg:flex justify-center px-4">
+                    <QuestionToolbar />
+                </div>
 
                 <div className="flex items-center gap-2 lg:gap-6">
                     {/* Desktop: Reading Material + Preview + Difficulty + Timer/Score */}

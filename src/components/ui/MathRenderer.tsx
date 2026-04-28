@@ -79,7 +79,7 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
         return (
             <div
                 ref={containerRef}
-                className={`math-rendered prose prose-slate dark:prose-invert max-w-none !text-[1em] ${className}`}
+                className={`math-rendered prose prose-slate dark:prose-invert max-w-none !text-[1em] prose-p:font-normal prose-headings:font-normal prose-strong:font-normal prose-ul:font-normal prose-ol:font-normal prose-li:font-normal !font-normal ${className}`}
                 data-content-hash={safeContent.length}
                 dangerouslySetInnerHTML={{ __html: safeContent }}
             />
@@ -89,7 +89,7 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
     return (
         <div
             ref={containerRef}
-            className={`math-rendered prose prose-slate dark:prose-invert max-w-none !text-[1em] ${className}`}
+            className={`math-rendered prose prose-slate dark:prose-invert max-w-none !text-[1em] prose-p:font-normal prose-headings:font-normal prose-strong:font-normal prose-ul:font-normal prose-ol:font-normal prose-li:font-normal !font-normal ${className}`}
             data-content-hash={processedContent.length}
         >
             {processedContent}

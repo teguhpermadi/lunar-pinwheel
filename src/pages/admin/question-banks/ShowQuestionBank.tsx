@@ -389,10 +389,10 @@ export default function ShowQuestionBank() {
                                 </div>
 
                                 <div className="p-6 rounded-b-2xl">
-                                    <MathRenderer
-                                        className="font-semibold text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
-                                        content={question.content}
-                                    />
+                                <MathRenderer
+                                    className="text-slate-800 dark:text-slate-100 leading-relaxed mb-6"
+                                    content={question.content}
+                                />
                                     <div className="mt-6">
                                         <QuestionOptionDisplay question={question} />
                                     </div>

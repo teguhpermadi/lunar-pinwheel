@@ -1221,7 +1221,7 @@ export default function ExamTaker() {
                                     );
                                 })()}
                                 <MathRenderer
-                                    className="font-medium leading-relaxed mb-8 text-gray-900 dark:text-white question-content"
+                                    className="leading-relaxed mb-8 text-gray-900 dark:text-white question-content"
                                     content={currentQuestion?.exam_question?.content || ''}
                                 />
 
