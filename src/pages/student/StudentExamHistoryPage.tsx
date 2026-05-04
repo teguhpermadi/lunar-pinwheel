@@ -159,15 +159,25 @@ export default function StudentExamHistoryPage() {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <span className={`px-2 py-0.5 ${result.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'} text-[10px] font-bold rounded-full uppercase`}>
-                                                                {result.is_passed ? 'Passed' : 'Failed'} • {Math.round(result.score_percent)}%
-                                                            </span>
+                                                            {result.exam?.is_show_result ? (
+                                                                <span className={`px-2 py-0.5 ${result.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'} text-[10px] font-bold rounded-full uppercase`}>
+                                                                    {result.is_passed ? 'Passed' : 'Failed'} • {Math.round(result.score_percent)}%
+                                                                </span>
+                                                            ) : (
+                                                                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 text-[10px] font-bold rounded-full uppercase italic">
+                                                                    Status Hidden
+                                                                </span>
+                                                            )}
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase truncate">{result.exam?.subject?.name || 'General'}</span>
                                                         </div>
                                                         <h4 className="font-bold text-slate-900 dark:text-white truncate">{result.exam?.title}</h4>
                                                         <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
                                                             <span className="flex items-center gap-1"><Clock className="size-3" /> {time}</span>
-                                                            <span className="flex items-center gap-1"><Medal className="size-3" /> Score: {result.final_score}</span>
+                                                            {result.exam?.is_show_result ? (
+                                                                <span className="flex items-center gap-1"><Medal className="size-3" /> Score: {result.final_score}</span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1"><Medal className="size-3" /> Score: <span className="italic text-slate-400">Hidden</span></span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <ChevronRight className={cn("size-5", isSelected ? 'text-primary' : 'text-slate-300')} />
@@ -243,9 +253,15 @@ export default function StudentExamHistoryPage() {
                                             <div className={`size-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${selectedResult.is_passed ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-500 shadow-rose-500/30'}`}>
                                                 <CheckCircle2 className="size-6" />
                                             </div>
-                                            <span className={`px-3 py-1 text-[10px] font-bold rounded-full ${selectedResult.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'}`}>
-                                                {selectedResult.is_passed ? 'PASSED' : 'FAILED'}
-                                            </span>
+                                            {selectedResult.exam?.is_show_result ? (
+                                                <span className={`px-3 py-1 text-[10px] font-bold rounded-full ${selectedResult.is_passed ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600'}`}>
+                                                    {selectedResult.is_passed ? 'PASSED' : 'FAILED'}
+                                                </span>
+                                            ) : (
+                                                <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 italic">
+                                                    Status Hidden
+                                                </span>
+                                            )}
                                         </div>
                                         <h4 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">{selectedResult.exam?.title}</h4>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-wide">
@@ -256,11 +272,19 @@ export default function StudentExamHistoryPage() {
                                         <div className="mt-8 grid grid-cols-2 gap-4">
                                             <div className="p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Final Score</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white">{selectedResult.final_score}</p>
+                                                {selectedResult.exam?.is_show_result ? (
+                                                    <p className="text-2xl font-black text-slate-900 dark:text-white">{selectedResult.final_score}</p>
+                                                ) : (
+                                                    <p className="text-2xl font-black text-slate-400 italic">Hidden</p>
+                                                )}
                                             </div>
                                             <div className="p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Accuracy</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white">{Math.round(selectedResult.score_percent)}%</p>
+                                                {selectedResult.exam?.is_show_result ? (
+                                                    <p className="text-2xl font-black text-slate-900 dark:text-white">{Math.round(selectedResult.score_percent)}%</p>
+                                                ) : (
+                                                    <p className="text-2xl font-black text-slate-400 italic">Hidden</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -299,6 +323,17 @@ export default function StudentExamHistoryPage() {
                                                         <p className="text-[11px] text-slate-500">{selectedResult.exam?.type_label}</p>
                                                     </div>
                                                 </div>
+                                                {!selectedResult.exam?.is_show_result && (
+                                                    <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                                                        <div className="size-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                            <Lock className="size-5 text-slate-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Score Information</p>
+                                                            <p className="text-[11px] text-slate-500 italic">The teacher has not released the score for this exam.</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
