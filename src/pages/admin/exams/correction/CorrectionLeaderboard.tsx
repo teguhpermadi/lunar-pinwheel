@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StudentSession } from '../ExamCorrectionPage';
 import { examApi } from '@/lib/api';
-import { RefreshCw, Calculator, Search, User, Trash2 } from 'lucide-react';
+import { RefreshCw, Calculator, Search, User, Trash2, Download } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface CorrectionLeaderboardProps {
@@ -19,6 +19,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
     const [isRecalculating, setIsRecalculating] = useState<string | null>(null);
     const [isRecalculatingAll, setIsRecalculatingAll] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isExporting, setIsExporting] = useState(false);
     const [localSearch, setLocalSearch] = useState('');
 
     const effectiveSearchQuery = localSearch || searchQuery;
@@ -120,6 +121,34 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
         }
     };
 
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            const data = await examApi.exportResults(id);
+            const url = window.URL.createObjectURL(new Blob([data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `exam_results_${id}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            
+            Swal.fire({
+                title: 'Success',
+                text: 'Results exported successfully',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } catch (error: any) {
+            Swal.fire('Error', 'Failed to export results', 'error');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     const getStatusColor = (session: StudentSession) => {
         if (session.is_corrected) return 'bg-emerald-500';
         if (session.is_finished) return 'bg-blue-500';
@@ -194,6 +223,23 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                                         <Calculator className="w-3.5 h-3.5" />
                                     )}
                                     {isRecalculatingAll ? 'Recalculating...' : 'Recalculate All'}
+                                </button>
+                                <button
+                                    onClick={handleExport}
+                                    disabled={isExporting}
+                                    className={cn(
+                                        "flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                                        isExporting
+                                            ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                            : "bg-emerald-500 text-white shadow-sm hover:bg-emerald-600"
+                                    )}
+                                >
+                                    {isExporting ? (
+                                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <Download className="w-3.5 h-3.5" />
+                                    )}
+                                    {isExporting ? 'Exporting...' : 'Download Results'}
                                 </button>
                             </div>
                         </div>

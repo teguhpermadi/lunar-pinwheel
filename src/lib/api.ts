@@ -1044,6 +1044,12 @@ export const examApi = {
         const response = await api.get(`/exams/${examId}/correction-progress`);
         return response.data;
     },
+    exportResults: async (examId: string) => {
+        const response = await api.get(`/exams/${examId}/export-results`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
 };
 
 export const examQuestionApi = {
@@ -1123,8 +1129,8 @@ export const questionSuggestionApi = {
         const response = await api.delete(`/question-suggestions/${id}`);
         return response.data;
     },
-    approveSuggestion: async (id: string) => {
-        const response = await api.post(`/question-suggestions/${id}/approve`);
+    approveSuggestion: async (id: string, data?: any) => {
+        const response = await api.post(`/question-suggestions/${id}/approve`, data);
         return response.data;
     },
     rejectSuggestion: async (id: string) => {
