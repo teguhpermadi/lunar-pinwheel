@@ -227,7 +227,7 @@ const StudentResultDetailPage: React.FC = () => {
             <div className="flex-1">
                 <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
                     <div className="mb-6 sm:mb-8">
-                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Post-Exam Deep Dive</h1>
+                        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Post-Exam Deep Dive</h1>
                         <p className="text-slate-500 dark:text-slate-400 mt-1 sm:mt-2 font-medium text-xs sm:text-base italic sm:not-italic">Review response for <span className="text-slate-900 dark:text-slate-200 font-bold">{sessionInfo?.student.name}</span> in <span className="text-slate-900 dark:text-slate-200 font-bold">{exam?.title}</span></p>
                     </div>
 
@@ -238,8 +238,8 @@ const StudentResultDetailPage: React.FC = () => {
                             <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-card overflow-hidden group">
                                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
                                     <div className="text-center sm:text-left">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Score</p>
-                                        <h2 className="text-5xl sm:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent-pink">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Final Score</p>
+                                        <h2 className="text-5xl sm:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent-pink">
                                             {Math.round(sessionInfo?.final_score || 0)}%
                                         </h2>
                                     </div>
@@ -260,14 +260,14 @@ const StudentResultDetailPage: React.FC = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto sm:min-w-[240px]">
                                         <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-3 sm:p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/10 flex flex-col items-center sm:items-start">
-                                            <p className="text-[8px] sm:text-[9px] uppercase font-black text-emerald-600 dark:text-emerald-400 tracking-wider mb-1">Correct</p>
-                                            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                                            <p className="text-[8px] sm:text-[9px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider mb-1">Correct</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
                                                 {questions.filter(q => q.is_correct === true).length}
                                             </p>
                                         </div>
                                         <div className="bg-rose-50/50 dark:bg-rose-500/5 p-3 sm:p-4 rounded-2xl border border-rose-100 dark:border-rose-500/10 flex flex-col items-center sm:items-start">
-                                            <p className="text-[8px] sm:text-[9px] uppercase font-black text-rose-600 dark:text-rose-400 tracking-wider mb-1">Incorrect</p>
-                                            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                                            <p className="text-[8px] sm:text-[9px] uppercase font-bold text-rose-600 dark:text-rose-400 tracking-wider mb-1">Incorrect</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
                                                 {questions.filter(q => q.is_correct === false).length}
                                             </p>
                                         </div>
@@ -284,7 +284,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                 <Trophy className="w-5 h-5 text-amber-500" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
+                                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
                                                 <p className="text-[10px] text-slate-400 font-medium mt-0.5">Exam Excellence</p>
                                             </div>
                                         </div>
@@ -315,7 +315,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         <div className="flex items-center gap-3 min-w-0">
                                                             <div className="relative shrink-0">
                                                                 <div className={cn(
-                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
+                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
                                                                     index === 0 ? "bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-500/30 text-white" :
                                                                         index === 1 ? "bg-gradient-to-br from-slate-300 to-slate-400 shadow-md shadow-slate-400/30 text-white" :
                                                                             index === 2 ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-md shadow-orange-500/30 text-white" :
@@ -328,7 +328,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                                     )}
                                                                 </div>
                                                                 <div className={cn(
-                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border border-white dark:border-slate-900 z-20",
+                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border border-white dark:border-slate-900 z-20",
                                                                     index === 0 ? "bg-yellow-400 text-yellow-900" :
                                                                         index === 1 ? "bg-slate-300 text-slate-800" :
                                                                             index === 2 ? "bg-orange-400 text-orange-900" :
@@ -342,12 +342,12 @@ const StudentResultDetailPage: React.FC = () => {
                                                                     {leader.user?.name || 'Unknown'}
                                                                 </p>
                                                                 {leader.user?.id === sessionInfo?.student.id && (
-                                                                    <p className="text-[9px] font-black uppercase tracking-wider text-primary">This Student</p>
+                                                                    <p className="text-[9px] font-bold uppercase tracking-wider text-primary">This Student</p>
                                                                 )}
                                                             </div>
                                                         </div>
                                                         <div className="text-right shrink-0">
-                                                            <p className="text-sm font-black text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
+                                                            <p className="text-sm font-bold text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
                                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{leader.total_score} pts</p>
                                                         </div>
                                                     </div>
@@ -372,7 +372,7 @@ const StudentResultDetailPage: React.FC = () => {
                             {/* Score by Tag Breakdown */}
                             {tagScoresList.length > 0 && (
                                 <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-card overflow-hidden">
-                                    <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-200 mb-6">Score By Tags</h3>
+                                    <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 mb-6">Score By Tags</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {tagScoresList.map((tag) => (
                                             <div key={tag.name} className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -381,7 +381,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         {tag.name}
                                                     </span>
                                                     <span className={cn(
-                                                        "text-[9px] sm:text-[10px] font-black tabular-nums px-2 py-0.5 rounded-md shrink-0",
+                                                        "text-[9px] sm:text-[10px] font-bold tabular-nums px-2 py-0.5 rounded-md shrink-0",
                                                         tag.percentage >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" :
                                                             tag.percentage >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" :
                                                                 "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
@@ -415,7 +415,7 @@ const StudentResultDetailPage: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('all')}
                                     className={cn(
-                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-bold transition-all",
                                         filter === 'all' ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
@@ -424,7 +424,7 @@ const StudentResultDetailPage: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('correct')}
                                     className={cn(
-                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-bold transition-all",
                                         filter === 'correct' ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
@@ -433,7 +433,7 @@ const StudentResultDetailPage: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('incorrect')}
                                     className={cn(
-                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-bold transition-all",
                                         filter === 'incorrect' ? "bg-rose-500 text-white shadow-lg shadow-rose-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
@@ -442,7 +442,7 @@ const StudentResultDetailPage: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('flagged')}
                                     className={cn(
-                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-black transition-all",
+                                        "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-[10px] sm:text-xs font-bold transition-all",
                                         filter === 'flagged' ? "bg-amber-500 text-white shadow-lg shadow-amber-500/25" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     )}
                                 >
@@ -471,20 +471,20 @@ const StudentResultDetailPage: React.FC = () => {
                                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                                                 <div className="flex items-center gap-3 sm:gap-4">
                                                     <span className={cn(
-                                                        "w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-base sm:text-lg shrink-0",
+                                                        "w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold text-base sm:text-lg shrink-0",
                                                         q.is_correct === true ? "bg-emerald-100 text-emerald-600" :
                                                             q.is_correct === false ? "bg-rose-100 text-rose-600" :
                                                                 "bg-amber-100 text-amber-600"
                                                     )}>
                                                         {(index + 1).toString().padStart(2, '0')}
                                                     </span>
-                                                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-lg">
+                                                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 rounded-lg">
                                                         {q.question_type.replace('_', ' ')}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-800">
                                                     <div className={cn(
-                                                        "flex items-center gap-1 font-black text-[10px] sm:text-xs uppercase tracking-widest",
+                                                        "flex items-center gap-1 font-bold text-[10px] sm:text-xs uppercase tracking-widest",
                                                         q.is_correct === true ? "text-emerald-500" :
                                                             q.is_correct === false ? "text-rose-500" : "text-amber-500"
                                                     )}>
@@ -498,7 +498,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         {q.is_correct === true ? 'Correct' : q.is_correct === false ? 'Incorrect' : 'Partial'}
                                                     </div>
                                                     <div className={cn(
-                                                        "px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow-sm border",
+                                                        "px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-bold tracking-widest uppercase flex items-center gap-1 shadow-sm border",
                                                         q.score_earned === q.max_score ? "bg-emerald-500 text-white border-emerald-400" :
                                                             q.score_earned > 0 ? "bg-amber-500 text-white border-amber-400" : "bg-rose-500 text-white border-rose-400"
                                                     )}>
@@ -508,7 +508,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            <MathRenderer className="text-base sm:text-xl font-bold text-slate-800 dark:text-white mb-6 sm:mb-8 leading-relaxed" content={q.question_content} />
+                                            <MathRenderer className="text-base sm:text-xl font-normal text-slate-800 dark:text-white mb-6 sm:mb-8 leading-relaxed" content={q.question_content} />
 
                                             <div className="bg-slate-50 dark:bg-slate-950/50 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 dark:border-slate-800 overflow-x-auto">
                                                 <CorrectionDisplay
@@ -525,9 +525,9 @@ const StudentResultDetailPage: React.FC = () => {
                                         {/* Score & Note Footer */}
                                         <div className="px-5 sm:px-8 py-4 sm:py-6 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400">Points</span>
+                                                <span className="text-[9px] sm:text-[10px] font-bold uppercase text-slate-400">Points</span>
                                                 <span className={cn(
-                                                    "text-lg sm:text-xl font-black tabular-nums",
+                                                    "text-lg sm:text-xl font-bold tabular-nums",
                                                     q.score_earned === q.max_score ? "text-emerald-500" :
                                                         q.score_earned > 0 ? "text-amber-500" : "text-rose-500"
                                                 )}>
@@ -540,7 +540,7 @@ const StudentResultDetailPage: React.FC = () => {
                                             <div className="p-6 sm:p-8 bg-primary/5 border-t border-primary/10 flex gap-3 sm:gap-4">
                                                 <Lightbulb className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
                                                 <div>
-                                                    <h4 className="text-[10px] sm:text-xs font-black uppercase text-primary tracking-widest mb-1">Analytical Feedback</h4>
+                                                    <h4 className="text-[10px] sm:text-xs font-bold uppercase text-primary tracking-widest mb-1">Analytical Feedback</h4>
                                                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic line-clamp-3">
                                                         "{q.correction_notes}"
                                                     </p>
@@ -566,7 +566,7 @@ const StudentResultDetailPage: React.FC = () => {
                                             <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                                                 <User className="w-5 h-5" />
                                             </div>
-                                            <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Candidate Detail</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Candidate Detail</span>
                                         </div>
                                         <ChevronDown className={cn(
                                             "w-5 h-5 text-slate-400 transition-transform duration-300",
@@ -591,7 +591,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                             )}
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">{sessionInfo?.student.name}</h4>
+                                                            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{sessionInfo?.student.name}</h4>
                                                             <p className="text-[10px] text-slate-400 font-medium truncate">{sessionInfo?.student.email}</p>
                                                         </div>
                                                     </div>
@@ -599,7 +599,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         <div className="flex items-start gap-3">
                                                             <DoorOpen className="w-4.5 h-4.5 text-primary" />
                                                             <div>
-                                                                <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 leading-none mb-1">Student Room</p>
+                                                                <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-1">Student Room</p>
                                                                 <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
                                                                     {(sessionInfo?.student as any)?.classrooms?.[0]?.name || 'N/A'}
                                                                 </p>
@@ -622,7 +622,7 @@ const StudentResultDetailPage: React.FC = () => {
                                             <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-200 dark:border-indigo-500/20">
                                                 <Brain className="w-5 h-5 text-indigo-600" />
                                             </div>
-                                            <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Exam Insight</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Exam Insight</span>
                                         </div>
                                         <ChevronDown className={cn(
                                             "w-5 h-5 text-slate-400 transition-transform duration-300",
@@ -639,9 +639,9 @@ const StudentResultDetailPage: React.FC = () => {
                                             >
                                                 <div className="px-6 pb-6 pt-2 space-y-6">
                                                     <div className="p-4 rounded-3xl bg-indigo-50/30 dark:bg-indigo-500/5 border border-indigo-100/50 dark:border-indigo-500/10">
-                                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">{exam?.title}</h4>
+                                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{exam?.title}</h4>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-tight rounded-md border border-indigo-200 dark:border-indigo-500/20">
+                                                            <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold uppercase tracking-tight rounded-md border border-indigo-200 dark:border-indigo-500/20">
                                                                 {exam?.type.replace('_', ' ')}
                                                             </span>
                                                             <span className="text-[10px] text-slate-400 font-bold">• {exam?.subject?.name}</span>
@@ -650,18 +650,18 @@ const StudentResultDetailPage: React.FC = () => {
 
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div className="space-y-1">
-                                                            <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Start Time</p>
+                                                            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Start Time</p>
                                                             <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{formatDate(exam?.start_time)}</p>
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">End Time</p>
+                                                            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">End Time</p>
                                                             <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{formatDate(exam?.end_time)}</p>
                                                         </div>
                                                         <div className="space-y-1 col-span-2">
-                                                            <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Exam Duration</p>
+                                                            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Exam Duration</p>
                                                             <div className="flex items-center gap-2">
                                                                 <Timer className="w-3.5 h-3.5 text-primary" />
-                                                                <span className="text-xs font-black text-slate-900 dark:text-white px-2 py-1 bg-primary/10 rounded-lg">{formatDuration(exam?.duration)}</span>
+                                                                <span className="text-xs font-bold text-slate-900 dark:text-white px-2 py-1 bg-primary/10 rounded-lg">{formatDuration(exam?.duration)}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -681,7 +681,7 @@ const StudentResultDetailPage: React.FC = () => {
                                             <div className="w-10 h-10 rounded-2xl bg-accent-pink/10 flex items-center justify-center text-accent-pink border border-accent-pink/20">
                                                 <Users className="w-5 h-5 text-accent-pink" />
                                             </div>
-                                            <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Target Groups</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Target Groups</span>
                                         </div>
                                         <ChevronDown className={cn(
                                             "w-5 h-5 text-slate-400 transition-transform duration-300",
@@ -701,7 +701,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         {exam?.classrooms?.map(classroom => (
                                                             <span
                                                                 key={classroom.id}
-                                                                className="px-3 py-1.5 bg-accent-pink/5 text-accent-pink text-[10px] font-black uppercase tracking-wider rounded-xl border border-accent-pink/10"
+                                                                className="px-3 py-1.5 bg-accent-pink/5 text-accent-pink text-[10px] font-bold uppercase tracking-wider rounded-xl border border-accent-pink/10"
                                                             >
                                                                 {classroom.name}
                                                             </span>
@@ -723,7 +723,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                 <Trophy className="w-5 h-5 text-amber-500" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
+                                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Top 5 Leaders</h3>
                                                 <p className="text-[10px] text-slate-400 font-medium mt-0.5">Exam Excellence</p>
                                             </div>
                                         </div>
@@ -754,7 +754,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                         <div className="flex items-center gap-3 min-w-0">
                                                             <div className="relative shrink-0">
                                                                 <div className={cn(
-                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
+                                                                    "w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white border-2 border-white dark:border-slate-900 z-10 relative overflow-hidden",
                                                                     index === 0 ? "bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-500/30 text-white" :
                                                                         index === 1 ? "bg-gradient-to-br from-slate-300 to-slate-400 shadow-md shadow-slate-400/30 text-white" :
                                                                             index === 2 ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-md shadow-orange-500/30 text-white" :
@@ -767,7 +767,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                                     )}
                                                                 </div>
                                                                 <div className={cn(
-                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black border border-white dark:border-slate-900 z-20",
+                                                                    "absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border border-white dark:border-slate-900 z-20",
                                                                     index === 0 ? "bg-yellow-400 text-yellow-900" :
                                                                         index === 1 ? "bg-slate-300 text-slate-800" :
                                                                             index === 2 ? "bg-orange-400 text-orange-900" :
@@ -781,12 +781,12 @@ const StudentResultDetailPage: React.FC = () => {
                                                                     {leader.user?.name || 'Unknown'}
                                                                 </p>
                                                                 {leader.user?.id === sessionInfo?.student.id && (
-                                                                    <p className="text-[9px] font-black uppercase tracking-wider text-primary">This Student</p>
+                                                                    <p className="text-[9px] font-bold uppercase tracking-wider text-primary">This Student</p>
                                                                 )}
                                                             </div>
                                                         </div>
                                                         <div className="text-right shrink-0">
-                                                            <p className="text-sm font-black text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
+                                                            <p className="text-sm font-bold text-slate-900 dark:text-white">{Math.round(leader.score_percent || 0)}%</p>
                                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{leader.total_score} pts</p>
                                                         </div>
                                                     </div>
