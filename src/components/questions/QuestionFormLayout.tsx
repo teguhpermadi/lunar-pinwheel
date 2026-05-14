@@ -8,7 +8,9 @@ import QuestionToolbar from './QuestionToolbar';
 import ReadingMaterialSelector from './ReadingMaterialSelector';
 import ReadingMaterialSlideOver from './ReadingMaterialSlideOver';
 import { readingMaterialApi, ReadingMaterial } from '@/lib/api';
-import { ArrowLeft, Loader2, Save, Lightbulb, X, Info, Eye, MoreHorizontal } from 'lucide-react';
+import EditorDialogs from './EditorDialogs';
+import { ArrowLeft, Loader2, Save, Lightbulb, X, Info, Eye, MoreHorizontal, Settings2 } from 'lucide-react';
+
 
 interface QuestionFormLayoutProps {
     children: ReactNode;
@@ -35,6 +37,7 @@ interface QuestionFormLayoutProps {
     onSave: () => void;
     isSaving: boolean;
     isEditing?: boolean;
+    useModalForSettings?: boolean;
 }
 
 export default function QuestionFormLayout({
@@ -55,7 +58,8 @@ export default function QuestionFormLayout({
     bankId: propBankId,
     onSave,
     isSaving,
-    isEditing: _isEditing = false
+    isEditing: _isEditing = false,
+    useModalForSettings = false
 }: QuestionFormLayoutProps) {
     const navigate = useNavigate();
     const { bankId: paramsBankId } = useParams();
@@ -63,6 +67,7 @@ export default function QuestionFormLayout({
     const [isHintOpen, setIsHintOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [availableMaterials, setAvailableMaterials] = useState<ReadingMaterial[]>([]);
     const [selectedMaterial, setSelectedMaterial] = useState<ReadingMaterial | null>(null);
     const [isMaterialLoading, setIsMaterialLoading] = useState(false);
@@ -179,35 +184,46 @@ export default function QuestionFormLayout({
                         )}
                     </div>
 
-                    {/* Desktop: Difficulty */}
-                    <div className="hidden lg:block">
-                        <QuestionDifficultySelector
-                            initialDifficulty={difficulty}
-                            onDifficultyChange={setDifficulty}
-                            manual={true}
-                        />
-                    </div>
+                    {/* Desktop: Difficulty, Timer, Score - Modal or Inline */}
+                    {useModalForSettings ? (
+                        <button
+                            onClick={() => setIsSettingsOpen(true)}
+                            className="hidden lg:flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary hover:text-primary transition-all text-slate-600 dark:text-slate-400"
+                        >
+                            <Settings2 className="size-4" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest">Settings</span>
+                        </button>
+                    ) : (
+                        <>
+                            <div className="hidden lg:block">
+                                <QuestionDifficultySelector
+                                    initialDifficulty={difficulty}
+                                    onDifficultyChange={setDifficulty}
+                                    manual={true}
+                                />
+                            </div>
 
-                    {/* Desktop: Timer & Score */}
-                    <div className="hidden lg:flex items-center gap-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-1.5">
-                        <div className="flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">Time</span>
-                            <QuestionTimerSelector
-                                initialTimer={timer}
-                                onTimerChange={setTimer}
-                                manual={true}
-                            />
-                        </div>
-                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">Score</span>
-                            <QuestionScoreSelector
-                                initialScore={score}
-                                onScoreChange={setScore}
-                                manual={true}
-                            />
-                        </div>
-                    </div>
+                            <div className="hidden lg:flex items-center gap-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-1.5">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">Time</span>
+                                    <QuestionTimerSelector
+                                        initialTimer={timer}
+                                        onTimerChange={setTimer}
+                                        manual={true}
+                                    />
+                                </div>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">Score</span>
+                                    <QuestionScoreSelector
+                                        initialScore={score}
+                                        onScoreChange={setScore}
+                                        manual={true}
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* Mobile: Menu Button */}
                     <button
@@ -394,6 +410,75 @@ export default function QuestionFormLayout({
                     isLoading={isMaterialLoading}
                 />
             </div>
+
+            {/* Settings Modal */}
+            {isSettingsOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/50 z-50"
+                        onClick={() => setIsSettingsOpen(false)}
+                    />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-6 animate-in fade-in zoom-in duration-200">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Question Settings</h2>
+                                <button
+                                    onClick={() => setIsSettingsOpen(false)}
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500"
+                                >
+                                    <X className="size-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Difficulty Level</label>
+                                    <QuestionDifficultySelector
+                                        initialDifficulty={difficulty}
+                                        onDifficultyChange={(diff) => {
+                                            setDifficulty(diff);
+                                        }}
+                                        manual={true}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Time Limit</label>
+                                    <QuestionTimerSelector
+                                        initialTimer={timer}
+                                        onTimerChange={(t) => {
+                                            setTimer(t);
+                                        }}
+                                        manual={true}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Score</label>
+                                    <QuestionScoreSelector
+                                        initialScore={score}
+                                        onScoreChange={(s) => {
+                                            setScore(s);
+                                        }}
+                                        manual={true}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    onClick={() => setIsSettingsOpen(false)}
+                                    className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/30 transition-all"
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+            {/* Editor Dialogs */}
+            <EditorDialogs />
         </div>
     );
 }

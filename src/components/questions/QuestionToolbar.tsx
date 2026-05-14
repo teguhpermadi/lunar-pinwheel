@@ -1,7 +1,4 @@
 import { useEditorStore } from '@/store/useEditorStore';
-import MathDialog from './MathDialog';
-import ArabicDialog from './ArabicDialog';
-import JavaneseDialog from './JavaneseDialog';
 import {
     Bold,
     Italic,
@@ -17,11 +14,8 @@ import {
 export default function QuestionToolbar() {
     const {
         activeEditor,
-        isMathDialogOpen,
         setIsMathDialogOpen,
-        isArabicDialogOpen,
         setIsArabicDialogOpen,
-        isJavaneseDialogOpen,
         setIsJavaneseDialogOpen
     } = useEditorStore();
 
@@ -39,65 +33,9 @@ export default function QuestionToolbar() {
     const toggleBulletList = () => activeEditor.chain().focus().toggleBulletList().run();
     const toggleOrderedList = () => activeEditor.chain().focus().toggleOrderedList().run();
 
-    const openMathDialog = () => {
-        setIsMathDialogOpen(true);
-    };
-
-    const handleMathConfirm = (latex: string) => {
-        const { state } = activeEditor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'math') {
-            activeEditor.chain().focus().updateMath({ latex }).run();
-        } else {
-            activeEditor.chain().focus().setMath({ latex }).run();
-        }
-    };
-
-    const openArabicDialog = () => {
-        setIsArabicDialogOpen(true);
-    };
-
-    const handleArabicConfirm = (text: string) => {
-        const { state } = activeEditor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'arabic') {
-            activeEditor.chain().focus().updateArabic({ text }).run();
-        } else {
-            activeEditor.chain().focus().setArabic({ text }).run();
-        }
-    };
-
-    const openJavaneseDialog = () => {
-        setIsJavaneseDialogOpen(true);
-    };
-
-    const handleJavaneseConfirm = (text: string) => {
-        const { state } = activeEditor;
-        const { from } = state.selection;
-        const node = state.doc.nodeAt(from);
-
-        if (node && node.type.name === 'javanese') {
-            activeEditor.chain().focus().updateJavanese({ text }).run();
-        } else {
-            activeEditor.chain().focus().setJavanese({ text }).run();
-        }
-    };
-
-    const currentMathLatex = activeEditor.isActive('math')
-        ? activeEditor.getAttributes('math').latex
-        : '';
-
-    const currentArabicText = activeEditor.isActive('arabic')
-        ? activeEditor.getAttributes('arabic').text
-        : '';
-
-    const currentJavaneseText = activeEditor.isActive('javanese')
-        ? activeEditor.getAttributes('javanese').text
-        : '';
+    const openMathDialog = () => setIsMathDialogOpen(true);
+    const openArabicDialog = () => setIsArabicDialogOpen(true);
+    const openJavaneseDialog = () => setIsJavaneseDialogOpen(true);
 
     return (
         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 shadow-sm overflow-x-auto no-scrollbar scroll-smooth">
@@ -153,27 +91,6 @@ export default function QuestionToolbar() {
                     tooltip="Javanese Script"
                 />
             </div>
-
-            <MathDialog
-                isOpen={isMathDialogOpen}
-                onClose={() => setIsMathDialogOpen(false)}
-                initialValue={currentMathLatex}
-                onConfirm={handleMathConfirm}
-            />
-
-            <ArabicDialog
-                isOpen={isArabicDialogOpen}
-                onClose={() => setIsArabicDialogOpen(false)}
-                initialValue={currentArabicText}
-                onConfirm={handleArabicConfirm}
-            />
-
-            <JavaneseDialog
-                isOpen={isJavaneseDialogOpen}
-                onClose={() => setIsJavaneseDialogOpen(false)}
-                initialValue={currentJavaneseText}
-                onConfirm={handleJavaneseConfirm}
-            />
         </div>
     );
 }

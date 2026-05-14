@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { 
     Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
-    Heading1, Heading2, Heading3, Link2, Quote
+    Heading1, Heading2, Heading3, Link2, Quote, Sigma, Languages, GraduationCap
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -83,6 +83,13 @@ interface MenuBarProps {
 }
 
 function MenuBar({ editor }: MenuBarProps) {
+    const { 
+        setActiveEditor,
+        setIsMathDialogOpen, 
+        setIsArabicDialogOpen, 
+        setIsJavaneseDialogOpen 
+    } = useEditorStore();
+
     if (!editor) return null;
 
     const addLink = () => {
@@ -161,6 +168,34 @@ function MenuBar({ editor }: MenuBarProps) {
             action: addLink, 
             isActive: editor.isActive('link'),
             title: 'Link'
+        },
+        { type: 'divider' },
+        { 
+            icon: Sigma, 
+            action: () => {
+                setActiveEditor(editor);
+                setIsMathDialogOpen(true);
+            }, 
+            isActive: editor.isActive('math'),
+            title: 'Math Formula'
+        },
+        { 
+            icon: Languages, 
+            action: () => {
+                setActiveEditor(editor);
+                setIsArabicDialogOpen(true);
+            }, 
+            isActive: editor.isActive('arabic'),
+            title: 'Arabic Text'
+        },
+        { 
+            icon: GraduationCap, 
+            action: () => {
+                setActiveEditor(editor);
+                setIsJavaneseDialogOpen(true);
+            }, 
+            isActive: editor.isActive('javanese'),
+            title: 'Javanese Script'
         },
     ];
 
