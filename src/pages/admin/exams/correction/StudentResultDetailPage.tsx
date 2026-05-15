@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { examApi, Exam, studentApi } from '@/lib/api';
+import { examApi, Exam, studentApi, readingMaterialApi, ReadingMaterial } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import CorrectionDisplay from '@/components/questions/correction/CorrectionDisplay';
 import MathRenderer from '@/components/ui/MathRenderer';
+import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import { StudentSession, QuestionDetail } from '@/pages/admin/exams/ExamCorrectionPage';
 import {
     ArrowLeft,
@@ -24,7 +25,8 @@ import {
     Brain,
     Timer,
     Users,
-    Medal
+    Medal,
+    BookOpen,
 } from 'lucide-react';
 
 const StudentResultDetailPage: React.FC = () => {
@@ -47,6 +49,10 @@ const StudentResultDetailPage: React.FC = () => {
     const [userRank, setUserRank] = useState<number | null>(null);
     const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+
+    const readingMaterials = exam?.exam_reading_materials || [];
+    const [selectedPreviewMaterial, setSelectedPreviewMaterial] = useState<any | null>(null);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -159,6 +165,21 @@ const StudentResultDetailPage: React.FC = () => {
             percentage: stats.max > 0 ? (stats.earned / stats.max) * 100 : 0
         }))
         .sort((a, b) => b.percentage - a.percentage);
+
+    const getMaterialColorClass = (materialId: string | null | undefined) => {
+        if (!materialId) return '';
+        const idx = readingMaterials.findIndex(m => m.id === materialId || m.reading_material_id === materialId);
+        if (idx === -1) return '';
+        const materialColors = [
+            'bg-indigo-500', 'bg-rose-500', 'bg-emerald-500',
+            'bg-amber-500', 'bg-sky-500', 'bg-violet-500',
+            'bg-orange-500', 'bg-teal-500', 'bg-fuchsia-500',
+            'bg-blue-500', 'bg-red-500', 'bg-green-500',
+            'bg-yellow-500', 'bg-cyan-500', 'bg-pink-500',
+            'bg-purple-500'
+        ];
+        return materialColors[idx % materialColors.length];
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -477,6 +498,15 @@ const StudentResultDetailPage: React.FC = () => {
                                                                 "bg-amber-100 text-amber-600"
                                                     )}>
                                                         {(index + 1).toString().padStart(2, '0')}
+                                                        {q.exam_reading_material && (
+                                                            <div
+                                                                className={cn(
+                                                                    "absolute -top-1 -right-1 size-3 rounded-full border-2 border-white dark:border-slate-900 shadow-sm",
+                                                                    getMaterialColorClass(q.exam_reading_material.id)
+                                                                )}
+                                                                title={`Linked to Reading Material: ${q.exam_reading_material.title}`}
+                                                            />
+                                                        )}
                                                     </span>
                                                     <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 rounded-lg">
                                                         {q.question_type.replace('_', ' ')}
@@ -507,6 +537,28 @@ const StudentResultDetailPage: React.FC = () => {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {q.exam_reading_material && (
+                                                <div className="mb-6 p-4 bg-emerald-50/50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl relative group/rm">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <BookOpen className="w-4 h-4 text-emerald-600" />
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Reading Material: {q.exam_reading_material.title}</span>
+                                                    </div>
+                                                    <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 italic">
+                                                        <MathRenderer content={q.exam_reading_material.content || ''} />
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => {
+                                                            setSelectedPreviewMaterial(q.exam_reading_material);
+                                                            setIsPreviewModalOpen(true);
+                                                        }}
+                                                        className="mt-2 text-[10px] font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                                                    >
+                                                        Read Full Material
+                                                        <ChevronRight className="size-3" />
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             <MathRenderer className="text-base sm:text-xl font-normal text-slate-800 dark:text-white mb-6 sm:mb-8 leading-relaxed" content={q.question_content} />
 
@@ -714,6 +766,55 @@ const StudentResultDetailPage: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Reading Materials Section */}
+                            {readingMaterials.length > 0 && (
+                                <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-200 dark:border-emerald-500/20">
+                                                <BookOpen className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Reading Materials</h3>
+                                                <p className="text-[10px] text-slate-400 font-medium mt-0.5">Reference Documents</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4">
+                                        <div className="space-y-3">
+                                            {readingMaterials.map((material, idx) => {
+                                                const materialColors = [
+                                                    'bg-indigo-500', 'bg-rose-500', 'bg-emerald-500',
+                                                    'bg-amber-500', 'bg-sky-500', 'bg-violet-500',
+                                                    'bg-orange-500', 'bg-teal-500', 'bg-fuchsia-500',
+                                                    'bg-blue-500', 'bg-red-500', 'bg-green-500',
+                                                    'bg-yellow-500', 'bg-cyan-500', 'bg-pink-500',
+                                                    'bg-purple-500'
+                                                ];
+                                                const colorClass = materialColors[idx % materialColors.length];
+
+                                                return (
+                                                    <div
+                                                        key={material.id}
+                                                        className="group/item flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-transparent hover:border-primary/30 transition-all cursor-pointer"
+                                                        onClick={() => {
+                                                            setSelectedPreviewMaterial(material);
+                                                            setIsPreviewModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <div className="flex-1 truncate pr-2 flex items-center gap-2">
+                                                            <div className={`size-1.5 rounded-full shrink-0 ${colorClass}`} />
+                                                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block truncate">{material.title}</span>
+                                                        </div>
+                                                        <ChevronRight className="w-3 h-3 text-slate-300 group-hover/item:text-primary transition-colors" />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Leaderboard Section - Desktop only (mobile version above) */}
                             {(leaderboard.length > 0 || isLeaderboardLoading) && (
                                 <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
@@ -823,6 +924,12 @@ const StudentResultDetailPage: React.FC = () => {
                     )}
                 </main>
             </div>
+
+            <ReadingMaterialPreviewModal
+                isOpen={isPreviewModalOpen}
+                onClose={() => setIsPreviewModalOpen(false)}
+                material={selectedPreviewMaterial}
+            />
         </div>
     );
 };

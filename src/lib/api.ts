@@ -907,6 +907,7 @@ export interface Exam {
     user?: User;
     user_id?: string;
     teacher?: User;
+    exam_reading_materials?: any[];
     created_at: string;
     updated_at: string;
 }
