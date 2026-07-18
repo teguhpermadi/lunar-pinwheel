@@ -1010,6 +1010,10 @@ export const examApi = {
         const response = await api.post(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/restore`);
         return response.data;
     },
+    async checkIntegrity(examId: string, sessionId: string, detailId: string) {
+        const response = await api.post(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/check-integrity`);
+        return response.data;
+    },
     finishCorrection: async (sessionId: string) => {
         const response = await api.post(`/sessions/${sessionId}/finish-correction`);
         return response.data;

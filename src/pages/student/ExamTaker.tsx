@@ -69,6 +69,10 @@ export default function ExamTaker() {
     const [isWaitingOfflineSubmit, setIsWaitingOfflineSubmit] = useState(false);
     const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
 
+    // Anti-cheat State
+    const [tabSwitches, setTabSwitches] = useState(0);
+    const [lastPasteTime, setLastPasteTime] = useState<number>(0);
+
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
         const saved = localStorage.getItem(`exam_${id}_pending_answers`);
@@ -425,6 +429,34 @@ export default function ExamTaker() {
         }
     }, [isLoading]);
 
+    // Anti-cheat logic: Window Blur (Tab Switching)
+    useEffect(() => {
+        const handleBlur = () => {
+            setTabSwitches(prev => prev + 1);
+            console.warn("Tab switch detected!");
+        };
+
+        window.addEventListener('blur', handleBlur);
+        return () => window.removeEventListener('blur', handleBlur);
+    }, []);
+
+    // Anti-cheat logic: Paste Detection
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            // Only care about large pastes in inputs
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                const text = e.clipboardData?.getData('text') || '';
+                if (text.length > 20) { // Threshold for suspicious paste
+                    setLastPasteTime(Date.now());
+                }
+            }
+        };
+
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+    }, []);
+
     const handleAnswerChange = useCallback((answer: any) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
@@ -453,8 +485,16 @@ export default function ExamTaker() {
         const payload = {
             question_id: currentQ.id,
             answer: answer,
-            is_flagged: currentQ.is_flagged
+            is_flagged: currentQ.is_flagged,
+            metadata: {
+                tab_switches: tabSwitches,
+                paste_count: Date.now() - lastPasteTime < 1000 ? 1 : 0, // If pasted just now
+                is_pasted: Date.now() - lastPasteTime < 1000,
+            }
         };
+
+        // Reset tabSwitches after sending (the backend will increment it)
+        if (tabSwitches > 0) setTabSwitches(0);
 
         if (!isOnline) {
             // Save to queue immediately when offline
