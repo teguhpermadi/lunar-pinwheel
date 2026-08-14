@@ -18,7 +18,7 @@ import MediaModal from '@/components/questions/MediaModal';
 import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import {
     ArrowLeft, Settings, FileText, HelpCircle, Pencil,
-    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, CheckSquare
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, CheckSquare, Calculator
 } from 'lucide-react';
 
 export default function EditQuestionBank() {
@@ -308,6 +308,13 @@ export default function EditQuestionBank() {
                                 <FileText className="size-4" />
                                 Import Word
                             </button>
+                            {/* <button
+                                onClick={() => navigate('/admin/math-generator', { state: { questionBankId: id } })}
+                                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-all"
+                            >
+                                <Calculator className="size-4" />
+                                Math Generator
+                            </button> */}
                             <button
                                 onClick={() => setIsSelectionMode(true)}
                                 className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"

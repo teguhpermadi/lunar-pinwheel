@@ -3,7 +3,11 @@ import { Outlet } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import Header from '@/components/layout/Header';
 
-export default function AdminLayout() {
+interface AdminLayoutProps {
+    hideSidebar?: boolean;
+}
+
+export default function AdminLayout({ hideSidebar = false }: AdminLayoutProps = {}) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -25,17 +29,20 @@ export default function AdminLayout() {
                 />
             )}
 
-            <AdminSidebar 
-                isCollapsed={isSidebarCollapsed} 
-                isMobileOpen={isMobileSidebarOpen}
-                onMobileClose={() => setIsMobileSidebarOpen(false)}
-            />
+            {!hideSidebar && (
+                <AdminSidebar 
+                    isCollapsed={isSidebarCollapsed} 
+                    isMobileOpen={isMobileSidebarOpen}
+                    onMobileClose={() => setIsMobileSidebarOpen(false)}
+                />
+            )}
 
             <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50 transition-all duration-300">
                 <Header 
                     toggleSidebar={toggleSidebar} 
                     toggleMobileSidebar={toggleMobileSidebar}
                     isSidebarCollapsed={isSidebarCollapsed} 
+                    hideSidebarToggle={hideSidebar}
                 />
 
                 <Outlet />

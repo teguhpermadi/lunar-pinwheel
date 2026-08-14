@@ -1478,3 +1478,95 @@ export const backupAssetsApi = {
         return response.data;
     }
 };
+
+// --- Math Generator ---
+
+export interface MathPreviewConfig {
+    domain: string;
+    level: number;
+    count: number;
+    operation?: string;
+    number_type?: string;
+    operand_count?: number;
+    shape?: string;
+    dimension?: string;
+    type?: string;
+    with_story?: boolean;
+    with_distractors?: boolean;
+    distractor_count?: number;
+    seed?: number;
+    score?: number;
+    timer?: number;
+    hint?: string;
+    tags?: string[];
+    question_bank_id?: string;
+}
+
+export interface MathPreviewQuestion {
+    id: string;
+    content: string;
+    type: string;
+    difficulty: string;
+    options: Array<{
+        option_key: string;
+        content: string;
+        is_correct: boolean;
+        metadata?: Record<string, any>;
+    }>;
+    math_metadata?: Record<string, any>;
+    score?: number;
+    timer?: number;
+    hint?: string;
+    tags?: string[];
+}
+
+export interface MathPreviewResponse {
+    previews: MathPreviewQuestion[];
+    total_generated: number;
+    engine_version?: string;
+    master_seed?: number;
+}
+
+export interface MathLevel {
+    level: number;
+    difficulty: string;
+    allowed_number_types: string[];
+}
+
+export interface MathDomain {
+    name: string;
+    display_name: string;
+    description: string;
+    available_operations?: string[];
+    available_shapes?: string[];
+    available_types?: string[];
+}
+
+export const mathGeneratorApi = {
+    preview: async (config: MathPreviewConfig): Promise<SingleResponse<MathPreviewResponse>> => {
+        const response = await api.post('/math-generate/preview', config);
+        return response.data;
+    },
+    batchPreview: async (requirements: MathPreviewConfig[], masterSeed?: number): Promise<SingleResponse<MathPreviewResponse>> => {
+        const response = await api.post('/math-generate/batch-preview', {
+            requirements,
+            master_seed: masterSeed,
+        });
+        return response.data;
+    },
+    save: async (questionBankId: string, previews: MathPreviewQuestion[]): Promise<SingleResponse<{ saved_count: number; question_ids: string[]; question_bank_id: string; questions_count_total: number }>> => {
+        const response = await api.post('/math-generate/save', {
+            question_bank_id: questionBankId,
+            previews,
+        });
+        return response.data;
+    },
+    getLevels: async (): Promise<SingleResponse<{ levels: MathLevel[]; domains: MathDomain[] }>> => {
+        const response = await api.get('/math-generate/levels');
+        return response.data;
+    },
+    getDomains: async (): Promise<SingleResponse<{ domains: MathDomain[] }>> => {
+        const response = await api.get('/math-generate/domains');
+        return response.data;
+    },
+};
