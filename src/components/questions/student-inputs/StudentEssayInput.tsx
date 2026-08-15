@@ -11,9 +11,11 @@ interface StudentEssayInputProps {
         rubric?: any;
         answers?: string[];
     };
+    onPasteDetected?: () => void;
+    allowPaste?: boolean;
 }
 
-export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentEssayInputProps) {
+export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer, keyAnswer, onPasteDetected, allowPaste = true }: StudentEssayInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
 
     useEffect(() => {
@@ -26,6 +28,15 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
 
     const handleBlur = () => {
         onChange(value);
+    };
+
+    const blockClipboard = (event: React.ClipboardEvent<HTMLElement> | React.ClipboardEvent<HTMLInputElement>) => {
+        if (!allowPaste) {
+            event.preventDefault();
+            if (onPasteDetected) {
+                onPasteDetected();
+            }
+        }
     };
 
     const stripHtml = (html: string) => {
@@ -74,6 +85,11 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
                     placeholder="Write your answer here..."
                     className="w-full p-4 min-h-[256px] bg-transparent pb-12"
                     minHeight="min-h-[256px]"
+                    onPasteDetected={onPasteDetected}
+                    allowPaste={allowPaste}
+                    onCopy={allowPaste ? undefined : (event) => event.preventDefault()}
+                    onCut={allowPaste ? undefined : (event) => event.preventDefault()}
+                    onPaste={blockClipboard}
                 />
             </div>
             <div className="flex justify-between text-xs text-slate-400 px-2 font-medium">

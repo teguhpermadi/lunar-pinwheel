@@ -897,6 +897,7 @@ export interface Exam {
     is_randomized_answer: boolean;
     is_show_result: boolean;
     is_visible_hint: boolean;
+    is_paste_allowed?: boolean;
     max_attempts: number | null;
     timer_type: 'strict' | 'flexible';
     passing_score: number;

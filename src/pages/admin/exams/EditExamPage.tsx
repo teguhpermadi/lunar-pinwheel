@@ -658,9 +658,17 @@ export default function EditExamPage() {
                                                 checked={exam.is_published}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_published: val } : null)}
                                             />
+                                            <Toggle
+                                                label="Izinkan Salin-Tempel"
+                                                description="Siswa diizinkan melakukan paste jawaban. Jika nonaktif, paste akan diblokir. Semua aktivitas paste selalu dicatat."
+                                                icon={Shield}
+                                                checked={exam.is_paste_allowed ?? false}
+                                                onChange={(val) => setExam(prev => prev ? { ...prev, is_paste_allowed: val } : null)}
+                                            />
                                         </div>
                                     </section>
                                 </div>
+
                             )}
                         </div>
                     </div>

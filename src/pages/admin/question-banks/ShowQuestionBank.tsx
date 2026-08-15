@@ -15,7 +15,7 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import {
     ArrowLeft, Eye, Printer, Download, Loader2, Pencil, Settings,
     Shield, Key, Shuffle, StretchVertical, Lightbulb, Rocket, Calendar,
-    Infinity, BarChart3
+    Infinity, BarChart3, Copy
 } from 'lucide-react';
 
 interface ToggleProps {
@@ -40,6 +40,7 @@ const Toggle = ({ label, hint, description, checked, onChange, icon }: TogglePro
                         {icon === 'visibility' && <Eye className="size-4" />}
                         {icon === 'lightbulb' && <Lightbulb className="size-4" />}
                         {icon === 'rocket_launch' && <Rocket className="size-4" />}
+                        {icon === 'copy' && <Copy className="size-4" />}
                     </div>
                 )}
                 <div className="flex flex-col">
@@ -88,6 +89,7 @@ export default function ShowQuestionBank() {
         is_token_visible: true,
         is_show_result: true,
         is_visible_hint: false,
+        is_paste_allowed: false,
         start_time: formatDateToLocalInput(),
         end_time: ''
     });
@@ -151,6 +153,7 @@ export default function ShowQuestionBank() {
                 is_token_visible: formData.is_token_visible,
                 is_show_result: formData.is_show_result,
                 is_visible_hint: formData.is_visible_hint,
+                is_paste_allowed: formData.is_paste_allowed,
                 start_time: formData.start_time ? new Date(formData.start_time).toISOString() : null,
                 end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
                 classroom_ids: selectedClassroomIds,
@@ -525,6 +528,13 @@ export default function ShowQuestionBank() {
                                         icon="lightbulb"
                                         checked={formData.is_visible_hint}
                                         onChange={(checked) => setFormData({ ...formData, is_visible_hint: checked })}
+                                    />
+                                    <Toggle
+                                        label="Izinkan Salin-Tempel"
+                                        hint="Siswa diizinkan melakukan paste jawaban. Jika nonaktif, paste akan diblokir. Semua aktivitas paste selalu dicatat."
+                                        icon="copy"
+                                        checked={formData.is_paste_allowed}
+                                        onChange={(checked) => setFormData({ ...formData, is_paste_allowed: checked })}
                                     />
                                     <Toggle
                                         label="Publish Immediately"

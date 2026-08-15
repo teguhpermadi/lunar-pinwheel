@@ -20,6 +20,11 @@ interface RichTextEditorProps {
     placeholder?: string;
     className?: string;
     minHeight?: string;
+    onPasteDetected?: () => void;
+    allowPaste?: boolean;
+    onPaste?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
+    onCopy?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
+    onCut?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
 }
 
 // Helper to convert $latex$ and [ara]arabic[/ara] in HTML to data-latex spans for TipTap
@@ -237,7 +242,12 @@ export default function RichTextEditor({
     onBlur,
     placeholder = 'Type here...',
     className = '',
-    minHeight = 'min-h-[100px]'
+    minHeight = 'min-h-[100px]',
+    onPasteDetected,
+    allowPaste = true,
+    onPaste,
+    onCopy,
+    onCut,
 }: RichTextEditorProps) {
     const { setActiveEditor } = useEditorStore();
 
@@ -299,8 +309,43 @@ export default function RichTextEditor({
         return <div className={`${minHeight} animate-pulse bg-slate-50 dark:bg-slate-800 rounded-xl`} />;
     }
 
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        if (!allowPaste) {
+            e.preventDefault();
+            if (onPasteDetected) {
+                onPasteDetected();
+            }
+        }
+        if (onPaste) {
+            onPaste(e);
+        }
+    };
+
+    const handleCopy = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        if (!allowPaste) {
+            e.preventDefault();
+        }
+        if (onCopy) {
+            onCopy(e);
+        }
+    };
+
+    const handleCut = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        if (!allowPaste) {
+            e.preventDefault();
+        }
+        if (onCut) {
+            onCut(e);
+        }
+    };
+
     return (
-        <div className="w-full flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+        <div
+            className="w-full flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm"
+            onPaste={handlePaste}
+            onCopy={handleCopy}
+            onCut={handleCut}
+        >
             <MenuBar editor={editor} />
             <EditorContent
                 editor={editor}

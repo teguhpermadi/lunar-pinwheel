@@ -182,6 +182,24 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                             </div>
                         </div>
 
+                        {/* Paste Detection Warning */}
+                        {((currentQuestion as any)?.metadata?.is_pasted || ((currentQuestion as any)?.metadata?.paste_count > 0)) && (
+                            <div className="flex items-start gap-3 p-4 mb-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-bold text-red-700 dark:text-red-300">
+                                        ⚠️ Peringatan: Jawaban Terdeteksi Hasil Salin-Tempel (Copy-Paste)
+                                    </p>
+                                    <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
+                                        Siswa melakukan paste sebanyak <strong>{(currentQuestion as any)?.metadata?.paste_count || 1} kali</strong>.
+                                        {(currentQuestion as any)?.metadata?.last_pasted_at && (
+                                            <span> Terakhir pada: {new Date((currentQuestion as any).metadata.last_pasted_at).toLocaleString('id-ID')}.</span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <CorrectionDisplay
                             type={currentQuestion.question_type || (currentQuestion as any)?.exam_question?.question_type}
                             studentAnswer={isEditingAnswer ? editedAnswer : currentQuestion.student_answer}

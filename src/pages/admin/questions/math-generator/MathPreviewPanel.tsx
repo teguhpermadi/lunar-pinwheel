@@ -1,6 +1,6 @@
 import { MathPreviewQuestion } from '@/lib/api';
 import MathQuestionCard from './MathQuestionCard';
-import { FileQuestion, CheckSquare } from 'lucide-react';
+import { FileQuestion } from 'lucide-react';
 
 interface MathPreviewPanelProps {
     questions: MathPreviewQuestion[];

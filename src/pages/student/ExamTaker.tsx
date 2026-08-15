@@ -71,7 +71,6 @@ export default function ExamTaker() {
 
     // Anti-cheat State
     const [tabSwitches, setTabSwitches] = useState(0);
-    const [lastPasteTime, setLastPasteTime] = useState<number>(0);
 
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
@@ -440,31 +439,83 @@ export default function ExamTaker() {
         return () => window.removeEventListener('blur', handleBlur);
     }, []);
 
-    // Anti-cheat logic: Paste Detection
-    useEffect(() => {
-        const handlePaste = (e: ClipboardEvent) => {
-            // Only care about large pastes in inputs
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-                const text = e.clipboardData?.getData('text') || '';
-                if (text.length > 20) { // Threshold for suspicious paste
-                    setLastPasteTime(Date.now());
-                }
-            }
-        };
+    // Anti-cheat logic: Paste Detection (global listener removed - now handled per-question input)
 
-        window.addEventListener('paste', handlePaste);
-        return () => window.removeEventListener('paste', handlePaste);
-    }, []);
+    const handlePasteDetected = useCallback(async () => {
+        if (!id || !questions[currentQuestionIndex]) return;
+        const currentQ = questions[currentQuestionIndex];
+
+        // Show alert only if paste is not allowed
+        if (!exam?.is_paste_allowed) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Salin-Tempel Tidak Diizinkan',
+                text: 'Tindakan salin-tempel (copy-paste) dilarang pada ujian ini. Aktivitas ini telah dicatat.',
+                toast: true,
+                position: 'top-end',
+                timer: 4000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+        }
+
+        // Always log the paste action to the backend
+        try {
+            const existingMetadata = currentQ.paste_metadata || {};
+            const newPasteCount = (existingMetadata.paste_count || 0) + 1;
+            const pastePayload = {
+                question_id: currentQ.id,
+                answer: currentQ.student_answer,
+                is_flagged: currentQ.is_flagged,
+                metadata: {
+                    tab_switches: tabSwitches,
+                    is_pasted: true,
+                    paste_count: newPasteCount,
+                    last_pasted_at: new Date().toISOString(),
+                }
+            };
+            // Update local tracking
+            const updatedQ = { ...currentQ, paste_metadata: { paste_count: newPasteCount, is_pasted: true } };
+            setQuestions(prev => prev.map((q, idx) => idx === currentQuestionIndex ? updatedQ : q));
+
+            await studentApi.answerQuestion(id, pastePayload);
+        } catch (e) {
+            console.error('Failed to log paste event:', e);
+        }
+    }, [id, questions, currentQuestionIndex, exam, tabSwitches]);
 
     const handleAnswerChange = useCallback((answer: any) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         const currentQ = questions[currentQuestionIndex];
+        const hasPasteHistory = Boolean(
+            currentQ.paste_metadata?.is_pasted ||
+            (currentQ.paste_metadata?.paste_count ?? 0) > 0 ||
+            currentQ.paste_metadata?.last_pasted_at
+        );
+
+        const normalizeText = (value: any) => {
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'string') return value.replace(/<[^>]*>/g, '').trim();
+            if (Array.isArray(value)) return value.join(' ').trim();
+            return String(value).trim();
+        };
+
+        const hadEmptyAnswer = normalizeText(currentQ.student_answer).length === 0;
+        const nowHasText = normalizeText(answer).length > 0;
+        const shouldClearPasteMetadata = hasPasteHistory && hadEmptyAnswer && nowHasText;
 
         // Optimistic Update - immediate UI update
         const newQuestions = questions.map((q, idx) =>
-            idx === currentQuestionIndex ? { ...q, student_answer: answer } : q
+            idx === currentQuestionIndex
+                ? {
+                    ...q,
+                    student_answer: answer,
+                    paste_metadata: shouldClearPasteMetadata
+                        ? { paste_count: 0, is_pasted: false, last_pasted_at: null }
+                        : q.paste_metadata,
+                }
+                : q
         );
         setQuestions(newQuestions);
 
@@ -488,12 +539,11 @@ export default function ExamTaker() {
             is_flagged: currentQ.is_flagged,
             metadata: {
                 tab_switches: tabSwitches,
-                paste_count: Date.now() - lastPasteTime < 1000 ? 1 : 0, // If pasted just now
-                is_pasted: Date.now() - lastPasteTime < 1000,
+                ...(shouldClearPasteMetadata ? { clear_paste_metadata: true } : {}),
             }
         };
 
-        // Reset tabSwitches after sending (the backend will increment it)
+        // Reset tabSwitches after sending
         if (tabSwitches > 0) setTabSwitches(0);
 
         if (!isOnline) {
@@ -887,11 +937,15 @@ export default function ExamTaker() {
                 return <StudentEssayInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    onPasteDetected={handlePasteDetected}
+                    allowPaste={exam?.is_paste_allowed ?? false}
                 />;
             case 'short_answer':
                 return <StudentShortAnswerInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    onPasteDetected={handlePasteDetected}
+                    allowPaste={exam?.is_paste_allowed ?? false}
                 />;
             case 'matching':
                 return <StudentMatchingInput

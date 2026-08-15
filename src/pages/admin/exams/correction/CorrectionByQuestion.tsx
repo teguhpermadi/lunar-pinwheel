@@ -311,6 +311,23 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 </div>
                             </div>
 
+                            {/* Paste Detection Warning */}
+                            {(answer.metadata?.is_pasted || answer.metadata?.paste_count > 0) && (
+                                <div className="flex items-start gap-3 p-3 mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-xs font-bold text-red-700 dark:text-red-300">
+                                            ⚠️ Terdeteksi Salin-Tempel: {answer.metadata?.paste_count || 1}x
+                                        </p>
+                                        {answer.metadata?.last_pasted_at && (
+                                            <p className="text-[10px] text-red-500 dark:text-red-400 mt-0.5">
+                                                Terakhir: {new Date(answer.metadata.last_pasted_at).toLocaleString('id-ID')}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             <CorrectionDisplay
                                 type={answer.exam_question?.question_type || answer.question_type}
                                 studentAnswer={editingAnswerId === answer.id ? editedAnswer : answer.student_answer}

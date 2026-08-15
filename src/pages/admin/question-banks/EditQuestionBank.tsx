@@ -18,7 +18,7 @@ import MediaModal from '@/components/questions/MediaModal';
 import ReadingMaterialPreviewModal from '@/components/admin/reading-materials/ReadingMaterialPreviewModal';
 import {
     ArrowLeft, Settings, FileText, HelpCircle, Pencil,
-    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, CheckSquare, Calculator
+    Trash2, BarChart3, PlusSquare, PlusCircle, Plus, CheckSquare
 } from 'lucide-react';
 
 export default function EditQuestionBank() {
