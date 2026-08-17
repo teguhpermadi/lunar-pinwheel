@@ -284,6 +284,28 @@ export default function RichTextEditor({
             attributes: {
                 class: `prose prose-slate dark:prose-invert max-w-none focus:outline-none ${minHeight} ${className}`,
             },
+            handlePaste: (_view, event) => {
+                if (!allowPaste) {
+                    event.preventDefault();
+                    if (onPasteDetected) {
+                        onPasteDetected();
+                    }
+                    return true;
+                }
+                return false;
+            },
+            handleDOMEvents: {
+                paste: (_view, event) => {
+                    if (!allowPaste) {
+                        event.preventDefault();
+                        if (onPasteDetected) {
+                            onPasteDetected();
+                        }
+                        return true;
+                    }
+                    return false;
+                },
+            },
         },
     });
 

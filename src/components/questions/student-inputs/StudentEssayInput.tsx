@@ -30,15 +30,6 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
         onChange(value);
     };
 
-    const blockClipboard = (event: React.ClipboardEvent<HTMLElement> | React.ClipboardEvent<HTMLInputElement>) => {
-        if (!allowPaste) {
-            event.preventDefault();
-            if (onPasteDetected) {
-                onPasteDetected();
-            }
-        }
-    };
-
     const stripHtml = (html: string) => {
         if (typeof window === 'undefined') return html;
         const tmp = document.createElement('DIV');
@@ -87,9 +78,6 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
                     minHeight="min-h-[256px]"
                     onPasteDetected={onPasteDetected}
                     allowPaste={allowPaste}
-                    onCopy={allowPaste ? undefined : (event) => event.preventDefault()}
-                    onCut={allowPaste ? undefined : (event) => event.preventDefault()}
-                    onPaste={blockClipboard}
                 />
             </div>
             <div className="flex justify-between text-xs text-slate-400 px-2 font-medium">
