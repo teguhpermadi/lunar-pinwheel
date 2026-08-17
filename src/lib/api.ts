@@ -491,6 +491,10 @@ export const studentApi = {
     finishExam: async (id: string) => {
         const response = await api.post(`/students/exams/${id}/finish`);
         return response.data;
+    },
+    reportExamViolation: async (id: string, data?: any) => {
+        const response = await api.post(`/students/exams/${id}/violation`, data || {});
+        return response.data;
     }
 };
 
@@ -898,6 +902,7 @@ export interface Exam {
     is_show_result: boolean;
     is_visible_hint: boolean;
     is_paste_allowed?: boolean;
+    is_open_other_apps_allowed?: boolean;
     max_attempts: number | null;
     timer_type: 'strict' | 'flexible';
     passing_score: number;

@@ -428,16 +428,103 @@ export default function ExamTaker() {
         }
     }, [isLoading]);
 
-    // Anti-cheat logic: Window Blur (Tab Switching)
+    const violationDetectedRef = useRef(false);
+
+    const handleExamViolation = useCallback(async (reason: string) => {
+        if (!id || !exam || exam.is_open_other_apps_allowed !== false || violationDetectedRef.current) {
+            return;
+        }
+
+        violationDetectedRef.current = true;
+
+        const result = await MySwal.fire({
+            icon: 'warning',
+            title: 'Ujian Terpaksa Diulang Dari Awal',
+            html: `
+                <div class="text-left space-y-2 text-sm">
+                    <p>Anda terdeteksi membuka aplikasi lain atau jendela lain saat ujian sedang berlangsung.</p>
+                    <p class="font-semibold text-slate-800 dark:text-slate-100">Semua jawaban ujian akan dihapus dan sesi ujian saat ini akan direset.</p>
+                    <p>Ujian harus dimulai dari awal kembali.</p>
+                </div>
+            `,
+            showCancelButton: false,
+            confirmButtonText: 'Kembali ke halaman awal ujian',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            focusConfirm: true,
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        try {
+            await studentApi.reportExamViolation(id, {
+                reason,
+                source: 'external_app_or_tab_switch',
+            });
+
+            if (answerDebounceTimerRef.current) {
+                clearTimeout(answerDebounceTimerRef.current);
+                answerDebounceTimerRef.current = null;
+            }
+            pendingAnswerQueueRef.current.clear();
+            localStorage.removeItem(`exam_${id}_cache_data`);
+            localStorage.removeItem(`exam_${id}_pending_answers`);
+            setIsSyncing(false);
+            setPendingAnswers({});
+            setQuestions([]);
+
+            await MySwal.fire({
+                icon: 'error',
+                title: 'Ujian Diulang Dari Awal',
+                text: 'Anda terdeteksi membuka aplikasi lain atau halaman lain. Ujian terpaksa diulang dari awal karena pelanggaran aturan ujian.',
+                timer: 2500,
+                showConfirmButton: false,
+            });
+
+            navigate('/exams', { replace: true });
+        } catch (error) {
+            console.error('Failed to reset exam after violation:', error);
+            navigate('/exams', { replace: true });
+        }
+    }, [id, exam, navigate]);
+
+    // Anti-cheat logic: Window Blur / tab switch / external app attempt
     useEffect(() => {
+        if (!exam || exam.is_open_other_apps_allowed !== false) {
+            return;
+        }
+
         const handleBlur = () => {
             setTabSwitches(prev => prev + 1);
-            console.warn("Tab switch detected!");
+            console.warn('Tab switch or app switch detected!');
+            void handleExamViolation('window_blur');
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                console.warn('Document hidden, external app or tab switch detected.');
+                void handleExamViolation('visibility_hidden');
+            }
+        };
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = '';
+            void handleExamViolation('before_unload');
         };
 
         window.addEventListener('blur', handleBlur);
-        return () => window.removeEventListener('blur', handleBlur);
-    }, []);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('blur', handleBlur);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [exam, handleExamViolation]);
 
     // Anti-cheat logic: Paste Detection (global listener removed - now handled per-question input)
 

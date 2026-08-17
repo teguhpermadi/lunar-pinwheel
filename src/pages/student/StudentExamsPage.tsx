@@ -69,9 +69,33 @@ export default function StudentExamsPage() {
         if (!confirmCheck) {
             MySwal.fire({
                 icon: 'warning',
-                title: 'Confirmation Required',
-                text: 'Please confirm your personal information before starting.',
+                title: 'Konfirmasi Diperlukan',
+                text: 'Silakan konfirmasi data diri Anda sebelum memulai ujian.',
             });
+            return;
+        }
+
+        const rulesResult = await MySwal.fire({
+            icon: 'warning',
+            title: 'Peraturan Ujian',
+            html: `
+                <div class="text-left space-y-3 text-sm">
+                    <p>Anda wajib mematuhi semua aturan berikut selama ujian berlangsung:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300">
+                        <li>Dilarang melakukan salin-tempel (copy-paste) jawaban.</li>
+                        <li>Dilarang membuka halaman lain, tab lain, atau aplikasi lain.</li>
+                        <li>Jika terdeteksi melanggar aturan, ujian akan terpaksa diulang dari awal.</li>
+                    </ul>
+                    <p class="font-semibold text-slate-800 dark:text-slate-100">Semua jawaban dan hasil ujian akan dihapus jika pelanggaran terdeteksi.</p>
+                </div>
+            `,
+            showCancelButton: false,
+            confirmButtonText: 'Saya Mengerti dan Mulai Ujian',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        });
+
+        if (!rulesResult.isConfirmed) {
             return;
         }
 
@@ -82,15 +106,15 @@ export default function StudentExamsPage() {
             } else {
                 MySwal.fire({
                     icon: 'error',
-                    title: 'Failed',
-                    text: response.message || 'Failed to start exam.',
+                    title: 'Gagal Memulai Ujian',
+                    text: response.message || 'Ujian gagal dimulai.',
                 });
             }
         } catch (error: any) {
             MySwal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.response?.data?.message || 'An error occurred while starting the exam.',
+                text: error.response?.data?.message || 'Terjadi kesalahan saat memulai ujian.',
             });
         }
     };

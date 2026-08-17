@@ -90,6 +90,7 @@ export default function ShowQuestionBank() {
         is_show_result: true,
         is_visible_hint: false,
         is_paste_allowed: false,
+        is_open_other_apps_allowed: false,
         start_time: formatDateToLocalInput(),
         end_time: ''
     });
@@ -154,6 +155,7 @@ export default function ShowQuestionBank() {
                 is_show_result: formData.is_show_result,
                 is_visible_hint: formData.is_visible_hint,
                 is_paste_allowed: formData.is_paste_allowed,
+                is_open_other_apps_allowed: formData.is_open_other_apps_allowed,
                 start_time: formData.start_time ? new Date(formData.start_time).toISOString() : null,
                 end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
                 classroom_ids: selectedClassroomIds,
@@ -535,6 +537,13 @@ export default function ShowQuestionBank() {
                                         icon="copy"
                                         checked={formData.is_paste_allowed}
                                         onChange={(checked) => setFormData({ ...formData, is_paste_allowed: checked })}
+                                    />
+                                    <Toggle
+                                        label="Izinkan Buka Aplikasi Lain"
+                                        hint="Jika nonaktif, siswa dilarang membuka aplikasi atau halaman lain saat ujian berlangsung. Semua jawaban akan dihapus bila melanggar."
+                                        icon="rocket_launch"
+                                        checked={formData.is_open_other_apps_allowed}
+                                        onChange={(checked) => setFormData({ ...formData, is_open_other_apps_allowed: checked })}
                                     />
                                     <Toggle
                                         label="Publish Immediately"
