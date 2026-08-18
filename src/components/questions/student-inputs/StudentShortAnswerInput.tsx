@@ -9,9 +9,11 @@ interface StudentShortAnswerInputProps {
     keyAnswer?: {
         answers?: string[];
     };
+    onPasteDetected?: () => void;
+    allowPaste?: boolean;
 }
 
-export default function StudentShortAnswerInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentShortAnswerInputProps) {
+export default function StudentShortAnswerInput({ selectedAnswer, onChange, showAnswer, keyAnswer, onPasteDetected, allowPaste = true }: StudentShortAnswerInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
 
     useEffect(() => {
@@ -29,6 +31,21 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             onChange(value);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        if (!allowPaste) {
+            e.preventDefault();
+            if (onPasteDetected) {
+                onPasteDetected();
+            }
+        }
+    };
+
+    const handleCopyCut = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        if (!allowPaste) {
+            e.preventDefault();
         }
     };
 
@@ -76,6 +93,9 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
                     onChange={handleChange}
                     onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
+                    onCopy={handleCopyCut}
+                    onCut={handleCopyCut}
                     placeholder="Type your short answer here..."
                     className="w-full p-5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl text-xl font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-sm group-hover:border-primary/30"
                 />

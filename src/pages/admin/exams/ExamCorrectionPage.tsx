@@ -75,6 +75,7 @@ export interface QuestionDetail {
     key_answer?: any;
     tags?: string[];
     exam_reading_material?: any | null;
+    metadata?: any;
 }
 
 export interface QuestionCorrectionStatus {

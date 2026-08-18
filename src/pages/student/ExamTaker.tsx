@@ -69,6 +69,9 @@ export default function ExamTaker() {
     const [isWaitingOfflineSubmit, setIsWaitingOfflineSubmit] = useState(false);
     const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
 
+    // Anti-cheat State
+    const [tabSwitches, setTabSwitches] = useState(0);
+
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
         const saved = localStorage.getItem(`exam_${id}_pending_answers`);
@@ -425,14 +428,181 @@ export default function ExamTaker() {
         }
     }, [isLoading]);
 
+    const violationDetectedRef = useRef(false);
+
+    const handleExamViolation = useCallback(async (reason: string) => {
+        if (!id || !exam || exam.is_open_other_apps_allowed !== false || violationDetectedRef.current) {
+            return;
+        }
+
+        violationDetectedRef.current = true;
+
+        const result = await MySwal.fire({
+            icon: 'warning',
+            title: 'Ujian Terpaksa Diulang Dari Awal',
+            html: `
+                <div class="text-left space-y-2 text-sm">
+                    <p>Anda terdeteksi membuka aplikasi lain atau jendela lain saat ujian sedang berlangsung.</p>
+                    <p class="font-semibold text-slate-800 dark:text-slate-100">Semua jawaban ujian akan dihapus dan sesi ujian saat ini akan direset.</p>
+                    <p>Ujian harus dimulai dari awal kembali.</p>
+                </div>
+            `,
+            showCancelButton: false,
+            confirmButtonText: 'Kembali ke halaman awal ujian',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            focusConfirm: true,
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        try {
+            await studentApi.reportExamViolation(id, {
+                reason,
+                source: 'external_app_or_tab_switch',
+            });
+
+            if (answerDebounceTimerRef.current) {
+                clearTimeout(answerDebounceTimerRef.current);
+                answerDebounceTimerRef.current = null;
+            }
+            pendingAnswerQueueRef.current.clear();
+            localStorage.removeItem(`exam_${id}_cache_data`);
+            localStorage.removeItem(`exam_${id}_pending_answers`);
+            setIsSyncing(false);
+            setPendingAnswers({});
+            setQuestions([]);
+
+            await MySwal.fire({
+                icon: 'error',
+                title: 'Ujian Diulang Dari Awal',
+                text: 'Anda terdeteksi membuka aplikasi lain atau halaman lain. Ujian terpaksa diulang dari awal karena pelanggaran aturan ujian.',
+                timer: 2500,
+                showConfirmButton: false,
+            });
+
+            navigate('/exams', { replace: true });
+        } catch (error) {
+            console.error('Failed to reset exam after violation:', error);
+            navigate('/exams', { replace: true });
+        }
+    }, [id, exam, navigate]);
+
+    // Anti-cheat logic: Window Blur / tab switch / external app attempt
+    useEffect(() => {
+        if (!exam || exam.is_open_other_apps_allowed !== false) {
+            return;
+        }
+
+        const handleBlur = () => {
+            setTabSwitches(prev => prev + 1);
+            console.warn('Tab switch or app switch detected!');
+            void handleExamViolation('window_blur');
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                console.warn('Document hidden, external app or tab switch detected.');
+                void handleExamViolation('visibility_hidden');
+            }
+        };
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = '';
+            void handleExamViolation('before_unload');
+        };
+
+        window.addEventListener('blur', handleBlur);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('blur', handleBlur);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [exam, handleExamViolation]);
+
+    // Anti-cheat logic: Paste Detection (global listener removed - now handled per-question input)
+
+    const handlePasteDetected = useCallback(async () => {
+        if (!id || !questions[currentQuestionIndex]) return;
+        const currentQ = questions[currentQuestionIndex];
+
+        // Show alert only if paste is not allowed
+        if (!exam?.is_paste_allowed) {
+            MySwal.fire({
+                icon: 'warning',
+                title: 'Salin-Tempel Tidak Diizinkan',
+                text: 'Tindakan salin-tempel (copy-paste) dilarang pada ujian ini. Aktivitas ini telah dicatat.',
+                toast: true,
+                position: 'top-end',
+                timer: 4000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+        }
+
+        // Always log the paste action to the backend
+        try {
+            const existingMetadata = currentQ.paste_metadata || {};
+            const newPasteCount = (existingMetadata.paste_count || 0) + 1;
+            const pastePayload = {
+                question_id: currentQ.id,
+                answer: currentQ.student_answer,
+                is_flagged: currentQ.is_flagged,
+                metadata: {
+                    tab_switches: tabSwitches,
+                    is_pasted: true,
+                    paste_count: newPasteCount,
+                    last_pasted_at: new Date().toISOString(),
+                }
+            };
+            // Update local tracking
+            const updatedQ = { ...currentQ, paste_metadata: { paste_count: newPasteCount, is_pasted: true } };
+            setQuestions(prev => prev.map((q, idx) => idx === currentQuestionIndex ? updatedQ : q));
+
+            await studentApi.answerQuestion(id, pastePayload);
+        } catch (e) {
+            console.error('Failed to log paste event:', e);
+        }
+    }, [id, questions, currentQuestionIndex, exam, tabSwitches]);
+
     const handleAnswerChange = useCallback((answer: any) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         const currentQ = questions[currentQuestionIndex];
+        const hasPasteHistory = Boolean(
+            currentQ.paste_metadata?.is_pasted ||
+            (currentQ.paste_metadata?.paste_count ?? 0) > 0 ||
+            currentQ.paste_metadata?.last_pasted_at
+        );
+
+        const normalizeText = (value: any) => {
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'string') return value.replace(/<[^>]*>/g, '').trim();
+            if (Array.isArray(value)) return value.join(' ').trim();
+            return String(value).trim();
+        };
+
+        const hadEmptyAnswer = normalizeText(currentQ.student_answer).length === 0;
+        const nowHasText = normalizeText(answer).length > 0;
+        const shouldClearPasteMetadata = hasPasteHistory && hadEmptyAnswer && nowHasText;
 
         // Optimistic Update - immediate UI update
         const newQuestions = questions.map((q, idx) =>
-            idx === currentQuestionIndex ? { ...q, student_answer: answer } : q
+            idx === currentQuestionIndex
+                ? {
+                    ...q,
+                    student_answer: answer,
+                    paste_metadata: shouldClearPasteMetadata
+                        ? { paste_count: 0, is_pasted: false, last_pasted_at: null }
+                        : q.paste_metadata,
+                }
+                : q
         );
         setQuestions(newQuestions);
 
@@ -453,8 +623,15 @@ export default function ExamTaker() {
         const payload = {
             question_id: currentQ.id,
             answer: answer,
-            is_flagged: currentQ.is_flagged
+            is_flagged: currentQ.is_flagged,
+            metadata: {
+                tab_switches: tabSwitches,
+                ...(shouldClearPasteMetadata ? { clear_paste_metadata: true } : {}),
+            }
         };
+
+        // Reset tabSwitches after sending
+        if (tabSwitches > 0) setTabSwitches(0);
 
         if (!isOnline) {
             // Save to queue immediately when offline
@@ -847,11 +1024,15 @@ export default function ExamTaker() {
                 return <StudentEssayInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    onPasteDetected={handlePasteDetected}
+                    allowPaste={exam?.is_paste_allowed ?? false}
                 />;
             case 'short_answer':
                 return <StudentShortAnswerInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    onPasteDetected={handlePasteDetected}
+                    allowPaste={exam?.is_paste_allowed ?? false}
                 />;
             case 'matching':
                 return <StudentMatchingInput

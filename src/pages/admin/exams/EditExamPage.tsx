@@ -658,9 +658,24 @@ export default function EditExamPage() {
                                                 checked={exam.is_published}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_published: val } : null)}
                                             />
+                                            <Toggle
+                                                label="Izinkan Salin-Tempel"
+                                                description="Siswa diizinkan melakukan paste jawaban. Jika nonaktif, paste akan diblokir. Semua aktivitas paste selalu dicatat."
+                                                icon={Shield}
+                                                checked={exam.is_paste_allowed ?? false}
+                                                onChange={(val) => setExam(prev => prev ? { ...prev, is_paste_allowed: val } : null)}
+                                            />
+                                            <Toggle
+                                                label="Izinkan Buka Aplikasi Lain"
+                                                description="Jika nonaktif, siswa dilarang membuka tab, aplikasi, atau halaman lain saat ujian berlangsung. Pelanggaran akan menghapus semua jawaban dan sesi ujian."
+                                                icon={Rocket}
+                                                checked={exam.is_open_other_apps_allowed ?? true}
+                                                onChange={(val) => setExam(prev => prev ? { ...prev, is_open_other_apps_allowed: val } : null)}
+                                            />
                                         </div>
                                     </section>
                                 </div>
+
                             )}
                         </div>
                     </div>

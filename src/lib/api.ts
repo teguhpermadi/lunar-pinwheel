@@ -491,6 +491,10 @@ export const studentApi = {
     finishExam: async (id: string) => {
         const response = await api.post(`/students/exams/${id}/finish`);
         return response.data;
+    },
+    reportExamViolation: async (id: string, data?: any) => {
+        const response = await api.post(`/students/exams/${id}/violation`, data || {});
+        return response.data;
     }
 };
 
@@ -897,6 +901,8 @@ export interface Exam {
     is_randomized_answer: boolean;
     is_show_result: boolean;
     is_visible_hint: boolean;
+    is_paste_allowed?: boolean;
+    is_open_other_apps_allowed?: boolean;
     max_attempts: number | null;
     timer_type: 'strict' | 'flexible';
     passing_score: number;
@@ -1008,6 +1014,10 @@ export const examApi = {
     },
     async restoreStudentAnswer(examId: string, sessionId: string, detailId: string) {
         const response = await api.post(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/restore`);
+        return response.data;
+    },
+    async checkIntegrity(examId: string, sessionId: string, detailId: string) {
+        const response = await api.post(`/exams/${examId}/sessions/${sessionId}/details/${detailId}/check-integrity`);
         return response.data;
     },
     finishCorrection: async (sessionId: string) => {
@@ -1473,4 +1483,96 @@ export const backupAssetsApi = {
         });
         return response.data;
     }
+};
+
+// --- Math Generator ---
+
+export interface MathPreviewConfig {
+    domain: string;
+    level: number;
+    count: number;
+    operation?: string;
+    number_type?: string;
+    operand_count?: number;
+    shape?: string;
+    dimension?: string;
+    type?: string;
+    with_story?: boolean;
+    with_distractors?: boolean;
+    distractor_count?: number;
+    seed?: number;
+    score?: number;
+    timer?: number;
+    hint?: string;
+    tags?: string[];
+    question_bank_id?: string;
+}
+
+export interface MathPreviewQuestion {
+    id: string;
+    content: string;
+    type: string;
+    difficulty: string;
+    options: Array<{
+        option_key: string;
+        content: string;
+        is_correct: boolean;
+        metadata?: Record<string, any>;
+    }>;
+    math_metadata?: Record<string, any>;
+    score?: number;
+    timer?: number;
+    hint?: string;
+    tags?: string[];
+}
+
+export interface MathPreviewResponse {
+    previews: MathPreviewQuestion[];
+    total_generated: number;
+    engine_version?: string;
+    master_seed?: number;
+}
+
+export interface MathLevel {
+    level: number;
+    difficulty: string;
+    allowed_number_types: string[];
+}
+
+export interface MathDomain {
+    name: string;
+    display_name: string;
+    description: string;
+    available_operations?: string[];
+    available_shapes?: string[];
+    available_types?: string[];
+}
+
+export const mathGeneratorApi = {
+    preview: async (config: MathPreviewConfig): Promise<SingleResponse<MathPreviewResponse>> => {
+        const response = await api.post('/math-generate/preview', config);
+        return response.data;
+    },
+    batchPreview: async (requirements: MathPreviewConfig[], masterSeed?: number): Promise<SingleResponse<MathPreviewResponse>> => {
+        const response = await api.post('/math-generate/batch-preview', {
+            requirements,
+            master_seed: masterSeed,
+        });
+        return response.data;
+    },
+    save: async (questionBankId: string, previews: MathPreviewQuestion[]): Promise<SingleResponse<{ saved_count: number; question_ids: string[]; question_bank_id: string; questions_count_total: number }>> => {
+        const response = await api.post('/math-generate/save', {
+            question_bank_id: questionBankId,
+            previews,
+        });
+        return response.data;
+    },
+    getLevels: async (): Promise<SingleResponse<{ levels: MathLevel[]; domains: MathDomain[] }>> => {
+        const response = await api.get('/math-generate/levels');
+        return response.data;
+    },
+    getDomains: async (): Promise<SingleResponse<{ domains: MathDomain[] }>> => {
+        const response = await api.get('/math-generate/domains');
+        return response.data;
+    },
 };

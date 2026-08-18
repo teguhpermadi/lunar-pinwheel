@@ -38,6 +38,7 @@ import BackupManagementPage from "@/pages/admin/BackupManagementPage"
 import SubjectUnitManagement from "@/pages/admin/SubjectUnitManagement"
 import QuestionSuggestionList from "@/pages/admin/question-banks/QuestionSuggestionList.tsx"
 import ReviewQuestionSuggestion from "@/pages/admin/question-banks/ReviewQuestionSuggestion"
+import MathGeneratorPage from "@/pages/admin/questions/math-generator/MathGeneratorPage"
 
 // Guard for protected routes
 function RequireAuth() {
@@ -138,6 +139,8 @@ function App() {
               <Route path="admin/question-banks/:id/suggestions" element={<QuestionSuggestionList />} />
               <Route path="admin/question-banks/:bankId/suggestions/:suggestionId/review" element={<ReviewQuestionSuggestion />} />
 
+              {/* Removed Math Generator from here, moved to standalone */}
+
               <Route path="admin/exams" element={<ExamManagementPage />} />
               <Route path="admin/exams/:id/edit" element={<EditExamPage />} />
 
@@ -154,6 +157,10 @@ function App() {
             </Route>
 
             {/* Standalone Routes (No Sidebar) */}
+            <Route element={<AdminLayout hideSidebar={true} />}>
+              <Route path="admin/math-generator" element={<MathGeneratorPage />} />
+            </Route>
+
             <Route path="admin/exams/:id/live" element={<ExamLiveScorePage />} />
             <Route path="admin/question-banks/:id" element={<EditQuestionBank />} />
             <Route path="admin/question-banks/:id/show" element={<ShowQuestionBank />} />

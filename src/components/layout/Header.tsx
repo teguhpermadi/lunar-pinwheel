@@ -6,29 +6,34 @@ interface HeaderProps {
     toggleSidebar: () => void;
     toggleMobileSidebar: () => void;
     isSidebarCollapsed: boolean;
+    hideSidebarToggle?: boolean;
 }
 
-export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCollapsed }: HeaderProps) {
+export default function Header({ toggleSidebar, toggleMobileSidebar, isSidebarCollapsed, hideSidebarToggle }: HeaderProps) {
     const { user } = useAuth();
 
     return (
         <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300">
             <div className="flex items-center gap-2 md:gap-6 flex-1">
-                {/* Desktop Toggle */}
-                <button
-                    onClick={toggleSidebar}
-                    className="hidden lg:flex cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
-                >
-                    <PanelLeftClose className={`size-5 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
-                </button>
+                {!hideSidebarToggle && (
+                    <>
+                        {/* Desktop Toggle */}
+                        <button
+                            onClick={toggleSidebar}
+                            className="hidden lg:flex cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+                        >
+                            <PanelLeftClose className={`size-5 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
+                        </button>
 
-                {/* Mobile Toggle */}
-                <button
-                    onClick={toggleMobileSidebar}
-                    className="lg:hidden cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
-                >
-                    <Menu className="size-5" />
-                </button>
+                        {/* Mobile Toggle */}
+                        <button
+                            onClick={toggleMobileSidebar}
+                            className="lg:hidden cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+                        >
+                            <Menu className="size-5" />
+                        </button>
+                    </>
+                )}
 
                 {/* Academic Year Selector - can be wrapped or hidden on very small screens if needed, but keeping it for now */}
                 <div className="scale-90 md:scale-100 origin-left">

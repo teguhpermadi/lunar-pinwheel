@@ -27,6 +27,11 @@ import {
     Users,
     Medal,
     BookOpen,
+    ShieldAlert,
+    AlertTriangle,
+    MousePointer2,
+    Copy,
+    RefreshCw,
 } from 'lucide-react';
 
 const StudentResultDetailPage: React.FC = () => {
@@ -37,6 +42,7 @@ const StudentResultDetailPage: React.FC = () => {
     const [questions, setQuestions] = useState<QuestionDetail[]>([]);
     const [sessionInfo, setSessionInfo] = useState<StudentSession | null>(null);
     const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect' | 'flagged'>('all');
+    const [isCheckingIntegrity, setIsCheckingIntegrity] = useState<string | null>(null);
 
     // Collapsible states
     const [expandedSections, setExpandedSections] = useState({
@@ -129,6 +135,40 @@ const StudentResultDetailPage: React.FC = () => {
             console.error('Error fetching student result detail:', error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleCheckIntegrity = async (detailId: string) => {
+        if (!examId || !sessionId) return;
+        
+        setIsCheckingIntegrity(detailId);
+        try {
+            const response = await examApi.checkIntegrity(examId, sessionId, detailId);
+            if (response.success) {
+                // Update local questions state
+                setQuestions(prev => prev.map(q => 
+                    q.id === detailId 
+                    ? { ...q, metadata: response.data.metadata, score_earned: response.data.score_earned, correction_notes: response.data.correction_notes } 
+                    : q
+                ));
+                
+                // Show success toast
+                const Swal = (await import('sweetalert2')).default;
+                Swal.fire({
+                    title: 'Analysis Complete',
+                    text: 'AI Integrity analysis has been updated.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        } catch (error: any) {
+            const Swal = (await import('sweetalert2')).default;
+            Swal.fire('Error', error.response?.data?.message || 'Failed to check integrity', 'error');
+        } finally {
+            setIsCheckingIntegrity(null);
         }
     };
 
@@ -572,6 +612,93 @@ const StudentResultDetailPage: React.FC = () => {
                                                     scoreEarned={q.score_earned}
                                                 />
                                             </div>
+
+                                            {/* AI Integrity Analysis Section */}
+                                            {q.metadata && (q.metadata.ai_cheat_probability > 0 || q.metadata.paste_count > 0 || q.metadata.tab_switches > 0) && (
+                                                <div className={cn(
+                                                    "mt-6 p-6 rounded-[2rem] border animate-in fade-in slide-in-from-top-4 duration-500",
+                                                    (q.metadata.ai_cheat_probability || 0) > 70 ? "bg-rose-500/5 border-rose-500/20" : 
+                                                    (q.metadata.ai_cheat_probability || 0) > 30 ? "bg-amber-500/5 border-amber-500/20" : "bg-slate-500/5 border-slate-500/10"
+                                                )}>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={cn(
+                                                                "p-2.5 rounded-xl border",
+                                                                (q.metadata.ai_cheat_probability || 0) > 70 ? "bg-rose-500/10 text-rose-500 border-rose-500/20" : 
+                                                                (q.metadata.ai_cheat_probability || 0) > 30 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-slate-500/10 text-slate-500 border-slate-500/20"
+                                                            )}>
+                                                                <ShieldAlert className="size-5" />
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <div>
+                                                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">AI Integrity Intelligence</h4>
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Behavioral & Linguistic Analysis</p>
+                                                                </div>
+                                                                <button 
+                                                                    onClick={() => handleCheckIntegrity(q.id)}
+                                                                    disabled={isCheckingIntegrity === q.id}
+                                                                    className={cn(
+                                                                        "p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group",
+                                                                        isCheckingIntegrity === q.id && "opacity-50 cursor-not-allowed"
+                                                                    )}
+                                                                    title="Re-analyze integrity"
+                                                                >
+                                                                    <RefreshCw className={cn(
+                                                                        "size-3 text-slate-400 group-hover:text-indigo-500 transition-colors",
+                                                                        isCheckingIntegrity === q.id && "animate-spin"
+                                                                    )} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">AI Probability</p>
+                                                            <div className={cn(
+                                                                "text-xl font-black tabular-nums",
+                                                                (q.metadata.ai_cheat_probability || 0) > 70 ? "text-rose-500" : 
+                                                                (q.metadata.ai_cheat_probability || 0) > 30 ? "text-amber-500" : "text-emerald-500"
+                                                            )}>
+                                                                {q.metadata.ai_cheat_probability || 0}%
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                                        <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                                            <div className="size-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20">
+                                                                <Copy className="size-4" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Paste Actions</p>
+                                                                <p className="text-sm font-black text-slate-900 dark:text-white">{q.metadata.paste_count || 0} times</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                                            <div className="size-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center border border-indigo-500/20">
+                                                                <MousePointer2 className="size-4" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Tab Switches</p>
+                                                                <p className="text-sm font-black text-slate-900 dark:text-white">{q.metadata.tab_switches || 0} times</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {q.metadata.ai_integrity_analysis && (
+                                                        <div className="p-4 rounded-2xl bg-white/40 dark:bg-slate-900/40 border border-white dark:border-slate-800/50">
+                                                            <div className="flex items-start gap-2">
+                                                                <AlertTriangle className={cn(
+                                                                    "size-4 shrink-0 mt-0.5",
+                                                                    (q.metadata.ai_cheat_probability || 0) > 70 ? "text-rose-500" : "text-amber-500"
+                                                                )} />
+                                                                <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                                                                    <span className="font-bold text-slate-900 dark:text-white">Analysis: </span>
+                                                                    {q.metadata.ai_integrity_analysis}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Score & Note Footer */}

@@ -11,9 +11,11 @@ interface StudentEssayInputProps {
         rubric?: any;
         answers?: string[];
     };
+    onPasteDetected?: () => void;
+    allowPaste?: boolean;
 }
 
-export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentEssayInputProps) {
+export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer, keyAnswer, onPasteDetected, allowPaste = true }: StudentEssayInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
 
     useEffect(() => {
@@ -74,6 +76,8 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
                     placeholder="Write your answer here..."
                     className="w-full p-4 min-h-[256px] bg-transparent pb-12"
                     minHeight="min-h-[256px]"
+                    onPasteDetected={onPasteDetected}
+                    allowPaste={allowPaste}
                 />
             </div>
             <div className="flex justify-between text-xs text-slate-400 px-2 font-medium">
