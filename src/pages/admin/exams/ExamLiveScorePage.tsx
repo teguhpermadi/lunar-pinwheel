@@ -33,7 +33,7 @@ interface LiveScoreData {
         };
         status: 'in_progress' | 'idle' | 'finished' | 'completed' | 'timed_out';
         start_time: string;
-        remaining_time: number;
+        remaining_time: number | null;
         extra_time: number;
         score: number;
         history?: number[]; // ADDED HISTORY FROM BACKEND
@@ -69,14 +69,18 @@ export default function ExamLiveScorePage() {
         }
     };
 
+    const isStrictTimer = data?.exam?.timer_type === 'strict';
+
     useEffect(() => {
+        if (!isStrictTimer) return;
+
         const ticker = setInterval(() => {
             setData(prev => {
                 if (!prev) return prev;
                 return {
                     ...prev,
                     sessions: prev.sessions.map(s => {
-                        if (s.status === 'in_progress' && s.remaining_time > 0) {
+                        if (s.status === 'in_progress' && typeof s.remaining_time === 'number' && s.remaining_time > 0) {
                             return { ...s, remaining_time: s.remaining_time - 1 };
                         }
                         return s;
@@ -86,7 +90,7 @@ export default function ExamLiveScorePage() {
         }, 1000);
 
         return () => clearInterval(ticker);
-    }, []);
+    }, [isStrictTimer]);
 
     useEffect(() => {
         fetchLiveScore();
@@ -204,6 +208,17 @@ export default function ExamLiveScorePage() {
 
     const handleAddTime = async (user_id: string, name: string) => {
         if (!id) return;
+
+        if (data?.exam?.timer_type !== 'strict') {
+            await Swal.fire({
+                title: 'Strict timer required',
+                text: 'Extra time can only be added to exams configured with a strict timer.',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         const { value: minutes } = await Swal.fire({
             title: `Add Extra Time`,
             text: `How many minutes would you like to add for ${name}?`,
@@ -546,12 +561,16 @@ export default function ExamLiveScorePage() {
                                                             </p>
                                                         </td>
                                                         <td className="hidden md:table-cell px-6 py-4 text-center">
-                                                            <p className={cn(
-                                                                "text-sm font-black tabular-nums",
-                                                                session.remaining_time < 300 && session.remaining_time > 0 ? "text-rose-500 animate-pulse" : "text-slate-900 dark:text-white"
-                                                            )}>
-                                                                {formatTime(session.remaining_time)}
-                                                            </p>
+                                                            {isStrictTimer && typeof session.remaining_time === 'number' ? (
+                                                                <p className={cn(
+                                                                    "text-sm font-black tabular-nums",
+                                                                    session.remaining_time < 300 && session.remaining_time > 0 ? "text-rose-500 animate-pulse" : "text-slate-900 dark:text-white"
+                                                                )}>
+                                                                    {formatTime(session.remaining_time)}
+                                                                </p>
+                                                            ) : (
+                                                                <p className="text-sm font-medium text-slate-400 dark:text-slate-500">—</p>
+                                                            )}
                                                         </td>
                                                         <td className="px-4 md:px-6 py-4">
                                                             <div className="flex items-center justify-center gap-1.5 md:gap-2">
@@ -573,13 +592,15 @@ export default function ExamLiveScorePage() {
                                                                         <CirclePlay className="w-4 h-4 md:w-5 md:h-5" />
                                                                     </button>
                                                                 )}
-                                                                <button
-                                                                    onClick={() => handleAddTime(session.student.id, session.student.name)}
-                                                                    className="text-[9px] md:text-[10px] font-bold text-primary hover:underline transition-all active:scale-90 shrink-0"
-                                                                >
-                                                                    <span className="hidden sm:inline">+ Add Time</span>
-                                                                    <span className="sm:hidden">+ Time</span>
-                                                                </button>
+                                                                {isStrictTimer && (
+                                                                    <button
+                                                                        onClick={() => handleAddTime(session.student.id, session.student.name)}
+                                                                        className="text-[9px] md:text-[10px] font-bold text-primary hover:underline transition-all active:scale-90 shrink-0"
+                                                                    >
+                                                                        <span className="hidden sm:inline">+ Add Time</span>
+                                                                        <span className="sm:hidden">+ Time</span>
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="px-4 md:px-6 py-4 text-right">
