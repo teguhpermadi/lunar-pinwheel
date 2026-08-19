@@ -148,6 +148,7 @@ export default function ExamCorrectionPage() {
     const [isAICorrecting, setIsAICorrecting] = useState(false);
     const [isAIScopeModalOpen, setIsAIScopeModalOpen] = useState(false);
     const [aiScope, setAiScope] = useState<'all' | 'question'>('all');
+    const [aiCorrectionMode, setAiCorrectionMode] = useState<'uncorrected' | 'all'>('uncorrected');
 
     const [isResetCorrecting, setIsResetCorrecting] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -650,6 +651,7 @@ export default function ExamCorrectionPage() {
         const uncorrectedCount = getUncorrectedAnswersCount(answersToCount);
         const totalCount = getTotalAnswersCount(answersToCount);
         const alreadyCorrected = totalCount - uncorrectedCount;
+        const answersToCorrect = aiCorrectionMode === 'all' ? totalCount : uncorrectedCount;
 
         const scopeLabel = aiScope === 'all' ? 'semua soal' : `soal Q${(selectedQuestionIndex + 1).toString().padStart(2, '0')}`;
 
@@ -657,8 +659,10 @@ export default function ExamCorrectionPage() {
             title: 'AI Correction',
             html: `
                 <div class="text-left">
-                    <p class="mb-2">Akan dikoreksi: <strong class="text-indigo-600">${uncorrectedCount}</strong> jawaban</p>
-                    <p class="text-slate-500 text-sm">${alreadyCorrected > 0 ? `${alreadyCorrected} sudah dikoreksi (akan dilewati)` : 'Semua belum dikoreksi'}</p>
+                    <p class="mb-2">Akan dikoreksi: <strong class="text-indigo-600">${answersToCorrect}</strong> jawaban</p>
+                    <p class="text-slate-500 text-sm">${aiCorrectionMode === 'all'
+                        ? 'Jawaban yang sudah dikoreksi akan dikoreksi ulang.'
+                        : (alreadyCorrected > 0 ? `${alreadyCorrected} sudah dikoreksi (akan dilewati)` : 'Semua belum dikoreksi')}</p>
                 </div>
             `,
             icon: 'info',
@@ -676,7 +680,7 @@ export default function ExamCorrectionPage() {
         try {
             const response = await examApi.aiCorrect(id, {
                 exam_question_id: questionId,
-                only_uncorrected: true
+                only_uncorrected: aiCorrectionMode === 'uncorrected'
             });
 
             Swal.fire({
@@ -1767,15 +1771,52 @@ export default function ExamCorrectionPage() {
                                 </div>
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2">AI Correction</h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Pilih scope koreksi AI. Hanya jawaban yang belum dikoreksi yang akan diproses.
+                                    Pilih scope dan mode koreksi AI.
                                 </p>
                             </div>
 
                             <div className="space-y-3 mb-6">
                                 <button
+                                    onClick={() => setAiCorrectionMode('uncorrected')}
+                                    disabled={isAICorrecting}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between disabled:opacity-50",
+                                        aiCorrectionMode === 'uncorrected' ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                                            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-white mb-0.5">Hanya Belum Dikoreksi</div>
+                                            <div className="text-[10px] text-slate-500">Jawaban yang sudah dikoreksi akan dilewati</div>
+                                        </div>
+                                    </div>
+                                    {aiCorrectionMode === 'uncorrected' && <CheckCircle2 className="w-5 h-5 text-indigo-500" />}
+                                </button>
+                                <button
+                                    onClick={() => setAiCorrectionMode('all')}
+                                    disabled={isAICorrecting}
+                                    className={cn(
+                                        "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between disabled:opacity-50",
+                                        aiCorrectionMode === 'all' ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" : "border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                                            <RotateCw className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-white mb-0.5">Koreksi Ulang Semua Siswa</div>
+                                            <div className="text-[10px] text-slate-500">Termasuk jawaban yang sudah dikoreksi</div>
+                                        </div>
+                                    </div>
+                                    {aiCorrectionMode === 'all' && <CheckCircle2 className="w-5 h-5 text-indigo-500" />}
+                                </button>
+                                <button
                                     onClick={() => {
                                         setAiScope('all');
-                                        handleAICorrection();
                                     }}
                                     disabled={isAICorrecting}
                                     className={cn(
@@ -1799,7 +1840,6 @@ export default function ExamCorrectionPage() {
                                 <button
                                     onClick={() => {
                                         setAiScope('question');
-                                        handleAICorrection();
                                     }}
                                     disabled={isAICorrecting || masterQuestions.length === 0}
                                     className={cn(
