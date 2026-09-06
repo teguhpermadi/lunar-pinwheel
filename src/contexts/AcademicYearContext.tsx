@@ -66,7 +66,8 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
                     } else if (newYears.length > 0) {
                         setSelectedYearIdState(prev => {
                             if (!prev) {
-                                const defaultYear = newYears[0];
+                                // Prefer the server-designated active year, fall back to first item
+                                const defaultYear = newYears.find(y => y.is_active) || newYears[0];
                                 localStorage.setItem('selectedAcademicYearId', defaultYear.id);
                                 return defaultYear.id;
                             }
@@ -102,28 +103,43 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
     };
 
     const setSelectedYearId = async (id: string) => {
-        // Just client side update
         setIsLoading(true);
+        try {
+            // Persist the active year on the server (single source of truth).
+            const response = await academicYearApi.setActive(id);
 
-        // Simulate a brief delay to show transition if needed
-        await new Promise(resolve => setTimeout(resolve, 300));
+            if (!response?.success) {
+                throw new Error(response?.message || 'Gagal mengubah tahun akademik aktif');
+            }
 
-        setSelectedYearIdState(id);
-        localStorage.setItem('selectedAcademicYearId', id);
+            setSelectedYearIdState(id);
+            localStorage.setItem('selectedAcademicYearId', id);
 
-        // Show success alert
-        const Swal = (await import('sweetalert2')).default;
-        Swal.fire({
-            icon: 'success',
-            title: 'Academic Year Updated',
-            text: 'Active academic year changed locally.',
-            timer: 1500,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-        });
-
-        setIsLoading(false);
+            const Swal = (await import('sweetalert2')).default;
+            Swal.fire({
+                icon: 'success',
+                title: 'Academic Year Updated',
+                text: 'Tahun akademik aktif berhasil diubah.',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } catch (error) {
+            console.error('Failed to set active academic year:', error);
+            const Swal = (await import('sweetalert2')).default;
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Tahun akademik aktif gagal diubah. Silakan coba lagi.',
+                timer: 2500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Ensure selected year is available even if not in current page (optional: fetch specific if missing)

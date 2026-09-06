@@ -195,6 +195,7 @@ export interface AcademicYear {
     id: string;
     year: string;
     semester: string;
+    is_active: boolean;
     user_id?: string; // integer in request, string/ulid in resource? Check schema.
     // Schema says user_id is integer in StoreRequest but user object in Resource.
     // However, usually IDs are strings in this app (ULID). 
@@ -285,6 +286,10 @@ export const academicYearApi = {
     },
     forceDelete: async (id: string) => {
         const response = await api.delete(`/academic-years/${id}/force-delete`);
+        return response.data;
+    },
+    setActive: async (id: string) => {
+        const response = await api.post(`/academic-years/${id}/set-active`);
         return response.data;
     }
 };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import Header from '@/components/layout/Header';
+import { useAcademicYear } from '@/contexts/AcademicYearContext';
 
 interface AdminLayoutProps {
     hideSidebar?: boolean;
@@ -10,6 +11,11 @@ interface AdminLayoutProps {
 export default function AdminLayout({ hideSidebar = false }: AdminLayoutProps = {}) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    // FE-03: Setiap kali tahun akademik aktif berganti, seluruh konten halaman
+    // di-remount (key berubah) sehingga semua fetch list/page ikut dijalankan
+    // ulang dengan tahun akademik yang baru. Header & sidebar tidak ikut
+    // di-remount karena berada di luar elemen berkunci ini.
+    const { selectedYearId } = useAcademicYear();
 
     const toggleSidebar = () => {
         setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -45,7 +51,9 @@ export default function AdminLayout({ hideSidebar = false }: AdminLayoutProps = 
                     hideSidebarToggle={hideSidebar}
                 />
 
-                <Outlet />
+                <div key={selectedYearId ?? 'no-year'} className="contents">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );
