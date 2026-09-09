@@ -1,6 +1,30 @@
 import axios from 'axios';
 import { z } from 'zod';
 
+export interface TypingMetrics {
+    schema_version: 1;
+    is_analyzed: true;
+    total_keystrokes: number;
+    avg_dwell_time_ms: number;
+    avg_flight_time_ms: number;
+    backspace_count: number;
+    delete_count: number;
+    correction_ratio: number;
+    long_pauses_count: number;
+    pause_positions: number[];
+    wpm_estimated: number | null;
+    capture_started_at: string;
+    capture_duration_ms: number;
+}
+
+export interface SaveAnswerPayload {
+    question_id: string;
+    answer: unknown;
+    is_flagged?: boolean;
+    metadata?: Record<string, unknown>;
+    typing_metrics?: TypingMetrics;
+}
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost/api/v1';
 
 export const api = axios.create({
@@ -489,7 +513,7 @@ export const studentApi = {
         const response = await api.get(`/students/exams/${id}/take`);
         return response.data;
     },
-    answerQuestion: async (id: string, data: any) => {
+    answerQuestion: async (id: string, data: SaveAnswerPayload) => {
         const response = await api.post(`/students/exams/${id}/answer`, data);
         return response.data;
     },
@@ -908,6 +932,8 @@ export interface Exam {
     is_visible_hint: boolean;
     is_paste_allowed?: boolean;
     is_open_other_apps_allowed?: boolean;
+    enable_keystroke_analytics?: boolean;
+    min_char_keystroke_threshold?: number;
     max_attempts: number | null;
     timer_type: 'strict' | 'flexible';
     passing_score: number;

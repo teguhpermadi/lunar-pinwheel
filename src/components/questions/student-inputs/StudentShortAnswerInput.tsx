@@ -1,20 +1,40 @@
 import { useState, useEffect } from 'react';
 import { PencilLine, CheckCircle2 } from 'lucide-react';
 import MathRenderer from '@/components/ui/MathRenderer';
+import type { TypingMetrics } from '@/lib/api';
+import { useKeystrokeAnalytics } from '@/hooks/useKeystrokeAnalytics';
 
 interface StudentShortAnswerInputProps {
     selectedAnswer: string | null;
-    onChange: (value: string) => void;
+    onChange: (value: string, typingMetrics?: TypingMetrics) => void;
     showAnswer?: boolean;
     keyAnswer?: {
         answers?: string[];
     };
     onPasteDetected?: () => void;
     allowPaste?: boolean;
+    analyticsEnabled?: boolean;
+    analyticsThreshold?: number;
+    analyticsResetToken?: number;
 }
 
-export default function StudentShortAnswerInput({ selectedAnswer, onChange, showAnswer, keyAnswer, onPasteDetected, allowPaste = true }: StudentShortAnswerInputProps) {
+export default function StudentShortAnswerInput({
+    selectedAnswer,
+    onChange,
+    showAnswer,
+    keyAnswer,
+    onPasteDetected,
+    allowPaste = true,
+    analyticsEnabled = false,
+    analyticsThreshold = 150,
+    analyticsResetToken = 0,
+}: StudentShortAnswerInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
+    const analytics = useKeystrokeAnalytics({
+        enabled: analyticsEnabled,
+        minCharThreshold: analyticsThreshold,
+        resetToken: analyticsResetToken,
+    });
 
     useEffect(() => {
         setValue(selectedAnswer || '');
@@ -25,12 +45,12 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
     };
 
     const handleBlur = () => {
-        onChange(value);
+        onChange(value, analytics.getMetrics(value));
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            onChange(value);
+            onChange(value, analytics.getMetrics(value));
         }
     };
 
@@ -92,7 +112,11 @@ export default function StudentShortAnswerInput({ selectedAnswer, onChange, show
                     value={value}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
+                    onKeyUp={analytics.onKeyUp}
+                    onKeyDown={(event) => {
+                        analytics.onKeyDown(event);
+                        handleKeyDown(event);
+                    }}
                     onPaste={handlePaste}
                     onCopy={handleCopyCut}
                     onCut={handleCopyCut}

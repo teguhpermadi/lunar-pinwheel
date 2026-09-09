@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import type { TypingMetrics } from '@/lib/api';
+import { useKeystrokeAnalytics } from '@/hooks/useKeystrokeAnalytics';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import QuestionToolbar from '@/components/questions/QuestionToolbar';
 import MathRenderer from '@/components/ui/MathRenderer';
 
 interface StudentEssayInputProps {
     selectedAnswer: string | null;
-    onChange: (value: string) => void;
+    onChange: (value: string, typingMetrics?: TypingMetrics) => void;
     showAnswer?: boolean;
     keyAnswer?: {
         rubric?: any;
@@ -13,10 +15,28 @@ interface StudentEssayInputProps {
     };
     onPasteDetected?: () => void;
     allowPaste?: boolean;
+    analyticsEnabled?: boolean;
+    analyticsThreshold?: number;
+    analyticsResetToken?: number;
 }
 
-export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer, keyAnswer, onPasteDetected, allowPaste = true }: StudentEssayInputProps) {
+export default function StudentEssayInput({
+    selectedAnswer,
+    onChange,
+    showAnswer,
+    keyAnswer,
+    onPasteDetected,
+    allowPaste = true,
+    analyticsEnabled = false,
+    analyticsThreshold = 150,
+    analyticsResetToken = 0,
+}: StudentEssayInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
+    const analytics = useKeystrokeAnalytics({
+        enabled: analyticsEnabled,
+        minCharThreshold: analyticsThreshold,
+        resetToken: analyticsResetToken,
+    });
 
     useEffect(() => {
         setValue(selectedAnswer || '');
@@ -27,7 +47,7 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
     };
 
     const handleBlur = () => {
-        onChange(value);
+        onChange(value, analytics.getMetrics(stripHtml(value)));
     };
 
     const stripHtml = (html: string) => {
@@ -78,6 +98,8 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
                     minHeight="min-h-[256px]"
                     onPasteDetected={onPasteDetected}
                     allowPaste={allowPaste}
+                    onKeyDown={analytics.onKeyDown}
+                    onKeyUp={analytics.onKeyUp}
                 />
             </div>
             <div className="flex justify-between text-xs text-slate-400 px-2 font-medium">
@@ -87,4 +109,3 @@ export default function StudentEssayInput({ selectedAnswer, onChange, showAnswer
         </div>
     );
 }
-

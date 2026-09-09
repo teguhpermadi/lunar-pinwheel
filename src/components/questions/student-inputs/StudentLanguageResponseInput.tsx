@@ -1,22 +1,41 @@
 import { useState, useEffect, useRef } from 'react';
+import type { TypingMetrics } from '@/lib/api';
+import { useKeystrokeAnalytics } from '@/hooks/useKeystrokeAnalytics';
 import ArabicKeyboard from '@/components/ui/ArabicKeyboard';
 import JavaneseKeyboard from '@/components/ui/JavaneseKeyboard';
 import { Info, CheckCircle2 } from 'lucide-react';
 
 interface StudentLanguageResponseInputProps {
     selectedAnswer: string | null;
-    onChange: (value: string) => void;
+    onChange: (value: string, typingMetrics?: TypingMetrics) => void;
     language: 'arabic' | 'javanese';
     showAnswer?: boolean;
     keyAnswer?: {
         answers?: string[];
     };
+    analyticsEnabled?: boolean;
+    analyticsThreshold?: number;
+    analyticsResetToken?: number;
 }
 
-export default function StudentLanguageResponseInput({ selectedAnswer, onChange, language, showAnswer, keyAnswer }: StudentLanguageResponseInputProps) {
+export default function StudentLanguageResponseInput({
+    selectedAnswer,
+    onChange,
+    language,
+    showAnswer,
+    keyAnswer,
+    analyticsEnabled = false,
+    analyticsThreshold = 150,
+    analyticsResetToken = 0,
+}: StudentLanguageResponseInputProps) {
     const [value, setValue] = useState(selectedAnswer || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const analytics = useKeystrokeAnalytics({
+        enabled: analyticsEnabled,
+        minCharThreshold: analyticsThreshold,
+        resetToken: analyticsResetToken,
+    });
 
     useEffect(() => {
         setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
@@ -29,7 +48,7 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value;
         setValue(newValue);
-        onChange(newValue);
+        onChange(newValue, analytics.getMetrics(newValue));
     };
 
     const handleKeyClick = (char: string) => {
@@ -132,6 +151,8 @@ export default function StudentLanguageResponseInput({ selectedAnswer, onChange,
                 ref={textareaRef}
                 value={value}
                 onChange={handleChange}
+                onKeyDown={analytics.onKeyDown}
+                onKeyUp={analytics.onKeyUp}
                 inputMode={isMobile ? "none" : undefined}
                 placeholder={language === 'arabic' ? 'اكتب إجابتك هنا...' : 'Serat wangsulan panjenengan wonten mriki...'}
                 dir={language === 'arabic' ? 'rtl' : 'ltr'}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { studentApi, Exam } from '@/lib/api';
+import { studentApi, Exam, SaveAnswerPayload, TypingMetrics } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
@@ -71,6 +71,8 @@ export default function ExamTaker() {
 
     // Anti-cheat State
     const [tabSwitches, setTabSwitches] = useState(0);
+    const [analyticsResetVersion, setAnalyticsResetVersion] = useState(0);
+    const [analyticsResetQuestionId, setAnalyticsResetQuestionId] = useState<string | null>(null);
 
     // Offline State Sync Queue
     const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
@@ -126,6 +128,8 @@ export default function ExamTaker() {
                         if (response.success) {
                             delete answersToKeep[qId];
                             syncedCount++;
+                            setAnalyticsResetQuestionId(qId);
+                            setAnalyticsResetVersion((version) => version + 1);
                         }
                     } catch (err) {
                         // Keep in pending loop
@@ -471,6 +475,8 @@ export default function ExamTaker() {
             pendingAnswerQueueRef.current.clear();
             localStorage.removeItem(`exam_${id}_cache_data`);
             localStorage.removeItem(`exam_${id}_pending_answers`);
+            setAnalyticsResetQuestionId(currentQuestion?.id ?? null);
+            setAnalyticsResetVersion((version) => version + 1);
             setIsSyncing(false);
             setPendingAnswers({});
             setQuestions([]);
@@ -571,7 +577,7 @@ export default function ExamTaker() {
         }
     }, [id, questions, currentQuestionIndex, exam, tabSwitches]);
 
-    const handleAnswerChange = useCallback((answer: any) => {
+    const handleAnswerChange = useCallback((answer: any, typingMetrics?: TypingMetrics) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         const currentQ = questions[currentQuestionIndex];
@@ -620,14 +626,15 @@ export default function ExamTaker() {
             } catch (e) { }
         }
 
-        const payload = {
+        const payload: SaveAnswerPayload = {
             question_id: currentQ.id,
             answer: answer,
             is_flagged: currentQ.is_flagged,
             metadata: {
                 tab_switches: tabSwitches,
                 ...(shouldClearPasteMetadata ? { clear_paste_metadata: true } : {}),
-            }
+            },
+            ...(typingMetrics ? { typing_metrics: typingMetrics } : {}),
         };
 
         // Reset tabSwitches after sending
@@ -669,6 +676,8 @@ export default function ExamTaker() {
                         }
                         return prev;
                     });
+                    setAnalyticsResetQuestionId(qId);
+                    setAnalyticsResetVersion((version) => version + 1);
                 } catch (error) {
                     console.error(`Debounced save failed for answer ${qId}:`, error);
                     // Keep in pending queue for retry
@@ -702,6 +711,8 @@ export default function ExamTaker() {
         try {
             const response = await studentApi.finishExam(id!);
             if (response.success) {
+                setAnalyticsResetQuestionId(currentQuestion?.id ?? null);
+                setAnalyticsResetVersion((version) => version + 1);
                 // Remove caches
                 localStorage.removeItem(`exam_${id}_cache_data`);
                 localStorage.removeItem(`exam_${id}_pending_answers`);
@@ -936,6 +947,8 @@ export default function ExamTaker() {
         try {
             const response = await studentApi.finishExam(id);
             if (response.success) {
+                setAnalyticsResetQuestionId(currentQuestion?.id ?? null);
+                setAnalyticsResetVersion((version) => version + 1);
                 // Clear all local storage caches
                 localStorage.removeItem(`exam_${id}_cache_data`);
                 localStorage.removeItem(`exam_${id}_pending_answers`);
@@ -1026,6 +1039,9 @@ export default function ExamTaker() {
                     onChange={handleAnswerChange}
                     onPasteDetected={handlePasteDetected}
                     allowPaste={exam?.is_paste_allowed ?? false}
+                    analyticsEnabled={exam?.enable_keystroke_analytics === true}
+                    analyticsThreshold={exam?.min_char_keystroke_threshold ?? 150}
+                    analyticsResetToken={analyticsResetQuestionId === q.id ? analyticsResetVersion : 0}
                 />;
             case 'short_answer':
                 return <StudentShortAnswerInput
@@ -1033,6 +1049,9 @@ export default function ExamTaker() {
                     onChange={handleAnswerChange}
                     onPasteDetected={handlePasteDetected}
                     allowPaste={exam?.is_paste_allowed ?? false}
+                    analyticsEnabled={exam?.enable_keystroke_analytics === true}
+                    analyticsThreshold={exam?.min_char_keystroke_threshold ?? 150}
+                    analyticsResetToken={analyticsResetQuestionId === q.id ? analyticsResetVersion : 0}
                 />;
             case 'matching':
                 return <StudentMatchingInput
@@ -1051,12 +1070,18 @@ export default function ExamTaker() {
                     language="arabic"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    analyticsEnabled={exam?.enable_keystroke_analytics === true}
+                    analyticsThreshold={exam?.min_char_keystroke_threshold ?? 150}
+                    analyticsResetToken={analyticsResetQuestionId === q.id ? analyticsResetVersion : 0}
                 />;
             case 'javanese_response':
                 return <StudentLanguageResponseInput
                     language="javanese"
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
+                    analyticsEnabled={exam?.enable_keystroke_analytics === true}
+                    analyticsThreshold={exam?.min_char_keystroke_threshold ?? 150}
+                    analyticsResetToken={analyticsResetQuestionId === q.id ? analyticsResetVersion : 0}
                 />;
             case 'math_input':
                 return <StudentMathInput

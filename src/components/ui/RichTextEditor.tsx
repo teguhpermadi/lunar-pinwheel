@@ -7,6 +7,7 @@ import { MathExtension } from '@/lib/tiptap/MathExtension';
 import { ArabicExtension } from '@/lib/tiptap/ArabicExtension';
 import { JavaneseExtension } from '@/lib/tiptap/JavaneseExtension';
 import { useEffect } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useEditorStore } from '@/store/useEditorStore';
 import { 
     Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
@@ -25,6 +26,8 @@ interface RichTextEditorProps {
     onPaste?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
     onCopy?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
     onCut?: (event: React.ClipboardEvent<HTMLDivElement>) => void;
+    onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
+    onKeyUp?: (event: KeyboardEvent<HTMLDivElement>) => void;
 }
 
 // Helper to convert $latex$ and [ara]arabic[/ara] in HTML to data-latex spans for TipTap
@@ -248,6 +251,8 @@ export default function RichTextEditor({
     onPaste,
     onCopy,
     onCut,
+    onKeyDown,
+    onKeyUp,
 }: RichTextEditorProps) {
     const { setActiveEditor } = useEditorStore();
 
@@ -367,6 +372,8 @@ export default function RichTextEditor({
             onPaste={handlePaste}
             onCopy={handleCopy}
             onCut={handleCut}
+            onKeyDown={onKeyDown}
+            onKeyUp={onKeyUp}
         >
             <MenuBar editor={editor} />
             <EditorContent
