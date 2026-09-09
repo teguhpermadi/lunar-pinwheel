@@ -1452,6 +1452,7 @@ export default function ExamCorrectionPage() {
                                     className="space-y-6"
                                 >
                                     <CorrectionByStudent
+                                        examId={id!}
                                         currentQuestion={currentQuestion}
                                         isDetailLoading={isDetailLoading}
                                         selectedQuestionIndex={selectedQuestionIndex}
@@ -1474,6 +1475,7 @@ export default function ExamCorrectionPage() {
                                 </motion.div>
                             ) : viewMode === 'by-question' ? (
                                 <CorrectionByQuestion
+                                    examId={id!}
                                     selectedQuestionIndex={selectedQuestionIndex}
                                     masterQuestions={masterQuestions}
                                     currentQuestionContent={currentQuestionContent}

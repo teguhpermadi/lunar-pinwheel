@@ -23,9 +23,12 @@ import {
     Maximize,
     RotateCw,
     Edit3,
-    Undo2
+    Undo2,
+    Sparkles
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { examApi } from '@/lib/api';
+import Swal from 'sweetalert2';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -40,6 +43,7 @@ import StudentCategorizationInput from '@/components/questions/student-inputs/St
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 
 interface CorrectionByQuestionProps {
+    examId: string;
     selectedQuestionIndex: number;
     masterQuestions: any[];
     currentQuestionContent: string;
@@ -61,6 +65,7 @@ interface CorrectionByQuestionProps {
 }
 
 const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
+    examId,
     selectedQuestionIndex,
     masterQuestions,
     currentQuestionContent,
@@ -83,6 +88,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     const [editingAnswerId, setEditingAnswerId] = useState<string | null>(null);
     const [editedAnswer, setEditedAnswer] = useState<any>(null);
     const [isSavingAnswer, setIsSavingAnswer] = useState(false);
+    const [isAICorrecting, setIsAICorrecting] = useState(false);
 
     useEffect(() => {
         setIsPreviewModalOpen(false);
@@ -95,6 +101,42 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
     // Get current master question to extract reading material if any
     const currentMasterQuestion = masterQuestions[selectedQuestionIndex];
     const readingMaterial = currentMasterQuestion?.exam_reading_material || currentMasterQuestion?.exam_question?.exam_reading_material;
+    const currentQuestionId = currentMasterQuestion?.id;
+
+    const handleAICorrection = async () => {
+        if (!currentQuestionId) return;
+
+        const result = await Swal.fire({
+            title: 'Koreksi AI',
+            text: 'Jalankan koreksi AI untuk semua jawaban pada soal ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Mulai Koreksi',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#6366f1',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsAICorrecting(true);
+        try {
+            const response = await examApi.aiCorrectByQuestion(examId, currentQuestionId);
+            await Swal.fire({
+                title: 'Berhasil',
+                text: response.message || 'Koreksi AI berhasil dijalankan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+            });
+            onRefresh?.();
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Gagal menjalankan koreksi AI.', 'error');
+        } finally {
+            setIsAICorrecting(false);
+        }
+    };
 
     return (
         <motion.div
@@ -152,6 +194,14 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 <RotateCw className="w-3.5 h-3.5" />
                             </button>
                         )}
+                        <button
+                            onClick={handleAICorrection}
+                            disabled={isAICorrecting || !currentQuestionId}
+                            className="flex items-center gap-2 px-3 py-2 bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase hover:bg-indigo-600 disabled:opacity-50"
+                        >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {isAICorrecting ? 'Memproses...' : 'Koreksi AI'}
+                        </button>
                         <button
                             onClick={handleToggleSelectAll}
                             className={cn(

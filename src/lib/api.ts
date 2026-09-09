@@ -1052,6 +1052,20 @@ export const examApi = {
         });
         return response.data;
     },
+    async aiCorrectByQuestion(examId: string, questionId: string, params: { provider?: string; model?: string } = {}) {
+        const response = await api.post(`/exams/${examId}/questions/${questionId}/ai-correct`, {
+            provider: params.provider || import.meta.env.VITE_AI_PROVIDER || 'lmstudio',
+            ...(params.model ? { model: params.model } : {}),
+        });
+        return response.data;
+    },
+    async aiCorrectByStudentQuestion(examId: string, questionId: string, studentId: string, params: { provider?: string; model?: string } = {}) {
+        const response = await api.post(`/exams/${examId}/questions/${questionId}/students/${studentId}/ai-correct`, {
+            provider: params.provider || import.meta.env.VITE_AI_PROVIDER || 'lmstudio',
+            ...(params.model ? { model: params.model } : {}),
+        });
+        return response.data;
+    },
     async resetObjectiveCorrection(examId: string) {
         const response = await api.post(`/exams/${examId}/reset-objective-correction`);
         return response.data;

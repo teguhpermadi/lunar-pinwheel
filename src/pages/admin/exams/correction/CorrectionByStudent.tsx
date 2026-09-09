@@ -19,9 +19,12 @@ import {
     Maximize,
     RotateCw,
     Edit3,
-    Undo2
+    Undo2,
+    Sparkles
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { examApi } from '@/lib/api';
+import Swal from 'sweetalert2';
 
 import StudentMultipleChoiceInput from '@/components/questions/student-inputs/StudentMultipleChoiceInput';
 import StudentMultipleSelectionInput from '@/components/questions/student-inputs/StudentMultipleSelectionInput';
@@ -36,6 +39,7 @@ import StudentCategorizationInput from '@/components/questions/student-inputs/St
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
 
 interface CorrectionByStudentProps {
+    examId: string;
     currentQuestion: QuestionDetail | null;
     isDetailLoading: boolean;
     selectedQuestionIndex: number;
@@ -54,6 +58,7 @@ interface CorrectionByStudentProps {
 }
 
 const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
+    examId,
     currentQuestion,
     isDetailLoading,
     selectedQuestionIndex,
@@ -74,6 +79,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
     const [isEditingAnswer, setIsEditingAnswer] = useState(false);
     const [editedAnswer, setEditedAnswer] = useState<any>(null);
     const [isSavingAnswer, setIsSavingAnswer] = useState(false);
+    const [isAICorrecting, setIsAICorrecting] = useState(false);
 
     useEffect(() => {
         setIsPreviewModalOpen(false);
@@ -83,6 +89,43 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
 
     const contentRaw = currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content || (currentQuestion as any)?.content || '';
     const readingMaterial = (currentQuestion as any)?.exam_reading_material || (currentQuestion as any)?.exam_question?.exam_reading_material;
+    const currentQuestionId = currentQuestion?.exam_question_id;
+    const currentStudentId = currentSession?.student?.id;
+
+    const handleAICorrection = async () => {
+        if (!currentQuestionId || !currentStudentId) return;
+
+        const result = await Swal.fire({
+            title: 'Koreksi AI',
+            text: 'Jalankan koreksi AI untuk jawaban siswa pada soal ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Mulai Koreksi',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#6366f1',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsAICorrecting(true);
+        try {
+            const response = await examApi.aiCorrectByStudentQuestion(examId, currentQuestionId, currentStudentId);
+            await Swal.fire({
+                title: 'Berhasil',
+                text: response.message || 'Koreksi AI berhasil dijalankan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+            });
+            onRefresh?.();
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Gagal menjalankan koreksi AI.', 'error');
+        } finally {
+            setIsAICorrecting(false);
+        }
+    };
 
     return (
         <motion.div
@@ -212,6 +255,14 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                         {!isEditingAnswer ? (
                             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleAICorrection}
+                                        disabled={isAICorrecting || !currentQuestionId || !currentStudentId}
+                                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        <Sparkles className="w-4 h-4" />
+                                        {isAICorrecting ? 'Memproses...' : 'Koreksi AI'}
+                                    </button>
                                     <button
                                         onClick={() => {
                                             setEditedAnswer(currentQuestion.student_answer);

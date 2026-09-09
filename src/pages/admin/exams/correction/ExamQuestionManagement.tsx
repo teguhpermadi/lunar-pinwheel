@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { examQuestionApi } from '@/lib/api';
+import { examApi, examQuestionApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
     Save,
@@ -11,7 +11,8 @@ import {
     AlignLeft,
     ArrowUpDown,
     HelpCircle,
-    Layout
+    Layout,
+    Sparkles
 } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import QuestionInputs from '@/components/questions/QuestionInputs';
@@ -27,11 +28,12 @@ interface ExamQuestionManagementProps {
     onUpdate: () => void;
 }
 
-export default function ExamQuestionManagement({ questions: initialQuestions, onUpdate }: ExamQuestionManagementProps) {
+export default function ExamQuestionManagement({ examId, questions: initialQuestions, onUpdate }: ExamQuestionManagementProps) {
     const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
     const [isQuestionLoading, setIsQuestionLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isAICorrecting, setIsAICorrecting] = useState(false);
 
     // Question States
     const [content, setContent] = useState('');
@@ -353,6 +355,41 @@ export default function ExamQuestionManagement({ questions: initialQuestions, on
         setOptions(prev => prev.map(o => o.uuid === uuid ? { ...o, media: null } : o));
     };
 
+    const handleAICorrection = async () => {
+        if (!examId || !currentQuestion?.id) return;
+
+        const result = await Swal.fire({
+            title: 'Koreksi AI',
+            text: 'Jalankan koreksi AI untuk semua jawaban pada ujian ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Mulai Koreksi',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#6366f1',
+        });
+
+        if (!result.isConfirmed) return;
+
+        setIsAICorrecting(true);
+        try {
+            const response = await examApi.aiCorrect(examId);
+            await Swal.fire({
+                title: 'Berhasil',
+                text: response.message || 'Koreksi AI berhasil dijalankan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+            });
+            onUpdate();
+        } catch (error: any) {
+            Swal.fire('Error', error.response?.data?.message || 'Gagal menjalankan koreksi AI.', 'error');
+        } finally {
+            setIsAICorrecting(false);
+        }
+    };
+
     const renderQuestionTypeIcon = (type: string) => {
         switch (type) {
             case 'multiple_choice': return <ListTodo className="w-4 h-4" />;
@@ -453,6 +490,15 @@ export default function ExamQuestionManagement({ questions: initialQuestions, on
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{type?.replace(/_/g, ' ')}</p>
                         </div>
                     </div>
+                    <button
+                        onClick={handleAICorrection}
+                        disabled={isAICorrecting}
+                        className="flex items-center gap-2 px-3 py-2 bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase hover:bg-indigo-600 disabled:opacity-50"
+                        title="Koreksi semua jawaban dengan AI"
+                    >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {isAICorrecting ? 'Memproses...' : 'Koreksi AI'}
+                    </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving || isQuestionLoading}
