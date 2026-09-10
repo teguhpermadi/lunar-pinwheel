@@ -100,8 +100,20 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
 
         const result = await Swal.fire({
             title: 'Koreksi AI',
-            text: 'Jalankan koreksi AI untuk jawaban siswa pada soal ini?',
+            text: 'Pilih jawaban yang ingin diproses oleh AI.',
             icon: 'question',
+            input: 'radio',
+            inputOptions: {
+                all: 'Koreksi ulang jawaban ini',
+                uncorrected: 'Hanya jika belum dikoreksi',
+            },
+            inputValue: 'uncorrected',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Pilih cakupan koreksi terlebih dahulu.';
+                }
+                return undefined;
+            },
             showCancelButton: true,
             confirmButtonText: 'Mulai Koreksi',
             cancelButtonText: 'Batal',
@@ -112,10 +124,19 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
 
         setIsAICorrecting(true);
         try {
-            const response = await examApi.aiCorrectByStudentQuestion(examId, currentQuestionId, currentStudentId);
+            const onlyUncorrected = result.value === 'uncorrected';
+            const response = await examApi.aiCorrect(examId, {
+                exam_question_id: currentQuestionId,
+                exam_session_id: selectedSessionId || undefined,
+                only_uncorrected: onlyUncorrected,
+            });
             await Swal.fire({
                 title: 'Berhasil',
-                text: response.message || 'Koreksi AI berhasil dijalankan.',
+                text: response.message || (
+                    onlyUncorrected
+                        ? 'Koreksi AI untuk jawaban yang belum dikoreksi berhasil dijalankan.'
+                        : 'Koreksi AI untuk jawaban ini berhasil dijalankan.'
+                ),
                 icon: 'success',
                 timer: 2000,
                 showConfirmButton: false,
