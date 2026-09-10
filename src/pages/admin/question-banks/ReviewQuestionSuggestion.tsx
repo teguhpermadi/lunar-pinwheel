@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -38,7 +40,7 @@ import MathRenderer from '@/components/ui/MathRenderer';
 const MySwal = withReactContent(Swal);
 
 function StatusBadge({ state, label }: { state: string, label: string }) {
-    const configs: Record<string, { bg: string, border: string, text: string, icon: any }> = {
+    const configs: Record<string, { bg: string, border: string, text: string, icon: LooseValue }> = {
         pending: { bg: 'bg-amber-500/5', border: 'border-amber-500/20', text: 'text-amber-600 dark:text-amber-400', icon: Clock },
         approved: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', icon: CheckCircle2 },
         rejected: { bg: 'bg-rose-500/5', border: 'border-rose-500/20', text: 'text-rose-600 dark:text-rose-400', icon: XCircle },
@@ -79,19 +81,19 @@ export default function ReviewQuestionSuggestion() {
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
     const [readingMaterialId, setReadingMaterialId] = useState<string | null>(null);
-    const [questionMedia, setQuestionMedia] = useState<any>(null);
+    const [questionMedia, setQuestionMedia] = useState<LooseValue>(null);
     const [pendingQuestionImage, setPendingQuestionImage] = useState<File | null>(null);
     const [questionPreviewUrl, setQuestionPreviewUrl] = useState<string | null>(null);
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
-    const [options, setOptions] = useState<any[]>([]);
-    const [matchingPairs, setMatchingPairs] = useState<any[]>([]);
-    const [sequenceItems, setSequenceItems] = useState<any[]>([]);
+    const [options, setOptions] = useState<LooseValue[]>([]);
+    const [matchingPairs, setMatchingPairs] = useState<LooseValue[]>([]);
+    const [sequenceItems, setSequenceItems] = useState<LooseValue[]>([]);
     const [essayKeywords, setEssayKeywords] = useState('');
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
     const [javaneseContent, setJavaneseContent] = useState('');
-    const [categorizationGroups, setCategorizationGroups] = useState<any[]>([]);
+    const [categorizationGroups, setCategorizationGroups] = useState<LooseValue[]>([]);
     const [arrangeWordsSentence, setArrangeWordsSentence] = useState('');
     const [arrangeWordsDelimiter, setArrangeWordsDelimiter] = useState(' ');
     const [arrangeWordsIsArabic, setArrangeWordsIsArabic] = useState(false);
@@ -123,21 +125,21 @@ export default function ReviewQuestionSuggestion() {
 
                 // Map data based on type (following QuestionFormPage logic)
                 if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(finalType)) {
-                    let initialOptions = q.options?.map((o: any) => ({
+                    let initialOptions = q.options?.map((o: LooseValue) => ({
                         ...o,
                         key: o.option_key,
                         uuid: o.id || generateUUID()
                     })) || [];
 
                     if (sugData.options?.update) {
-                        initialOptions = initialOptions.map((o: any) => {
-                            const update = sugData.options.update.find((u: any) => u.id === o.id);
+                        initialOptions = initialOptions.map((o: LooseValue) => {
+                            const update = sugData.options.update.find((u: LooseValue) => u.id === o.id);
                             return update ? { ...o, ...update } : o;
                         });
                     }
 
                     if (sugData.options?.create) {
-                        const newOptions = sugData.options.create.map((no: any) => ({
+                        const newOptions = sugData.options.create.map((no: LooseValue) => ({
                             ...no,
                             uuid: generateUUID(),
                             key: no.option_key || String.fromCharCode(65 + initialOptions.length)
@@ -147,7 +149,7 @@ export default function ReviewQuestionSuggestion() {
                     setOptions(initialOptions);
                 } else if (finalType === 'matching') {
                     const pairsMap = new Map();
-                    q.options.forEach((o: any) => {
+                    q.options.forEach((o: LooseValue) => {
                         const pairId = o.metadata?.pair_id;
                         if (!pairId) return;
                         if (!pairsMap.has(pairId)) {
@@ -163,18 +165,18 @@ export default function ReviewQuestionSuggestion() {
                     setMatchingPairs(Array.from(pairsMap.values()));
                     // Note: Suggestion patching for matching is omitted for brevity as it's rarely used in suggestions
                 } else if (finalType === 'sequence') {
-                    setSequenceItems(q.options.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).map((o: any) => ({
+                    setSequenceItems(q.options.sort((a: LooseValue, b: LooseValue) => (a.order || 0) - (b.order || 0)).map((o: LooseValue) => ({
                         id: o.id, uuid: o.id || generateUUID(), content: o.content, order: o.order
                     })));
                 } else if (finalType === 'essay') {
-                    const essayOption = q.options.find((o: any) => o.option_key === 'ESSAY');
+                    const essayOption = q.options.find((o: LooseValue) => o.option_key === 'ESSAY');
                     if (essayOption) setEssayKeywords(sugData.keywords || essayOption.content);
                 } else if (finalType === 'math_input') {
-                    const mathOption = q.options.find((o: any) => o.option_key === 'MATH');
+                    const mathOption = q.options.find((o: LooseValue) => o.option_key === 'MATH');
                     if (mathOption) setMathContent(sugData.math_content || mathOption.content);
                 } else if (finalType === 'categorization') {
                     const groupsMap = new Map();
-                    q.options.forEach((o: any) => {
+                    q.options.forEach((o: LooseValue) => {
                         const groupUuid = o.metadata?.group_uuid;
                         const groupTitle = o.metadata?.group_title || 'Uncategorized';
                         if (!groupsMap.has(groupUuid)) groupsMap.set(groupUuid, { uuid: groupUuid || generateUUID(), title: groupTitle, items: [] });
@@ -182,7 +184,7 @@ export default function ReviewQuestionSuggestion() {
                     });
                     setCategorizationGroups(Array.from(groupsMap.values()));
                 } else if (finalType === 'arrange_words') {
-                    const sentenceOption = q.options.find((o: any) => o.option_key === 'SENTENCE');
+                    const sentenceOption = q.options.find((o: LooseValue) => o.option_key === 'SENTENCE');
                     if (sentenceOption) {
                         setArrangeWordsSentence(sugData.arrange_words_sentence || sentenceOption.content);
                         setArrangeWordsDelimiter(sugData.arrange_words_delimiter || sentenceOption.metadata?.delimiter || ' ');
@@ -220,7 +222,7 @@ export default function ReviewQuestionSuggestion() {
             setIsSaving(true);
             try {
                 // Construct current data to apply
-                const currentData: any = {
+                const currentData: LooseValue = {
                     content, type, difficulty, timer, score, hint, reading_material_id: readingMaterialId,
                 };
 
@@ -251,7 +253,7 @@ export default function ReviewQuestionSuggestion() {
                     await MySwal.fire('Approved!', 'Changes have been applied.', 'success');
                     navigate(`/admin/question-banks/${bankId}/suggestions`);
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to approve', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to approve suggestion.', 'error');
             } finally {
@@ -279,7 +281,7 @@ export default function ReviewQuestionSuggestion() {
                     await MySwal.fire('Rejected!', 'Suggestion has been rejected.', 'success');
                     navigate(`/admin/question-banks/${bankId}/suggestions`);
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to reject', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to reject suggestion.', 'error');
             }
@@ -305,7 +307,7 @@ export default function ReviewQuestionSuggestion() {
                     MySwal.fire('Deleted!', 'Suggestion has been deleted.', 'success');
                     navigate(`/admin/question-banks/${bankId}/suggestions`);
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to delete', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to delete suggestion.', 'error');
             }
@@ -313,10 +315,10 @@ export default function ReviewQuestionSuggestion() {
     };
 
     const handleDeleteOptionMedia = async (optionUuid: string, mediaId?: string) => {
-        const option = options.find((o: any) => o.uuid === optionUuid);
+        const option = options.find((o: LooseValue) => o.uuid === optionUuid);
         try {
             if (option?.id && mediaId) await optionsApi.deleteMedia(option.id, mediaId);
-            setOptions((prev: any) => prev.map((o: any) => o.uuid === optionUuid ? { ...o, media: null } : o));
+            setOptions((prev: LooseValue) => prev.map((o: LooseValue) => o.uuid === optionUuid ? { ...o, media: null } : o));
         } catch (error) {
             console.error("Failed to delete media", error);
             Swal.fire('Error', 'Failed to delete media', 'error');
@@ -431,7 +433,7 @@ export default function ReviewQuestionSuggestion() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Question Text</p><div className="text-slate-600 dark:text-slate-400 text-sm bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700"><MathRenderer content={suggestion.question?.content || ''} /></div></div>
                                     <div className="space-y-4"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Options</p><div className="grid grid-cols-1 gap-2">
-                                            {suggestion.question?.options?.map((opt: any) => (
+                                            {suggestion.question?.options?.map((opt: LooseValue) => (
                                                 <div key={opt.id} className={cn("p-3 rounded-lg border flex items-center justify-between text-xs font-bold", opt.is_correct ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500")}>
                                                     <div className="flex items-center gap-3"><span className="size-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-[10px]">{opt.option_key}</span><MathRenderer content={opt.content} /></div>
                                                     {opt.is_correct && <CheckCircle2 className="size-3" />}

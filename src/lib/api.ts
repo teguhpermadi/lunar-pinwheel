@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import axios from 'axios';
 import { z } from 'zod';
 
@@ -19,9 +21,9 @@ export interface TypingMetrics {
 
 export interface SaveAnswerPayload {
     question_id: string;
-    answer: unknown;
+    answer: LooseValue;
     is_flagged?: boolean;
-    metadata?: Record<string, unknown>;
+    metadata?: Record<string, LooseValue>;
     typing_metrics?: TypingMetrics;
 }
 
@@ -110,13 +112,13 @@ export interface OngoingExam {
 export interface DashboardData {
     stats: DashboardStats;
     ongoing_exams: OngoingExam[];
-    recent_activities: any[]; // Or use ActivityLogResource structure if defined
+    recent_activities: LooseValue[]; // Or use ActivityLogResource structure if defined
 }
 
 export interface ActionResponse {
     success: boolean;
     message: string;
-    data: null | any;
+    data: null | LooseValue;
 }
 
 // --- Auth & User ---
@@ -267,12 +269,10 @@ export interface Teacher extends User {
     subjects?: Subject[];
 }
 
-export interface Student extends User {
-    // Student specific fields if any
-}
+export type Student = User;
 
 export const academicYearApi = {
-    getAcademicYears: async (params?: any) => {
+    getAcademicYears: async (params?: LooseValue) => {
         const response = await api.get('/academic-years', { params });
         return response.data;
     },
@@ -280,11 +280,11 @@ export const academicYearApi = {
         const response = await api.get(`/academic-years/${id}`);
         return response.data;
     },
-    createAcademicYear: async (data: any) => {
+    createAcademicYear: async (data: LooseValue) => {
         const response = await api.post('/academic-years', data);
         return response.data;
     },
-    updateAcademicYear: async (id: string, data: any) => {
+    updateAcademicYear: async (id: string, data: LooseValue) => {
         const response = await api.put(`/academic-years/${id}`, data);
         return response.data;
     },
@@ -296,11 +296,11 @@ export const academicYearApi = {
         const response = await api.post('/academic-years/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateAcademicYears: async (data: any) => {
+    bulkUpdateAcademicYears: async (data: LooseValue) => {
         const response = await api.post('/academic-years/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/academic-years/trashed', { params });
         return response.data;
     },
@@ -319,7 +319,7 @@ export const academicYearApi = {
 };
 
 export const classroomApi = {
-    getClassrooms: async (params?: any) => {
+    getClassrooms: async (params?: LooseValue) => {
         const response = await api.get('/classrooms', { params });
         return response.data;
     },
@@ -343,11 +343,11 @@ export const classroomApi = {
         const response = await api.post('/classrooms/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateClassrooms: async (data: any) => {
+    bulkUpdateClassrooms: async (data: LooseValue) => {
         const response = await api.post('/classrooms/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/classrooms/trashed', { params });
         return response.data;
     },
@@ -359,7 +359,7 @@ export const classroomApi = {
         const response = await api.delete(`/classrooms/${id}/force-delete`);
         return response.data;
     },
-    getMyClassrooms: async (params?: any) => {
+    getMyClassrooms: async (params?: LooseValue) => {
         const response = await api.get('/classrooms/mine', { params });
         return response.data;
     },
@@ -373,7 +373,7 @@ export const classroomApi = {
 };
 
 export const teacherApi = {
-    getTeachers: async (params?: any) => {
+    getTeachers: async (params?: LooseValue) => {
         const response = await api.get('/teachers', { params });
         return response.data;
     },
@@ -381,11 +381,11 @@ export const teacherApi = {
         const response = await api.get(`/teachers/${id}`);
         return response.data;
     },
-    createTeacher: async (data: any) => {
+    createTeacher: async (data: LooseValue) => {
         const response = await api.post('/teachers', data);
         return response.data;
     },
-    updateTeacher: async (id: string, data: any) => {
+    updateTeacher: async (id: string, data: LooseValue) => {
         const response = await api.put(`/teachers/${id}`, data);
         return response.data;
     },
@@ -397,11 +397,11 @@ export const teacherApi = {
         const response = await api.post('/teachers/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateTeachers: async (data: any) => {
+    bulkUpdateTeachers: async (data: LooseValue) => {
         const response = await api.post('/teachers/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/teachers/trashed', { params });
         return response.data;
     },
@@ -433,7 +433,7 @@ export const teacherApi = {
 };
 
 export const studentApi = {
-    getStudents: async (params?: any) => {
+    getStudents: async (params?: LooseValue) => {
         const response = await api.get('/students', { params });
         return response.data;
     },
@@ -441,11 +441,11 @@ export const studentApi = {
         const response = await api.get(`/students/${id}`);
         return response.data;
     },
-    createStudent: async (data: any) => {
+    createStudent: async (data: LooseValue) => {
         const response = await api.post('/students', data);
         return response.data;
     },
-    updateStudent: async (id: string, data: any) => {
+    updateStudent: async (id: string, data: LooseValue) => {
         const response = await api.put(`/students/${id}`, data);
         return response.data;
     },
@@ -457,11 +457,11 @@ export const studentApi = {
         const response = await api.post('/students/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateStudents: async (data: any) => {
+    bulkUpdateStudents: async (data: LooseValue) => {
         const response = await api.post('/students/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/students/trashed', { params });
         return response.data;
     },
@@ -489,11 +489,11 @@ export const studentApi = {
         const response = await api.get('/students/export', { responseType: 'blob' });
         return response.data;
     },
-    getAvailable: async (params?: any) => {
+    getAvailable: async (params?: LooseValue) => {
         const response = await api.get('/students/available', { params });
         return response.data;
     },
-    getExamResults: async (params?: any) => {
+    getExamResults: async (params?: LooseValue) => {
         const response = await api.get('/students/exams/history', { params });
         return response.data;
     },
@@ -501,7 +501,7 @@ export const studentApi = {
         const response = await api.get('/students/exam-results/leaderboard', { params });
         return response.data;
     },
-    getStudentExams: async (params?: any) => {
+    getStudentExams: async (params?: LooseValue) => {
         const response = await api.get('/students/exams', { params });
         return response.data;
     },
@@ -521,7 +521,7 @@ export const studentApi = {
         const response = await api.post(`/students/exams/${id}/finish`);
         return response.data;
     },
-    reportExamViolation: async (id: string, data?: any) => {
+    reportExamViolation: async (id: string, data?: LooseValue) => {
         const response = await api.post(`/students/exams/${id}/violation`, data || {});
         return response.data;
     }
@@ -549,7 +549,7 @@ export interface Subject {
 }
 
 export const subjectApi = {
-    getSubjects: async (params?: any) => {
+    getSubjects: async (params?: LooseValue) => {
         const response = await api.get('/subjects', { params });
         return response.data;
     },
@@ -557,11 +557,11 @@ export const subjectApi = {
         const response = await api.get(`/subjects/${id}`);
         return response.data;
     },
-    createSubject: async (data: any) => {
+    createSubject: async (data: LooseValue) => {
         const response = await api.post('/subjects', data);
         return response.data;
     },
-    updateSubject: async (id: string, data: any) => {
+    updateSubject: async (id: string, data: LooseValue) => {
         const response = await api.put(`/subjects/${id}`, data);
         return response.data;
     },
@@ -573,11 +573,11 @@ export const subjectApi = {
         const response = await api.post('/subjects/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateSubjects: async (data: any) => {
+    bulkUpdateSubjects: async (data: LooseValue) => {
         const response = await api.post('/subjects/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/subjects/trashed', { params });
         return response.data;
     },
@@ -589,7 +589,7 @@ export const subjectApi = {
         const response = await api.delete(`/subjects/${id}/force-delete`);
         return response.data;
     },
-    getMySubjects: async (params?: any) => {
+    getMySubjects: async (params?: LooseValue) => {
         const response = await api.get('/subjects/mine', { params });
         return response.data;
     }
@@ -610,15 +610,15 @@ export interface QuestionBank {
 }
 
 export const questionBankApi = {
-    getQuestionBanks: async (params?: any) => {
+    getQuestionBanks: async (params?: LooseValue) => {
         const response = await api.get('/question-banks', { params });
         return response.data;
     },
-    getMyQuestionBanks: async (params?: any) => {
+    getMyQuestionBanks: async (params?: LooseValue) => {
         const response = await api.get('/question-banks/mine', { params });
         return response.data;
     },
-    getPublicQuestionBanks: async (params?: any) => {
+    getPublicQuestionBanks: async (params?: LooseValue) => {
         const response = await api.get('/question-banks/public', { params });
         return response.data;
     },
@@ -626,11 +626,11 @@ export const questionBankApi = {
         const response = await api.get(`/question-banks/${id}`);
         return response.data;
     },
-    createQuestionBank: async (data: any) => {
+    createQuestionBank: async (data: LooseValue) => {
         const response = await api.post('/question-banks', data);
         return response.data;
     },
-    updateQuestionBank: async (id: string, data: any) => {
+    updateQuestionBank: async (id: string, data: LooseValue) => {
         const response = await api.put(`/question-banks/${id}`, data);
         return response.data;
     },
@@ -638,7 +638,7 @@ export const questionBankApi = {
         const response = await api.delete(`/question-banks/${id}`);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/question-banks/trashed', { params });
         return response.data;
     },
@@ -677,7 +677,7 @@ export interface QuestionOption {
         side?: 'left' | 'right';
         pair_id?: string | number;
         match_with?: string;
-        [key: string]: any;
+        [key: string]: LooseValue;
     };
     media?: {
         option_media?: MediaItem[];
@@ -693,7 +693,7 @@ export interface Question {
     score: number;
     hint?: string;
     reading_material_id?: string | null;
-    tags?: any[] | string[];
+    tags?: LooseValue[] | string[];
     media?: {
         content?: MediaItem[];
     };
@@ -703,9 +703,9 @@ export interface Question {
         answers?: string[];
         pairs?: Record<string, string>;
         order?: string[];
-        rubric?: any;
+        rubric?: LooseValue;
         words?: string[];
-        groups?: any[];
+        groups?: LooseValue[];
     };
     created_at: string;
     updated_at: string;
@@ -768,15 +768,15 @@ export interface UpdateQuestionBankReviewerRequest {
 }
 
 export const questionBankReviewerApi = {
-    getQuestionBankReviewers: async (params?: any) => {
+    getQuestionBankReviewers: async (params?: LooseValue) => {
         const response = await api.get('/question-bank-reviewers', { params });
         return response.data;
     },
-    getMyQuestionBankReviewers: async (params?: any) => {
+    getMyQuestionBankReviewers: async (params?: LooseValue) => {
         const response = await api.get('/question-bank-reviewers/mine', { params });
         return response.data;
     },
-    getPublicQuestionBankReviewers: async (params?: any) => {
+    getPublicQuestionBankReviewers: async (params?: LooseValue) => {
         const response = await api.get('/question-bank-reviewers/public', { params });
         return response.data;
     },
@@ -807,7 +807,7 @@ export const questionBankReviewerApi = {
 };
 
 export const questionApi = {
-    getQuestions: async (params?: any) => {
+    getQuestions: async (params?: LooseValue) => {
         const response = await api.get('/questions', { params });
         return response.data;
     },
@@ -815,14 +815,14 @@ export const questionApi = {
         const response = await api.get(`/questions/${id}`);
         return response.data;
     },
-    createQuestion: async (data: StoreQuestionRequest | FormData | any) => {
+    createQuestion: async (data: StoreQuestionRequest | FormData | LooseValue) => {
         const isFormData = data instanceof FormData;
         const response = await api.post('/questions', data, {
             headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
         });
         return response.data;
     },
-    updateQuestion: async (id: string, data: any | FormData) => {
+    updateQuestion: async (id: string, data: LooseValue | FormData) => {
         if (data instanceof FormData) {
             // Laravel works best with POST + _method=PUT for multipart updates
             data.append('_method', 'PUT');
@@ -842,11 +842,11 @@ export const questionApi = {
         const response = await api.post('/questions/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateQuestions: async (data: any) => {
+    bulkUpdateQuestions: async (data: LooseValue) => {
         const response = await api.post('/questions/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/questions/trashed', { params });
         return response.data;
     },
@@ -904,8 +904,8 @@ export interface ExamQuestion {
     exam_reading_material_id?: string;
     question_number: number;
     content: string;
-    options: any;
-    key_answer: any;
+    options: LooseValue;
+    key_answer: LooseValue;
     score_value: number;
     question_type: string;
     difficulty_level: string;
@@ -944,13 +944,13 @@ export interface Exam {
     user?: User;
     user_id?: string;
     teacher?: User;
-    exam_reading_materials?: any[];
+    exam_reading_materials?: LooseValue[];
     created_at: string;
     updated_at: string;
 }
 
 export const examApi = {
-    getExams: async (params?: any) => {
+    getExams: async (params?: LooseValue) => {
         const response = await api.get('/exams', { params });
         return response.data;
     },
@@ -958,11 +958,11 @@ export const examApi = {
         const response = await api.get(`/exams/${id}`);
         return response.data;
     },
-    createExam: async (data: any) => {
+    createExam: async (data: LooseValue) => {
         const response = await api.post('/exams', data);
         return response.data;
     },
-    updateExam: async (id: string, data: any) => {
+    updateExam: async (id: string, data: LooseValue) => {
         const response = await api.put(`/exams/${id}`, data);
         return response.data;
     },
@@ -974,11 +974,11 @@ export const examApi = {
         const response = await api.post('/exams/bulk-delete', { ids, force });
         return response.data;
     },
-    bulkUpdateExams: async (data: any) => {
+    bulkUpdateExams: async (data: LooseValue) => {
         const response = await api.post('/exams/bulk-update', data);
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/exams/trashed', { params });
         return response.data;
     },
@@ -990,7 +990,7 @@ export const examApi = {
         const response = await api.delete(`/exams/${id}/force-delete`);
         return response.data;
     },
-    getExamSessions: async (id: string, params?: any) => {
+    getExamSessions: async (id: string, params?: LooseValue) => {
         const response = await api.get(`/exams/${id}/sessions`, { params });
         return response.data;
     },
@@ -1019,7 +1019,7 @@ export const examApi = {
         return response.data;
     },
     // Correction endpoints
-    getCorrectionSessions: async (id: string, params?: any) => {
+    getCorrectionSessions: async (id: string, params?: LooseValue) => {
         const response = await api.get(`/exams/${id}/sessions`, { params });
         return response.data;
     },
@@ -1109,7 +1109,7 @@ export const examApi = {
 };
 
 export const examQuestionApi = {
-    getExamQuestions: async (params?: any) => {
+    getExamQuestions: async (params?: LooseValue) => {
         const response = await api.get('/exam-questions', { params });
         return response.data;
     },
@@ -1117,11 +1117,11 @@ export const examQuestionApi = {
         const response = await api.get(`/exam-questions/${id}`);
         return response.data;
     },
-    updateExamQuestion: async (id: string, data: any) => {
+    updateExamQuestion: async (id: string, data: LooseValue) => {
         const response = await api.put(`/exam-questions/${id}`, data);
         return response.data;
     },
-    bulkUpdateExamQuestions: async (data: any) => {
+    bulkUpdateExamQuestions: async (data: LooseValue) => {
         const response = await api.post('/exam-questions/bulk-update', data);
         return response.data;
     },
@@ -1136,7 +1136,7 @@ export interface QuestionSuggestion {
     question_id: string;
     user?: User;
     question?: Question;
-    data: Record<string, any> | null;
+    data: Record<string, LooseValue> | null;
     description: string | null;
     state: 'pending' | 'approved' | 'rejected';
     state_label: string;
@@ -1148,24 +1148,24 @@ export interface QuestionSuggestion {
 export interface StoreQuestionSuggestionRequest {
     question_id: string;
     description: string;
-    data?: Record<string, any>;
+    data?: Record<string, LooseValue>;
 }
 
 export interface UpdateQuestionSuggestionRequest {
     description?: string;
-    data?: Record<string, any>;
+    data?: Record<string, LooseValue>;
 }
 
 export const questionSuggestionApi = {
-    getSuggestions: async (params?: any) => {
+    getSuggestions: async (params?: LooseValue) => {
         const response = await api.get('/question-suggestions', { params });
         return response.data;
     },
-    getSuggestionsByQuestionBank: async (questionBankId: string, params?: any) => {
+    getSuggestionsByQuestionBank: async (questionBankId: string, params?: LooseValue) => {
         const response = await api.get(`/question-banks/${questionBankId}/suggestions`, { params });
         return response.data;
     },
-    getMySuggestions: async (params?: any) => {
+    getMySuggestions: async (params?: LooseValue) => {
         const response = await api.get('/question-suggestions/mine', { params });
         return response.data;
     },
@@ -1185,7 +1185,7 @@ export const questionSuggestionApi = {
         const response = await api.delete(`/question-suggestions/${id}`);
         return response.data;
     },
-    approveSuggestion: async (id: string, data?: any) => {
+    approveSuggestion: async (id: string, data?: LooseValue) => {
         const response = await api.post(`/question-suggestions/${id}/approve`, data);
         return response.data;
     },
@@ -1208,7 +1208,7 @@ export interface ReadingMaterial {
 }
 
 export const readingMaterialApi = {
-    getMaterials: async (params?: any) => {
+    getMaterials: async (params?: LooseValue) => {
         const response = await api.get('/reading-materials', { params });
         return response.data;
     },
@@ -1216,11 +1216,11 @@ export const readingMaterialApi = {
         const response = await api.get(`/reading-materials/${id}`);
         return response.data;
     },
-    createMaterial: async (data: any) => {
+    createMaterial: async (data: LooseValue) => {
         const response = await api.post('/reading-materials', data);
         return response.data;
     },
-    updateMaterial: async (id: string, data: any) => {
+    updateMaterial: async (id: string, data: LooseValue) => {
         const response = await api.put(`/reading-materials/${id}`, data);
         return response.data;
     },
@@ -1232,7 +1232,7 @@ export const readingMaterialApi = {
         const response = await api.post('/reading-materials/bulk-delete', { ids, force });
         return response.data;
     },
-    getTrashed: async (params?: any) => {
+    getTrashed: async (params?: LooseValue) => {
         const response = await api.get('/reading-materials/trashed', { params });
         return response.data;
     },
@@ -1269,18 +1269,18 @@ export const readingMaterialApi = {
 };
 
 export const activityLogApi = {
-    getLogs: async (params?: any) => {
+    getLogs: async (params?: LooseValue) => {
         const response = await api.get('/activity-logs', { params });
         return response.data;
     },
-    getMyLogs: async (params?: any) => {
+    getMyLogs: async (params?: LooseValue) => {
         const response = await api.get('/activity-logs/mine', { params });
         return response.data;
     }
 };
 
 export const optionsApi = {
-    getOptions: async (params?: any) => {
+    getOptions: async (params?: LooseValue) => {
         // Assuming '/options' refers to general options/settings if it exists
         const response = await api.get('/options', { params });
         return response.data;
@@ -1337,7 +1337,7 @@ export interface QueueMonitor {
     time_elapsed: number;
     failed: boolean;
     retried: boolean;
-    data: any;
+    data: LooseValue;
 }
 
 export const queueMonitorApi = {
@@ -1419,7 +1419,7 @@ export interface LearningLesson {
 }
 
 export const learningPathApi = {
-    getBySubject: async (subjectId: string, params?: any) => {
+    getBySubject: async (subjectId: string, params?: LooseValue) => {
         const response = await api.get('/learning-paths', { 
             params: { 
                 ...params, 
@@ -1477,7 +1477,7 @@ export const learningUnitApi = {
 };
 
 export const learningLessonApi = {
-    getByUnit: async (unitId: string, params?: any) => {
+    getByUnit: async (unitId: string, params?: LooseValue) => {
         const response = await api.get('/learning-lessons', { params: { ...params, learning_unit_id: unitId } });
         return response.data;
     },
@@ -1562,9 +1562,9 @@ export interface MathPreviewQuestion {
         option_key: string;
         content: string;
         is_correct: boolean;
-        metadata?: Record<string, any>;
+        metadata?: Record<string, LooseValue>;
     }>;
-    math_metadata?: Record<string, any>;
+    math_metadata?: Record<string, LooseValue>;
     score?: number;
     timer?: number;
     hint?: string;

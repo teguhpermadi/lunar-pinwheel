@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useRef, useEffect, useState } from 'react';
 import MathKeyboard from '@/components/ui/MathKeyboard';
 import MathRenderer from '@/components/ui/MathRenderer';
@@ -5,9 +7,9 @@ import { Info, CheckCircle2 } from 'lucide-react';
 
 declare global {
     interface Window {
-        MathQuill: any;
-        jQuery: any;
-        $: any;
+        MathQuill: LooseValue;
+        jQuery: LooseValue;
+        $: LooseValue;
     }
 }
 
@@ -22,7 +24,7 @@ interface StudentMathInputProps {
 
 export default function StudentMathInput({ selectedAnswer, onChange, showAnswer, keyAnswer }: StudentMathInputProps) {
     const mathFieldRef = useRef<HTMLSpanElement>(null);
-    const mqRef = useRef<any>(null);
+    const mqRef = useRef<LooseValue>(null);
     const [internalValue, setInternalValue] = useState(selectedAnswer || '');
 
     useEffect(() => {

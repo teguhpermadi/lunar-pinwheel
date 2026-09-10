@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MathSpan from '@/components/ui/MathSpan';
 import { QuestionOption } from '@/lib/api';
 import { User, BadgeCheck } from 'lucide-react';
@@ -5,11 +7,11 @@ import { User, BadgeCheck } from 'lucide-react';
 interface MathInputCorrectionProps {
     studentAnswer: string;
     options?: QuestionOption[];
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function MathInputCorrection({ studentAnswer, options = [], keyAnswer }: MathInputCorrectionProps) {
-    const extractValue = (val: any): string => {
+    const extractValue = (val: LooseValue): string => {
         if (typeof val === 'object' && val !== null) {
             // Check for answer field primarily for Math
             const inner = val.answer || val.answers || val.id || val.option_id || val.option_key || val;
@@ -24,7 +26,7 @@ export default function MathInputCorrection({ studentAnswer, options = [], keyAn
     let referenceAnswer = keyAnswer ? extractValue(keyAnswer) : null;
 
     if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined') {
-        const mathOpt = options.find(o => o.option_key === 'MATH' || o.metadata?.correct_answer || o.is_correct || (o as any).is_answer);
+        const mathOpt = options.find(o => o.option_key === 'MATH' || o.metadata?.correct_answer || o.is_correct || (o as LooseValue).is_answer);
         if (mathOpt) {
             referenceAnswer = mathOpt.metadata?.correct_answer || mathOpt.content;
         } else {

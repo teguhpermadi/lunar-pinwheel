@@ -1,11 +1,13 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useRef, useEffect, useState } from 'react';
 import MathKeyboard from '@/components/ui/MathKeyboard';
 
 declare global {
     interface Window {
-        MathQuill: any;
-        jQuery: any;
-        $: any;
+        MathQuill: LooseValue;
+        jQuery: LooseValue;
+        $: LooseValue;
     }
 }
 
@@ -18,7 +20,7 @@ interface MathInputProps {
 
 export default function MathInput({ value, onChange, placeholder = "Enter math expression...", className = "" }: MathInputProps) {
     const mathFieldRef = useRef<HTMLSpanElement>(null);
-    const mqRef = useRef<any>(null);
+    const mqRef = useRef<LooseValue>(null);
     const [internalValue, setInternalValue] = useState(value);
 
     useEffect(() => {

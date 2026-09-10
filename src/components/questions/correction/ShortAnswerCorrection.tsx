@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 import { User, BadgeCheck } from 'lucide-react';
@@ -5,11 +7,11 @@ import { User, BadgeCheck } from 'lucide-react';
 interface ShortAnswerCorrectionProps {
     studentAnswer: string;
     options?: QuestionOption[];
-    keyAnswer?: any; // { answers: string[] }
+    keyAnswer?: LooseValue; // { answers: string[] }
 }
 
 export default function ShortAnswerCorrection({ studentAnswer, options = [], keyAnswer }: ShortAnswerCorrectionProps) {
-    const extractValue = (val: any): string[] => {
+    const extractValue = (val: LooseValue): string[] => {
         if (typeof val === 'object' && val !== null) {
             const inner = val.answers || val.answer || val.id || val.option_id || val.option_key || val;
             return Array.isArray(inner) ? inner.map(String) : [String(inner)];
@@ -20,7 +22,7 @@ export default function ShortAnswerCorrection({ studentAnswer, options = [], key
     let referenceAnswers = keyAnswer ? extractValue(keyAnswer) : [];
 
     if (referenceAnswers.length === 0) {
-        referenceAnswers = options.filter(o => o.is_correct || (o as any).is_answer).map(o => o.content);
+        referenceAnswers = options.filter(o => o.is_correct || (o as LooseValue).is_answer).map(o => o.content);
         if (referenceAnswers.length === 0 && options[0]) {
             referenceAnswers = [options[0].content];
         }

@@ -1,10 +1,12 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { Link2 } from 'lucide-react';
 
 interface MatchingDisplayProps {
     options?: QuestionOption[];
-    matchingPairs?: any[]; // Allow for specialized MatchingPair structure if available
+    matchingPairs?: LooseValue[]; // Allow for specialized MatchingPair structure if available
 }
 
 export default function MatchingDisplay({ options = [], matchingPairs }: MatchingDisplayProps) {

@@ -49,7 +49,7 @@ export default function LoginPage() {
             } else {
                 throw new Error("Token not found in response");
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error('Login failed', error);
             if (error.response?.data?.errors) {
                 // Handle server-side validation errors

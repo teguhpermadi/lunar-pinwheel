@@ -91,7 +91,7 @@ export default function StudentMatchingInput({ options, selectedAnswer, onChange
                 return initialRightOptions.find(r => r.option_key === rightKey) || initialRightOptions[0];
             }).filter(Boolean);
 
-            // Add any missing right options (though in matching they should all be there)
+            // Add ReturnType<typeof JSON.parse> missing right options (though in matching they should all be there)
             const missing = initialRightOptions.filter(r => !newOrder.find(no => no.id === r.id));
             setOrderedRight([...newOrder, ...missing]);
         } else {

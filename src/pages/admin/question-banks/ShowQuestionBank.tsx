@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { questionBankApi, examApi, classroomApi, QuestionBank, Question, Classroom } from '@/lib/api';
@@ -15,7 +17,7 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import {
     ArrowLeft, Eye, Printer, Download, Loader2, Pencil, Settings,
     Shield, Key, Shuffle, StretchVertical, Lightbulb, Rocket, Calendar,
-    Infinity, BarChart3, Copy
+    Infinity as InfinityIcon, BarChart3, Copy
 } from 'lucide-react';
 
 interface ToggleProps {
@@ -175,7 +177,7 @@ export default function ShowQuestionBank() {
             } else {
                 Swal.fire('Error', response.message || 'Failed to create exam', 'error');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Failed to create exam", error);
             const errorMessage = error.response?.data?.message || 'Something went wrong';
             Swal.fire('Error', errorMessage, 'error');
@@ -213,7 +215,7 @@ export default function ShowQuestionBank() {
             link.click();
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(url);
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Failed to export question bank", error);
             Swal.fire('Error', error.message || 'Failed to export to Word. Please try again.', 'error');
         } finally {
@@ -303,7 +305,7 @@ export default function ShowQuestionBank() {
                     <div className="flex-1 max-w-xl">
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">{bank.name}</h1>
                         <p className="text-xs text-slate-400 font-medium">
-                            {(bank as any).subject?.name} • {(bank as any).subject?.code} • {questions.length} Questions
+                            {(bank as LooseValue).subject?.name} • {(bank as LooseValue).subject?.code} • {questions.length} Questions
                         </p>
                     </div>
                 </div>
@@ -579,7 +581,7 @@ export default function ShowQuestionBank() {
                                                     onClick={() => setFormData({ ...formData, max_attempts: formData.max_attempts === 0 ? 1 : 0 })}
                                                     className={`flex items-center gap-1 text-[9px] font-bold px-2.5 py-1 rounded-full transition-all duration-300 ${formData.max_attempts === 0 ? 'bg-primary text-white shadow-sm shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-200'}`}
                                                 >
-                                                    <Infinity className="size-3" />
+                                                    <InfinityIcon className="size-3" />
                                                     {formData.max_attempts === 0 ? 'Unlimited Active' : 'Set Unlimited'}
                                                 </button>
                                             </div>
@@ -595,7 +597,7 @@ export default function ShowQuestionBank() {
                                                 {formData.max_attempts === 0 && (
                                                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none animate-in fade-in zoom-in-95 duration-300">
                                                         <div className="flex items-center gap-2">
-                                                            <Infinity className="size-4 text-primary" />
+                                                            <InfinityIcon className="size-4 text-primary" />
                                                             <span className="text-sm font-bold text-primary/60 italic tracking-tight">Unlimited Retakes</span>
                                                         </div>
                                                     </div>

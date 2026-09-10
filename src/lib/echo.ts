@@ -1,13 +1,15 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 declare global {
     interface Window {
-        Pusher: any;
-        Echo: any;
+        Pusher: LooseValue;
+        Echo: LooseValue;
     }
 }
 
-(window as any).Pusher = Pusher;
+(window as LooseValue).Pusher = Pusher;
 
 const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
 

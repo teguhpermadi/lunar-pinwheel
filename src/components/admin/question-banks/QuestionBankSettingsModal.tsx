@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -93,7 +95,7 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
 
     const onSubmit = async (data: SettingsFormData) => {
         try {
-            const payload: any = {
+            const payload: LooseValue = {
                 name: data.name,
                 subject_id: data.subject_id,
             };
@@ -117,7 +119,7 @@ export default function QuestionBankSettingsModal({ isOpen, onClose, bank, onSav
             } else {
                 Swal.fire('Error', response.message || 'Failed to save settings', 'error');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to save settings:', error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {

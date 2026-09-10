@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -5,8 +7,8 @@ import { CheckCircle2 } from 'lucide-react';
 
 interface CategorizationCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // Record<string, string> (itemId -> categoryId)
-    keyAnswer?: any;
+    studentAnswer: LooseValue; // Record<string, string> (itemId -> categoryId)
+    keyAnswer?: LooseValue;
 }
 
 export default function CategorizationCorrection({ options = [], studentAnswer = {} }: CategorizationCorrectionProps) {

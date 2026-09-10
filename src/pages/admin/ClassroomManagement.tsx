@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -42,7 +44,7 @@ export default function ClassroomManagement() {
         try {
             const query = search !== undefined ? search : searchQuery;
 
-            const params: any = {
+            const params: LooseValue = {
                 page,
                 sort_by: 'created_at',
                 order: 'desc'

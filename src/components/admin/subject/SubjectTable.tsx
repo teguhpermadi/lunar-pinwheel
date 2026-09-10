@@ -283,7 +283,7 @@ export default function SubjectTable({ subjects, isLoading, onEdit, onDelete, on
                                 }
                             }
 
-                            for (let i of range) {
+                            for (const i of range) {
                                 if (l) {
                                     if (i - l === 2) {
                                         rangeWithDots.push(l + 1);

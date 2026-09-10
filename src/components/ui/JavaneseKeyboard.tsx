@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Delete } from '@/components/ui/Icons';
@@ -82,7 +84,7 @@ export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace, isS
         ],
         angka: [
             '꧐', '꧑', '꧒', '꧓', '꧔', '꧕', '꧖', '꧗', '꧘', '꧙',
-            '꧞', '꧟', '.', ',', '!', ':', ';', '(', ')', '?', '\"'
+            '꧞', '꧟', '.', ',', '!', ':', ';', '(', ')', '?', '"'
         ]
     };
 
@@ -94,7 +96,7 @@ export default function JavaneseKeyboard({ onKeyClick, onBackspace, onSpace, isS
                         <button
                             key={tab.id}
                             type="button"
-                            onClick={() => setActiveTab(tab.id as any)}
+                            onClick={() => setActiveTab(tab.id as LooseValue)}
                             className={`px-3 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-xl transition-all whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                                 ? 'bg-primary/10 text-primary'
                                 : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'

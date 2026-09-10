@@ -58,7 +58,6 @@ export default function QuestionFormLayout({
     bankId: propBankId,
     onSave,
     isSaving,
-    isEditing: _isEditing = false,
     useModalForSettings = false
 }: QuestionFormLayoutProps) {
     const navigate = useNavigate();

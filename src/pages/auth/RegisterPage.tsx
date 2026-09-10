@@ -19,7 +19,7 @@ export default function RegisterPage() {
             // Assuming successful registration logs the user in or redirects to login
             // For now, let's redirect to login with a success message (conceptually)
             navigate('/login');
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error('Registration failed', error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {

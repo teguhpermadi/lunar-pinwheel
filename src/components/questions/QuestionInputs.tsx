@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MultipleChoiceInput from '@/components/questions/inputs/MultipleChoiceInput';
 import MultipleSelectionInput from '@/components/questions/inputs/MultipleSelectionInput';
 import TrueFalseInput from '@/components/questions/inputs/TrueFalseInput';
@@ -14,13 +16,13 @@ import ArrangeWordsInput from '@/components/questions/inputs/ArrangeWordsInput';
 
 interface QuestionInputsProps {
     type: string;
-    options: any[];
-    setOptions: (options: any[]) => void;
+    options: LooseValue[];
+    setOptions: (options: LooseValue[]) => void;
     handleDeleteOptionMedia: (uuid: string, mediaId?: string) => void;
-    matchingPairs: any[];
-    setMatchingPairs: (pairs: any[]) => void;
-    sequenceItems: any[];
-    setSequenceItems: (items: any[]) => void;
+    matchingPairs: LooseValue[];
+    setMatchingPairs: (pairs: LooseValue[]) => void;
+    sequenceItems: LooseValue[];
+    setSequenceItems: (items: LooseValue[]) => void;
     essayKeywords: string;
     setEssayKeywords: (keywords: string) => void;
     mathContent: string;
@@ -29,8 +31,8 @@ interface QuestionInputsProps {
     setArabicContent: (content: string) => void;
     javaneseContent: string;
     setJavaneseContent: (content: string) => void;
-    categorizationGroups: any[];
-    setCategorizationGroups: (groups: any[]) => void;
+    categorizationGroups: LooseValue[];
+    setCategorizationGroups: (groups: LooseValue[]) => void;
     arrangeWordsSentence: string;
     setArrangeWordsSentence: (sentence: string) => void;
     arrangeWordsDelimiter: string;

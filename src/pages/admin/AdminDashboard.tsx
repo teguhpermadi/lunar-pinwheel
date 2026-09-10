@@ -249,7 +249,7 @@ export default function AdminDashboard() {
                                 ))
                             )}
 
-                            {!isLoading && data?.recent_activities.length! > 0 && (
+                            {!isLoading && (data?.recent_activities?.length ?? 0) > 0 && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 0.2 }}

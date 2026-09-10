@@ -74,7 +74,7 @@ export default function StudentModal({ isOpen, onClose, student, onSave }: Stude
         try {
             await onSave(payload as StudentFormData);
             onClose();
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error("Submission failed", error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {

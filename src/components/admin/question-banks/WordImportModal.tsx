@@ -30,7 +30,7 @@ export default function WordImportModal({ isOpen, onClose, questionBankId, onImp
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (error) {
+        } catch {
             Swal.fire('Error', 'Failed to download template', 'error');
         }
     };
@@ -48,7 +48,7 @@ export default function WordImportModal({ isOpen, onClose, questionBankId, onImp
             } else {
                 Swal.fire('Import Failed', response.message || 'Check your file format', 'error');
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             Swal.fire('Import Failed', error.response?.data?.message || 'Failed to upload file.', 'error');
         } finally {
             setIsUploading(false);

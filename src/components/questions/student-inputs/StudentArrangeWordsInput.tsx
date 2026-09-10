@@ -38,7 +38,7 @@ export default function StudentArrangeWordsInput({ options, selectedAnswer, onCh
 
     useEffect(() => {
         // Calculate which words are still available
-        let remaining = [...allWords];
+        const remaining = [...allWords];
         if (selectedAnswer && selectedAnswer.length > 0) {
             selectedAnswer.forEach(word => {
                 const idx = remaining.indexOf(word);

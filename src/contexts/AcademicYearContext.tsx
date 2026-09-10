@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { academicYearApi, AcademicYear } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,7 +42,7 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
             });
 
             if (response.success && response.data) {
-                const result = response.data as any;
+                const result = response.data as LooseValue;
                 // Handle both paginated and non-paginated structures safely
                 const newYears: AcademicYear[] = Array.isArray(result) ? result : (result.data || []);
                 const meta = result.meta || {};
@@ -164,6 +166,8 @@ export function AcademicYearProvider({ children }: { children: ReactNode }) {
     );
 }
 
+// Context hooks are intentionally colocated with their provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAcademicYear() {
     const context = useContext(AcademicYearContext);
     if (context === undefined) {

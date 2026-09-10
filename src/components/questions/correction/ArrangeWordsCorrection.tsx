@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useMemo } from 'react';
 import { QuestionOption } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -6,7 +8,7 @@ import { User, CheckCircle2, XCircle, BadgeCheck } from 'lucide-react';
 interface ArrangeWordsCorrectionProps {
     options: QuestionOption[];
     studentAnswer: string[]; // Array of words in student's chosen order
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function ArrangeWordsCorrection({ options, studentAnswer = [] }: ArrangeWordsCorrectionProps) {

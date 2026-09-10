@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -6,14 +8,14 @@ import { User, CheckCircle2, XCircle, BadgeCheck } from 'lucide-react';
 interface SequenceCorrectionProps {
     options: QuestionOption[];
     studentAnswer: string[]; // Array of option IDs in student's chosen order
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function SequenceCorrection({ options, studentAnswer = [], keyAnswer }: SequenceCorrectionProps) {
     // 1. Try to get correct sequence from keyAnswer.order
     let correctSequence: QuestionOption[] = [];
     if (keyAnswer && Array.isArray(keyAnswer.order)) {
-        correctSequence = keyAnswer.order.map((key: any) => options.find(o => o.option_key === String(key))).filter(Boolean) as QuestionOption[];
+        correctSequence = keyAnswer.order.map((key: LooseValue) => options.find(o => o.option_key === String(key))).filter(Boolean) as QuestionOption[];
     }
 
     // 2. Fallback to sorting by order property if keyAnswer is missing or incomplete

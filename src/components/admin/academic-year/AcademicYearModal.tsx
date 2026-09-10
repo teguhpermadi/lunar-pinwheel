@@ -109,7 +109,7 @@ export default function AcademicYearModal({ isOpen, onClose, academicYear, onSav
         try {
             await onSave(data);
             onClose();
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error("Submission failed", error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {

@@ -120,7 +120,7 @@ export default function QueueMonitorPage() {
             await queueMonitorApi.retryMonitor(monitor.id);
             showToast('success', `Job "${monitor.name}" queued for retry.`);
             await fetchMonitors(currentPage);
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             showToast('error', error?.response?.data?.message || 'Failed to retry job.');
         } finally {
             setActionLoadingId(null);
@@ -134,7 +134,7 @@ export default function QueueMonitorPage() {
             await queueMonitorApi.cancelMonitor(monitor.id);
             showToast('success', `Job "${monitor.name}" has been cancelled.`);
             await fetchMonitors(currentPage);
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             showToast('error', error?.response?.data?.message || 'Failed to cancel job.');
         } finally {
             setActionLoadingId(null);

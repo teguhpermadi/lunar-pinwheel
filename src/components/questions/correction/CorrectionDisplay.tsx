@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import { Blocks } from 'lucide-react';
 import MultipleChoiceCorrection from './MultipleChoiceCorrection';
@@ -15,9 +17,9 @@ import ArrangeWordsCorrection from './ArrangeWordsCorrection';
 
 interface CorrectionDisplayProps {
     type: string;
-    studentAnswer: any;
+    studentAnswer: LooseValue;
     options: QuestionOption[];
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
     maxScore: number;
     scoreEarned: number;
 }

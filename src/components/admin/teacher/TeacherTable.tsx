@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -207,7 +209,7 @@ export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pa
                                             </td>
                                             <td className="px-4 py-5">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.map((sub: any, idx) => (
+                                                    {teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.map((sub: LooseValue, idx) => (
                                                         <span key={idx} className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                                                             {sub.name || sub}
                                                         </span>
@@ -271,7 +273,7 @@ export default function TeacherTable({ teachers, isLoading, onEdit, onDelete, pa
                                 }
                             }
 
-                            for (let i of range) {
+                            for (const i of range) {
                                 if (l) {
                                     if (i - l === 2) {
                                         rangeWithDots.push(l + 1);

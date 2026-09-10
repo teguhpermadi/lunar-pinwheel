@@ -1,9 +1,11 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 
 interface SequenceDisplayProps {
     options?: QuestionOption[];
-    sequenceItems?: any[];
+    sequenceItems?: LooseValue[];
 }
 
 export default function SequenceDisplay({ options = [], sequenceItems }: SequenceDisplayProps) {

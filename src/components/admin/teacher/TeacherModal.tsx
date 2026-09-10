@@ -80,7 +80,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSave }: Teach
         try {
             await onSave(payload as TeacherFormData);
             onClose(); // Close only on success
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error("Submission failed", error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {

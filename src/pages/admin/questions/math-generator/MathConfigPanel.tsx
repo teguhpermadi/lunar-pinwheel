@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MathPreviewConfig, MathLevel, MathDomain, mathGeneratorApi } from '@/lib/api';
@@ -68,7 +70,7 @@ export default function MathConfigPanel({ onGenerate, isLoading }: MathConfigPan
                     const domainsData = response.data.domains;
                     const domainsArray = Array.isArray(domainsData)
                         ? domainsData
-                        : Object.entries(domainsData).map(([key, val]: [string, any]) => ({
+                        : Object.entries(domainsData).map(([key, val]: [string, LooseValue]) => ({
                             name: key,
                             display_name: val.name || key,
                             description: val.description || '',

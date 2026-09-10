@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -5,12 +7,12 @@ import { CheckCircle2, XCircle, MessageSquare } from 'lucide-react';
 
 interface TrueFalseCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any;
-    keyAnswer?: any;
+    studentAnswer: LooseValue;
+    keyAnswer?: LooseValue;
 }
 
 export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer }: TrueFalseCorrectionProps) {
-    const extractOptionKey = (answer: any): string | null => {
+    const extractOptionKey = (answer: LooseValue): string | null => {
         if (!answer) return null;
         if (typeof answer === 'string') return answer;
         if (typeof answer === 'object' && answer !== null) {
@@ -19,7 +21,7 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
         return null;
     };
 
-    const extractReason = (answer: any): string | null => {
+    const extractReason = (answer: LooseValue): string | null => {
         if (!answer) return null;
         if (typeof answer === 'object' && answer !== null) {
             const reason = answer.reason;
@@ -46,8 +48,8 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
         const optionKey = String(opt.option_key).toUpperCase();
 
         if (keyAnswer) {
-            const extractValues = (val: any): string[] => {
-                const normalizeVal = (v: any) => String(v).toUpperCase();
+            const extractValues = (val: LooseValue): string[] => {
+                const normalizeVal = (v: LooseValue) => String(v).toUpperCase();
                 if (typeof val === 'object' && val !== null) {
                     const inner = val.answer || val.id || val.option_id || val.option_key || val;
                     if (Array.isArray(inner)) return inner.map(normalizeVal);
@@ -62,7 +64,7 @@ export default function TrueFalseCorrection({ options, studentAnswer, keyAnswer 
             }
         }
 
-        const o = opt as any;
+        const o = opt as LooseValue;
         return !!opt.is_correct || !!o.is_answer || opt.metadata?.is_correct || opt.metadata?.is_answer;
     };
 

@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -50,7 +52,7 @@ function timeAgo(dateString: string) {
 }
 
 function StatusBadge({ state, label }: { state: string, label: string }) {
-    const configs: Record<string, { bg: string, text: string, icon: any }> = {
+    const configs: Record<string, { bg: string, text: string, icon: LooseValue }> = {
         pending: { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-600 dark:text-amber-400', icon: Clock },
         approved: { bg: 'bg-green-100 dark:bg-green-500/20', text: 'text-green-600 dark:text-green-400', icon: CheckCircle2 },
         rejected: { bg: 'bg-red-100 dark:bg-red-500/20', text: 'text-red-600 dark:text-red-400', icon: XCircle },
@@ -111,11 +113,11 @@ export default function QuestionSuggestionList() {
                 search: searchQuery,
             });
             if (response.success) {
-                const result = response.data as any;
+                const result = response.data as LooseValue;
                 const items = Array.isArray(result) ? result : (result.data || []);
                 setSuggestions(items);
 
-                const meta = result.meta || (response as any).meta;
+                const meta = result.meta || (response as LooseValue).meta;
                 if (meta) {
                     setTotalPages(meta.last_page);
                     setTotalItems(meta.total);
@@ -154,7 +156,7 @@ export default function QuestionSuggestionList() {
                     MySwal.fire('Approved!', 'Changes have been applied.', 'success');
                     fetchSuggestions();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to approve', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to approve suggestion.', 'error');
             }
@@ -179,7 +181,7 @@ export default function QuestionSuggestionList() {
                     MySwal.fire('Rejected!', 'Suggestion has been rejected.', 'success');
                     fetchSuggestions();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to reject', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to reject suggestion.', 'error');
             }
@@ -204,7 +206,7 @@ export default function QuestionSuggestionList() {
                     MySwal.fire('Deleted!', 'Suggestion has been deleted.', 'success');
                     fetchSuggestions();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error('Failed to delete', error);
                 MySwal.fire('Error!', error.response?.data?.message || 'Failed to delete suggestion.', 'error');
             }

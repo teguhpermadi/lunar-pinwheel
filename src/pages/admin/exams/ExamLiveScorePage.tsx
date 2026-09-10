@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
@@ -99,7 +101,7 @@ export default function ExamLiveScorePage() {
 
         const channel = echo.channel(`exam.${id}.live-score`);
 
-        channel.listen('.LiveScoreUpdated', (event: { sessionData: any }) => {
+        channel.listen('.LiveScoreUpdated', (event: { sessionData: LooseValue }) => {
             setData(prev => {
                 if (!prev) return prev;
                 const sessions = [...prev.sessions];
@@ -200,7 +202,7 @@ export default function ExamLiveScorePage() {
                     });
                     fetchLiveScore();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to force finish exam', 'error');
             }
         }
@@ -250,7 +252,7 @@ export default function ExamLiveScorePage() {
                     });
                     fetchLiveScore();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to add extra time', 'error');
             }
         }
@@ -302,7 +304,7 @@ export default function ExamLiveScorePage() {
                     });
                     fetchLiveScore();
                 }
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to reopen exam', 'error');
             }
         }

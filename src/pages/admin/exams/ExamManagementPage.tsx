@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { examApi, Exam, teacherApi, User } from '@/lib/api';
@@ -54,7 +56,7 @@ export default function ExamManagementPage() {
     const fetchExams = async (page = 1, search = searchQuery) => {
         setIsLoading(true);
         try {
-            const params: any = {
+            const params: LooseValue = {
                 page,
                 sort_by: 'created_at',
                 order: 'desc'
@@ -441,7 +443,7 @@ export default function ExamManagementPage() {
                                 }
                             }
 
-                            for (let i of range) {
+                            for (const i of range) {
                                 if (l) {
                                     if (i - l === 2) {
                                         rangeWithDots.push(l + 1);

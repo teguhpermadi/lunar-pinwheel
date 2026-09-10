@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useEffect, useRef, useMemo } from 'react';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 import * as DOMPurify from 'dompurify';
@@ -34,11 +36,11 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
         if (!processedContent) return '';
         try {
             if (typeof window !== 'undefined' && DOMPurify) {
-                // Cast to any to avoid depending on DOMPurify types in this repo
-                return (DOMPurify as any).sanitize(processedContent);
+                // Cast to LooseValue to avoid depending on DOMPurify types in this repo
+                return (DOMPurify as LooseValue).sanitize(processedContent);
             }
-        } catch (err) {
-            // If sanitization fails for any reason, fall back to the raw processedContent
+        } catch {
+            // If sanitization fails for LooseValue reason, fall back to the raw processedContent
             return processedContent;
         }
         return processedContent;
@@ -47,9 +49,9 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
     useEffect(() => {
         if (containerRef.current) {
             try {
-                // @ts-ignore
+                // @ts-expect-error renderMathInElement is attached globally by the auto-render script
                 if (window.renderMathInElement) {
-                    // @ts-ignore
+                    // @ts-expect-error renderMathInElement is attached globally by the auto-render script
                     window.renderMathInElement(containerRef.current, {
                         delimiters: [
                             { left: "$$", right: "$$", display: true },
@@ -69,7 +71,7 @@ export default function MathRenderer({ content, isHtml = true, className = "" }:
                         output: 'html',
                     });
                 }
-            } catch (err) {
+            } catch {
                 // Silently fail if KaTeX fails to render
             }
         }

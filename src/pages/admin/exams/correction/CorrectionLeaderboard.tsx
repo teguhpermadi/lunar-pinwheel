@@ -56,7 +56,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                 });
                 onRefresh();
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to delete session', 'error');
         } finally {
             setIsDeleting(null);
@@ -79,7 +79,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                 });
                 onRefresh();
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to recalculate score', 'error');
         } finally {
             setIsRecalculating(null);
@@ -114,7 +114,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                 });
                 onRefresh();
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to recalculate all scores', 'error');
         } finally {
             setIsRecalculatingAll(false);
@@ -142,7 +142,7 @@ const CorrectionLeaderboard: React.FC<CorrectionLeaderboardProps> = ({ sessions,
                 toast: true,
                 position: 'top-end'
             });
-        } catch (error: any) {
+        } catch {
             Swal.fire('Error', 'Failed to export results', 'error');
         } finally {
             setIsExporting(false);

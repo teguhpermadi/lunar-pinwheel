@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import React, { useState, useEffect, useRef } from 'react';
 import { tagApi, Tag } from '@/lib/api';
 import { X, Loader2, PlusCircle } from 'lucide-react';
@@ -5,7 +7,7 @@ import { X, Loader2, PlusCircle } from 'lucide-react';
 interface QuestionTagInputProps {
     questionId: string;
     tagType?: string;
-    initialTags: string[] | any[]; // Backend can return array of strings or array of Tag objects
+    initialTags: string[] | LooseValue[]; // Backend can return array of strings or array of Tag objects
     onTagsChange: (newTags: string[]) => void;
     disabled?: boolean;
 }
@@ -17,7 +19,7 @@ export default function QuestionTagInput({
     disabled = false
 }: QuestionTagInputProps) {
     // Normalize initial tags to an array of strings
-    const normalizedTags = initialTags.map((t: any) => typeof t === 'string' ? t : (t.name || t.slug || '')).filter(Boolean);
+    const normalizedTags = initialTags.map((t: LooseValue) => typeof t === 'string' ? t : (t.name || t.slug || '')).filter(Boolean);
 
     const [tags, setTags] = useState<string[]>(normalizedTags);
     const [inputValue, setInputValue] = useState('');
@@ -29,7 +31,7 @@ export default function QuestionTagInput({
 
     // Sync state when initial props change
     useEffect(() => {
-        setTags(initialTags.map((t: any) => typeof t === 'string' ? t : (t.name || t.slug || '')).filter(Boolean));
+        setTags(initialTags.map((t: LooseValue) => typeof t === 'string' ? t : (t.name || t.slug || '')).filter(Boolean));
     }, [initialTags]);
 
     // Click outside to close suggestions

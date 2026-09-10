@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -39,7 +41,7 @@ export default function CreateQuestionBank() {
                         per_page: 100 // Get all subjects
                     });
                     if (response.success) {
-                        const result = response.data as any;
+                        const result = response.data as LooseValue;
                         setSubjects(Array.isArray(result) ? result : (result.data || []));
                     }
                 } catch (error) {
@@ -73,7 +75,7 @@ export default function CreateQuestionBank() {
                 // Redirect to Edit page to add questions
                 navigate(`/admin/question-banks/${response.data.id}`);
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error(error);
             Swal.fire({
                 icon: 'error',

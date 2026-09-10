@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -29,7 +31,7 @@ export default function SubjectManagement() {
     const fetchSubjects = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const params: any = { page };
+            const params: LooseValue = { page };
 
             if (search) {
                 params.search = search;

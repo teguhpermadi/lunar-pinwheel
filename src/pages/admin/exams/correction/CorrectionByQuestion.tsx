@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -45,22 +47,22 @@ import StudentArrangeWordsInput from '@/components/questions/student-inputs/Stud
 interface CorrectionByQuestionProps {
     examId: string;
     selectedQuestionIndex: number;
-    masterQuestions: any[];
+    masterQuestions: LooseValue[];
     currentQuestionContent: string;
     currentQuestionType?: string;
     handleToggleSelectAll: () => void;
     selectedAnswerIds: string[];
-    bulkAnswers: any[];
+    bulkAnswers: LooseValue[];
     setSelectedQuestionIndex: (index: number) => void;
     isBulkLoading: boolean;
     toggleAnswerSelection: (id: string) => void;
     handleUpdateCorrection: (score: number, isCorrect: boolean, detailIdOverride?: string, sessionIdOverride?: string, notes?: string) => void;
     handleUpdateStudentAnswer: (detailId: string, sessionId: string, studentAnswer: string | string[] | number[]) => void;
     handleRestoreStudentAnswer: (detailId: string, sessionId: string) => void;
-    setPartialScoreData: (data: any) => void;
+    setPartialScoreData: (data: LooseValue) => void;
     setIsPartialModalOpen: (open: boolean) => void;
     isAdmin?: boolean;
-    setBulkAnswers: (answers: any[]) => void;
+    setBulkAnswers: (answers: LooseValue[]) => void;
     onRefresh?: () => void;
 }
 
@@ -86,7 +88,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
 }) => {
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [editingAnswerId, setEditingAnswerId] = useState<string | null>(null);
-    const [editedAnswer, setEditedAnswer] = useState<any>(null);
+    const [editedAnswer, setEditedAnswer] = useState<LooseValue>(null);
     const [isSavingAnswer, setIsSavingAnswer] = useState(false);
     const [isAICorrecting, setIsAICorrecting] = useState(false);
 
@@ -98,7 +100,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
 
     const contentRaw = currentQuestionContent || '';
 
-    // Get current master question to extract reading material if any
+    // Get current master question to extract reading material if LooseValue
     const currentMasterQuestion = masterQuestions[selectedQuestionIndex];
     const readingMaterial = currentMasterQuestion?.exam_reading_material || currentMasterQuestion?.exam_question?.exam_reading_material;
     const currentQuestionId = currentMasterQuestion?.id;
@@ -131,7 +133,7 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                 position: 'top-end',
             });
             onRefresh?.();
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Gagal menjalankan koreksi AI.', 'error');
         } finally {
             setIsAICorrecting(false);

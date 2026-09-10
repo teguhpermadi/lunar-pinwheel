@@ -258,7 +258,7 @@ export default function AcademicYearTable({ academicYears, isLoading, onEdit, on
                                 }
                             }
 
-                            for (let i of range) {
+                            for (const i of range) {
                                 if (l) {
                                     if (i - l === 2) {
                                         rangeWithDots.push(l + 1);

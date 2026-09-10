@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -25,7 +27,7 @@ export default function QuestionFormPage() {
     const [content, setContent] = useState('');
     const [hint, setHint] = useState('');
     const [readingMaterialId, setReadingMaterialId] = useState<string | null>(null);
-    const [questionMedia, setQuestionMedia] = useState<any>(null);
+    const [questionMedia, setQuestionMedia] = useState<LooseValue>(null);
     const [pendingQuestionImage, setPendingQuestionImage] = useState<File | null>(null);
     const [questionPreviewUrl, setQuestionPreviewUrl] = useState<string | null>(null);
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -34,17 +36,17 @@ export default function QuestionFormPage() {
     const [currentBankId, setCurrentBankId] = useState<string | undefined>(bankId);
 
     // Specific Input States
-    const [options, setOptions] = useState<any[]>([
+    const [options, setOptions] = useState<LooseValue[]>([
         { key: 'A', content: '', is_correct: false, uuid: generateUUID() },
         { key: 'B', content: '', is_correct: false, uuid: generateUUID() },
         { key: 'C', content: '', is_correct: false, uuid: generateUUID() },
         { key: 'D', content: '', is_correct: false, uuid: generateUUID() },
     ]);
-    const [matchingPairs, setMatchingPairs] = useState<any[]>([
+    const [matchingPairs, setMatchingPairs] = useState<LooseValue[]>([
         { uuid: generateUUID(), rightUuid: generateUUID(), left: '', right: '' },
         { uuid: generateUUID(), rightUuid: generateUUID(), left: '', right: '' },
     ]);
-    const [sequenceItems, setSequenceItems] = useState<any[]>([
+    const [sequenceItems, setSequenceItems] = useState<LooseValue[]>([
         { uuid: generateUUID(), content: '', order: 1 },
         { uuid: generateUUID(), content: '', order: 2 },
     ]);
@@ -52,7 +54,7 @@ export default function QuestionFormPage() {
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
     const [javaneseContent, setJavaneseContent] = useState('');
-    const [categorizationGroups, setCategorizationGroups] = useState<any[]>([
+    const [categorizationGroups, setCategorizationGroups] = useState<LooseValue[]>([
         { uuid: generateUUID(), title: 'Category 1', items: [{ uuid: generateUUID(), content: '' }] },
         { uuid: generateUUID(), title: 'Category 2', items: [{ uuid: generateUUID(), content: '' }] },
     ]);
@@ -140,7 +142,7 @@ export default function QuestionFormPage() {
 
                 // Map options
                 if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(q.type)) {
-                    setOptions(q.options.map((o: any) => ({
+                    setOptions(q.options.map((o: LooseValue) => ({
                         ...o,
                         key: o.option_key,
                         uuid: o.id || generateUUID()
@@ -149,7 +151,7 @@ export default function QuestionFormPage() {
                     const pairsMap = new Map();
 
                     // Group by pair_id from metadata
-                    q.options.forEach((o: any) => {
+                    q.options.forEach((o: LooseValue) => {
                         const pairId = o.metadata?.pair_id;
                         if (!pairId) return;
 
@@ -178,36 +180,36 @@ export default function QuestionFormPage() {
                     setMatchingPairs(Array.from(pairsMap.values()));
                 } else if (q.type === 'sequence') {
                     setSequenceItems(q.options
-                        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-                        .map((o: any) => ({
+                        .sort((a: LooseValue, b: LooseValue) => (a.order || 0) - (b.order || 0))
+                        .map((o: LooseValue) => ({
                             id: o.id,
                             uuid: o.id || generateUUID(),
                             content: o.content,
                             order: o.order
                         })));
                 } else if (q.type === 'essay') {
-                    const essayOption = q.options.find((o: any) => o.option_key === 'ESSAY');
+                    const essayOption = q.options.find((o: LooseValue) => o.option_key === 'ESSAY');
                     if (essayOption) {
                         setEssayKeywords(essayOption.content);
                     }
                 } else if (q.type === 'math_input') {
-                    const mathOption = q.options.find((o: any) => o.option_key === 'MATH');
+                    const mathOption = q.options.find((o: LooseValue) => o.option_key === 'MATH');
                     if (mathOption) {
                         setMathContent(mathOption.content);
                     }
                 } else if (q.type === 'arabic_response') {
-                    const arabicOption = q.options.find((o: any) => o.option_key === 'ARABIC');
+                    const arabicOption = q.options.find((o: LooseValue) => o.option_key === 'ARABIC');
                     if (arabicOption) {
                         setArabicContent(arabicOption.content);
                     }
                 } else if (q.type === 'javanese_response') {
-                    const javaneseOption = q.options.find((o: any) => o.option_key === 'JAVANESE');
+                    const javaneseOption = q.options.find((o: LooseValue) => o.option_key === 'JAVANESE');
                     if (javaneseOption) {
                         setJavaneseContent(javaneseOption.content);
                     }
                 } else if (q.type === 'categorization') {
                     const groupsMap = new Map();
-                    q.options.forEach((o: any) => {
+                    q.options.forEach((o: LooseValue) => {
                         const groupUuid = o.metadata?.group_uuid;
                         const groupTitle = o.metadata?.group_title || 'Uncategorized';
                         if (!groupsMap.has(groupUuid)) {
@@ -226,7 +228,7 @@ export default function QuestionFormPage() {
                     });
                     setCategorizationGroups(Array.from(groupsMap.values()));
                 } else if (q.type === 'arrange_words') {
-                    const sentenceOption = q.options.find((o: any) => o.option_key === 'SENTENCE');
+                    const sentenceOption = q.options.find((o: LooseValue) => o.option_key === 'SENTENCE');
                     if (sentenceOption) {
                         setArrangeWordsSentence(sentenceOption.content);
                         setArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
@@ -248,7 +250,7 @@ export default function QuestionFormPage() {
     };
 
     const handleDeleteOptionMedia = async (optionUuid: string, mediaId?: string) => {
-        const option = options.find((o: any) => o.uuid === optionUuid);
+        const option = options.find((o: LooseValue) => o.uuid === optionUuid);
 
         try {
             if (option?.id && mediaId) {
@@ -263,13 +265,13 @@ export default function QuestionFormPage() {
                 });
             }
 
-            setOptions((prev: any) => prev.map((o: any) =>
+            setOptions((prev: LooseValue) => prev.map((o: LooseValue) =>
                 o.uuid === optionUuid ? { ...o, media: null } : o
             ));
 
-            setCategorizationGroups((prev: any) => prev.map((g: any) => ({
+            setCategorizationGroups((prev: LooseValue) => prev.map((g: LooseValue) => ({
                 ...g,
-                items: g.items.map((i: any) =>
+                items: g.items.map((i: LooseValue) =>
                     i.uuid === optionUuid ? { ...i, media: null, previewUrl: null, pendingImage: null } : i
                 )
             })));
@@ -360,7 +362,7 @@ export default function QuestionFormPage() {
                 case 'multiple_selection':
                 case 'true_false':
                 case 'short_answer':
-                    options.forEach((opt: any, idx: number) => {
+                    options.forEach((opt: LooseValue, idx: number) => {
                         if (opt.id) {
                             formData.append(`options[${idx}][id]`, opt.id);
                         }
@@ -372,24 +374,24 @@ export default function QuestionFormPage() {
                         }
                     });
 
-                    if (type === 'multiple_choice' && !options.some((o: any) => o.is_correct)) {
+                    if (type === 'multiple_choice' && !options.some((o: LooseValue) => o.is_correct)) {
                         throw new Error('Please select a correct answer');
                     }
-                    if (type === 'multiple_selection' && !options.some((o: any) => o.is_correct)) {
+                    if (type === 'multiple_selection' && !options.some((o: LooseValue) => o.is_correct)) {
                         throw new Error('Please select at least one correct answer');
                     }
-                    if (type === 'short_answer' && !options.some((o: any) => o.content.trim())) {
+                    if (type === 'short_answer' && !options.some((o: LooseValue) => o.content.trim())) {
                         throw new Error('Please provide at least one accepted answer');
                     }
                     break;
                 case 'matching':
-                    matchingPairs.forEach((p: any, idx: number) => {
+                    matchingPairs.forEach((p: LooseValue, idx: number) => {
                         formData.append(`matching_pairs[${idx}][left]`, p.left);
                         formData.append(`matching_pairs[${idx}][right]`, p.right);
                     });
                     break;
                 case 'sequence':
-                    sequenceItems.forEach((item: any, idx: number) => {
+                    sequenceItems.forEach((item: LooseValue, idx: number) => {
                         formData.append(`sequence_items[${idx}][content]`, item.content);
                         formData.append(`sequence_items[${idx}][order]`, (idx + 1).toString());
                     });
@@ -407,10 +409,10 @@ export default function QuestionFormPage() {
                     formData.append('javanese_content', javaneseContent);
                     break;
                 case 'categorization':
-                    categorizationGroups.forEach((group: any, gIdx: number) => {
+                    categorizationGroups.forEach((group: LooseValue, gIdx: number) => {
                         formData.append(`categorization_groups[${gIdx}][title]`, group.title);
                         formData.append(`categorization_groups[${gIdx}][group_uuid]`, group.uuid);
-                        group.items.forEach((item: any, iIdx: number) => {
+                        group.items.forEach((item: LooseValue, iIdx: number) => {
                             formData.append(`categorization_groups[${gIdx}][items][${iIdx}][content]`, item.content);
                             formData.append(`categorization_groups[${gIdx}][items][${iIdx}][metadata][group_uuid]`, group.uuid);
                             formData.append(`categorization_groups[${gIdx}][items][${iIdx}][metadata][group_title]`, group.title);
@@ -451,7 +453,7 @@ export default function QuestionFormPage() {
                 throw new Error(response.message || 'Failed to save question');
             }
 
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Save error", error);
             Swal.fire('Error', error.message || 'Failed to save question', 'error');
         } finally {

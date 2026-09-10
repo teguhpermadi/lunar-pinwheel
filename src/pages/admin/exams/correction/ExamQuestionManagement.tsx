@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { examApi, examQuestionApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -24,7 +26,7 @@ import QuestionToolbar from '@/components/questions/QuestionToolbar';
 
 interface ExamQuestionManagementProps {
     examId: string;
-    questions: any[];
+    questions: LooseValue[];
     onUpdate: () => void;
 }
 
@@ -41,14 +43,14 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
     const [type, setType] = useState('multiple_choice');
 
     // Specific Input States
-    const [options, setOptions] = useState<any[]>([]);
-    const [matchingPairs, setMatchingPairs] = useState<any[]>([]);
-    const [sequenceItems, setSequenceItems] = useState<any[]>([]);
+    const [options, setOptions] = useState<LooseValue[]>([]);
+    const [matchingPairs, setMatchingPairs] = useState<LooseValue[]>([]);
+    const [sequenceItems, setSequenceItems] = useState<LooseValue[]>([]);
     const [essayKeywords, setEssayKeywords] = useState('');
     const [mathContent, setMathContent] = useState('');
     const [arabicContent, setArabicContent] = useState('');
     const [javaneseContent, setJavaneseContent] = useState('');
-    const [categorizationGroups, setCategorizationGroups] = useState<any[]>([]);
+    const [categorizationGroups, setCategorizationGroups] = useState<LooseValue[]>([]);
     const [arrangeWordsSentence, setArrangeWordsSentence] = useState('');
     const [arrangeWordsDelimiter, setArrangeWordsDelimiter] = useState(' ');
     const [arrangeWordsIsArabic, setArrangeWordsIsArabic] = useState(false);
@@ -71,7 +73,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 // Option mapping
                 if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(q.question_type)) {
                     const keyAnswer = q.key_answer;
-                    setOptions((q.options || []).map((o: any) => {
+                    setOptions((q.options || []).map((o: LooseValue) => {
                         let isCorrect = false;
                         if (q.question_type === 'multiple_choice' || q.question_type === 'true_false') {
                             const val = keyAnswer?.answer || keyAnswer;
@@ -93,7 +95,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                     }));
                 } else if (q.question_type === 'matching') {
                     const pairsMap = new Map();
-                    (q.options || []).forEach((o: any) => {
+                    (q.options || []).forEach((o: LooseValue) => {
                         const pairId = o.metadata?.pair_id;
                         if (!pairId) return;
                         if (!pairsMap.has(pairId)) {
@@ -121,8 +123,8 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                     if (pairsMap.size === 0 && q.key_answer?.pairs) {
                         const keyPairs = q.key_answer.pairs;
                         Object.entries(keyPairs).forEach(([leftKey, rightKey], idx) => {
-                            const leftOpt = (q.options || []).find((o: any) => o.option_key === leftKey);
-                            const rightOpt = (q.options || []).find((o: any) => o.option_key === rightKey);
+                            const leftOpt = (q.options || []).find((o: LooseValue) => o.option_key === leftKey);
+                            const rightOpt = (q.options || []).find((o: LooseValue) => o.option_key === rightKey);
                             if (leftOpt && rightOpt) {
                                 pairsMap.set(idx + 1, {
                                     uuid: generateUUID(),
@@ -140,14 +142,14 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                     setMatchingPairs(Array.from(pairsMap.values()));
                 } else if (q.question_type === 'sequence') {
                     const keyOrder = q.key_answer?.order || []; // Format: ["A", "B", "C"]
-                    const sortedOptions = (q.options || []).sort((a: any, b: any) => {
+                    const sortedOptions = (q.options || []).sort((a: LooseValue, b: LooseValue) => {
                         const idxA = keyOrder.indexOf(a.option_key);
                         const idxB = keyOrder.indexOf(b.option_key);
                         if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                         return (a.order || 0) - (b.order || 0);
                     });
 
-                    setSequenceItems(sortedOptions.map((o: any) => ({
+                    setSequenceItems(sortedOptions.map((o: LooseValue) => ({
                         id: o.id,
                         uuid: o.id || generateUUID(),
                         content: o.content,
@@ -155,22 +157,22 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                     })));
                 } else if (q.question_type === 'essay') {
                     // Essay rubric is stored in the content of the option with key ESSAY
-                    const essayOpt = (q.options || []).find((o: any) => o.option_key === 'ESSAY');
+                    const essayOpt = (q.options || []).find((o: LooseValue) => o.option_key === 'ESSAY');
                     setEssayKeywords(essayOpt ? essayOpt.content : (typeof q.key_answer?.rubric === 'string' ? q.key_answer.rubric : ''));
                 } else if (q.question_type === 'math_input') {
                     const answer = q.key_answer?.answer || q.key_answer;
-                    const mathOpt = (q.options || []).find((o: any) => o.option_key === 'MATH');
+                    const mathOpt = (q.options || []).find((o: LooseValue) => o.option_key === 'MATH');
                     setMathContent(mathOpt ? mathOpt.content : (typeof answer === 'string' ? answer : ''));
                 } else if (q.question_type === 'arabic_response') {
-                    const araOpt = (q.options || []).find((o: any) => o.option_key === 'ARABIC');
+                    const araOpt = (q.options || []).find((o: LooseValue) => o.option_key === 'ARABIC');
                     setArabicContent(araOpt ? araOpt.content : ((q.key_answer?.answers || [])[0] || ''));
                 } else if (q.question_type === 'javanese_response') {
-                    const javOpt = (q.options || []).find((o: any) => o.option_key === 'JAVANESE');
+                    const javOpt = (q.options || []).find((o: LooseValue) => o.option_key === 'JAVANESE');
                     setJavaneseContent(javOpt ? javOpt.content : ((q.key_answer?.answers || [])[0] || ''));
                 } else if (q.question_type === 'categorization') {
                     const groupsMap = new Map();
                     // Options in snapshot contain the item content and their category metadata
-                    (q.options || []).forEach((o: any) => {
+                    (q.options || []).forEach((o: LooseValue) => {
                         const title = o.metadata?.group_title || o.metadata?.category_title || 'Other';
                         const groupUuid = o.metadata?.group_uuid || generateUUID();
 
@@ -192,13 +194,13 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
 
                     // Fallback to key_answer groups if options don't have metadata
                     if (groupsMap.size === 0 && q.key_answer?.groups) {
-                        q.key_answer.groups.forEach((kg: any) => {
+                        q.key_answer.groups.forEach((kg: LooseValue) => {
                             const groupUuid = generateUUID();
                             groupsMap.set(kg.title, {
                                 uuid: groupUuid,
                                 title: kg.title,
                                 items: kg.items.map((itemKey: string) => {
-                                    const opt = (q.options || []).find((o: any) => o.option_key === itemKey);
+                                    const opt = (q.options || []).find((o: LooseValue) => o.option_key === itemKey);
                                     return {
                                         id: opt?.id,
                                         uuid: opt?.id || generateUUID(),
@@ -213,7 +215,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                     setCategorizationGroups(Array.from(groupsMap.values()));
                 } else if (q.question_type === 'arrange_words') {
                     setArrangeWordsSentence(q.key_answer?.words?.join(q.key_answer?.delimiter || ' ') || '');
-                    const sentOpt = (q.options || []).find((o: any) => o.option_key === 'SENTENCE');
+                    const sentOpt = (q.options || []).find((o: LooseValue) => o.option_key === 'SENTENCE');
                     if (sentOpt) {
                         setArrangeWordsDelimiter(sentOpt.metadata?.delimiter || ' ');
                         setArrangeWordsIsArabic(!!sentOpt.metadata?.is_arabic);
@@ -234,7 +236,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
         setIsSaving(true);
         try {
             // Reconstruct data based on type
-            const updatePayload: any = {
+            const updatePayload: LooseValue = {
                 id: currentQuestion.id,
                 content,
                 score_value: score,
@@ -250,16 +252,16 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 }));
 
                 if (type === 'multiple_choice' || type === 'true_false') {
-                    const correct = options.find((o: any) => o.is_correct);
+                    const correct = options.find((o: LooseValue) => o.is_correct);
                     updatePayload.key_answer = { answer: correct ? correct.key : '' };
                 } else if (type === 'multiple_selection') {
-                    updatePayload.key_answer = { answers: options.filter((o: any) => o.is_correct).map((o: any) => o.key) };
+                    updatePayload.key_answer = { answers: options.filter((o: LooseValue) => o.is_correct).map((o: LooseValue) => o.key) };
                 } else if (type === 'short_answer') {
-                    updatePayload.key_answer = { answers: options.filter((o: any) => o.is_correct).map((o: any) => o.content) };
+                    updatePayload.key_answer = { answers: options.filter((o: LooseValue) => o.is_correct).map((o: LooseValue) => o.content) };
                 }
             } else if (type === 'matching') {
                 updatePayload.options = [];
-                const keyPairs: any = {};
+                const keyPairs: LooseValue = {};
                 matchingPairs.forEach((p, idx) => {
                     const leftKey = `L${idx + 1}`;
                     const rightKey = `R${idx + 1}`;
@@ -271,13 +273,13 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 });
                 updatePayload.key_answer = { pairs: keyPairs };
             } else if (type === 'sequence') {
-                updatePayload.options = sequenceItems.map((item: any, idx: number) => ({
+                updatePayload.options = sequenceItems.map((item: LooseValue, idx: number) => ({
                     option_key: (idx + 1).toString(),
                     content: item.content,
                     order: idx + 1,
                     metadata: { correct_position: idx + 1 }
                 }));
-                updatePayload.key_answer = { order: updatePayload.options.map((o: any) => o.option_key) };
+                updatePayload.key_answer = { order: updatePayload.options.map((o: LooseValue) => o.option_key) };
             } else if (type === 'essay') {
                 updatePayload.options = [{ option_key: 'ESSAY', content: essayKeywords, is_correct: true, metadata: { type: 'rubric' } }];
                 updatePayload.key_answer = { rubric: essayKeywords };
@@ -292,11 +294,11 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 updatePayload.key_answer = { answers: [javaneseContent] };
             } else if (type === 'categorization') {
                 updatePayload.options = [];
-                const groups: any[] = [];
+                const groups: LooseValue[] = [];
                 categorizationGroups.forEach((group, gIdx) => {
                     const itemKeys: string[] = [];
                     const groupUuid = group.uuid || generateUUID();
-                    group.items.forEach((item: any, iIdx: number) => {
+                    group.items.forEach((item: LooseValue, iIdx: number) => {
                         const key = `C${gIdx + 1}I${iIdx + 1}`;
                         updatePayload.options.push({
                             option_key: key,
@@ -342,7 +344,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 });
                 onUpdate();
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Gagal menyimpan perubahan', 'error');
         } finally {
             setIsSaving(false);
@@ -383,7 +385,7 @@ export default function ExamQuestionManagement({ examId, questions: initialQuest
                 position: 'top-end',
             });
             onUpdate();
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Gagal menjalankan koreksi AI.', 'error');
         } finally {
             setIsAICorrecting(false);

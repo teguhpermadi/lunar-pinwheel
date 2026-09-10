@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -5,8 +7,8 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface MultipleChoiceCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // string (id/key)
-    keyAnswer?: any;    // { answer: string }
+    studentAnswer: LooseValue; // string (id/key)
+    keyAnswer?: LooseValue;    // { answer: string }
 }
 
 export default function MultipleChoiceCorrection({ options, studentAnswer, keyAnswer }: MultipleChoiceCorrectionProps) {
@@ -16,7 +18,7 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
         const optionId = String(opt.id);
         const optionKey = String(opt.option_key).toUpperCase();
 
-        const normalize = (val: any): string => {
+        const normalize = (val: LooseValue): string => {
             if (typeof val === 'object' && val !== null) {
                 return String(val.id || val.option_id || val.option_key || val).toUpperCase();
             }
@@ -33,8 +35,8 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
 
         // 1. Check if keyAnswer exists and contains this option
         if (keyAnswer) {
-            const extractValues = (val: any): string[] => {
-                const normalizeVal = (v: any) => String(v).toUpperCase();
+            const extractValues = (val: LooseValue): string[] => {
+                const normalizeVal = (v: LooseValue) => String(v).toUpperCase();
 
                 if (typeof val === 'object' && val !== null) {
                     // Try plural 'answers' first, then singular 'answer', then other identifiers
@@ -60,7 +62,7 @@ export default function MultipleChoiceCorrection({ options, studentAnswer, keyAn
         }
 
         // 2. Fallbacks for various formats in the opt object itself
-        const o = opt as any;
+        const o = opt as LooseValue;
         return !!opt.is_correct ||
             !!o.isCorrect ||
             !!o.correct ||

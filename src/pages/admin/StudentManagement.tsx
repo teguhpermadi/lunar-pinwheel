@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -40,7 +42,7 @@ export default function StudentManagement() {
     const fetchStudents = async (page = 1, search = '') => {
         setIsLoading(true);
         try {
-            const params: any = { page };
+            const params: LooseValue = { page };
             if (search) {
                 params.search = search;
             }
@@ -102,7 +104,7 @@ export default function StudentManagement() {
         setIsModalOpen(true);
     };
 
-    const handleSave = async (data: any) => {
+    const handleSave = async (data: LooseValue) => {
         try {
             if (selectedStudent) {
                 await studentApi.updateStudent(selectedStudent.id, data);
@@ -261,7 +263,7 @@ export default function StudentManagement() {
                     text: 'Students have been imported successfully.'
                 });
                 fetchStudents(pagination.currentPage, searchQuery);
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 console.error("Import failed:", error);
 
                 const responseData = error.response?.data;

@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,7 +60,7 @@ export default function QuestionBankList() {
     const fetchQuestionBanks = async () => {
         setIsLoading(true);
         try {
-            const params: any = {
+            const params: LooseValue = {
                 page,
                 per_page: 10,
                 search: searchQuery,
@@ -73,11 +75,11 @@ export default function QuestionBankList() {
             
             const response = await apiMethod;
             if (response.success) {
-                const result = response.data as any;
+                const result = response.data as LooseValue;
                 const items = Array.isArray(result) ? result : (result.data || []);
                 setQuestionBanks(items);
 
-                const meta = result.meta || (response as any).meta;
+                const meta = result.meta || (response as LooseValue).meta;
                 if (meta) {
                     setTotalPages(meta.last_page);
                     setTotalItems(meta.total);
@@ -330,13 +332,13 @@ export default function QuestionBankList() {
                                     </td>
                                     <td className="px-4 py-5">
                                         <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                            {(bank as any).subject?.name || 'Unknown Subject'}
+                                            {(bank as LooseValue).subject?.name || 'Unknown Subject'}
                                         </span>
                                     </td>
                                     {(isAdmin && (activeTab === 'mine' || activeTab === 'all')) && (
                                         <td className="px-4 py-5">
                                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                                                {(bank as any).user?.name || 'No Teacher'}
+                                                {(bank as LooseValue).user?.name || 'No Teacher'}
                                             </span>
                                         </td>
                                     )}

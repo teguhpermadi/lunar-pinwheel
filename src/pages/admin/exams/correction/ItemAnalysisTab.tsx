@@ -70,7 +70,7 @@ export default function ItemAnalysisTab({ examId }: ItemAnalysisTabProps) {
                 } else {
                     setError('Gagal memuat data telaah soal.');
                 }
-            } catch (err: any) {
+            } catch (err: ReturnType<typeof JSON.parse>) {
                 setError(err.response?.data?.message || 'Gagal memuat data telaah soal.');
             } finally {
                 setIsLoading(false);

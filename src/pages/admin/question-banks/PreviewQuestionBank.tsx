@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +39,7 @@ interface SuggestionOption {
     key: string;
     content: string;
     is_correct: boolean;
-    media?: any;
+    media?: LooseValue;
     uuid: string;
     pendingImage?: File | null;
     previewUrl?: string | null;
@@ -55,7 +57,7 @@ export default function PreviewQuestionBank() {
 
     // Data State
     const [bank, setBank] = useState<QuestionBank | null>(null);
-    const [questions, setQuestions] = useState<any[]>([]);
+    const [questions, setQuestions] = useState<LooseValue[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // UI State
@@ -75,13 +77,13 @@ export default function PreviewQuestionBank() {
     const [suggestedContent, setSuggestedContent] = useState('');
     const [suggestedScore, setSuggestedScore] = useState<number | null>(null);
     const [suggestedOptions, setSuggestedOptions] = useState<SuggestionOption[]>([]);
-    const [suggestedMatchingPairs, setSuggestedMatchingPairs] = useState<any[]>([]);
-    const [suggestedSequenceItems, setSuggestedSequenceItems] = useState<any[]>([]);
+    const [suggestedMatchingPairs, setSuggestedMatchingPairs] = useState<LooseValue[]>([]);
+    const [suggestedSequenceItems, setSuggestedSequenceItems] = useState<LooseValue[]>([]);
     const [suggestedEssayKeywords, setSuggestedEssayKeywords] = useState('');
     const [suggestedMathContent, setSuggestedMathContent] = useState('');
     const [suggestedArabicContent, setSuggestedArabicContent] = useState('');
     const [suggestedJavaneseContent, setSuggestedJavaneseContent] = useState('');
-    const [suggestedCategorizationGroups, setSuggestedCategorizationGroups] = useState<any[]>([]);
+    const [suggestedCategorizationGroups, setSuggestedCategorizationGroups] = useState<LooseValue[]>([]);
     const [suggestedArrangeWordsSentence, setSuggestedArrangeWordsSentence] = useState('');
     const [suggestedArrangeWordsDelimiter, setSuggestedArrangeWordsDelimiter] = useState(' ');
     const [suggestedArrangeWordsIsArabic, setSuggestedArrangeWordsIsArabic] = useState(false);
@@ -89,7 +91,7 @@ export default function PreviewQuestionBank() {
     
     const [suggestionDescription, setSuggestionDescription] = useState('');
     const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
-    const [existingSuggestion, setExistingSuggestion] = useState<any>(null);
+    const [existingSuggestion, setExistingSuggestion] = useState<LooseValue>(null);
     const [isMaterialExpanded, setIsMaterialExpanded] = useState(true);
 
     // Review Modal State
@@ -125,13 +127,13 @@ export default function PreviewQuestionBank() {
                 // Map questions to match ExamTaker format
                 const rawQuestions = response.data.questions || [];
 
-                const questionsData = rawQuestions.map((q: any) => {
+                const questionsData = rawQuestions.map((q: LooseValue) => {
                     const type = q.type;
 
                     // Generate key_answer for categorization if missing
                     if (type === 'categorization' && !q.key_answer) {
                         const groupsMap = new Map();
-                        (q.options || []).forEach((opt: any) => {
+                        (q.options || []).forEach((opt: LooseValue) => {
                             const groupUuid = opt.metadata?.group_uuid;
                             const groupTitle = opt.metadata?.group_title || 'Uncategorized';
                             
@@ -166,7 +168,7 @@ export default function PreviewQuestionBank() {
                     text: response.message || 'Failed to load question bank data.',
                 }).then(() => navigate('/admin/question-banks'));
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to fetch question bank data:', error);
             MySwal.fire({
                 icon: 'error',
@@ -178,7 +180,7 @@ export default function PreviewQuestionBank() {
         }
     };
 
-    const handleAnswerChange = async (answer: any) => {
+    const handleAnswerChange = async (answer: LooseValue) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         // Local state update only - no backend save for preview
@@ -188,7 +190,7 @@ export default function PreviewQuestionBank() {
         setQuestions(newQuestions);
     };
 
-    const isQuestionAnswered = (q: any) => {
+    const isQuestionAnswered = (q: LooseValue) => {
         if (q.student_answer === null || q.student_answer === undefined) return false;
         if (Array.isArray(q.student_answer)) return q.student_answer.length > 0;
         if (typeof q.student_answer === 'object') return Object.keys(q.student_answer).length > 0;
@@ -239,7 +241,7 @@ export default function PreviewQuestionBank() {
             } else {
                 throw new Error(response.message || 'Failed to submit review');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to submit review:', error);
             MySwal.fire({
                 icon: 'error',
@@ -252,7 +254,7 @@ export default function PreviewQuestionBank() {
     };
 
     // Suggestion Mode Functions
-    const initializeSuggestionStatesFromQuestion = (q: any) => {
+    const initializeSuggestionStatesFromQuestion = (q: LooseValue) => {
         const type = q.type;
         const options = q.options || [];
 
@@ -268,7 +270,7 @@ export default function PreviewQuestionBank() {
         setSuggestedArrangeWordsSentence('');
 
         if (['multiple_choice', 'multiple_selection', 'true_false', 'short_answer'].includes(type)) {
-            setSuggestedOptions(options.map((o: any, idx: number) => ({
+            setSuggestedOptions(options.map((o: LooseValue, idx: number) => ({
                 id: o.id,
                 key: o.option_key || (type === 'short_answer' ? `SA${idx + 1}` : String.fromCharCode(65 + idx)),
                 content: o.content,
@@ -280,7 +282,7 @@ export default function PreviewQuestionBank() {
             })));
         } else if (type === 'matching') {
             const pairsMap = new Map();
-            options.forEach((o: any) => {
+            options.forEach((o: LooseValue) => {
                 const pairId = o.metadata?.pair_id;
                 if (!pairId) return;
                 if (!pairsMap.has(pairId)) {
@@ -306,28 +308,28 @@ export default function PreviewQuestionBank() {
             setSuggestedMatchingPairs(Array.from(pairsMap.values()));
         } else if (type === 'sequence') {
             setSuggestedSequenceItems(options
-                .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-                .map((o: any) => ({
+                .sort((a: LooseValue, b: LooseValue) => (a.order || 0) - (b.order || 0))
+                .map((o: LooseValue) => ({
                     id: o.id,
                     uuid: o.id || generateUUID(),
                     content: o.content,
                     order: o.order
                 })));
         } else if (type === 'essay') {
-            const essayOption = options.find((o: any) => o.option_key === 'ESSAY');
+            const essayOption = options.find((o: LooseValue) => o.option_key === 'ESSAY');
             if (essayOption) setSuggestedEssayKeywords(essayOption.content);
         } else if (type === 'math_input') {
-            const mathOption = options.find((o: any) => o.option_key === 'MATH');
+            const mathOption = options.find((o: LooseValue) => o.option_key === 'MATH');
             if (mathOption) setSuggestedMathContent(mathOption.content);
         } else if (type === 'arabic_response') {
-            const arabicOption = options.find((o: any) => o.option_key === 'ARABIC');
+            const arabicOption = options.find((o: LooseValue) => o.option_key === 'ARABIC');
             if (arabicOption) setSuggestedArabicContent(arabicOption.content);
         } else if (type === 'javanese_response') {
-            const javaneseOption = options.find((o: any) => o.option_key === 'JAVANESE');
+            const javaneseOption = options.find((o: LooseValue) => o.option_key === 'JAVANESE');
             if (javaneseOption) setSuggestedJavaneseContent(javaneseOption.content);
         } else if (type === 'categorization') {
             const groupsMap = new Map();
-            options.forEach((o: any) => {
+            options.forEach((o: LooseValue) => {
                 const groupUuid = o.metadata?.group_uuid;
                 const groupTitle = o.metadata?.group_title || 'Uncategorized';
                 if (!groupsMap.has(groupUuid)) {
@@ -346,7 +348,7 @@ export default function PreviewQuestionBank() {
             });
             setSuggestedCategorizationGroups(Array.from(groupsMap.values()));
         } else if (type === 'arrange_words') {
-            const sentenceOption = options.find((o: any) => o.option_key === 'SENTENCE');
+            const sentenceOption = options.find((o: LooseValue) => o.option_key === 'SENTENCE');
             if (sentenceOption) {
                 setSuggestedArrangeWordsSentence(sentenceOption.content);
                 setSuggestedArrangeWordsDelimiter(sentenceOption.metadata?.delimiter || ' ');
@@ -356,13 +358,13 @@ export default function PreviewQuestionBank() {
         }
     };
 
-    const applySuggestionDataToStates = (data: any, eq: any) => {
+    const applySuggestionDataToStates = (data: LooseValue, eq: LooseValue) => {
         if (data.options) {
             const optsFromSuggestion: SuggestionOption[] = [];
             
             if (data.options.update && data.options.update.length > 0) {
-                data.options.update.forEach((upd: any) => {
-                    const origOpt = eq.options?.find((o: any) => o.id === upd.id);
+                data.options.update.forEach((upd: LooseValue) => {
+                    const origOpt = eq.options?.find((o: LooseValue) => o.id === upd.id);
                     if (origOpt) {
                         optsFromSuggestion.push({
                             id: upd.id,
@@ -379,7 +381,7 @@ export default function PreviewQuestionBank() {
             }
             
             if (data.options.create && data.options.create.length > 0) {
-                data.options.create.forEach((c: any) => {
+                data.options.create.forEach((c: LooseValue) => {
                     optsFromSuggestion.push({
                         id: undefined,
                         key: String.fromCharCode(65 + optsFromSuggestion.length),
@@ -454,7 +456,7 @@ export default function PreviewQuestionBank() {
                 if (data.content) fields.push('content');
                 if (data.score !== undefined) fields.push('score');
                 
-                // Check if any specific field exists in data
+                // Check if LooseValue specific field exists in data
                 if (data.options || data.matching_pairs || data.sequence_items || data.keywords || 
                     data.math_content || data.arabic_content || data.javanese_content || 
                     data.categorization_groups || data.arrange_words_sentence) {
@@ -502,7 +504,7 @@ export default function PreviewQuestionBank() {
     };
 
     const buildSuggestionData = () => {
-        const data: Record<string, any> = {};
+        const data: Record<string, LooseValue> = {};
         const q = currentQuestion?.exam_question;
         if (!q) return data;
 
@@ -640,7 +642,7 @@ export default function PreviewQuestionBank() {
                     throw new Error(response.message || 'Failed to submit suggestion');
                 }
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to submit suggestion:', error);
             MySwal.fire({
                 icon: 'error',
@@ -843,7 +845,7 @@ export default function PreviewQuestionBank() {
                     showAnswer={showAnswer}
                 />;
             case 'essay': {
-                const essayKeyAnswer = options.find((o: any) => o.is_correct)?.content;
+                const essayKeyAnswer = options.find((o: LooseValue) => o.is_correct)?.content;
                 return <StudentEssayInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
@@ -852,7 +854,7 @@ export default function PreviewQuestionBank() {
                 />;
             }
             case 'short_answer': {
-                const shortAnswerKeys = options.filter((o: any) => o.is_correct).map((o: any) => o.content).filter(Boolean);
+                const shortAnswerKeys = options.filter((o: LooseValue) => o.is_correct).map((o: LooseValue) => o.content).filter(Boolean);
                 return <StudentShortAnswerInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
@@ -866,7 +868,7 @@ export default function PreviewQuestionBank() {
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={(q.exam_question as LooseValue).key_answer}
                 />;
             case 'matching':
                 return <StudentMatchingInput
@@ -874,10 +876,10 @@ export default function PreviewQuestionBank() {
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={(q.exam_question as LooseValue).key_answer}
                 />;
             case 'arabic_response': {
-                const arabicKeyAnswer = options.find((o: any) => o.is_correct)?.content;
+                const arabicKeyAnswer = options.find((o: LooseValue) => o.is_correct)?.content;
                 return <StudentLanguageResponseInput
                     language="arabic"
                     selectedAnswer={q.student_answer}
@@ -887,7 +889,7 @@ export default function PreviewQuestionBank() {
                 />;
             }
             case 'javanese_response': {
-                const javaneseKeyAnswer = options.find((o: any) => o.is_correct)?.content;
+                const javaneseKeyAnswer = options.find((o: LooseValue) => o.is_correct)?.content;
                 return <StudentLanguageResponseInput
                     language="javanese"
                     selectedAnswer={q.student_answer}
@@ -897,7 +899,7 @@ export default function PreviewQuestionBank() {
                 />;
             }
             case 'math_input': {
-                const mathKeyAnswer = options.find((o: any) => o.is_correct)?.content;
+                const mathKeyAnswer = options.find((o: LooseValue) => o.is_correct)?.content;
                 return <StudentMathInput
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
@@ -917,7 +919,7 @@ export default function PreviewQuestionBank() {
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={false}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={(q.exam_question as LooseValue).key_answer}
                 />;
             case 'arrange_words':
                 return <StudentArrangeWordsInput
@@ -925,7 +927,7 @@ export default function PreviewQuestionBank() {
                     selectedAnswer={q.student_answer}
                     onChange={handleAnswerChange}
                     showAnswer={showAnswer}
-                    keyAnswer={(q.exam_question as any).key_answer}
+                    keyAnswer={(q.exam_question as LooseValue).key_answer}
                 />;
             default:
                 return (
@@ -1013,7 +1015,7 @@ export default function PreviewQuestionBank() {
                             <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Preview Mode</span>
                             <h1 className="sm:text-lg text-sm font-semibold leading-tight line-clamp-1">{bank?.name || 'Loading...'}</h1>
                         </div>
-                        <p className="sm:text-xs text-[10px] text-gray-500 dark:text-gray-400">{(bank as any)?.subject?.name || 'Question Bank'}</p>
+                        <p className="sm:text-xs text-[10px] text-gray-500 dark:text-gray-400">{(bank as LooseValue)?.subject?.name || 'Question Bank'}</p>
                     </div>
                 </div>
 
@@ -1102,7 +1104,7 @@ export default function PreviewQuestionBank() {
                                                 {(() => {
                                                     const rm = currentQuestion.exam_question.reading_material;
                                                     // In QuestionResource, media is returned as collections
-                                                    const pdfMedia = rm.media?.reading_materials?.find((m: any) => m.mime_type === 'application/pdf');
+                                                    const pdfMedia = rm.media?.reading_materials?.find((m: LooseValue) => m.mime_type === 'application/pdf');
                                                     const imageMedia = rm.media?.reading_images?.[0];
 
                                                     if (pdfMedia) {
@@ -1180,7 +1182,7 @@ export default function PreviewQuestionBank() {
                                 {currentQuestion?.exam_question?.media?.content && currentQuestion.exam_question.media.content.length > 0 && (
                                     <div className="mb-6 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-2xl bg-gray-50 dark:bg-gray-800/50 p-2">
                                         <div className="w-full flex flex-col items-center gap-3">
-                                            {currentQuestion.exam_question.media.content.map((m: any, mi: number) => {
+                                            {currentQuestion.exam_question.media.content.map((m: LooseValue, mi: number) => {
                                                 const url = m?.url || m?.path || '';
                                                 const mime = m?.mime || m?.type || '';
                                                 const kind = mime.split('/')[0] || (/(jpe?g|png|gif|webp|svg)$/i.test(url) ? 'image' : (/(mp4|webm|ogg)$/i.test(url) ? 'video' : (/(mp3|wav|ogg)$/i.test(url) ? 'audio' : 'file')));

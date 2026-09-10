@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { Question } from '@/lib/api';
 import MultipleChoiceDisplay from './MultipleChoiceDisplay';
 import TrueFalseDisplay from './TrueFalseDisplay';
@@ -28,10 +30,10 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
 
         case 'matching':
             // Check for matching_pairs in extended data if exists, otherwise try options or standard mapping
-            return <MatchingDisplay options={question.options} matchingPairs={(question as any).matching_pairs} />;
+            return <MatchingDisplay options={question.options} matchingPairs={(question as LooseValue).matching_pairs} />;
 
         case 'sequence':
-            return <SequenceDisplay options={question.options} sequenceItems={(question as any).sequence_items} />;
+            return <SequenceDisplay options={question.options} sequenceItems={(question as LooseValue).sequence_items} />;
 
         case 'short_answer':
             return <ShortAnswerDisplay options={question.options} />;
@@ -40,7 +42,7 @@ export default function QuestionOptionDisplay({ question, onMediaClick }: Questi
             return (
                 <EssayDisplay
                     options={question.options}
-                    keywords={(question as any).keywords}
+                    keywords={(question as LooseValue).keywords}
                 />
             );
 

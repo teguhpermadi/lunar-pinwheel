@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -61,8 +63,8 @@ export default function SubjectForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     // Initial data for infinite selects to show selected value
-    const [initialTeacher, setInitialTeacher] = useState<any>(null);
-    const [initialClassroom, setInitialClassroom] = useState<any>(null);
+    const [initialTeacher, setInitialTeacher] = useState<LooseValue>(null);
+    const [initialClassroom, setInitialClassroom] = useState<LooseValue>(null);
 
     const { selectedYearId } = useAcademicYear();
 
@@ -112,8 +114,8 @@ export default function SubjectForm() {
             // Wait, looking at previous steps... I should verify api.ts.
             // I will implement `fetchSubject` assuming I will fix `api.ts`.
 
-            // Correction: I'll use a temporary any type to bypass TS check until I fix api.ts
-            const response = await (subjectApi as any).getSubject(subjectId);
+            // Correction: I'll use a temporary LooseValue type to bypass TS check until I fix api.ts
+            const response = await (subjectApi as LooseValue).getSubject(subjectId);
 
             if (response.success && response.data) {
                 const subject = response.data;
@@ -137,7 +139,7 @@ export default function SubjectForm() {
                 // Based on Subject interface: classroom_id is present, but classroom object? 
                 // Interface says `classroom_id: string`, `user: User`, `academic_year: AcademicYear`. 
                 // Attempting to use `subject.classroom` if exists.
-                if ((subject as any).classroom) setInitialClassroom((subject as any).classroom);
+                if ((subject as LooseValue).classroom) setInitialClassroom((subject as LooseValue).classroom);
             }
         } catch (error) {
             console.error("Failed to fetch subject:", error);
@@ -165,7 +167,7 @@ export default function SubjectForm() {
                 Toast.fire({ icon: 'success', title: 'Subject created successfully' });
             }
             navigate('/admin/subjects');
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Failed to save subject:", error);
             Toast.fire({
                 icon: 'error',

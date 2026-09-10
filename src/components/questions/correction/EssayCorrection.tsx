@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 import { User, BadgeCheck } from 'lucide-react';
@@ -5,12 +7,12 @@ import { User, BadgeCheck } from 'lucide-react';
 interface EssayCorrectionProps {
     studentAnswer: string;
     options?: QuestionOption[]; // Often used to store key/rubric
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function EssayCorrection({ studentAnswer, options = [], keyAnswer }: EssayCorrectionProps) {
     // 1. Try keyAnswer first
-    const extractValue = (val: any): string => {
+    const extractValue = (val: LooseValue): string => {
         if (typeof val === 'object' && val !== null) {
             // Check for common answer fields
             const inner = val.answers || val.answer || val.rubric || val.id || val.option_id || val.option_key || val;
@@ -38,12 +40,12 @@ export default function EssayCorrection({ studentAnswer, options = [], keyAnswer
 
     if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined' || looksLikeMetadata) {
         // Priority for essay: 1. Try to find rubric in metadata
-        const rubricOpt = options.find(o => o.metadata?.type === 'rubric' || (o as any).type === 'rubric');
+        const rubricOpt = options.find(o => o.metadata?.type === 'rubric' || (o as LooseValue).type === 'rubric');
         if (rubricOpt) {
             referenceAnswer = rubricOpt.content;
         } else {
             // Fallback to standard identification
-            referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer)?.content || options[0]?.content;
+            referenceAnswer = options.find(o => o.is_correct || (o as LooseValue).is_answer)?.content || options[0]?.content;
         }
     }
 

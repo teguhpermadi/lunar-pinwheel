@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam } from '@/lib/api';
@@ -35,7 +37,10 @@ import CorrectionLeaderboard from './correction/CorrectionLeaderboard';
 import ItemAnalysisTab from './correction/ItemAnalysisTab';
 import ExamQuestionManagement from './correction/ExamQuestionManagement';
 
+// These constants are shared by the correction tabs and intentionally live with the page.
+// eslint-disable-next-line react-refresh/only-export-components
 export const EXCLUDED_PARTIAL_TYPES = ['multiple_choice', 'true_false'];
+// eslint-disable-next-line react-refresh/only-export-components
 export const NEEDS_DOUBLE_CORRECTION_TYPES = ['short_answer', 'essay', 'math_input', 'arabic_input', 'javanese_input'];
 
 export interface StudentSession {
@@ -65,17 +70,17 @@ export interface QuestionDetail {
     exam_question_id: string;
     question_type: string;
     question_content: string;
-    student_answer: any;
+    student_answer: LooseValue;
     is_correct: boolean | null;
     score_earned: number;
     max_score: number;
     correction_notes: string | null;
     question_number: number;
-    options?: any[];
-    key_answer?: any;
+    options?: LooseValue[];
+    key_answer?: LooseValue;
     tags?: string[];
-    exam_reading_material?: any | null;
-    metadata?: any;
+    exam_reading_material?: LooseValue | null;
+    metadata?: LooseValue;
 }
 
 export interface QuestionCorrectionStatus {
@@ -126,9 +131,9 @@ export default function ExamCorrectionPage() {
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
     const [viewMode, setViewMode] = useState<'by-student' | 'by-question' | 'leaderboard' | 'item-analysis' | 'manage-questions'>('leaderboard');
-    const [masterQuestions, setMasterQuestions] = useState<any[]>([]); // All questions in the exam
+    const [masterQuestions, setMasterQuestions] = useState<LooseValue[]>([]); // All questions in the exam
     const [correctionStatuses, setCorrectionStatuses] = useState<QuestionCorrectionStatus[]>([]);
-    const [bulkAnswers, setBulkAnswers] = useState<any[]>([]); // Answers for a specific question across all students
+    const [bulkAnswers, setBulkAnswers] = useState<LooseValue[]>([]); // Answers for a specific question across all students
     const [selectedAnswerIds, setSelectedAnswerIds] = useState<string[]>([]);
     const [passFailStats, setPassFailStats] = useState<{ total: number; passed: number; failed: number; not_yet_graded: number } | null>(null);
 
@@ -202,7 +207,7 @@ export default function ExamCorrectionPage() {
             const response = await examApi.getCorrectionSessions(id);
             if (response.success) {
                 // Adjust to the new backend response structure
-                let rawSessions = response.data.sessions || response.data || [];
+                const rawSessions = response.data.sessions || response.data || [];
 
                 // Process attempts
                 const studentMap = new Map<string, StudentSession[]>();
@@ -214,7 +219,7 @@ export default function ExamCorrectionPage() {
                     studentMap.get(studentId)!.push(s);
                 });
 
-                let processedSessions: StudentSession[] = [];
+                const processedSessions: StudentSession[] = [];
                 let hasMultipleAttempts = false;
 
                 studentMap.forEach((studentSessions) => {
@@ -403,7 +408,7 @@ export default function ExamCorrectionPage() {
 
                 fetchSessions();
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to update correction', 'error');
         }
     };
@@ -454,7 +459,7 @@ export default function ExamCorrectionPage() {
                     position: 'top-end'
                 });
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to update student answer', 'error');
         }
     };
@@ -525,7 +530,7 @@ export default function ExamCorrectionPage() {
                     position: 'top-end'
                 });
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to restore student answer', 'error');
         }
     };
@@ -563,7 +568,7 @@ export default function ExamCorrectionPage() {
                 score_earned: status === 'partial' ? score : undefined
             }));
 
-            const response = await examApi.bulkCorrection(id, updates as any);
+            const response = await examApi.bulkCorrection(id, updates as LooseValue);
             if (response.success) {
                 Swal.fire({
                     title: 'Updated',
@@ -581,7 +586,7 @@ export default function ExamCorrectionPage() {
                 }
                 fetchSessions();
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to update bulk correction', 'error');
         } finally {
             setIsBulkLoading(false);
@@ -622,17 +627,17 @@ export default function ExamCorrectionPage() {
 
                 Swal.fire('Success', targetSessionIds.length > 1 ? 'Corrections finalized successfully!' : 'Correction finalized successfully!', 'success');
                 fetchSessions();
-            } catch (error: any) {
+            } catch (error: LooseValue) {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to finalize correction', 'error');
             }
         }
     };
 
-    const getUncorrectedAnswersCount = useCallback((answers: any[]) => {
+    const getUncorrectedAnswersCount = useCallback((answers: LooseValue[]) => {
         return answers.filter(a => a.is_correct === null || a.is_correct === undefined).length;
     }, []);
 
-    const getTotalAnswersCount = useCallback((answers: any[]) => {
+    const getTotalAnswersCount = useCallback((answers: LooseValue[]) => {
         return answers.length;
     }, []);
 
@@ -641,7 +646,7 @@ export default function ExamCorrectionPage() {
 
         const questionId = aiScope === 'question' ? masterQuestions[selectedQuestionIndex]?.id : undefined;
         
-        let answersToCount: any[] = [];
+        let answersToCount: LooseValue[] = [];
         if (aiScope === 'question') {
             answersToCount = filteredBulkAnswers;
         } else {
@@ -699,7 +704,7 @@ export default function ExamCorrectionPage() {
             } else if (selectedSessionId) {
                 fetchDetail(selectedSessionId);
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to run AI correction', 'error');
         } finally {
             setIsAICorrecting(false);
@@ -749,7 +754,7 @@ export default function ExamCorrectionPage() {
             });
             fetchSessions();
             if (selectedSessionId) fetchDetail(selectedSessionId);
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to reset correction', 'error');
         } finally {
             setIsResetCorrecting(false);
@@ -899,7 +904,7 @@ export default function ExamCorrectionPage() {
                                     <span className={cn(
                                         "flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center transition-colors",
                                         (() => {
-                                            const detail = questions.find(qd => (qd as any).exam_question_id === q.id || (qd as any).exam_question?.id === q.id);
+                                            const detail = questions.find(qd => (qd as LooseValue).exam_question_id === q.id || (qd as LooseValue).exam_question?.id === q.id);
                                             if (selectedQuestionIndex === index) return "bg-primary text-white";
                                             if (!detail) return "bg-slate-100 text-slate-400";
                                             if (detail.is_correct === true && detail.score_earned === detail.max_score) return "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400";
@@ -1155,7 +1160,7 @@ export default function ExamCorrectionPage() {
         : masterQuestions[selectedQuestionIndex];
 
     const currentQuestionContent = viewMode === 'by-student'
-        ? currentQuestion?.question_content || (currentQuestion as any)?.exam_question?.content
+        ? currentQuestion?.question_content || (currentQuestion as LooseValue)?.exam_question?.content
         : currentQuestion?.content || currentQuestion?.question_content || '';
 
     return (

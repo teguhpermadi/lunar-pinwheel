@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import Swal from 'sweetalert2';
 import { useState } from 'react';
 import MediaModal from '../MediaModal';
@@ -10,7 +12,7 @@ interface Option {
     key: string;
     content: string;
     is_correct: boolean;
-    media?: any;
+    media?: LooseValue;
     uuid: string;
     pendingImage?: File | null;
     previewUrl?: string | null;

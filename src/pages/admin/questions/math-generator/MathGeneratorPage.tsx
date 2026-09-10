@@ -37,7 +37,7 @@ export default function MathGeneratorPage() {
                     timer: 3000,
                 });
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             const message = error.response?.data?.message || 'Gagal generate soal';
             MySwal.fire({
                 icon: 'error',
@@ -93,7 +93,7 @@ export default function MathGeneratorPage() {
                     navigate(`/admin/question-banks/${preselectedBankId}/edit`);
                 }
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             const message = error.response?.data?.message || 'Gagal menyimpan soal';
             MySwal.fire({
                 icon: 'error',

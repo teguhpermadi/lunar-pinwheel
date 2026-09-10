@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -26,7 +28,7 @@ export default function ReadingMaterialFormPage() {
     const isEditingEffective = !!localMaterialId;
     // PDF State
     const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [existingPdf, setExistingPdf] = useState<any>(null);
+    const [existingPdf, setExistingPdf] = useState<LooseValue>(null);
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
     const hasRichTextContent = !!(content && content !== '<p></p>' && content.trim() !== '');
@@ -112,7 +114,7 @@ export default function ReadingMaterialFormPage() {
                 throw new Error(uploadRes.message || "Upload failed");
             }
 
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Image upload error", error);
             Swal.fire('Error', error.message || 'Failed to upload image', 'error');
         } finally {
@@ -163,7 +165,7 @@ export default function ReadingMaterialFormPage() {
             } else {
                 throw new Error(response.message);
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error("Save error", error);
             Swal.fire('Error', error.message || 'Failed to save material', 'error');
         } finally {

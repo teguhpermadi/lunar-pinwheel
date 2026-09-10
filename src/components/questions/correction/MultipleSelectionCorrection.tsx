@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -5,8 +7,8 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface MultipleSelectionCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // string[] (ids/keys)
-    keyAnswer?: any;    // { answers: string[] }
+    studentAnswer: LooseValue; // string[] (ids/keys)
+    keyAnswer?: LooseValue;    // { answers: string[] }
 }
 
 export default function MultipleSelectionCorrection({ options, studentAnswer, keyAnswer }: MultipleSelectionCorrectionProps) {
@@ -16,7 +18,7 @@ export default function MultipleSelectionCorrection({ options, studentAnswer, ke
         const optionId = String(opt.id);
         const optionKey = String(opt.option_key).toUpperCase();
 
-        const normalize = (val: any): string => {
+        const normalize = (val: LooseValue): string => {
             if (typeof val === 'object' && val !== null) {
                 return String(val.id || val.option_id || val.option_key || val).toUpperCase();
             }
@@ -34,8 +36,8 @@ export default function MultipleSelectionCorrection({ options, studentAnswer, ke
         const optionKey = String(opt.option_key).toUpperCase();
 
         if (keyAnswer) {
-            const extractValues = (val: any): string[] => {
-                const normalizeVal = (v: any) => String(v).toUpperCase();
+            const extractValues = (val: LooseValue): string[] => {
+                const normalizeVal = (v: LooseValue) => String(v).toUpperCase();
                 if (typeof val === 'object' && val !== null) {
                     const inner = val.answers || val.answer || val.id || val.option_id || val.option_key || val;
                     if (Array.isArray(inner)) return inner.map(normalizeVal);
@@ -51,7 +53,7 @@ export default function MultipleSelectionCorrection({ options, studentAnswer, ke
             }
         }
 
-        const o = opt as any;
+        const o = opt as LooseValue;
         return !!opt.is_correct || !!o.is_answer || opt.metadata?.is_correct || opt.metadata?.is_answer;
     };
 

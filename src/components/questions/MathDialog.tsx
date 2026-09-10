@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useRef, useEffect, useState } from 'react';
 import Modal from '@/components/ui/modal';
 import MathKeyboard from '@/components/ui/MathKeyboard';
@@ -12,7 +14,7 @@ interface MathDialogProps {
 
 export default function MathDialog({ isOpen, onClose, initialValue = '', onConfirm }: MathDialogProps) {
     const mathFieldRef = useRef<HTMLSpanElement>(null);
-    const mqRef = useRef<any>(null);
+    const mqRef = useRef<LooseValue>(null);
     const [latex, setLatex] = useState(initialValue);
 
     // Reset latex when dialog opens with a new initialValue

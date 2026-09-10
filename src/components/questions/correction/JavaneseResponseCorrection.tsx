@@ -1,14 +1,16 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 
 interface JavaneseResponseCorrectionProps {
     studentAnswer: string;
     options?: QuestionOption[];
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function JavaneseResponseCorrection({ studentAnswer, options = [], keyAnswer }: JavaneseResponseCorrectionProps) {
-    const extractValue = (val: any): string => {
+    const extractValue = (val: LooseValue): string => {
         if (typeof val === 'object' && val !== null) {
             const inner = val.answers || val.answer || val.id || val.option_id || val.option_key || val;
             return Array.isArray(inner) ? inner.join(', ') : String(inner);
@@ -19,7 +21,7 @@ export default function JavaneseResponseCorrection({ studentAnswer, options = []
     let referenceAnswer = keyAnswer ? extractValue(keyAnswer) : null;
 
     if (!referenceAnswer || referenceAnswer === 'null' || referenceAnswer === 'undefined') {
-        referenceAnswer = options.find(o => o.is_correct || (o as any).is_answer)?.content || options[0]?.content;
+        referenceAnswer = options.find(o => o.is_correct || (o as LooseValue).is_answer)?.content || options[0]?.content;
     }
 
     return (

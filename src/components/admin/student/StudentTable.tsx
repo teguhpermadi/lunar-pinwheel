@@ -266,7 +266,7 @@ export default function StudentTable({ students, isLoading, onEdit, onDelete, pa
                                 }
                             }
 
-                            for (let i of range) {
+                            for (const i of range) {
                                 if (l) {
                                     if (i - l === 2) {
                                         rangeWithDots.push(l + 1);

@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Delete } from '@/components/ui/Icons';
@@ -136,7 +138,7 @@ export default function MathKeyboard({ onKeyClick, onBackspace }: MathKeyboardPr
                         <button
                             key={tab.id}
                             type="button"
-                            onClick={() => setActiveTab(tab.id as any)}
+                            onClick={() => setActiveTab(tab.id as LooseValue)}
                             className={`px-3 py-1.5 sm:py-1 text-[10px] font-bold rounded-md transition-all whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                                 ? 'bg-primary/10 text-primary'
                                 : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'

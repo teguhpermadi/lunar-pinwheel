@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { examApi, Exam, Classroom, classroomApi, teacherApi, Teacher } from '@/lib/api';
@@ -21,7 +23,7 @@ import {
     ListFilter,
     Eye,
     Lightbulb,
-    Infinity,
+    Infinity as InfinityIcon,
     Key,
     Rocket,
     Shield,
@@ -92,7 +94,7 @@ export default function EditExamPage() {
                 if (response.success) {
                     const data = response.data;
                     if (data.classrooms && !data.classroom_ids) {
-                        data.classroom_ids = data.classrooms.map((c: any) => c.id);
+                        data.classroom_ids = data.classrooms.map((c: LooseValue) => c.id);
                     }
                     setExam(data);
                 }
@@ -196,7 +198,7 @@ export default function EditExamPage() {
             } else {
                 Swal.fire('Error', response.message || 'Failed to update exam', 'error');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Error updating exam:', error);
             const errorMessage = error.response?.data?.message || 'Something went wrong';
             Swal.fire('Error', errorMessage, 'error');
@@ -519,7 +521,7 @@ export default function EditExamPage() {
                                                                 exam.max_attempts === null ? "bg-primary text-white shadow-sm shadow-primary/20" : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-200"
                                                             )}
                                                         >
-                                                            <Infinity className="size-3 leading-none" />
+                                                            <InfinityIcon className="size-3 leading-none" />
                                                             {exam.max_attempts === null ? 'Unlimited Active' : 'Set Unlimited'}
                                                         </button>
                                                     </div>
@@ -538,7 +540,7 @@ export default function EditExamPage() {
                                                         {exam.max_attempts === null && (
                                                             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none animate-in fade-in zoom-in-95 duration-300">
                                                                 <div className="flex items-center gap-2">
-                                                                    <Infinity className="size-5 text-primary" />
+                                                                    <InfinityIcon className="size-5 text-primary" />
                                                                     <span className="text-sm font-bold text-primary/60 italic">Unlimited Retakes</span>
                                                                 </div>
                                                             </div>

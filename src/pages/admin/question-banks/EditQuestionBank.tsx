@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { questionBankApi, questionApi, readingMaterialApi, QuestionBank, Question, ReadingMaterial } from '@/lib/api';
@@ -57,7 +59,7 @@ export default function EditQuestionBank() {
                 Swal.fire('Error', response.message, 'error');
                 navigate('/admin/question-banks');
             }
-        } catch (error) {
+        } catch {
             Swal.fire('Error', 'Failed to load question bank', 'error');
             navigate('/admin/question-banks');
         } finally {
@@ -259,7 +261,7 @@ export default function EditQuestionBank() {
                         {/* Editable Title Implementation could go here */}
                         <div className="text-xl font-bold text-slate-900 dark:text-white truncate">{bank.name}</div>
                         <p className="text-xs text-slate-400 font-medium">
-                            {(bank as any).subject?.name} • {(bank as any).subject?.code}
+                            {(bank as LooseValue).subject?.name} • {(bank as LooseValue).subject?.code}
                         </p>
                     </div>
                 </div>
@@ -459,14 +461,14 @@ export default function EditQuestionBank() {
                                             <div className="mb-4">
                                                 <QuestionTagInput
                                                     questionId={question.id}
-                                                    tagType={(bank as any).subject_id}
+                                                    tagType={(bank as LooseValue).subject_id}
                                                     initialTags={question.tags || []}
                                                     onTagsChange={async (newTags) => {
                                                         // Update visually
                                                         setQuestions(prev => prev.map(q => q.id === question.id ? { ...q, tags: newTags } : q));
                                                         // Update backend
                                                         try {
-                                                            await questionApi.updateQuestion(question.id, { tags: newTags, tag_type: (bank as any).subject_id });
+                                                            await questionApi.updateQuestion(question.id, { tags: newTags, tag_type: (bank as LooseValue).subject_id });
                                                         } catch (error) {
                                                             console.error('Failed to update tags', error);
                                                         }

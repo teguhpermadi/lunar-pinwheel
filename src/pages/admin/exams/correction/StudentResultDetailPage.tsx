@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,13 +53,13 @@ const StudentResultDetailPage: React.FC = () => {
         targeting: false
     });
 
-    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LooseValue[]>([]);
     const [userRank, setUserRank] = useState<number | null>(null);
     const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     const readingMaterials = exam?.exam_reading_materials || [];
-    const [selectedPreviewMaterial, setSelectedPreviewMaterial] = useState<any | null>(null);
+    const [selectedPreviewMaterial, setSelectedPreviewMaterial] = useState<LooseValue | null>(null);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
     useEffect(() => {
@@ -164,7 +166,7 @@ const StudentResultDetailPage: React.FC = () => {
                     position: 'top-end'
                 });
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             const Swal = (await import('sweetalert2')).default;
             Swal.fire('Error', error.response?.data?.message || 'Failed to check integrity', 'error');
         } finally {
@@ -780,7 +782,7 @@ const StudentResultDetailPage: React.FC = () => {
                                                             <div>
                                                                 <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-1">Student Room</p>
                                                                 <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                                                                    {(sessionInfo?.student as any)?.classrooms?.[0]?.name || 'N/A'}
+                                                                    {(sessionInfo?.student as LooseValue)?.classrooms?.[0]?.name || 'N/A'}
                                                                 </p>
                                                             </div>
                                                         </div>

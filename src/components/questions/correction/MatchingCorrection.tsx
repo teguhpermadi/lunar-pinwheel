@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { QuestionOption } from '@/lib/api';
 import MathRenderer from '@/components/ui/MathRenderer';
 import { cn } from '@/lib/utils';
@@ -5,8 +7,8 @@ import { MoveRight, AlertCircle } from 'lucide-react';
 
 interface MatchingCorrectionProps {
     options: QuestionOption[];
-    studentAnswer: any; // Record<string, string> (leftId -> rightId)
-    keyAnswer?: any;
+    studentAnswer: LooseValue; // Record<string, string> (leftId -> rightId)
+    keyAnswer?: LooseValue;
 }
 
 export default function MatchingCorrection({ options, studentAnswer = {}, keyAnswer }: MatchingCorrectionProps) {
@@ -39,7 +41,7 @@ export default function MatchingCorrection({ options, studentAnswer = {}, keyAns
                     const correctRightId = getCorrectRightId(left);
 
                     // Finder helper to handle both ID and Key in studentChoice
-                    const findRightOption = (choice: any) => {
+                    const findRightOption = (choice: LooseValue) => {
                         if (!choice) return null;
                         const val = String(choice);
                         return rightOptions.find(o => o.id === val || o.option_key === val);

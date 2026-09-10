@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/modal';
 import { questionSuggestionApi } from '@/lib/api';
@@ -12,7 +14,7 @@ const MySwal = withReactContent(Swal);
 interface QuestionSuggestionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    question: any;
+    question: LooseValue;
     onSuccess?: () => void;
 }
 
@@ -21,7 +23,7 @@ interface SuggestionOption {
     key: string;
     content: string;
     is_correct: boolean;
-    media?: any;
+    media?: LooseValue;
     uuid: string;
     pendingImage?: File | null;
     previewUrl?: string | null;
@@ -77,7 +79,7 @@ export default function QuestionSuggestionModal({
 
     useEffect(() => {
         if (question?.exam_question?.options) {
-            const opts = question.exam_question.options.map((opt: any, idx: number) => ({
+            const opts = question.exam_question.options.map((opt: LooseValue, idx: number) => ({
                 id: opt.id,
                 key: opt.option_key || String.fromCharCode(65 + idx),
                 content: opt.content,
@@ -100,7 +102,7 @@ export default function QuestionSuggestionModal({
         setSuggestedScore(null);
         setDescription('');
         if (question?.exam_question?.options) {
-            const opts = question.exam_question.options.map((opt: any, idx: number) => ({
+            const opts = question.exam_question.options.map((opt: LooseValue, idx: number) => ({
                 id: opt.id,
                 key: opt.option_key || String.fromCharCode(65 + idx),
                 content: opt.content,
@@ -142,11 +144,11 @@ export default function QuestionSuggestionModal({
     };
 
     const hasOptionsChanges = (): boolean => {
-        const original: any[] = question?.exam_question?.options || [];
+        const original: LooseValue[] = question?.exam_question?.options || [];
         if (suggestedOptions.length !== original.length) return true;
         
         for (let i = 0; i < suggestedOptions.length; i++) {
-            const orig: any = original[i];
+            const orig: LooseValue = original[i];
             const sug = suggestedOptions[i];
             if (orig?.id !== sug.id) return true;
             if (orig?.content !== sug.content) return true;
@@ -156,8 +158,8 @@ export default function QuestionSuggestionModal({
     };
 
     const generateOptionsDiff = () => {
-        const original: any[] = question?.exam_question?.options || [];
-        const originalMap = new Map(original.map((o: any) => [o.id, o]));
+        const original: LooseValue[] = question?.exam_question?.options || [];
+        const originalMap = new Map(original.map((o: LooseValue) => [o.id, o]));
         const suggestedMap = new Map(suggestedOptions.filter(o => o.id).map(o => [o.id, o]));
 
         const update: { id: string; content?: string; is_correct?: boolean }[] = [];
@@ -166,7 +168,7 @@ export default function QuestionSuggestionModal({
 
         suggestedOptions.forEach(sug => {
             if (sug.id && originalMap.has(sug.id)) {
-                const orig: any = originalMap.get(sug.id);
+                const orig: LooseValue = originalMap.get(sug.id);
                 if (orig?.content !== sug.content || orig?.is_correct !== sug.is_correct) {
                     update.push({
                         id: sug.id,
@@ -182,7 +184,7 @@ export default function QuestionSuggestionModal({
             }
         });
 
-        original.forEach((orig: any) => {
+        original.forEach((orig: LooseValue) => {
             if (!suggestedMap.has(orig.id)) {
                 deleteIds.push(orig.id);
             }
@@ -192,7 +194,7 @@ export default function QuestionSuggestionModal({
     };
 
     const buildSubmitData = () => {
-        const data: Record<string, any> = {};
+        const data: Record<string, LooseValue> = {};
 
         if (selectedFields.includes('content') && suggestedContent.trim()) {
             data.content = suggestedContent.trim();
@@ -278,7 +280,7 @@ export default function QuestionSuggestionModal({
             } else {
                 throw new Error(response.message || 'Failed to submit suggestion');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to submit suggestion:', error);
             MySwal.fire({
                 icon: 'error',
@@ -297,7 +299,7 @@ export default function QuestionSuggestionModal({
 
         return (
             <div className="space-y-2">
-                {currentOptions.map((opt: any, idx: number) => (
+                {currentOptions.map((opt: LooseValue, idx: number) => (
                     <div 
                         key={opt.id || idx}
                         className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700"

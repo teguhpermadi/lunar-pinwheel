@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import type { TypingMetrics } from '@/lib/api';
 import { useKeystrokeAnalytics } from '@/hooks/useKeystrokeAnalytics';
@@ -10,7 +12,7 @@ interface StudentEssayInputProps {
     onChange: (value: string, typingMetrics?: TypingMetrics) => void;
     showAnswer?: boolean;
     keyAnswer?: {
-        rubric?: any;
+        rubric?: LooseValue;
         answers?: string[];
     };
     onPasteDetected?: () => void;

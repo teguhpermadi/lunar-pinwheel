@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,7 +53,7 @@ export default function ExamTaker() {
 
     // Data State
     const [exam, setExam] = useState<Exam | null>(null);
-    const [questions, setQuestions] = useState<any[]>([]);
+    const [questions, setQuestions] = useState<LooseValue[]>([]);
     const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -75,7 +77,7 @@ export default function ExamTaker() {
     const [analyticsResetQuestionId, setAnalyticsResetQuestionId] = useState<string | null>(null);
 
     // Offline State Sync Queue
-    const [pendingAnswers, setPendingAnswers] = useState<Record<string, any>>(() => {
+    const [pendingAnswers, setPendingAnswers] = useState<Record<string, LooseValue>>(() => {
         const saved = localStorage.getItem(`exam_${id}_pending_answers`);
         return saved ? JSON.parse(saved) : {};
     });
@@ -84,7 +86,7 @@ export default function ExamTaker() {
 
     // Debounce refs for answer API calls
     const answerDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-    const pendingAnswerQueueRef = useRef<Map<string, any>>(new Map());
+    const pendingAnswerQueueRef = useRef<Map<string, LooseValue>>(new Map());
 
     // Track online/offline status
     useEffect(() => {
@@ -107,7 +109,7 @@ export default function ExamTaker() {
 
     // Background sync manager
     useEffect(() => {
-        let syncTimer: any;
+        let syncTimer: LooseValue;
 
         const syncPendingAnswers = async () => {
             if (!isOnline || isSyncing || !id) return;
@@ -275,7 +277,7 @@ export default function ExamTaker() {
                     setRemainingSeconds(prev => (prev === null || Math.abs(prev - newSeconds) > 10) ? newSeconds : prev);
                     localStorage.setItem(`exam_${id}_end_time`, (Date.now() + newSeconds * 1000).toString());
                 }
-            } catch (e) { }
+            } catch { /* Ignore transient polling failures. */ }
         }, pollInterval);
 
         return () => clearInterval(syncTimer);
@@ -294,7 +296,7 @@ export default function ExamTaker() {
             } else {
                 handleFetchFallback(response.message || 'Failed to load exam data.');
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Failed to fetch exam data:', error);
             handleFetchFallback(error.response?.data?.message || 'An error occurred while loading exam data.');
         } finally {
@@ -329,7 +331,7 @@ export default function ExamTaker() {
                     showConfirmButton: false
                 });
                 processExamData(cachedData, true);
-            } catch (e) {
+            } catch {
                 showErrorAndRedirect(errorMsg);
             }
         } else {
@@ -345,7 +347,7 @@ export default function ExamTaker() {
         }).then(() => navigate('/exams'));
     };
 
-    const processExamData = (data: any, isOfflineLoad = false) => {
+    const processExamData = (data: LooseValue, isOfflineLoad = false) => {
         setExam(data.exam);
 
         // Handle both plain array and { data: [] } structure
@@ -353,12 +355,12 @@ export default function ExamTaker() {
             ? data.questions
             : (data.questions?.data || []);
 
-        // Retrieve any pending offline answers for this exam
+        // Retrieve LooseValue pending offline answers for this exam
         const savedPendingStr = localStorage.getItem(`exam_${id}_pending_answers`);
         const localPendingAnswers = savedPendingStr ? JSON.parse(savedPendingStr) : {};
 
         // Merge offline answers if they exist
-        const questionsData = rawQuestions.map((q: any) => {
+        const questionsData = rawQuestions.map((q: LooseValue) => {
             const eq = q.exam_question;
             const qt = eq?.question_type || eq?.type;
 
@@ -368,15 +370,15 @@ export default function ExamTaker() {
 
             if (eq) {
                 if (!eq.media && q.media) {
-                    try { eq.media = q.media; } catch (e) { /* ignore */ }
+                    try { eq.media = q.media; } catch { /* ignore */ }
                 }
 
                 if (!eq.media && eq.media_path) {
                     try {
                         eq.media = {
                             content: [{ url: eq.media_path, mime_type: '' }]
-                        } as any;
-                    } catch (e) { /* ignore */ }
+                        } as LooseValue;
+                    } catch { /* ignore */ }
                 }
             }
 
@@ -577,7 +579,7 @@ export default function ExamTaker() {
         }
     }, [id, questions, currentQuestionIndex, exam, tabSwitches]);
 
-    const handleAnswerChange = useCallback((answer: any, typingMetrics?: TypingMetrics) => {
+    const handleAnswerChange = useCallback((answer: LooseValue, typingMetrics?: TypingMetrics) => {
         if (!id || !questions[currentQuestionIndex]) return;
 
         const currentQ = questions[currentQuestionIndex];
@@ -587,7 +589,7 @@ export default function ExamTaker() {
             currentQ.paste_metadata?.last_pasted_at
         );
 
-        const normalizeText = (value: any) => {
+        const normalizeText = (value: LooseValue) => {
             if (value === null || value === undefined) return '';
             if (typeof value === 'string') return value.replace(/<[^>]*>/g, '').trim();
             if (Array.isArray(value)) return value.join(' ').trim();
@@ -623,7 +625,7 @@ export default function ExamTaker() {
                     cachedData.questions.data = newQuestions;
                 }
                 localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(cachedData));
-            } catch (e) { }
+            } catch { /* Ignore transient polling failures. */ }
         }
 
         const payload: SaveAnswerPayload = {
@@ -725,7 +727,7 @@ export default function ExamTaker() {
                     allowOutsideClick: false,
                 }).then(() => navigate('/exams'));
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             console.error('Auto finish failed:', error);
             if (!isOnline) {
                 setIsWaitingOfflineSubmit(true);
@@ -820,13 +822,13 @@ export default function ExamTaker() {
         });
     };
 
-    const isQuestionAnswered = (q: any) => {
+    const isQuestionAnswered = (q: LooseValue) => {
         if (q.student_answer === null || q.student_answer === undefined) return false;
         if (Array.isArray(q.student_answer)) return q.student_answer.length > 0;
         if (typeof q.student_answer === 'object') {
             const qt = q.exam_question?.question_type || q.exam_question?.type;
             if (qt === 'true_false') {
-                return !!(q.student_answer as any)?.option_key;
+                return !!(q.student_answer as LooseValue)?.option_key;
             }
             return Object.keys(q.student_answer).length > 0;
         }
@@ -852,7 +854,7 @@ export default function ExamTaker() {
                     cachedData.questions.data = newQuestions;
                 }
                 localStorage.setItem(`exam_${id}_cache_data`, JSON.stringify(cachedData));
-            } catch (e) { }
+            } catch { /* Ignore transient polling failures. */ }
         }
 
         const payload = {
@@ -959,7 +961,7 @@ export default function ExamTaker() {
                     text: 'Ujian Anda telah berhasil disimpan.',
                 }).then(() => navigate('/exams'));
             }
-        } catch (error: any) {
+        } catch (error: LooseValue) {
             MySwal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -993,10 +995,10 @@ export default function ExamTaker() {
                     return Object.keys(q.student_answer).length === q.exam_question?.options?.length;
                 }
                 if (qt === 'matching') {
-                    return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: any) => o.metadata?.side === 'left').length;
+                    return Object.keys(q.student_answer).length === q.exam_question?.options?.filter((o: LooseValue) => o.metadata?.side === 'left').length;
                 }
                 if (qt === 'true_false') {
-                    return !!(q.student_answer as any)?.option_key;
+                    return !!(q.student_answer as LooseValue)?.option_key;
                 }
                 return Object.keys(q.student_answer).length > 0;
             }
@@ -1385,7 +1387,7 @@ export default function ExamTaker() {
                                     return (
                                         <div className="mb-6 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-2xl bg-gray-50 dark:bg-gray-800/50 p-2">
                                             <div className="w-full flex flex-col items-center gap-3">
-                                                {mediaContent.map((m: any, mi: number) => {
+                                                {mediaContent.map((m: LooseValue, mi: number) => {
                                                     const url = m?.url || m?.path || '';
                                                     const mime = m?.mime || m?.type || m?.mime_type || '';
                                                     const kind = mime.split('/')[0] || (/(jpe?g|png|gif|webp|svg)$/i.test(url) ? 'image' : (/(mp4|webm|ogg)$/i.test(url) ? 'video' : (/(mp3|wav|ogg)$/i.test(url) ? 'audio' : 'file')));

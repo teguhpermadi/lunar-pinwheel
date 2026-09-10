@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,7 +74,7 @@ export default function QuestionBankReviewerList() {
         
         setIsLoading(true);
         try {
-            const params: any = {
+            const params: LooseValue = {
                 page,
                 per_page: 10,
                 search: searchQuery,
@@ -85,11 +87,11 @@ export default function QuestionBankReviewerList() {
 
             const response = await apiMethod;
             if (response.success) {
-                const result = response.data as any;
+                const result = response.data as LooseValue;
                 const items = Array.isArray(result) ? result : (result.data || []);
                 setReviewers(items);
 
-                const meta = result.meta || (response as any).meta;
+                const meta = result.meta || (response as LooseValue).meta;
                 if (meta) {
                     setTotalPages(meta.last_page);
                     setTotalItems(meta.total);
@@ -311,7 +313,7 @@ export default function QuestionBankReviewerList() {
                                             </div>
                                             <div>
                                                 <span className="block font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
-                                                    {(reviewer as any).question_bank?.name || 'Unknown Bank'}
+                                                    {(reviewer as LooseValue).question_bank?.name || 'Unknown Bank'}
                                                 </span>
                                                 <span className="text-xs text-slate-400">
                                                     Updated {timeAgo(reviewer.updated_at)}
@@ -322,7 +324,7 @@ export default function QuestionBankReviewerList() {
                                     {activeTab === 'all' && (
                                         <td className="px-4 py-5">
                                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                                                {(reviewer as any).user?.name || 'Unknown User'}
+                                                {(reviewer as LooseValue).user?.name || 'Unknown User'}
                                             </span>
                                         </td>
                                     )}

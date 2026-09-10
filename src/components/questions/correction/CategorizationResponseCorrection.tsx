@@ -1,11 +1,13 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import MathRenderer from '@/components/ui/MathRenderer';
 import { QuestionOption } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 interface CategorizationResponseCorrectionProps {
-    studentAnswer: any; // Record<string, string> (itemId -> categoryId/Title)
+    studentAnswer: LooseValue; // Record<string, string> (itemId -> categoryId/Title)
     options: QuestionOption[];
-    keyAnswer?: any;
+    keyAnswer?: LooseValue;
 }
 
 export default function CategorizationResponseCorrection({ studentAnswer, options = [] }: CategorizationResponseCorrectionProps) {

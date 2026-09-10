@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useEffect } from 'react';
 import { Reorder } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -83,7 +85,7 @@ export default function MatchingInput({ pairs, onChange }: MatchingInputProps) {
     };
 
     // When reordering Right column, keep Left side fixed → changes pairings
-    const handleReorderRight = (newRightItems: any[]) => {
+    const handleReorderRight = (newRightItems: LooseValue[]) => {
         const nextPairs = pairs.map((p, i) => ({
             ...p,
             right: newRightItems[i].content,

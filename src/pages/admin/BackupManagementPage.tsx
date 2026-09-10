@@ -66,7 +66,7 @@ export default function BackupManagementPage() {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
             showToast('success', 'Backup downloaded successfully.');
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error('Backup failed:', error);
             const message = error?.response?.data?.message || 'Failed to backup assets.';
             showToast('error', message);
@@ -94,7 +94,7 @@ export default function BackupManagementPage() {
             const res = await backupAssetsApi.restoreAssets(file);
             setRestoreResult(res.data);
             showToast('success', res.message || 'Assets restored successfully.');
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error('Restore failed:', error);
             const message = error?.response?.data?.message || error?.response?.data?.errors?.file?.[0] || 'Failed to restore assets.';
             showToast('error', message);
@@ -186,7 +186,7 @@ export default function BackupManagementPage() {
                 examFileInputRef.current.value = '';
             }
             setExamBackupPreview(null);
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error('Exam restore failed:', error);
             const message = error?.response?.data?.message || 'Failed to restore exam answers.';
             showToast('error', message);

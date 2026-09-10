@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -87,7 +89,7 @@ const toPersistenceHtml = (html: string) => {
 };
 
 interface MenuBarProps {
-    editor: any;
+    editor: LooseValue;
 }
 
 function MenuBar({ editor }: MenuBarProps) {

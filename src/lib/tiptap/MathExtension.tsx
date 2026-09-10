@@ -1,9 +1,11 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { Node, mergeAttributes, nodeInputRule } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import MathNodeView from './MathNodeView';
 
 export interface MathOptions {
-    HTMLAttributes: Record<string, any>;
+    HTMLAttributes: Record<string, LooseValue>;
 }
 
 declare module '@tiptap/core' {

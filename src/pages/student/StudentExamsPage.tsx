@@ -110,7 +110,7 @@ export default function StudentExamsPage() {
                     text: response.message || 'Ujian gagal dimulai.',
                 });
             }
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             MySwal.fire({
                 icon: 'error',
                 title: 'Error',

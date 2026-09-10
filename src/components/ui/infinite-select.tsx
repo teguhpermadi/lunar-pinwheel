@@ -1,3 +1,5 @@
+type LooseValue = ReturnType<typeof JSON.parse>;
+
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown, Search, Check } from 'lucide-react';
@@ -61,7 +63,7 @@ export default function InfiniteSelect<T extends { id: string }>({
                 if (reset) return data;
                 // De-duplicate
                 const ids = new Set(prev.map(o => o[valueKey]));
-                const newOptions = data.filter(o => !ids.has(o[valueKey] as any));
+                const newOptions = data.filter(o => !ids.has(o[valueKey] as LooseValue));
                 return [...prev, ...newOptions];
             });
 

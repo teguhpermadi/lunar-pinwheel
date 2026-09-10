@@ -132,7 +132,7 @@ export default function SubjectModal({ isOpen, onClose, subject, onSave }: Subje
         try {
             await onSave(cleanedData as SubjectFormData);
             onClose();
-        } catch (error: any) {
+        } catch (error: ReturnType<typeof JSON.parse>) {
             console.error("Submission failed", error);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach((key) => {
