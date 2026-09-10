@@ -634,7 +634,7 @@ export default function ExamCorrectionPage() {
     };
 
     const getUncorrectedAnswersCount = useCallback((answers: LooseValue[]) => {
-        return answers.filter(a => a.is_correct === null || a.is_correct === undefined).length;
+        return answers.filter(a => a.score_earned === null || a.score_earned === undefined).length;
     }, []);
 
     const getTotalAnswersCount = useCallback((answers: LooseValue[]) => {
