@@ -674,6 +674,34 @@ export default function EditExamPage() {
                                                 checked={exam.is_open_other_apps_allowed ?? true}
                                                 onChange={(val) => setExam(prev => prev ? { ...prev, is_open_other_apps_allowed: val } : null)}
                                             />
+                                            <Toggle
+                                                label="Aktifkan Analisis Pola Ketik"
+                                                description="Menganalisis pola pengetikan pada jawaban teks panjang sebagai indikator untuk ditinjau."
+                                                icon={Brain}
+                                                checked={exam.enable_keystroke_analytics ?? false}
+                                                onChange={(val) => setExam(prev => prev ? { ...prev, enable_keystroke_analytics: val } : null)}
+                                            />
+                                            {exam.enable_keystroke_analytics && (
+                                                <div className="sm:col-span-2 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3 dark:border-indigo-500/20 dark:bg-indigo-500/5">
+                                                    <label className="mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                                        Minimum Karakter Analisis
+                                                    </label>
+                                                    <input
+                                                        className="w-full rounded-xl border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900"
+                                                        type="number"
+                                                        min={50}
+                                                        max={5000}
+                                                        value={exam.min_char_keystroke_threshold ?? 150}
+                                                        onChange={(e) => setExam(prev => prev ? {
+                                                            ...prev,
+                                                            min_char_keystroke_threshold: Math.min(5000, Math.max(50, parseInt(e.target.value) || 150))
+                                                        } : null)}
+                                                    />
+                                                    <p className="mt-1 px-1 text-[9px] text-slate-400">
+                                                        Analisis dijalankan ketika jawaban memiliki minimal jumlah karakter ini.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
                                 </div>

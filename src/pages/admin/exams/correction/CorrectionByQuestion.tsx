@@ -43,6 +43,7 @@ import StudentLanguageResponseInput from '@/components/questions/student-inputs/
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
+import IntegrityBadge from '@/components/correction/IntegrityBadge';
 
 interface CorrectionByQuestionProps {
     examId: string;
@@ -146,9 +147,9 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-8"
+            className="space-y-4"
         >
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-20">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1 overflow-hidden">
                         <div className="flex flex-col gap-1 shrink-0 mt-1">
@@ -247,12 +248,12 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                     </div>
                 ))
             ) : bulkAnswers.length > 0 ? (
-                <div className="space-y-6 pb-20">
+                <div className="space-y-4 pb-12">
                     {bulkAnswers.map((answer) => (
                         <div
                             key={answer.id}
                             id={`session-${answer.exam_session_id}`}
-                            className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md scroll-mt-24"
+                            className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md scroll-mt-24"
                         >
                             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-50 dark:border-slate-800/50">
                                 <div className="flex items-center gap-3">
@@ -363,9 +364,11 @@ const CorrectionByQuestion: React.FC<CorrectionByQuestionProps> = ({
                                 </div>
                             </div>
 
+                            <IntegrityBadge metadata={answer.metadata} integrity={answer.integrity} compact />
+
                             {/* Paste Detection Warning */}
                             {(answer.metadata?.is_pasted || answer.metadata?.paste_count > 0) && (
-                                <div className="flex items-start gap-3 p-3 mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                                <div className="flex items-start gap-3 p-2.5 mb-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
                                     <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                                     <div>
                                         <p className="text-xs font-bold text-red-700 dark:text-red-300">

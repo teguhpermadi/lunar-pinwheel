@@ -17,7 +17,7 @@ import MathRenderer from '@/components/ui/MathRenderer';
 import {
     ArrowLeft, Eye, Printer, Download, Loader2, Pencil, Settings,
     Shield, Key, Shuffle, StretchVertical, Lightbulb, Rocket, Calendar,
-    Infinity as InfinityIcon, BarChart3, Copy
+    Infinity as InfinityIcon, BarChart3, Copy, Keyboard
 } from 'lucide-react';
 
 interface ToggleProps {
@@ -43,6 +43,7 @@ const Toggle = ({ label, hint, description, checked, onChange, icon }: TogglePro
                         {icon === 'lightbulb' && <Lightbulb className="size-4" />}
                         {icon === 'rocket_launch' && <Rocket className="size-4" />}
                         {icon === 'copy' && <Copy className="size-4" />}
+                        {icon === 'keyboard' && <Keyboard className="size-4" />}
                     </div>
                 )}
                 <div className="flex flex-col">
@@ -93,6 +94,8 @@ export default function ShowQuestionBank() {
         is_visible_hint: false,
         is_paste_allowed: false,
         is_open_other_apps_allowed: false,
+        enable_keystroke_analytics: false,
+        min_char_keystroke_threshold: 150,
         start_time: formatDateToLocalInput(),
         end_time: ''
     });
@@ -131,6 +134,14 @@ export default function ShowQuestionBank() {
             return;
         }
 
+        if (
+            formData.enable_keystroke_analytics &&
+            (formData.min_char_keystroke_threshold < 50 || formData.min_char_keystroke_threshold > 5000)
+        ) {
+            Swal.fire('Error', 'Minimum karakter analisis harus berada antara 50 dan 5000', 'error');
+            return;
+        }
+
         if (selectedClassroomIds.length === 0) {
             Swal.fire('Error', 'Please select at least one target classroom', 'error');
             return;
@@ -158,6 +169,8 @@ export default function ShowQuestionBank() {
                 is_visible_hint: formData.is_visible_hint,
                 is_paste_allowed: formData.is_paste_allowed,
                 is_open_other_apps_allowed: formData.is_open_other_apps_allowed,
+                enable_keystroke_analytics: formData.enable_keystroke_analytics,
+                min_char_keystroke_threshold: formData.min_char_keystroke_threshold,
                 start_time: formData.start_time ? new Date(formData.start_time).toISOString() : null,
                 end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
                 classroom_ids: selectedClassroomIds,
@@ -547,6 +560,34 @@ export default function ShowQuestionBank() {
                                         checked={formData.is_open_other_apps_allowed}
                                         onChange={(checked) => setFormData({ ...formData, is_open_other_apps_allowed: checked })}
                                     />
+                                    <Toggle
+                                        label="Aktifkan Analisis Pola Ketik"
+                                        hint="Mengirim ringkasan metrik pengetikan untuk membantu guru meninjau pola jawaban. Tidak mengambil raw keystroke dan bukan keputusan otomatis."
+                                        icon="keyboard"
+                                        checked={formData.enable_keystroke_analytics}
+                                        onChange={(checked) => setFormData({ ...formData, enable_keystroke_analytics: checked })}
+                                    />
+                                    {formData.enable_keystroke_analytics && (
+                                        <div className="rounded-2xl border border-primary/20 bg-primary/[0.03] dark:bg-primary/[0.08] p-3.5">
+                                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-tight mb-1">
+                                                Minimum Karakter Analisis
+                                            </label>
+                                            <input
+                                                className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-800 dark:bg-slate-900 focus:ring-primary focus:border-primary"
+                                                type="number"
+                                                min={50}
+                                                max={5000}
+                                                value={formData.min_char_keystroke_threshold}
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
+                                                    min_char_keystroke_threshold: Math.min(5000, Math.max(50, parseInt(e.target.value) || 50))
+                                                })}
+                                            />
+                                            <p className="text-[9px] text-slate-400 mt-1.5">
+                                                Analisis dimulai setelah jawaban mencapai jumlah karakter ini.
+                                            </p>
+                                        </div>
+                                    )}
                                     <Toggle
                                         label="Publish Immediately"
                                         hint="Make exam live for students"

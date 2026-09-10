@@ -39,6 +39,7 @@ import StudentLanguageResponseInput from '@/components/questions/student-inputs/
 import StudentMathInput from '@/components/questions/student-inputs/StudentMathInput';
 import StudentCategorizationInput from '@/components/questions/student-inputs/StudentCategorizationInput';
 import StudentArrangeWordsInput from '@/components/questions/student-inputs/StudentArrangeWordsInput';
+import IntegrityBadge from '@/components/correction/IntegrityBadge';
 
 interface CorrectionByStudentProps {
     examId: string;
@@ -135,7 +136,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
         >
             {isDetailLoading || !currentQuestion ? (
                 <div className="space-y-6 animate-pulse">
@@ -144,8 +145,8 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <div className="flex items-start justify-between gap-4 mb-6">
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div className="flex items-start justify-between gap-3 mb-4">
                             <div className="flex flex-col gap-3 mt-1 flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-1">
                                     <h3 className="text-sm font-black text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
@@ -227,9 +228,14 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                             </div>
                         </div>
 
+                        <IntegrityBadge
+                            metadata={(currentQuestion as LooseValue)?.metadata}
+                            integrity={(currentQuestion as LooseValue)?.integrity}
+                        />
+
                         {/* Paste Detection Warning */}
                         {((currentQuestion as LooseValue)?.metadata?.is_pasted || ((currentQuestion as LooseValue)?.metadata?.paste_count > 0)) && (
-                            <div className="flex items-start gap-3 p-4 mb-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                            <div className="flex items-start gap-3 p-3 mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
                                 <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                                 <div>
                                     <p className="text-sm font-bold text-red-700 dark:text-red-300">
@@ -427,7 +433,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                         )}
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluate Response</h4>
                             <div className="flex items-center gap-2">
@@ -436,7 +442,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="grid grid-cols-3 gap-3 mb-4">
                             <button
                                 onClick={() => handleUpdateCorrection((currentQuestion.max_score || (currentQuestion as LooseValue)?.exam_question?.score_value), true)}
                                 className={cn(
@@ -574,7 +580,7 @@ const CorrectionByStudent: React.FC<CorrectionByStudentProps> = ({
                                                 Reading Material
                                             </span>
                                         </div>
-                                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-inner">
+                                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                                             {readingMaterial.media_path?.toLowerCase().endsWith('.pdf') ? (
                                                 <div className="flex flex-col gap-4">
                                                     <div className="relative w-full aspect-[3/4] sm:aspect-video rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900">
